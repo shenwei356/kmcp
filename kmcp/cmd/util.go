@@ -31,6 +31,7 @@ import (
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
+	"github.com/twotwotwo/sorts"
 )
 
 var mapInitSize = 1 << 20 // 1M
@@ -55,6 +56,8 @@ func getOptions(cmd *cobra.Command) *Options {
 	if threads == 0 {
 		threads = runtime.NumCPU()
 	}
+
+	sorts.MaxProcs = threads
 
 	return &Options{
 		NumCPUs: threads,

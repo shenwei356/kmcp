@@ -33,7 +33,6 @@ import (
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/unikmer"
 	"github.com/spf13/cobra"
-	"github.com/twotwotwo/sorts"
 )
 
 var computeCmd = &cobra.Command{
@@ -42,18 +41,17 @@ var computeCmd = &cobra.Command{
 	Long: `Generate k-mers (sketch) from FASTA/Q sequences
 
 K-mer:
-  1. Hased k-mer (ntHash)
+  1. ntHash of k-mer (-k)
 
 K-mer sketchs:
-  1. Scaled MinHash
-  2. Minimizer
-  3. Syncmer
+  1. Scaled MinHash (-D)
+  2. Minimizer (-k -W), optionally scaling/down-sampling (-D)
+  3. Syncmer   (-k -S), optionally scaling/down-sampling (-D)
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
 		runtime.GOMAXPROCS(opt.NumCPUs)
-		sorts.MaxProcs = opt.NumCPUs
 		seq.ValidateSeq = false
 
 		timeStart := time.Now()
@@ -64,6 +62,7 @@ K-mer sketchs:
 		}()
 
 		// ---------------------------------------------------------------
+		// basic flags
 
 		var err error
 
@@ -81,6 +80,7 @@ K-mer sketchs:
 		}
 
 		// ---------------------------------------------------------------
+		// flags of sketch
 
 		scale := getFlagPositiveInt(cmd, "scale")
 		if scale > 1<<32-1 {
@@ -106,6 +106,7 @@ K-mer sketchs:
 		}
 
 		// ---------------------------------------------------------------
+		// out dir
 
 		outputDir := outDir != ""
 		if outputDir {
@@ -113,6 +114,7 @@ K-mer sketchs:
 		}
 
 		// ---------------------------------------------------------------
+		// input files
 
 		if opt.Verbose {
 			log.Info("checking input files ...")
@@ -127,8 +129,10 @@ K-mer sketchs:
 		}
 
 		// ---------------------------------------------------------------
+		// log
+
 		if opt.Verbose {
-			log.Infof("---------- [main parameters] ----------")
+			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("k: %d", k)
 			log.Infof("circular genome: %v", circular)
 			if scaled {
@@ -140,7 +144,7 @@ K-mer sketchs:
 			if syncmer {
 				log.Infof("syncmer s: %d", syncmerS)
 			}
-			log.Infof("---------- [main parameters] ----------")
+			log.Infof("-------------------- [main parameters] --------------------")
 		}
 
 		// ---------------------------------------------------------------
@@ -173,7 +177,7 @@ K-mer sketchs:
 
 					var writer *unikmer.Writer
 					var mode uint32
-					var n int64
+					var n int
 
 					mode |= unikmer.UnikCompact
 					mode |= unikmer.UnikCanonical
@@ -191,6 +195,7 @@ K-mer sketchs:
 					var code uint64
 					var iter *unikmer.Iterator
 					var sketch *unikmer.Sketch
+					codes := make([]uint64, 0, mapInitSize)
 
 					fastxReader, err = fastx.NewDefaultReader(file)
 					checkError(errors.Wrap(err, file))
@@ -229,8 +234,7 @@ K-mer sketchs:
 								if scaled && code > maxHash {
 									continue
 								}
-								writer.WriteCode(code)
-								n++
+								codes = append(codes, code)
 							}
 							continue
 						}
@@ -244,8 +248,7 @@ K-mer sketchs:
 								if scaled && code > maxHash {
 									continue
 								}
-								writer.WriteCode(code)
-								n++
+								codes = append(codes, code)
 							}
 							continue
 						}
@@ -258,11 +261,17 @@ K-mer sketchs:
 							if scaled && code > maxHash {
 								continue
 							}
-							writer.WriteCode(code)
-							n++
+							codes = append(codes, code)
 						}
 					}
 
+					n = len(codes)
+					writer.Number = int64(n)
+					for _, code = range codes {
+						writer.WriteCode(code)
+					}
+
+					checkError(writer.Flush())
 					if opt.Verbose {
 						log.Infof("%d unique k-mers saved to %s", n, outFile)
 					}
@@ -293,7 +302,7 @@ K-mer sketchs:
 
 		var writer *unikmer.Writer
 		var mode uint32
-		var n int64
+		var n int
 
 		mode |= unikmer.UnikCompact
 		mode |= unikmer.UnikCanonical
@@ -305,14 +314,13 @@ K-mer sketchs:
 			writer.SetScale(uint32(scale))
 		}
 
-		n = 0
-
 		var record *fastx.Record
 		var fastxReader *fastx.Reader
 		var ok bool
 		var code uint64
 		var iter *unikmer.Iterator
 		var sketch *unikmer.Sketch
+		codes := make([]uint64, 0, mapInitSize)
 
 		for _, file := range files {
 			if opt.Verbose {
@@ -355,8 +363,7 @@ K-mer sketchs:
 						if scaled && code > maxHash {
 							continue
 						}
-						writer.WriteCode(code)
-						n++
+						codes = append(codes, code)
 					}
 					continue
 				}
@@ -370,8 +377,7 @@ K-mer sketchs:
 						if scaled && code > maxHash {
 							continue
 						}
-						writer.WriteCode(code)
-						n++
+						codes = append(codes, code)
 					}
 					continue
 				}
@@ -384,10 +390,15 @@ K-mer sketchs:
 					if scaled && code > maxHash {
 						continue
 					}
-					writer.WriteCode(code)
-					n++
+					codes = append(codes, code)
 				}
 			}
+		}
+
+		n = len(codes)
+		writer.Number = int64(n)
+		for _, code = range codes {
+			writer.WriteCode(code)
 		}
 
 		checkError(writer.Flush())
