@@ -13,3 +13,15 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+*.directory
+kmcp/kmcp*
+kmcp/binaries*
+doc/site/*
+
+*ssshtest
+testdata/*.unik
+t_*
+*.nextflow.log*
+*.brename_detail.txt
+*/Rplots.pdf
