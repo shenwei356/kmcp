@@ -32,7 +32,10 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/unikmer"
+	"github.com/smallnest/ringbuffer"
 	"github.com/spf13/cobra"
+	"github.com/vbauerster/mpb"
+	"github.com/vbauerster/mpb/decor"
 )
 
 var computeCmd = &cobra.Command{
@@ -57,7 +60,7 @@ K-mer sketchs:
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
-				log.Infof("elapsed time: %s", time.Now().Sub(timeStart))
+				log.Infof("elapsed time: %s", time.Since(timeStart))
 			}
 		}()
 
@@ -151,17 +154,46 @@ K-mer sketchs:
 		// compute for every file and output to a directory
 		if outputDir {
 
+			// process bar
+			pbs := mpb.New(mpb.WithWidth(79))
+			bar := pbs.AddBar(int64(len(files)),
+				mpb.BarStyle("[=>-]<+"),
+				mpb.PrependDecorators(
+					decor.Name("processing file: ", decor.WC{W: len("compute") + 1, C: decor.DidentRight}),
+					decor.Name("", decor.WCSyncSpaceR),
+					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+				),
+				mpb.AppendDecorators(
+					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+				),
+			)
+
+			chDuration := make(chan time.Duration, opt.NumCPUs)
+			done := make(chan int)
+			go func() {
+				for t := range chDuration {
+					bar.Increment()
+					bar.DecoratorEwmaUpdate(t)
+				}
+				done <- 1
+			}()
+
+			// wait group
 			var wg sync.WaitGroup
-			token := make(chan int, opt.NumCPUs)
+			tokens := ringbuffer.New(opt.NumCPUs)
 
 			for _, file := range files {
-				token <- 1
+				tokens.WriteByte(0)
 				wg.Add(1)
 
 				go func(file string) {
+					startTime := time.Now()
+
 					defer func() {
 						wg.Done()
-						<-token
+						tokens.ReadByte()
+
+						chDuration <- time.Since(startTime)
 					}()
 
 					outFile := filepath.Join(outDir, fmt.Sprintf("%s%s", filepath.Base(file), extDataFile))
@@ -272,14 +304,14 @@ K-mer sketchs:
 					}
 
 					checkError(writer.Flush())
-					if opt.Verbose {
-						log.Infof("%d unique k-mers saved to %s", n, outFile)
-					}
-
 				}(file)
 			}
 
 			wg.Wait()
+
+			close(chDuration)
+			<-done
+			pbs.Wait()
 
 			return
 		}

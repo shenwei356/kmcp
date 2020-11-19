@@ -68,7 +68,7 @@ Tips:
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
-				log.Infof("elapsed time: %s", time.Now().Sub(timeStart))
+				log.Infof("elapsed time: %s", time.Since(timeStart))
 			}
 		}()
 
@@ -646,7 +646,7 @@ Tips:
 						chNames <- names
 						chSizes <- sizes
 						if opt.Verbose {
-							log.Infof("%s batch #%03d/%d: %d signatures loaded", prefix, bb, nBatchFiles, len(sigs))
+							log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
 						}
 
 					}(files[ii:jj], bb, maxElements, numSigs, outFile)
