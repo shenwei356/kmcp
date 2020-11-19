@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/shenwei356/util/cliutil"
+	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +45,9 @@ const (
 type Options struct {
 	NumCPUs int
 	Verbose bool
+
+	Compress         bool
+	CompressionLevel int
 }
 
 func getOptions(cmd *cobra.Command) *Options {
@@ -52,6 +59,9 @@ func getOptions(cmd *cobra.Command) *Options {
 	return &Options{
 		NumCPUs: threads,
 		Verbose: cliutil.GetFlagBool(cmd, "verbose"),
+
+		Compress:         true,
+		CompressionLevel: -1,
 	}
 }
 
@@ -64,5 +74,27 @@ func checkFileSuffix(opt *Options, suffix string, files ...string) {
 		if suffix != "" && !strings.HasSuffix(file, suffix) {
 			checkError(fmt.Errorf("input should be stdin or %s file: %s", suffix, file))
 		}
+	}
+}
+
+func makeOutDir(outDir string, force bool) {
+	pwd, _ := os.Getwd()
+	if outDir != "./" && outDir != "." && pwd != filepath.Clean(outDir) {
+		existed, err := pathutil.DirExists(outDir)
+		checkError(errors.Wrap(err, outDir))
+		if existed {
+			empty, err := pathutil.IsEmpty(outDir)
+			checkError(errors.Wrap(err, outDir))
+			if !empty {
+				if force {
+					checkError(os.RemoveAll(outDir))
+				} else {
+					checkError(fmt.Errorf("out-dir not empty: %s, use --force to overwrite", outDir))
+				}
+			} else {
+				checkError(os.RemoveAll(outDir))
+			}
+		}
+		checkError(os.MkdirAll(outDir, 0777))
 	}
 }
