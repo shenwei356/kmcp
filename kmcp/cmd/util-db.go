@@ -71,7 +71,7 @@ type UnikIndexDBInfo struct {
 }
 
 func (i UnikIndexDBInfo) String() string {
-	return fmt.Sprintf("unikmer index db v%d: k: %d, hashed: %v,  canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
+	return fmt.Sprintf("kmcp database v%d: k: %d, hashed: %v,  canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
 		i.Version, i.K, i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.K, i.Kmers)
 }
 

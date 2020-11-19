@@ -163,7 +163,7 @@ Tips:
 		// out dir
 
 		outputDir := outDir != ""
-		if outputDir {
+		if outputDir && !dryRun {
 			makeOutDir(outDir, force)
 		}
 
