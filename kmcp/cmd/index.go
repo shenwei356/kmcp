@@ -39,6 +39,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
 	"github.com/twotwotwo/sorts/sortutil"
+	"github.com/vbauerster/mpb"
+	"github.com/vbauerster/mpb/decor"
 )
 
 var indexCmd = &cobra.Command{
@@ -208,6 +210,37 @@ Tips:
 			log.Info("checking .unik files ...")
 		}
 
+		var pbs *mpb.Progress
+		var bar *mpb.Bar
+		var chDuration chan time.Duration
+		var doneDuration chan int
+
+		if opt.Verbose {
+			pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
+			bar = pbs.AddBar(int64(len(files)),
+				mpb.BarStyle("[=>-]<+"),
+				mpb.PrependDecorators(
+					decor.Name("checking .unik file: ", decor.WC{W: len("checking .unik file: "), C: decor.DidentRight}),
+					decor.Name("", decor.WCSyncSpaceR),
+					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+				),
+				mpb.AppendDecorators(
+					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
+					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+				),
+			)
+
+			chDuration = make(chan time.Duration, opt.NumCPUs)
+			doneDuration = make(chan int)
+			go func() {
+				for t := range chDuration {
+					bar.Increment()
+					bar.DecoratorEwmaUpdate(t)
+				}
+				doneDuration <- 1
+			}()
+		}
+
 		fileInfos := make([]UnikFileInfo, 0, len(files))
 
 		var k int = -1
@@ -272,12 +305,19 @@ Tips:
 			return UnikFileInfo{Path: file, Name: name, Kmers: reader.Number}
 		}
 
-		// fisrt file
-		if opt.Verbose {
-			log.Infof("checking file: %d/%d", 1, nfiles)
-		}
 		file := files[0]
+		var t time.Time
+		if opt.Verbose {
+			t = time.Now()
+		}
+
 		info := getInfo(file, true)
+
+		if opt.Verbose {
+			bar.Increment()
+			bar.DecoratorEwmaUpdate(time.Since(t))
+		}
+
 		fileInfos = append(fileInfos, info)
 		namesMap := make(map[string]interface{}, nfiles)
 		namesMap[info.Name] = struct{}{}
@@ -301,12 +341,8 @@ Tips:
 			}
 			doneGetInfo <- 1
 		}()
-		for i, file := range files[1:] {
-			if opt.Verbose {
-				if i < 98 || (i+2)%100 == 0 {
-					log.Infof("checking file: %d/%d", i+2, nfiles)
-				}
-			}
+
+		for _, file := range files[1:] {
 			wgGetInfo.Add(1)
 			tokensGetInfo <- 1
 			go func(file string) {
@@ -314,13 +350,28 @@ Tips:
 					wgGetInfo.Done()
 					<-tokensGetInfo
 				}()
+				var t time.Time
+				if opt.Verbose {
+					t = time.Now()
+				}
+
 				chInfos <- getInfo(file, false)
+
+				if opt.Verbose {
+					chDuration <- time.Duration(float64(time.Since(t)) / float64(opt.NumCPUs))
+				}
 			}(file)
 		}
 
 		wgGetInfo.Wait()
 		close(chInfos)
 		<-doneGetInfo
+
+		if opt.Verbose {
+			close(chDuration)
+			<-doneDuration
+			pbs.Wait()
+		}
 
 		if opt.Verbose {
 			log.Infof("finished checking %d .unik files", nfiles)
@@ -691,9 +742,9 @@ Tips:
 							checkError(writer.Write(row))
 						}
 					}
-					if opt.Verbose {
-						log.Infof("%s signatures saved", prefix)
-					}
+					// if opt.Verbose {
+					// 	log.Infof("%s signatures saved", prefix)
+					// }
 				}
 
 				ch <- filepath.Base(blockFile)

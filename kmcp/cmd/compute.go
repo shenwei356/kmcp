@@ -23,6 +23,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -32,8 +33,8 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/unikmer"
-	"github.com/smallnest/ringbuffer"
 	"github.com/spf13/cobra"
+	"github.com/twotwotwo/sorts/sortutil"
 	"github.com/vbauerster/mpb"
 	"github.com/vbauerster/mpb/decor"
 )
@@ -75,6 +76,7 @@ K-mer sketchs:
 		outFile := getFlagString(cmd, "out-prefix")
 		outDir := getFlagString(cmd, "out-dir")
 		force := getFlagBool(cmd, "force")
+		exactNumber := getFlagBool(cmd, "exact-number")
 
 		if outDir == "" && outFile == "" {
 			checkError(fmt.Errorf("flag -o/--out-prefix OR -O/--out-dir is needed"))
@@ -155,56 +157,64 @@ K-mer sketchs:
 		if outputDir {
 
 			// process bar
-			pbs := mpb.New(mpb.WithWidth(79))
-			bar := pbs.AddBar(int64(len(files)),
-				mpb.BarStyle("[=>-]<+"),
-				mpb.PrependDecorators(
-					decor.Name("processing file: ", decor.WC{W: len("compute") + 1, C: decor.DidentRight}),
-					decor.Name("", decor.WCSyncSpaceR),
-					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
-				),
-				mpb.AppendDecorators(
-					decor.EwmaETA(decor.ET_STYLE_GO, 60),
-				),
-			)
+			var pbs *mpb.Progress
+			var bar *mpb.Bar
+			var chDuration chan time.Duration
+			var doneDuration chan int
 
-			chDuration := make(chan time.Duration, opt.NumCPUs)
-			done := make(chan int)
-			go func() {
-				for t := range chDuration {
-					bar.Increment()
-					bar.DecoratorEwmaUpdate(t)
-				}
-				done <- 1
-			}()
+			if opt.Verbose {
+				pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
+				bar = pbs.AddBar(int64(len(files)),
+					mpb.BarStyle("[=>-]<+"),
+					mpb.PrependDecorators(
+						decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
+						decor.Name("", decor.WCSyncSpaceR),
+						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+					),
+					mpb.AppendDecorators(
+						decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
+						decor.EwmaETA(decor.ET_STYLE_GO, 60),
+					),
+				)
+
+				chDuration = make(chan time.Duration, opt.NumCPUs)
+				doneDuration = make(chan int)
+				go func() {
+					for t := range chDuration {
+						bar.Increment()
+						bar.DecoratorEwmaUpdate(t)
+					}
+					doneDuration <- 1
+				}()
+			}
 
 			// wait group
 			var wg sync.WaitGroup
-			tokens := ringbuffer.New(opt.NumCPUs)
+			tokens := make(chan int, opt.NumCPUs)
 
 			for _, file := range files {
-				tokens.WriteByte(0)
+				tokens <- 1
 				wg.Add(1)
 
 				go func(file string) {
 					startTime := time.Now()
 
-					defer func() {
-						wg.Done()
-						tokens.ReadByte()
-
-						chDuration <- time.Since(startTime)
-					}()
-
 					outFile := filepath.Join(outDir, fmt.Sprintf("%s%s", filepath.Base(file), extDataFile))
 					outfh, gw, w, err := outStream(outFile, opt.Compress, opt.CompressionLevel)
 					checkError(err)
 					defer func() {
-						outfh.Flush()
+						checkError(outfh.Flush())
 						if gw != nil {
-							gw.Close()
+							checkError(gw.Close())
 						}
-						w.Close()
+						checkError(w.Close())
+
+						wg.Done()
+						<-tokens
+
+						if opt.Verbose {
+							chDuration <- time.Duration(float64(time.Since(startTime)) / float64(opt.NumCPUs))
+						}
 					}()
 
 					var writer *unikmer.Writer
@@ -298,7 +308,24 @@ K-mer sketchs:
 					}
 
 					n = len(codes)
+
+					if exactNumber {
+						// compute exact number of unique k-mers
+						codes2 := make([]uint64, n)
+						copy(codes2, codes)
+						sortutil.Uint64s(codes2)
+						var pre uint64 = 0
+						n = 0
+						for _, code = range codes2 {
+							if code != pre {
+								n++
+								pre = code
+							}
+						}
+					}
+
 					writer.Number = int64(n)
+
 					for _, code = range codes {
 						writer.WriteCode(code)
 					}
@@ -309,9 +336,11 @@ K-mer sketchs:
 
 			wg.Wait()
 
-			close(chDuration)
-			<-done
-			pbs.Wait()
+			if opt.Verbose {
+				close(chDuration)
+				<-doneDuration
+				pbs.Wait()
+			}
 
 			return
 		}
@@ -325,11 +354,11 @@ K-mer sketchs:
 		outfh, gw, w, err := outStream(outFile, opt.Compress, opt.CompressionLevel)
 		checkError(err)
 		defer func() {
-			outfh.Flush()
+			checkError(outfh.Flush())
 			if gw != nil {
-				gw.Close()
+				checkError(gw.Close())
 			}
-			w.Close()
+			checkError(w.Close())
 		}()
 
 		var writer *unikmer.Writer
@@ -453,4 +482,6 @@ func init() {
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `syncmer s`)
+
+	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers`)
 }
