@@ -522,7 +522,7 @@ Tips:
 			prefix = fmt.Sprintf("[block #%03d]", b)
 
 			var bar *mpb.Bar
-			if opt.Verbose {
+			if opt.Verbose && !dryRun {
 				bar = pbs.AddBar(int64((len(batch)+7)/8),
 					mpb.PrependDecorators(
 						decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
@@ -571,7 +571,7 @@ Tips:
 				go func() {
 					for _sigs := range chSigs {
 						sigsBlock = append(sigsBlock, _sigs)
-						if opt.Verbose {
+						if opt.Verbose && !dryRun {
 							bar.Increment()
 						}
 					}
@@ -598,9 +598,9 @@ Tips:
 				}
 				eFileSize += float64(numSigs * uint64(nBatchFiles))
 
-				// if opt.Verbose {
-				// 	log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
-				// }
+				if opt.Verbose && dryRun {
+					log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
+				}
 
 				// split into batches with 8 files
 				var bb, jj int
@@ -785,7 +785,7 @@ Tips:
 		<-done
 		<-doneFileSize
 
-		if opt.Verbose {
+		if opt.Verbose && !dryRun {
 			pbs.Wait()
 		}
 

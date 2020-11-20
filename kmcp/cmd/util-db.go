@@ -528,7 +528,6 @@ func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov floa
 	iLast := numRowBytes - 1
 	for i, _counts = range counts {
 		ix8 = i << 3
-		// for j, count = range _counts {
 		for j = 0; j < 8; j++ {
 			count = _counts[7-j] // because count in package pospop is in reversed order
 			k = ix8 + j
@@ -549,6 +548,8 @@ func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov floa
 			if T < targetCov {
 				continue
 			}
+
+			// check k-mer locations
 
 			result[names[k]] = [3]float64{c, t, T}
 		}
