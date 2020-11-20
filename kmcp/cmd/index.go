@@ -227,6 +227,7 @@ Tips:
 				mpb.AppendDecorators(
 					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
 					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+					decor.OnComplete(decor.Name(""), ". done"),
 				),
 			)
 
@@ -416,6 +417,11 @@ Tips:
 			log.Infof("block-max-kmers-threshold 1: %s", kmerThreshold8Str)
 			log.Infof("block-max-kmers-threshold 2: %s", kmerThresholdSStr)
 			log.Infof("-------------------- [important parameters] --------------------")
+			log.Infof("buiding index ...")
+		}
+
+		if opt.Verbose {
+			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
 		}
 
 		nIndexFiles := int((len(files) + sBlock - 1) / sBlock) // may be more if using -m and -M
@@ -515,9 +521,21 @@ Tips:
 
 			prefix = fmt.Sprintf("[block #%03d]", b)
 
+			var bar *mpb.Bar
+			if opt.Verbose {
+				bar = pbs.AddBar(int64((len(batch)+7)/8),
+					mpb.PrependDecorators(
+						decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
+						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+					),
+					mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
+					mpb.BarFillerClearOnComplete(),
+				)
+			}
+
 			wg0.Add(1)
 			tokens0 <- 1
-			go func(files []*UnikFileInfo, b int, prefix string) {
+			go func(files []*UnikFileInfo, b int, prefix string, bar *mpb.Bar) {
 				var wg sync.WaitGroup
 				tokens := make(chan int, opt.NumCPUs)
 
@@ -553,6 +571,9 @@ Tips:
 				go func() {
 					for _sigs := range chSigs {
 						sigsBlock = append(sigsBlock, _sigs)
+						if opt.Verbose {
+							bar.Increment()
+						}
 					}
 					doneSigs <- 1
 				}()
@@ -577,9 +598,9 @@ Tips:
 				}
 				eFileSize += float64(numSigs * uint64(nBatchFiles))
 
-				if opt.Verbose {
-					log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
-				}
+				// if opt.Verbose {
+				// 	log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
+				// }
 
 				// split into batches with 8 files
 				var bb, jj int
@@ -696,9 +717,9 @@ Tips:
 						chSigs <- sigs
 						chNames <- names
 						chSizes <- sizes
-						if opt.Verbose {
-							log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
-						}
+						// if opt.Verbose {
+						// 	log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
+						// }
 
 					}(files[ii:jj], bb, maxElements, numSigs, outFile)
 				}
@@ -752,7 +773,7 @@ Tips:
 
 				wg0.Done()
 				<-tokens0
-			}(batch, b, prefix)
+			}(batch, b, prefix, bar)
 
 			batch = make([]*UnikFileInfo, 0, sBlock)
 		}
@@ -763,6 +784,10 @@ Tips:
 		close(chFileSize)
 		<-done
 		<-doneFileSize
+
+		if opt.Verbose {
+			pbs.Wait()
+		}
 
 		if !dryRun {
 			sortutil.Strings(indexFiles)

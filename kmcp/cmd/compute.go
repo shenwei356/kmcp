@@ -174,6 +174,7 @@ K-mer sketchs:
 					mpb.AppendDecorators(
 						decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
 						decor.EwmaETA(decor.ET_STYLE_GO, 60),
+						decor.OnComplete(decor.Name(""), ". done"),
 					),
 				)
 
