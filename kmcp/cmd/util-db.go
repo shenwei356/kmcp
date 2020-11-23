@@ -53,8 +53,8 @@ type UnikIndexDBInfo struct {
 
 	Scaled     bool   `yaml:"scaled"`
 	Scale      uint32 `yaml:"scale"`
-	Minizimer  bool   `yaml:"minimizer"`
-	MinizimerW uint32 `yaml:"minimizer-w"`
+	Minimizer  bool   `yaml:"minimizer"`
+	MinimizerW uint32 `yaml:"minimizer-w"`
 	Syncmer    bool   `yaml:"syncmer"`
 	SyncmerS   uint32 `yaml:"syncmer-s"`
 

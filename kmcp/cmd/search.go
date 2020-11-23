@@ -129,8 +129,8 @@ Attentions:
 			if db.Info.Scaled {
 				log.Infof("down-sampling scale: %d", db.Info.Scale)
 			}
-			if db.Info.Minizimer {
-				log.Infof("minizimer window: %d", db.Info.MinizimerW)
+			if db.Info.Minimizer {
+				log.Infof("Minimizer window: %d", db.Info.MinimizerW)
 			}
 			if db.Info.Syncmer {
 				log.Infof("syncmer s: %d", db.Info.SyncmerS)
@@ -161,8 +161,8 @@ Attentions:
 		hashed := db.Info.Hashed
 		scaled := db.Info.Scaled
 		scale := db.Info.Scale
-		minimizer := db.Info.Minizimer
-		minimizerW := int(db.Info.MinizimerW)
+		minimizer := db.Info.Minimizer
+		minimizerW := int(db.Info.MinimizerW)
 		syncmer := db.Info.Syncmer
 		syncmerS := int(db.Info.SyncmerS)
 
