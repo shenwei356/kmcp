@@ -128,6 +128,25 @@ func (i UnikIndexDBInfo) WriteTo(file string) error {
 	return nil
 }
 
+// CompatibleWith checks whether two database have same parameters.
+func (i UnikIndexDBInfo) CompatibleWith(j UnikIndexDBInfo) bool {
+	if i.Version == j.Version &&
+		i.IndexVersion == j.IndexVersion &&
+		i.K == j.K &&
+		i.Hashed == j.Hashed &&
+		i.Canonical == j.Canonical &&
+		i.Scale == j.Scale &&
+		i.Scaled == j.Scaled &&
+		i.Minimizer == j.Minimizer &&
+		i.MinimizerW == j.MinimizerW &&
+		i.Syncmer == j.Syncmer &&
+		i.SyncmerS == j.SyncmerS {
+		return true
+	}
+
+	return false
+}
+
 // Check check if all index files exist.
 func (i UnikIndexDBInfo) Check() error {
 	for _, file := range i.Files {

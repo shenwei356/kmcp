@@ -26,18 +26,167 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 
 	"github.com/clausecker/pospop"
 	"github.com/edsrzf/mmap-go"
 	"github.com/pkg/errors"
+	"github.com/shenwei356/bio/seq"
+	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/unikmer/index"
-	"github.com/smallnest/ringbuffer"
 )
+
+// ---------------------------------------------------------------
+// messenging between search command and search engine
+
+// Query strands for a query sequence
+type Query struct {
+	ID  []byte
+	Seq *seq.Seq
+
+	Ch chan QueryResult // result chanel
+}
+
+// QueryResult is search result of a query sequence
+type QueryResult struct {
+	Query Query
+
+	DBName string
+	FPR    float64 // fpr, p is related to database
+
+	NumKmers int      // number of k-mers
+	Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
+
+	Matches []Match // all matches
+}
+
+// Match is the type of matching detail
+type Match struct {
+	Target string  // target name
+	Kmers  int     // matched k-mers
+	QCov   float64 // coverage of query
+	TCov   float64 // coverage of target
+}
+
+// ---------------------------------------------------------------
+// messenging between database and indice
+
+// IndexQuery is a query sent to multiple indice of a database
+type IndexQuery struct {
+	Hashes [][]uint64 // related to database
+
+	Ch chan []Match // result chanel
+}
+
+// ---------------------------------------------------------------
+
+// SearchOptions defines options for searching
+type SearchOptions struct {
+	UseMMap bool
+	Threads int
+
+	Align bool
+
+	TopN   int
+	SortBy string
+
+	MinQueryCov  float64
+	MinTargetCov float64
+}
+
+// UnikIndexDBSearchEngine search sequence on multiple database
+type UnikIndexDBSearchEngine struct {
+	Options SearchOptions
+
+	DBs     []*UnikIndexDB
+	DBNames []string
+
+	wg   sync.WaitGroup
+	done chan int
+
+	InCh  chan Query // queries
+	OutCh chan QueryResult
+}
+
+// NewUnikIndexDBSearchEngine returns a search engine based on multiple engines
+func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikIndexDBSearchEngine, error) {
+	dbs := make([]*UnikIndexDB, 0, len(dbPaths))
+	names := make([]string, 0, len(dbPaths))
+	for _, path := range dbPaths {
+		db, err := NewUnikIndexDB(path, opt)
+		if err != nil {
+			return nil, errors.Wrapf(err, "open kmcp db: %s", path)
+		}
+		dbs = append(dbs, db)
+		names = append(names, filepath.Base(path))
+	}
+
+	sg := &UnikIndexDBSearchEngine{Options: opt, DBs: dbs, DBNames: names}
+	sg.done = make(chan int)
+	sg.InCh = make(chan Query, opt.Threads)
+	sg.OutCh = make(chan QueryResult, opt.Threads)
+
+	go func() {
+		for query := range sg.InCh {
+			sg.wg.Add(1)
+			go func(query Query) {
+				query.Ch = make(chan QueryResult, len(sg.DBs))
+
+				// send to all databases
+				for _, db := range sg.DBs {
+					db.InCh <- query
+				}
+
+				// get matches from all databases
+				var _queryResult QueryResult
+				for i := 0; i < len(sg.DBs); i++ {
+					// block to read
+					_queryResult = <-query.Ch
+					if _queryResult.Matches == nil {
+						continue
+					}
+
+					sg.OutCh <- _queryResult
+				}
+
+				sg.wg.Done()
+			}(query)
+		}
+		sg.done <- 1
+	}()
+
+	return sg, nil
+}
+
+// Wait waits
+func (sg *UnikIndexDBSearchEngine) Wait() {
+	<-sg.done       //  confirm inCh being closed
+	sg.wg.Wait()    // wait all results being sent
+	close(sg.OutCh) // close OutCh
+}
+
+// Close closes the search engine.
+func (sg *UnikIndexDBSearchEngine) Close() error {
+	var err0 error
+	for _, db := range sg.DBs {
+		err := db.Close()
+		if err != nil && err0 == nil {
+			err0 = err
+		}
+	}
+	return err0
+}
 
 // UnikIndexDB is database for multiple .unik indices.
 type UnikIndexDB struct {
-	path string
+	Options SearchOptions
+	path    string
+
+	InCh chan Query
+
+	wg0        sync.WaitGroup
+	stop, done chan int
 
 	Info   UnikIndexDBInfo
 	Header index.Header
@@ -51,7 +200,7 @@ func (db *UnikIndexDB) String() string {
 }
 
 // NewUnikIndexDB opens and read from database directory.
-func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
+func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	info, err := UnikIndexDBInfoFromFile(filepath.Join(path, dbInfoFile))
 	if err != nil {
 		return nil, err
@@ -69,7 +218,7 @@ func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
 	// first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), useMmap)
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -83,6 +232,11 @@ func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 	indices = append(indices, idx1)
 
 	db := &UnikIndexDB{Info: info, Header: idx1.Header, path: path}
+
+	db.InCh = make(chan Query, opt.Threads)
+
+	db.stop = make(chan int)
+	db.done = make(chan int)
 
 	if len(info.Files) == 1 {
 		db.Indices = indices
@@ -106,7 +260,7 @@ func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 		go func(f string) {
 			defer wg.Done()
 
-			idx, err := NewUnixIndex(f, useMmap)
+			idx, err := NewUnixIndex(f, opt)
 			checkError(errors.Wrap(err, f))
 
 			if !idx.Header.Compatible(idx1.Header) {
@@ -121,11 +275,191 @@ func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 	<-done
 
 	db.Indices = indices
+
+	numHashes := db.Info.NumHashes
+	go func() {
+	LOOP:
+		for {
+			select {
+			case <-db.stop:
+				break LOOP
+			case query := <-db.InCh:
+				// db.wg0.Add(1)
+				go func(query Query) {
+					// defer db.wg0.Done()
+
+					// compute kmers
+					kmers, err := db.generateKmers(query.Seq)
+
+					if err != nil {
+						checkError(err)
+					}
+
+					result := QueryResult{
+						Query:    query,
+						NumKmers: len(kmers),
+						Kmers:    kmers,
+						Matches:  nil,
+					}
+
+					if kmers == nil { // sequence shorter than k
+						query.Ch <- result
+						return
+					}
+
+					// compute hashes
+					hashes := make([][]uint64, len(kmers))
+					for i, kmer := range kmers {
+						hashes[i] = hashValues(kmer, numHashes)
+					}
+
+					// send queries
+					chMatches := make(chan []Match, len(db.Indices))
+					for i := len(db.Indices) - 1; i >= 0; i-- { // start from bigger files
+						db.Indices[i].InCh <- IndexQuery{
+							Hashes: hashes,
+							Ch:     chMatches,
+						}
+					}
+
+					// get matches from all indice
+					matches := make([]Match, 0, 8)
+					var _matches []Match
+					var _match Match
+					for i := 0; i < len(db.Indices); i++ {
+						// block to read
+						_matches = <-chMatches
+						for _, _match = range _matches {
+							matches = append(matches, _match)
+						}
+					}
+					// close(chMatches)
+
+					db.filterMatches(matches)
+
+					// send result
+					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
+					result.DBName = filepath.Base(path)
+					result.Kmers = kmers
+					result.Matches = matches
+					query.Ch <- result
+				}(query)
+			}
+
+		}
+		db.done <- 1
+	}()
+
 	return db, nil
+}
+
+func (db *UnikIndexDB) filterMatches(matches []Match) {
+	switch db.Options.SortBy {
+	case "qcov":
+		sort.Slice(matches,
+			func(i, j int) bool {
+				return matches[i].QCov > matches[j].QCov
+			})
+	case "tcov":
+		sort.Slice(matches,
+			func(i, j int) bool {
+				return matches[i].TCov > matches[j].TCov
+			})
+	case "sum":
+		sort.Slice(matches,
+			func(i, j int) bool {
+				return matches[i].QCov+matches[i].TCov > matches[j].QCov+matches[j].TCov
+			})
+	}
+
+	if db.Options.TopN > 0 && db.Options.TopN < len(matches) {
+		matches = matches[0:db.Options.TopN]
+	}
+}
+
+func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) ([]uint64, error) {
+	scaled := db.Info.Scaled
+	scale := db.Info.Scale
+	maxHash := ^uint64(0)
+	if scaled {
+		maxHash = uint64(float64(^uint64(0)) / float64(scale))
+	}
+
+	var err error
+	var iter *unikmer.Iterator
+	var sketch *unikmer.Sketch
+	var code uint64
+	var ok bool
+
+	kmers := make([]uint64, 0, 256)
+
+	// using ntHash
+	if db.Info.Syncmer {
+		sketch, err = unikmer.NewSyncmerSketch(sequence, db.Header.K, int(db.Info.SyncmerS), false)
+	} else if db.Info.Minimizer {
+		sketch, err = unikmer.NewMinimizerSketch(sequence, db.Header.K, int(db.Info.MinimizerW), false)
+	} else {
+		iter, err = unikmer.NewHashIterator(sequence, db.Header.K, db.Header.Canonical, false)
+	}
+	if err != nil {
+		if err == unikmer.ErrShortSeq {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if db.Info.Syncmer {
+		for {
+			code, ok = sketch.NextSyncmer()
+			if !ok {
+				break
+			}
+			if scaled && code > maxHash {
+				continue
+			}
+			kmers = append(kmers, code)
+		}
+	} else if db.Info.Minimizer {
+		for {
+			code, ok = sketch.NextMinimizer()
+			if !ok {
+				break
+			}
+			if scaled && code > maxHash {
+				continue
+			}
+			kmers = append(kmers, code)
+		}
+	} else {
+		for {
+			code, ok = iter.NextHash()
+			if !ok {
+				break
+			}
+			if scaled && code > maxHash {
+				continue
+			}
+			kmers = append(kmers, code)
+		}
+	}
+	return kmers, nil
+}
+
+// CompatibleWith has loose restric tions for enabling searching from database of different perameters.
+func (db *UnikIndexDB) CompatibleWith(db2 *UnikIndexDB) bool {
+	if db.Info.Version == db2.Info.Version &&
+		db.Info.IndexVersion == db2.Info.IndexVersion {
+		return true
+	}
+	return false
 }
 
 // Close closes database.
 func (db *UnikIndexDB) Close() error {
+	close(db.stop)
+	<-db.done
+	close(db.InCh)
+
 	var err0 error
 	for _, idx := range db.Indices {
 		err := idx.Close()
@@ -134,86 +468,6 @@ func (db *UnikIndexDB) Close() error {
 		}
 	}
 	return err0
-}
-
-// SearchMap searches for a map of k-mer code/hash.
-func (db *UnikIndexDB) SearchMap(kmers map[uint64]interface{}, threads int, queryCov float64, targetCov float64) map[string][3]float64 {
-	numHashes := db.Info.NumHashes
-	hashes := make([][]uint64, len(kmers))
-	i := 0
-
-	if db.Info.Hashed {
-		for kmer := range kmers {
-			hashes[i] = hashValues(kmer, numHashes)
-			i++
-		}
-	} else {
-		for kmer := range kmers {
-			hashes[i] = hashValues(hash64(kmer), numHashes)
-			i++
-		}
-	}
-
-	return db.searchHashes(hashes, threads, queryCov, targetCov)
-}
-
-// Search searches for a slice of k-mer code/hash.
-func (db *UnikIndexDB) Search(kmers []uint64, threads int, queryCov float64, targetCov float64) map[string][3]float64 {
-	numHashes := db.Info.NumHashes
-	hashes := make([][]uint64, len(kmers))
-	if db.Info.Hashed {
-		for i, kmer := range kmers {
-			hashes[i] = hashValues(kmer, numHashes)
-		}
-	} else {
-		for i, kmer := range kmers {
-			hashes[i] = hashValues(hash64(kmer), numHashes)
-		}
-	}
-
-	return db.searchHashes(hashes, threads, queryCov, targetCov)
-}
-
-func (db *UnikIndexDB) searchHashes(hashes [][]uint64, threads int, queryCov float64, targetCov float64) map[string][3]float64 {
-
-	m := make(map[string][3]float64, 8)
-
-	if threads <= 0 {
-		threads = len(db.Indices)
-	}
-
-	ch := make([]*map[string][3]float64, len(db.Indices))
-
-	var wg sync.WaitGroup
-	// tokens := make(chan int, threads)
-	tokens := ringbuffer.New(threads) // ringbufer is faster than channel
-	// for i, idx := range db.Indices {
-	for i := len(db.Indices) - 1; i >= 0; i-- { // start from bigger files
-		idx := db.Indices[i]
-
-		wg.Add(1)
-		// tokens <- 1
-		tokens.WriteByte(0)
-		go func(idx *UnikIndex, ch []*map[string][3]float64, i int) {
-			_m := idx.Search(hashes, queryCov, targetCov)
-			ch[i] = &_m
-
-			wg.Done()
-			// <-tokens
-			tokens.ReadByte()
-		}(idx, ch, i)
-	}
-	wg.Wait()
-
-	var k string
-	var v [3]float64
-	for _, _m := range ch {
-		for k, v = range *_m {
-			m[k] = v
-		}
-	}
-
-	return m
 }
 
 // ------------------------------------------------------------------
@@ -231,6 +485,11 @@ const PosPopCountBufSize = 128
 
 // UnikIndex defines a unik index struct.
 type UnikIndex struct {
+	Options SearchOptions
+
+	stop, done chan int
+	InCh       chan IndexQuery
+
 	Path   string
 	Header index.Header
 
@@ -256,7 +515,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, useMmap bool) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open unikmer index file: %s", file)
@@ -281,10 +540,14 @@ func NewUnixIndex(file string, useMmap bool) (*UnikIndex, error) {
 	h.Sizes = reader.Sizes
 	h.NumRowBytes = reader.NumRowBytes
 	h.NumSigs = reader.NumSigs
-	idx := &UnikIndex{Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
-	idx.useMmap = useMmap
+	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
+	idx.useMmap = opt.UseMMap
 
-	if useMmap {
+	idx.stop = make(chan int)
+	idx.done = make(chan int)
+	idx.InCh = make(chan IndexQuery, opt.Threads)
+
+	if idx.useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
 		if err != nil {
 			return nil, err
@@ -311,23 +574,37 @@ func NewUnixIndex(file string, useMmap bool) (*UnikIndex, error) {
 	idx.buffsT = buffsT
 
 	idx.moreThanOneHash = reader.NumHashes > 1
+
+	go func() {
+	LOOP:
+		for {
+			select {
+			case <-idx.stop:
+				break LOOP
+			case query := <-idx.InCh:
+				query.Ch <- idx.Search(query.Hashes)
+			}
+		}
+		idx.done <- 1
+	}()
 	return idx, nil
 }
 
 // Search searches with hashes.
-func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov float64) map[string][3]float64 {
+func (idx *UnikIndex) Search(hashes [][]uint64) []Match {
 	numNames := len(idx.Header.Names)
 	numRowBytes := idx.Header.NumRowBytes
 	numSigs := idx.Header.NumSigs
 	numSigsInt := uint64(numSigs)
 	offset0 := idx.offset0
 	fh := idx.fh
-	names := idx.Header.Names
 	sizes := idx.Header.Sizes
 	sigs := idx.sigsB
 	useMmap := idx.useMmap
 	data := idx._data
 	moreThanOneHash := idx.moreThanOneHash
+	queryCov := idx.Options.MinQueryCov
+	targetCov := idx.Options.MinTargetCov
 
 	counts := make([][8]int, numRowBytes)
 
@@ -422,7 +699,7 @@ func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov floa
 	var ix8 int
 	var k int
 
-	result := make(map[string][3]float64, 8)
+	results := make([]Match, 0, 8)
 
 	var c, t, T float64
 	iLast := numRowBytes - 1
@@ -449,23 +726,31 @@ func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov floa
 				continue
 			}
 
-			// check k-mer locations
-
-			result[names[k]] = [3]float64{c, t, T}
+			results = append(results, Match{
+				Target: idx.Header.Names[k],
+				Kmers:  count,
+				QCov:   t,
+				TCov:   t,
+			})
 		}
 	}
 
-	return result
+	return results
 }
 
 // Close closes the index.
 func (idx *UnikIndex) Close() error {
+	close(idx.stop) // send stop signal
+	<-idx.done      // confirm stopped
+	close(idx.InCh) // close InCh
+
 	if idx.useMmap {
 		err := idx.sigs.Unmap()
 		if err != nil {
 			return err
 		}
 	}
+
 	return idx.fh.Close()
 }
 

@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"io"
 	"runtime"
-	"sort"
+	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
-	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/spf13/cobra"
 )
@@ -51,12 +51,19 @@ Attentions:
 		runtime.GOMAXPROCS(opt.NumCPUs)
 		seq.ValidateSeq = false
 
+		timeStart := time.Now()
+		defer func() {
+			if opt.Verbose {
+				log.Infof("elapsed time: %s", time.Since(timeStart))
+			}
+		}()
+
 		var err error
 
 		// ---------------------------------------------------------------
 
-		dbDir := getFlagString(cmd, "db-dir")
-		if dbDir == "" {
+		dbDirs := getFlagStringSlice(cmd, "db-dir")
+		if len(dbDirs) == 0 {
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
 		outFile := getFlagString(cmd, "out-prefix")
@@ -64,12 +71,11 @@ Attentions:
 		targetCov := getFlagFloat64(cmd, "target-cov")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFile := getFlagString(cmd, "name-map")
-		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
+		// keepUnmatched := getFlagBool(cmd, "keep-unmatched")
 		topN := getFlagNonNegativeInt(cmd, "keep-top")
-		keepTopN := topN > 0
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
-		circular := getFlagBool(cmd, "circular")
+		// circular := getFlagBool(cmd, "circular")
 		if !(sortBy == "qcov" || sortBy == "tcov" || sortBy == "sum") {
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
 		}
@@ -116,62 +122,48 @@ Attentions:
 				log.Info("loading database ...")
 			}
 		}
-		db, err := NewUnikIndexDB(dbDir, useMmap)
-		checkError(errors.Wrap(err, dbDir))
-		defer func() {
-			checkError(db.Close())
-		}()
+		searchOpt := SearchOptions{
+			UseMMap: useMmap,
+			Threads: opt.NumCPUs,
 
-		if queryCov <= db.Info.FPR {
-			checkError(fmt.Errorf("query coverage threshold (%f) should not be smaller than FPR of single bloom filter of index database (%f)", queryCov, db.Info.FPR))
+			Align: false,
+
+			TopN:   topN,
+			SortBy: sortBy,
+
+			MinQueryCov:  queryCov,
+			MinTargetCov: targetCov,
+		}
+		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
+		if err != nil {
+			checkError(err)
+		}
+
+		for _, db := range sg.DBs {
+			if queryCov <= db.Info.FPR {
+				checkError(fmt.Errorf("query coverage threshold (%f) should not be smaller than FPR of single bloom filter of index database (%f)", queryCov, db.Info.FPR))
+			}
 		}
 		if opt.Verbose {
-			log.Infof("db loaded: %s", db)
-			log.Infof("-------------------- [more db information] --------------------")
-			if db.Info.Scaled {
-				log.Infof("down-sampling scale: %d", db.Info.Scale)
-			}
-			if db.Info.Minimizer {
-				log.Infof("Minimizer window: %d", db.Info.MinimizerW)
-			}
-			if db.Info.Syncmer {
-				log.Infof("syncmer s: %d", db.Info.SyncmerS)
-			}
-			log.Infof("-------------------- [more db information] --------------------")
+			log.Infof("%d databases loaded", len(sg.DBs))
 
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Infof("query coverage threshold: %f", queryCov)
 			log.Infof("target coverage threshold: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
 		}
-		if mappingNames {
-			var ok bool
-			var _n int
-			for _, name := range db.Info.Names {
-				if _, ok = namesMap[name]; !ok {
-					_n++
-				}
-			}
-			if _n > 0 {
-				log.Warningf("%d names are not defined in name mapping file: %s", _n, nameMappingFile)
-			}
-		}
-
-		k := db.Header.K
-		canonical := db.Header.Canonical
-
-		hashed := db.Info.Hashed
-		scaled := db.Info.Scaled
-		scale := db.Info.Scale
-		minimizer := db.Info.Minimizer
-		minimizerW := int(db.Info.MinimizerW)
-		syncmer := db.Info.Syncmer
-		syncmerS := int(db.Info.SyncmerS)
-
-		maxHash := ^uint64(0)
-		if scaled {
-			maxHash = uint64(float64(^uint64(0)) / float64(scale))
-		}
+		// if mappingNames {
+		// 	var ok bool
+		// 	var _n int
+		// 	for _, name := range db.Info.Names {
+		// 		if _, ok = namesMap[name]; !ok {
+		// 			_n++
+		// 		}
+		// 	}
+		// 	if _n > 0 {
+		// 		log.Warningf("%d names are not defined in name mapping file: %s", _n, nameMappingFile)
+		// 	}
+		// }
 
 		// if !isStdout(outFile) {
 		// 	outFile += ".txt"
@@ -187,23 +179,52 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tlength\tFPR\thits\ttarget\tkmers\tqcov\ttcov\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\ttKmers\tqCov\ttCov\n")
 		}
 
 		var fastxReader *fastx.Reader
 		var record *fastx.Record
-		var nseq int64
-		var iter *unikmer.Iterator
-		var sketch *unikmer.Sketch
-		var code uint64
 		var ok bool
 
-		var kmers map[uint64]interface{}
-		var matched map[string][3]float64
-		var targets []string
-		var match [3]float64
-		var m, prefix2 string
+		var prefix2 string
 		var t, target string
+
+		done := make(chan int)
+		go func() {
+			for result := range sg.OutCh {
+				// query, len_query,
+				// db, num_kmers, fpr, num_matches,
+				prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
+					result.Query.ID, len(result.Query.Seq.Seq),
+					result.DBName, result.NumKmers, result.FPR, len(result.Matches))
+
+				for _, match := range result.Matches {
+
+					// if keepUnmatched && len(matched) == 0 {
+					// 	outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n",
+					// 		prefix2, t, len(kmers), 0, 0))
+					// }
+					target = match.Target
+					if mappingNames {
+						if t, ok = namesMap[target]; ok {
+							t = target
+						}
+					} else {
+						t = target
+					}
+
+					// query, len_query,
+					// db, num_kmers, fpr,
+					// target, num_target_kmers, qcov, tcov
+					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
+						prefix2, t, match.Kmers, match.QCov, match.TCov))
+				}
+
+			}
+			done <- 1
+		}()
+
+		var wg sync.WaitGroup
 		for _, file := range files {
 			if opt.Verbose {
 				log.Infof("reading sequence file: %s", file)
@@ -220,140 +241,23 @@ Attentions:
 					break
 				}
 
-				nseq++
-
-				kmers = make(map[uint64]interface{}, 2048)
-
-				// using ntHash
-				if syncmer {
-					sketch, err = unikmer.NewSyncmerSketch(record.Seq, k, syncmerS, circular)
-				} else if minimizer {
-					sketch, err = unikmer.NewMinimizerSketch(record.Seq, k, minimizerW, circular)
-				} else if hashed {
-					iter, err = unikmer.NewHashIterator(record.Seq, k, canonical, circular)
-				} else {
-					iter, err = unikmer.NewKmerIterator(record.Seq, k, canonical, circular)
-				}
-				if err != nil {
-					if err == unikmer.ErrShortSeq {
-						if opt.Verbose {
-							log.Infof("ignore short seq: %s", record.Name)
-						}
-						continue
-					} else {
-						checkError(errors.Wrapf(err, "seq: %s", record.Name))
+				wg.Add(1)
+				go func(record *fastx.Record) {
+					sg.InCh <- Query{
+						ID:  record.ID,
+						Seq: record.Seq,
 					}
-				}
-
-				if syncmer {
-					for {
-						code, ok = sketch.NextSyncmer()
-						if !ok {
-							break
-						}
-
-						if scaled && code > maxHash {
-							continue
-						}
-
-						kmers[code] = struct{}{}
-					}
-				} else if minimizer {
-					for {
-						code, ok = sketch.NextMinimizer()
-						if !ok {
-							break
-						}
-
-						if scaled && code > maxHash {
-							continue
-						}
-
-						kmers[code] = struct{}{}
-					}
-				} else if hashed {
-					for {
-						code, ok = iter.NextHash()
-						if !ok {
-							break
-						}
-
-						if scaled && code > maxHash {
-							continue
-						}
-
-						kmers[code] = struct{}{}
-					}
-				} else {
-					for {
-						code, ok, err = iter.NextKmer()
-						if err != nil {
-							checkError(errors.Wrapf(err, "seq: %s", record.Name))
-						}
-						if !ok {
-							break
-						}
-
-						if scaled && code > maxHash {
-							continue
-						}
-
-						kmers[code] = struct{}{}
-					}
-				}
-
-				matched = db.SearchMap(kmers, opt.NumCPUs, queryCov, targetCov)
-
-				targets = make([]string, 0, len(matched))
-				for m = range matched {
-					targets = append(targets, m)
-				}
-
-				switch sortBy {
-				case "qcov":
-					sort.Slice(targets,
-						func(i, j int) bool {
-							return matched[targets[i]][0] > matched[targets[j]][0]
-						})
-				case "tcov":
-					sort.Slice(targets,
-						func(i, j int) bool {
-							return matched[targets[i]][2] > matched[targets[j]][2]
-						})
-				case "sum":
-					sort.Slice(targets,
-						func(i, j int) bool {
-							return matched[targets[i]][1]+matched[targets[i]][2] > matched[targets[j]][1]+matched[targets[j]][2]
-						})
-				}
-
-				if keepTopN && topN < len(targets) {
-					targets = targets[0:topN]
-				}
-
-				prefix2 = fmt.Sprintf("%s\t%d\t%e\t%d",
-					record.ID, len(record.Seq.Seq), maxFPR(db.Info.FPR, queryCov, len(kmers)), len(matched))
-
-				if keepUnmatched && len(matched) == 0 {
-					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n",
-						prefix2, t, len(kmers), 0, 0))
-				}
-				for _, target = range targets {
-					if mappingNames {
-						if t, ok = namesMap[target]; !ok {
-							t = target
-						}
-					} else {
-						t = target
-					}
-
-					match = matched[target]
-					outfh.WriteString(fmt.Sprintf("%s\t%s\t%.0f\t%0.4f\t%0.4f\n",
-						prefix2, t, match[0], match[1], match[2]))
-				}
-
+					wg.Done()
+				}(record.Clone())
 			}
 		}
+		wg.Wait()      // all sequences being sent
+		close(sg.InCh) // close Inch
+
+		sg.Wait() // wait all searching finished
+		<-done    // all result returned and outputed
+
+		checkError(sg.Close()) // cleanup
 		if opt.Verbose {
 			log.Infof("done searching")
 		}
@@ -366,11 +270,11 @@ func init() {
 
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
-	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "unikmer db index"`)
+	searchCmd.Flags().StringSliceP("db-dir", "d", []string{}, `database directorys created by "kmcp index"`)
 	searchCmd.Flags().StringP("name-map", "M", "", `tabular two-column file mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("use-mmap", "m", false, `load index files into memory to accelerate searching (recommended)`)
 
-	searchCmd.Flags().BoolP("circular", "", false, `query sequence is circular genome`)
+	// searchCmd.Flags().BoolP("circular", "", false, `query sequence is circular genome`)
 
 	searchCmd.Flags().Float64P("query-cov", "t", 0.6, `query coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `target coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a target`)

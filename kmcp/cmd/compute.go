@@ -83,7 +83,7 @@ K-mer sketchs:
 
 		if outDir == "" && outFile == "" {
 			checkError(fmt.Errorf("flag -o/--out-prefix OR -O/--out-dir is needed"))
-		} else if outDir != "" && outFile != "-" {
+		} else if outDir != "" && outFile != "" {
 			checkError(fmt.Errorf("either flag -o/--out-prefix OR -O/--out-dir is allowed"))
 		}
 
