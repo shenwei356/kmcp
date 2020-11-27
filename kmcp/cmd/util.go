@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -100,4 +101,18 @@ func makeOutDir(outDir string, force bool) {
 		}
 		checkError(os.MkdirAll(outDir, 0777))
 	}
+}
+
+func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
+	files := make([]string, 0, 128)
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && pattern.MatchString(info.Name()) {
+			files = append(files, filepath.Join(path))
+		}
+		return nil
+	})
+	return files, err
 }

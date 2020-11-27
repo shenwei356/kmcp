@@ -33,9 +33,10 @@ import (
 const extIndex = ".uniki"
 
 type UnikFileInfo struct {
-	Path  string
-	Name  string
-	Kmers int64
+	Path    string
+	RelPath string
+	Name    string
+	Kmers   int64
 }
 
 func (i UnikFileInfo) String() string {

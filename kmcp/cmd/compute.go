@@ -42,15 +42,18 @@ import (
 var computeCmd = &cobra.Command{
 	Use:   "compute",
 	Short: "Generate k-mers (sketch) from FASTA/Q sequences",
-	Long: `Generate k-mers (sketch) from FASTA/Q sequences
+	Long: `Generate k-mers (sketchs) from FASTA/Q sequences
+
+Attentions:
+  1. K-mers (sketchs) are not sorted and duplicates remained.
 
 K-mer:
   1. ntHash of k-mer (-k)
 
 K-mer sketchs:
-  1. Scaled MinHash (-D)
-  2. Minimizer (-k -W), optionally scaling/down-sampling (-D)
-  3. Syncmer   (-k -S), optionally scaling/down-sampling (-D)
+  1. Scaled MinHash (-k -D)
+  2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
+  3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -384,10 +387,29 @@ K-mer sketchs:
 		var sketch *unikmer.Sketch
 		codes := make([]uint64, 0, mapInitSize)
 
+		var pbs *mpb.Progress
+		var bar *mpb.Bar
+		var startTime time.Time
+		if opt.Verbose {
+			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
+			bar = pbs.AddBar(int64(len(files)),
+				mpb.BarStyle("[=>-]<+"),
+				mpb.PrependDecorators(
+					decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
+					decor.Name("", decor.WCSyncSpaceR),
+					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+				),
+				mpb.AppendDecorators(
+					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
+					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+					decor.OnComplete(decor.Name(""), ". done"),
+				),
+			)
+		}
+
 		for _, file := range files {
-			if opt.Verbose {
-				log.Infof("reading sequence file: %s", file)
-			}
+			startTime = time.Now()
+
 			fastxReader, err = fastx.NewDefaultReader(file)
 			checkError(errors.Wrap(err, file))
 
@@ -454,11 +476,38 @@ K-mer sketchs:
 					}
 					codes = append(codes, code)
 				}
+
+				bar.Increment()
+				bar.DecoratorEwmaUpdate(time.Since(startTime))
+			}
+		}
+		pbs.Wait()
+
+		n = len(codes)
+
+		if exactNumber {
+			// compute exact number of unique k-mers
+			if opt.Verbose {
+				log.Infof("sorting and counting unique k-mers ...")
+			}
+			codes2 := make([]uint64, n)
+			copy(codes2, codes)
+			sortutil.Uint64s(codes2)
+			var pre uint64 = 0
+			n = 0
+			for _, code = range codes2 {
+				if code != pre {
+					n++
+					pre = code
+				}
 			}
 		}
 
-		n = len(codes)
 		writer.Number = int64(n)
+
+		if opt.Verbose {
+			log.Infof("starting writing to %s ...", outFile)
+		}
 		for _, code = range codes {
 			writer.WriteCode(code)
 		}
@@ -474,7 +523,7 @@ func init() {
 	RootCmd.AddCommand(computeCmd)
 
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory, overide -o/--out-prefix`)
-	computeCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
+	computeCmd.Flags().StringP("out-prefix", "o", "", `out file prefix ("-" for stdout)`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
 	computeCmd.Flags().IntP("kmer-len", "k", 31, "k-mer length")

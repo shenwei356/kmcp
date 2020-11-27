@@ -38,7 +38,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const dbInfoFile = "_db.yml"
+const dbInfoFile = "__db.yml"
 
 var ErrVersionMismatch = errors.New("kmcp/index: version mismatch")
 
@@ -66,6 +66,7 @@ type UnikIndexDBInfo struct {
 	NumNames  int      `yaml:"numNames"`
 	Names     []string `yaml:"names"`
 	Sizes     []uint64 `yaml:"kmers"`
+	Paths     []string `yaml:"unik-path"`
 
 	path string
 }
