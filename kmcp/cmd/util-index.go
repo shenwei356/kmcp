@@ -32,6 +32,7 @@ import (
 
 const extIndex = ".uniki"
 
+// UnikFileInfo store basic info of .unik file.
 type UnikFileInfo struct {
 	Path    string
 	RelPath string
@@ -43,12 +44,14 @@ func (i UnikFileInfo) String() string {
 	return fmt.Sprintf("UnikFile{Kmers: %d, Path: %s, Name: %s}", i.Kmers, i.Path, i.Name)
 }
 
+// UnikFileInfos is list of UnikFileInfo.
 type UnikFileInfos []UnikFileInfo
 
 func (l UnikFileInfos) Len() int               { return len(l) }
 func (l UnikFileInfos) Less(i int, j int) bool { return l[i].Kmers < l[j].Kmers }
 func (l UnikFileInfos) Swap(i int, j int)      { l[i], l[j] = l[j], l[i] }
 
+// MergeUnikIndex merges multiple index files to one (not used)
 func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string) error {
 	if len(files) == 1 {
 		file := files[0]

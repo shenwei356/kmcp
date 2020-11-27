@@ -92,6 +92,7 @@ Attentions:
 		}
 
 		// ---------------------------------------------------------------
+		// input files
 
 		if opt.Verbose {
 			log.Info("checking input files ...")
@@ -106,6 +107,7 @@ Attentions:
 		}
 
 		// ---------------------------------------------------------------
+		// load db
 
 		if opt.Verbose {
 			if useMmap {

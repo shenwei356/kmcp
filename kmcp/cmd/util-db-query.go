@@ -23,7 +23,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -33,117 +32,10 @@ import (
 	"github.com/edsrzf/mmap-go"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer/index"
-	"github.com/shenwei356/util/pathutil"
 	"github.com/smallnest/ringbuffer"
-	"gopkg.in/yaml.v2"
 )
 
-const dbInfoFile = "__db.yml"
-
-var ErrVersionMismatch = errors.New("kmcp/index: version mismatch")
-
-const UnikIndexDBVersion uint8 = 3
-
-type UnikIndexDBInfo struct {
-	Version      uint8 `yaml:"version"`
-	IndexVersion uint8 `yaml:"unikiVersion"`
-	K            int   `yaml:"k"`
-	Hashed       bool  `yaml:"hashed"`
-	Canonical    bool  `yaml:"canonical"`
-
-	Scaled     bool   `yaml:"scaled"`
-	Scale      uint32 `yaml:"scale"`
-	Minimizer  bool   `yaml:"minimizer"`
-	MinimizerW uint32 `yaml:"minimizer-w"`
-	Syncmer    bool   `yaml:"syncmer"`
-	SyncmerS   uint32 `yaml:"syncmer-s"`
-
-	NumHashes int      `yaml:"hashes"`
-	FPR       float64  `yaml:"fpr"`
-	BlockSize int      `yaml:"blocksize"`
-	Kmers     int      `yaml:"totalKmers"`
-	Files     []string `yaml:"files"`
-	NumNames  int      `yaml:"numNames"`
-	Names     []string `yaml:"names"`
-	Sizes     []uint64 `yaml:"kmers"`
-	Paths     []string `yaml:"unik-path"`
-
-	path string
-}
-
-func (i UnikIndexDBInfo) String() string {
-	return fmt.Sprintf("kmcp database v%d: k: %d, hashed: %v,  canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
-		i.Version, i.K, i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.K, i.Kmers)
-}
-
-func NewUnikIndexDBInfo(files []string) UnikIndexDBInfo {
-	return UnikIndexDBInfo{Version: UnikIndexDBVersion, IndexVersion: index.Version, Files: files}
-}
-
-func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
-	info := UnikIndexDBInfo{}
-
-	r, err := os.Open(file)
-	if err != nil {
-		return info, fmt.Errorf("fail to read unikmer index db info file: %s", file)
-	}
-
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return info, fmt.Errorf("fail to read unikmer index db info file: %s", file)
-	}
-
-	err = yaml.Unmarshal(data, &info)
-	if err != nil {
-		return info, fmt.Errorf("fail to unmarshal unikmer index db info")
-	}
-
-	r.Close()
-
-	if info.Version != UnikIndexDBVersion {
-		return info, ErrVersionMismatch
-	}
-
-	p, _ := filepath.Abs(file)
-	info.path = filepath.Dir(p)
-	return info, nil
-}
-
-func (i UnikIndexDBInfo) WriteTo(file string) error {
-	data, err := yaml.Marshal(i)
-	if err != nil {
-		return fmt.Errorf("fail to marshal uniker index db info")
-	}
-
-	w, err := os.Create(file)
-	if err != nil {
-		return fmt.Errorf("fail to write unikmer index db info file: %s", file)
-	}
-	_, err = w.Write(data)
-	if err != nil {
-		return fmt.Errorf("fail to write unikmer index db info file: %s", file)
-	}
-
-	w.Close()
-	return nil
-}
-
-func (i UnikIndexDBInfo) Check() error {
-	for _, file := range i.Files {
-		file = filepath.Join(i.path, file)
-		ok, err := pathutil.Exists(file)
-		if err != nil {
-			return fmt.Errorf("error on checking unikmer index file: %s: %s", file, err)
-		}
-		if !ok {
-			return fmt.Errorf("unikmer index file missing: %s", file)
-		}
-	}
-	return nil
-}
-
-// ------------------------------------------------------------------
-
+// UnikIndexDB is database for multiple .unik indices.
 type UnikIndexDB struct {
 	path string
 
@@ -158,6 +50,7 @@ func (db *UnikIndexDB) String() string {
 		db.Info.Version, db.Info.BlockSize, len(db.Info.Files), db.Header.K, db.Info.Kmers, db.Header.NumHashes)
 }
 
+// NewUnikIndexDB opens and read from database directory.
 func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 	info, err := UnikIndexDBInfoFromFile(filepath.Join(path, dbInfoFile))
 	if err != nil {
@@ -231,6 +124,7 @@ func NewUnikIndexDB(path string, useMmap bool) (*UnikIndexDB, error) {
 	return db, nil
 }
 
+// Close closes database.
 func (db *UnikIndexDB) Close() error {
 	var err0 error
 	for _, idx := range db.Indices {
@@ -242,6 +136,7 @@ func (db *UnikIndexDB) Close() error {
 	return err0
 }
 
+// SearchMap searches for a map of k-mer code/hash.
 func (db *UnikIndexDB) SearchMap(kmers map[uint64]interface{}, threads int, queryCov float64, targetCov float64) map[string][3]float64 {
 	numHashes := db.Info.NumHashes
 	hashes := make([][]uint64, len(kmers))
@@ -262,6 +157,7 @@ func (db *UnikIndexDB) SearchMap(kmers map[uint64]interface{}, threads int, quer
 	return db.searchHashes(hashes, threads, queryCov, targetCov)
 }
 
+// Search searches for a slice of k-mer code/hash.
 func (db *UnikIndexDB) Search(kmers []uint64, threads int, queryCov float64, targetCov float64) map[string][3]float64 {
 	numHashes := db.Info.NumHashes
 	hashes := make([][]uint64, len(kmers))
@@ -333,6 +229,7 @@ func (db *UnikIndexDB) searchHashes(hashes [][]uint64, threads int, queryCov flo
 // 128 is the best value for my machine (AMD ryzen 2700X).
 const PosPopCountBufSize = 128
 
+// UnikIndex defines a unik index struct.
 type UnikIndex struct {
 	Path   string
 	Header index.Header
@@ -358,6 +255,7 @@ func (idx *UnikIndex) String() string {
 	return fmt.Sprintf("%s: %s", idx.Path, idx.Header.String())
 }
 
+// NewUnixIndex create a index from file.
 func NewUnixIndex(file string, useMmap bool) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
@@ -416,6 +314,7 @@ func NewUnixIndex(file string, useMmap bool) (*UnikIndex, error) {
 	return idx, nil
 }
 
+// Search searches with hashes.
 func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov float64) map[string][3]float64 {
 	numNames := len(idx.Header.Names)
 	numRowBytes := idx.Header.NumRowBytes
@@ -559,6 +458,7 @@ func (idx *UnikIndex) Search(hashes [][]uint64, queryCov float64, targetCov floa
 	return result
 }
 
+// Close closes the index.
 func (idx *UnikIndex) Close() error {
 	if idx.useMmap {
 		err := idx.sigs.Unmap()
