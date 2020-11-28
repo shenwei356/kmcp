@@ -32,6 +32,7 @@ import (
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/spf13/cobra"
+	"github.com/twotwotwo/sorts/sortutil"
 )
 
 var searchCmd = &cobra.Command{
@@ -75,6 +76,7 @@ Attentions:
 		topN := getFlagNonNegativeInt(cmd, "keep-top")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
+		keepOrder := getFlagBool(cmd, "keep-order")
 		if !(sortBy == "qcov" || sortBy == "tcov" || sortBy == "sum") {
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
 		}
@@ -179,20 +181,20 @@ Attentions:
 		// ---------------------------------------------------------------
 		// receive result and output
 
-		done := make(chan int)
-		go func() {
-			for result := range sg.OutCh {
-				// query, len_query,
-				// db, num_kmers, fpr, num_matches,
-				prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
-					result.Query.ID, len(result.Query.Seq.Seq),
-					result.DBName, result.NumKmers, result.FPR, len(result.Matches))
+		output := func(result QueryResult) {
+			if len(result.Matches) == 0 && !keepUnmatched {
+				return
+			}
+			// query, len_query,
+			// db, num_kmers, fpr, num_matches,
+			prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
+				result.QueryID, result.QueryLen,
+				result.DBName, result.NumKmers, result.FPR, len(result.Matches))
 
-				if keepUnmatched && len(result.Matches) == 0 {
-					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-						prefix2, "", 0, float64(0), float64(0)))
-					continue
-				}
+			if keepUnmatched && len(result.Matches) == 0 {
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
+					prefix2, "", 0, float64(0), float64(0)))
+			} else {
 				for _, match := range result.Matches {
 					target = match.Target
 					if mappingNames {
@@ -209,7 +211,54 @@ Attentions:
 					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
 						prefix2, t, match.NumKmers, match.QCov, match.TCov))
 				}
+			}
+		}
 
+		done := make(chan int)
+		go func() {
+			if !keepOrder {
+				for result := range sg.OutCh {
+					output(result)
+				}
+			} else {
+				m := make(map[uint64]*[]QueryResult, opt.NumCPUs)
+				var id, _id uint64
+				var ok bool
+				var _result QueryResult
+				var _results *[]QueryResult
+				ndb := len(sg.DBs)
+				for result := range sg.OutCh {
+					_id = result.QueryIdx
+					if _results, ok = m[_id]; ok {
+						*_results = append(*_results, result)
+					} else {
+						m[_id] = &[]QueryResult{result}
+					}
+
+					if _results, ok = m[id]; ok && len(*_results) == ndb {
+						for _, _result = range *_results {
+							output(_result)
+						}
+						delete(m, id)
+						id++
+					}
+				}
+
+				if len(m) > 0 {
+					ids := make([]uint64, len(m))
+					i := 0
+					for id = range m {
+						ids[i] = id
+						i++
+					}
+					sortutil.Uint64s(ids)
+					for _, id = range ids {
+						_results = m[id]
+						for _, _result = range *_results {
+							output(_result)
+						}
+					}
+				}
 			}
 			done <- 1
 		}()
@@ -218,6 +267,7 @@ Attentions:
 		// send query
 
 		var wg sync.WaitGroup
+		var id uint64
 		for _, file := range files {
 			if opt.Verbose {
 				log.Infof("reading sequence file: %s", file)
@@ -235,13 +285,16 @@ Attentions:
 				}
 
 				wg.Add(1)
-				go func(record *fastx.Record) {
+				go func(record *fastx.Record, id uint64) {
 					sg.InCh <- Query{
+						Idx: id,
 						ID:  record.ID,
 						Seq: record.Seq,
 					}
 					wg.Done()
-				}(record.Clone())
+				}(record.Clone(), id)
+
+				id++
 			}
 		}
 		wg.Wait()      // all sequences being sent
@@ -269,7 +322,8 @@ func init() {
 	searchCmd.Flags().Float64P("query-cov", "t", 0.6, `query coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `target coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a target`)
 	searchCmd.Flags().StringP("name-map", "M", "", `tabular two-column file mapping names to user-defined values`)
-	searchCmd.Flags().BoolP("keep-unmatched", "k", false, `keep unmatched query sequence information`)
+	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
+	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, tcov or sum (qcov+tcov)`)

@@ -42,6 +42,7 @@ import (
 
 // Query strands for a query sequence.
 type Query struct {
+	Idx uint64 // id for keep output in order
 	ID  []byte
 	Seq *seq.Seq
 
@@ -50,7 +51,9 @@ type Query struct {
 
 // QueryResult is the search result of a query sequence.
 type QueryResult struct {
-	Query Query
+	QueryIdx uint64
+	QueryID  []byte
+	QueryLen int
 
 	DBName string  // database name
 	FPR    float64 // fpr, p is related to database
@@ -61,12 +64,44 @@ type QueryResult struct {
 	Matches []Match // all matches
 }
 
+// Clone returns a clone of QueryResult
+func (r QueryResult) Clone() QueryResult {
+	var matches []Match
+	if len(r.Matches) > 0 {
+		matches = make([]Match, len(r.Matches))
+		for i := 0; i < len(r.Matches); i++ {
+			matches[i] = r.Matches[i].Clone()
+		}
+	}
+
+	return QueryResult{
+		QueryIdx: r.QueryIdx,
+		QueryID:  r.QueryID,
+		QueryLen: r.QueryLen,
+		DBName:   r.DBName,
+		FPR:      r.FPR,
+		NumKmers: r.NumKmers,
+		Kmers:    r.Kmers,
+		Matches:  matches,
+	}
+}
+
 // Match is the struct of matching detail.
 type Match struct {
 	Target   string  // target name
 	NumKmers int     // matched k-mers
 	QCov     float64 // coverage of query
 	TCov     float64 // coverage of target
+}
+
+// Clone returns a clone of Match
+func (m Match) Clone() Match {
+	return Match{
+		Target:   m.Target,
+		NumKmers: m.NumKmers,
+		QCov:     m.QCov,
+		TCov:     m.TCov,
+	}
 }
 
 // Matches is list of Matches, for sorting.
@@ -329,7 +364,9 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					}
 
 					result := QueryResult{
-						Query:    query,
+						QueryIdx: query.Idx,
+						QueryID:  query.ID,
+						QueryLen: query.Seq.Length(),
 						NumKmers: len(kmers),
 						Kmers:    kmers,
 						Matches:  nil,
