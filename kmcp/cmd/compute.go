@@ -225,7 +225,6 @@ K-mer sketchs:
 					var mode uint32
 					var n int
 
-					mode |= unikmer.UnikCompact
 					mode |= unikmer.UnikCanonical
 					mode |= unikmer.UnikHashed
 
@@ -369,7 +368,6 @@ K-mer sketchs:
 		var mode uint32
 		var n int
 
-		mode |= unikmer.UnikCompact
 		mode |= unikmer.UnikCanonical
 		mode |= unikmer.UnikHashed
 
@@ -477,11 +475,16 @@ K-mer sketchs:
 					codes = append(codes, code)
 				}
 
-				bar.Increment()
-				bar.DecoratorEwmaUpdate(time.Since(startTime))
+				if opt.Verbose {
+					bar.Increment()
+					bar.DecoratorEwmaUpdate(time.Since(startTime))
+				}
 			}
 		}
-		pbs.Wait()
+
+		if opt.Verbose {
+			pbs.Wait()
+		}
 
 		n = len(codes)
 

@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer/index"
+	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"gopkg.in/yaml.v2"
 )
 
 const dbInfoFile = "__db.yml"
+const dbNameMappingFile = "__name_mapping.tsv"
 
 // ErrVersionMismatch indicates mismatched version
 var ErrVersionMismatch = errors.New("kmcp/index: version mismatch")
@@ -42,11 +44,12 @@ const UnikIndexDBVersion uint8 = 3
 
 // UnikIndexDBInfo is the meta data of a database.
 type UnikIndexDBInfo struct {
-	Version      uint8 `yaml:"version"`
-	IndexVersion uint8 `yaml:"unikiVersion"`
-	K            int   `yaml:"k"`
-	Hashed       bool  `yaml:"hashed"`
-	Canonical    bool  `yaml:"canonical"`
+	Version      uint8  `yaml:"version"`
+	IndexVersion uint8  `yaml:"unikiVersion"`
+	Alias        string `yaml:"alias"`
+	K            int    `yaml:"k"`
+	Hashed       bool   `yaml:"hashed"`
+	Canonical    bool   `yaml:"canonical"`
 
 	Scaled     bool   `yaml:"scaled"`
 	Scale      uint32 `yaml:"scale"`
@@ -65,12 +68,13 @@ type UnikIndexDBInfo struct {
 	Sizes     []uint64 `yaml:"kmers"`
 	Paths     []string `yaml:"unik-path"`
 
-	path string
+	path        string
+	NameMapping map[string]string
 }
 
 func (i UnikIndexDBInfo) String() string {
-	return fmt.Sprintf("kmcp database v%d: k: %d, hashed: %v,  canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
-		i.Version, i.K, i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.K, i.Kmers)
+	return fmt.Sprintf("kmcp database (v%d): %s, k: %d, hashed: %v, canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
+		i.Version, i.Alias, i.K, i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.K, i.Kmers)
 }
 
 // NewUnikIndexDBInfo creates UnikIndexDBInfo from index files, but you have to manually assign other values.
@@ -84,17 +88,17 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 
 	r, err := os.Open(file)
 	if err != nil {
-		return info, fmt.Errorf("fail to read unikmer index db info file: %s", file)
+		return info, fmt.Errorf("fail to open kmcp database info file: %s", file)
 	}
 
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
-		return info, fmt.Errorf("fail to read unikmer index db info file: %s", file)
+		return info, fmt.Errorf("fail to read kmcp database info file: %s", file)
 	}
 
 	err = yaml.Unmarshal(data, &info)
 	if err != nil {
-		return info, fmt.Errorf("fail to unmarshal unikmer index db info")
+		return info, fmt.Errorf("fail to unmarshal kmcp database info")
 	}
 
 	r.Close()
@@ -105,6 +109,14 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 
 	p, _ := filepath.Abs(file)
 	info.path = filepath.Dir(p)
+
+	fileNameMapping := filepath.Join(filepath.Dir(file), dbNameMappingFile)
+	var existed bool
+	existed, err = pathutil.Exists(fileNameMapping)
+	if existed {
+		info.NameMapping, err = cliutil.ReadKVs(fileNameMapping, false)
+		checkError(err)
+	}
 	return info, nil
 }
 
@@ -117,18 +129,18 @@ func (i UnikIndexDBInfo) WriteTo(file string) error {
 
 	w, err := os.Create(file)
 	if err != nil {
-		return fmt.Errorf("fail to write unikmer index db info file: %s", file)
+		return fmt.Errorf("fail to write kmcp database info file: %s", file)
 	}
 	_, err = w.Write(data)
 	if err != nil {
-		return fmt.Errorf("fail to write unikmer index db info file: %s", file)
+		return fmt.Errorf("fail to write kmcp database info file: %s", file)
 	}
 
 	w.Close()
 	return nil
 }
 
-// CompatibleWith checks whether two database have same parameters.
+// CompatibleWith checks whether two databases have the same parameters.
 func (i UnikIndexDBInfo) CompatibleWith(j UnikIndexDBInfo) bool {
 	if i.Version == j.Version &&
 		i.IndexVersion == j.IndexVersion &&

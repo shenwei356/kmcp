@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -71,11 +71,10 @@ Attentions:
 		targetCov := getFlagFloat64(cmd, "target-cov")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFile := getFlagString(cmd, "name-map")
-		// keepUnmatched := getFlagBool(cmd, "keep-unmatched")
+		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
 		topN := getFlagNonNegativeInt(cmd, "keep-top")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
-		// circular := getFlagBool(cmd, "circular")
 		if !(sortBy == "qcov" || sortBy == "tcov" || sortBy == "sum") {
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
 		}
@@ -152,18 +151,6 @@ Attentions:
 			log.Infof("target coverage threshold: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
 		}
-		// if mappingNames {
-		// 	var ok bool
-		// 	var _n int
-		// 	for _, name := range db.Info.Names {
-		// 		if _, ok = namesMap[name]; !ok {
-		// 			_n++
-		// 		}
-		// 	}
-		// 	if _n > 0 {
-		// 		log.Warningf("%d names are not defined in name mapping file: %s", _n, nameMappingFile)
-		// 	}
-		// }
 
 		// if !isStdout(outFile) {
 		// 	outFile += ".txt"
@@ -189,6 +176,9 @@ Attentions:
 		var prefix2 string
 		var t, target string
 
+		// ---------------------------------------------------------------
+		// receive result and output
+
 		done := make(chan int)
 		go func() {
 			for result := range sg.OutCh {
@@ -198,12 +188,12 @@ Attentions:
 					result.Query.ID, len(result.Query.Seq.Seq),
 					result.DBName, result.NumKmers, result.FPR, len(result.Matches))
 
+				if keepUnmatched && len(result.Matches) == 0 {
+					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
+						prefix2, "", 0, float64(0), float64(0)))
+					continue
+				}
 				for _, match := range result.Matches {
-
-					// if keepUnmatched && len(matched) == 0 {
-					// 	outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n",
-					// 		prefix2, t, len(kmers), 0, 0))
-					// }
 					target = match.Target
 					if mappingNames {
 						if t, ok = namesMap[target]; ok {
@@ -217,12 +207,15 @@ Attentions:
 					// db, num_kmers, fpr,
 					// target, num_target_kmers, qcov, tcov
 					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-						prefix2, t, match.Kmers, match.QCov, match.TCov))
+						prefix2, t, match.NumKmers, match.QCov, match.TCov))
 				}
 
 			}
 			done <- 1
 		}()
+
+		// ---------------------------------------------------------------
+		// send query
 
 		var wg sync.WaitGroup
 		for _, file := range files {
@@ -271,14 +264,11 @@ func init() {
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
 	searchCmd.Flags().StringSliceP("db-dir", "d", []string{}, `database directorys created by "kmcp index"`)
-	searchCmd.Flags().StringP("name-map", "M", "", `tabular two-column file mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("use-mmap", "m", false, `load index files into memory to accelerate searching (recommended)`)
-
-	// searchCmd.Flags().BoolP("circular", "", false, `query sequence is circular genome`)
 
 	searchCmd.Flags().Float64P("query-cov", "t", 0.6, `query coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `target coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a target`)
-
+	searchCmd.Flags().StringP("name-map", "M", "", `tabular two-column file mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("keep-unmatched", "k", false, `keep unmatched query sequence information`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)

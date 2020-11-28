@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"sort"
 	"sync"
 
 	"github.com/clausecker/pospop"
@@ -35,12 +34,13 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/unikmer/index"
+	"github.com/twotwotwo/sorts"
 )
 
 // ---------------------------------------------------------------
 // messenging between search command and search engine
 
-// Query strands for a query sequence
+// Query strands for a query sequence.
 type Query struct {
 	ID  []byte
 	Seq *seq.Seq
@@ -48,11 +48,11 @@ type Query struct {
 	Ch chan QueryResult // result chanel
 }
 
-// QueryResult is search result of a query sequence
+// QueryResult is the search result of a query sequence.
 type QueryResult struct {
 	Query Query
 
-	DBName string
+	DBName string  // database name
 	FPR    float64 // fpr, p is related to database
 
 	NumKmers int      // number of k-mers
@@ -61,18 +61,51 @@ type QueryResult struct {
 	Matches []Match // all matches
 }
 
-// Match is the type of matching detail
+// Match is the struct of matching detail.
 type Match struct {
-	Target string  // target name
-	Kmers  int     // matched k-mers
-	QCov   float64 // coverage of query
-	TCov   float64 // coverage of target
+	Target   string  // target name
+	NumKmers int     // matched k-mers
+	QCov     float64 // coverage of query
+	TCov     float64 // coverage of target
+}
+
+// Matches is list of Matches, for sorting.
+type Matches []Match
+
+// Len returns length of Matches.
+func (ms Matches) Len() int { return len(ms) }
+
+// Swap swaps two elements.
+func (ms Matches) Swap(i int, j int) { ms[i], ms[j] = ms[j], ms[i] }
+
+// Less judges if element is i is less than element in j.
+func (ms Matches) Less(i int, j int) bool {
+	return ms[i].QCov > ms[j].QCov && ms[i].NumKmers > ms[j].NumKmers
+}
+
+// SortByQCov is used to sort matches by qcov
+type SortByQCov struct{ Matches }
+
+// SortByTCov is used to sort matches by tcov
+type SortByTCov struct{ Matches }
+
+// Less judges if element is i is less than element in j.
+func (ms SortByTCov) Less(i int, j int) bool {
+	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+}
+
+// SortBySum is used to sort matches by tcov
+type SortBySum struct{ Matches }
+
+// Less judges if element is i is less than element in j.
+func (ms SortBySum) Less(i int, j int) bool {
+	return ms.Matches[i].QCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
 // messenging between database and indice
 
-// IndexQuery is a query sent to multiple indice of a database
+// IndexQuery is a query sent to multiple indice of a database.
 type IndexQuery struct {
 	Hashes [][]uint64 // related to database
 
@@ -88,8 +121,9 @@ type SearchOptions struct {
 
 	Align bool
 
-	TopN   int
-	SortBy string
+	KeepUnmatched bool
+	TopN          int
+	SortBy        string
 
 	MinQueryCov  float64
 	MinTargetCov float64
@@ -143,7 +177,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				for i := 0; i < len(sg.DBs); i++ {
 					// block to read
 					_queryResult = <-query.Ch
-					if _queryResult.Matches == nil {
+					if _queryResult.Matches == nil && !opt.KeepUnmatched {
 						continue
 					}
 
@@ -161,7 +195,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 // Wait waits
 func (sg *UnikIndexDBSearchEngine) Wait() {
-	<-sg.done       //  confirm inCh being closed
+	<-sg.done       // confirm inCh being closed
 	sg.wg.Wait()    // wait all results being sent
 	close(sg.OutCh) // close OutCh
 }
@@ -195,8 +229,8 @@ type UnikIndexDB struct {
 }
 
 func (db *UnikIndexDB) String() string {
-	return fmt.Sprintf("unikmer index db v%d: #blocksize: %d, #blocks: %d, #%d-mers: %d, #hashes: %d",
-		db.Info.Version, db.Info.BlockSize, len(db.Info.Files), db.Header.K, db.Info.Kmers, db.Header.NumHashes)
+	return fmt.Sprintf("kmcp database v%d: %s,#blocksize: %d, #blocks: %d, #%d-mers: %d, #hashes: %d",
+		db.Info.Version, db.Info.Alias, db.Info.BlockSize, len(db.Info.Files), db.Header.K, db.Info.Kmers, db.Header.NumHashes)
 }
 
 // NewUnikIndexDB opens and read from database directory.
@@ -277,6 +311,8 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	db.Indices = indices
 
 	numHashes := db.Info.NumHashes
+	nameMapping := db.Info.NameMapping
+	hasNameMapping := nameMapping != nil
 	go func() {
 	LOOP:
 		for {
@@ -284,13 +320,10 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 			case <-db.stop:
 				break LOOP
 			case query := <-db.InCh:
-				// db.wg0.Add(1)
+				// do not have to control max concurrence number
 				go func(query Query) {
-					// defer db.wg0.Done()
-
 					// compute kmers
 					kmers, err := db.generateKmers(query.Seq)
-
 					if err != nil {
 						checkError(err)
 					}
@@ -303,7 +336,7 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					}
 
 					if kmers == nil { // sequence shorter than k
-						query.Ch <- result
+						query.Ch <- result // still send result!
 						return
 					}
 
@@ -326,6 +359,8 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					matches := make([]Match, 0, 8)
 					var _matches []Match
 					var _match Match
+					var ok bool
+					var _name string
 					for i := 0; i < len(db.Indices); i++ {
 						// block to read
 						_matches = <-chMatches
@@ -333,19 +368,31 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 							matches = append(matches, _match)
 						}
 					}
-					// close(chMatches)
 
-					db.filterMatches(matches)
+					// sort and filter
+					if len(matches) > 0 {
+						db.sortAndFilterMatches(matches)
 
-					// send result
-					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
-					result.DBName = filepath.Base(path)
-					result.Kmers = kmers
-					result.Matches = matches
+						if hasNameMapping {
+							var i int
+							for i, _match = range matches {
+								if _name, ok = nameMapping[_match.Target]; ok {
+									_match.Target = _name
+									matches[i] = _match
+								}
+							}
+						}
+
+						// send result
+						result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
+						result.DBName = db.Info.Alias
+						result.Kmers = kmers
+						result.Matches = matches
+					}
+
 					query.Ch <- result
 				}(query)
 			}
-
 		}
 		db.done <- 1
 	}()
@@ -353,23 +400,14 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	return db, nil
 }
 
-func (db *UnikIndexDB) filterMatches(matches []Match) {
+func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
 	switch db.Options.SortBy {
 	case "qcov":
-		sort.Slice(matches,
-			func(i, j int) bool {
-				return matches[i].QCov > matches[j].QCov
-			})
+		sorts.Quicksort(Matches(matches))
 	case "tcov":
-		sort.Slice(matches,
-			func(i, j int) bool {
-				return matches[i].TCov > matches[j].TCov
-			})
+		sorts.Quicksort(SortByTCov{Matches(matches)})
 	case "sum":
-		sort.Slice(matches,
-			func(i, j int) bool {
-				return matches[i].QCov+matches[i].TCov > matches[j].QCov+matches[j].TCov
-			})
+		sorts.Quicksort(SortBySum{Matches(matches)})
 	}
 
 	if db.Options.TopN > 0 && db.Options.TopN < len(matches) {
@@ -391,7 +429,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) ([]uint64, error) {
 	var code uint64
 	var ok bool
 
-	kmers := make([]uint64, 0, 256)
+	kmers := make([]uint64, 0, len(sequence.Seq))
 
 	// using ntHash
 	if db.Info.Syncmer {
@@ -575,6 +613,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 	idx.moreThanOneHash = reader.NumHashes > 1
 
+	// receive query and execute
 	go func() {
 	LOOP:
 		for {
@@ -582,7 +621,9 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			case <-idx.stop:
 				break LOOP
 			case query := <-idx.InCh:
+				// go func() { // no need
 				query.Ch <- idx.Search(query.Hashes)
+				// }()
 			}
 		}
 		idx.done <- 1
@@ -727,10 +768,10 @@ func (idx *UnikIndex) Search(hashes [][]uint64) []Match {
 			}
 
 			results = append(results, Match{
-				Target: idx.Header.Names[k],
-				Kmers:  count,
-				QCov:   t,
-				TCov:   t,
+				Target:   idx.Header.Names[k],
+				NumKmers: count,
+				QCov:     t,
+				TCov:     T,
 			})
 		}
 	}

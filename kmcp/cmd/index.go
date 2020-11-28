@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -112,6 +112,8 @@ Tips:
 
 		force := getFlagBool(cmd, "force")
 
+		alias := getFlagString(cmd, "alias")
+
 		// ---------------------------------------------------------------
 		// index flags
 
@@ -193,6 +195,9 @@ Tips:
 			}
 		} else if !dryRun {
 			makeOutDir(outDir, force)
+		}
+		if alias == "" {
+			alias = filepath.Base(outDir)
 		}
 
 		// ---------------------------------------------------------------
@@ -836,6 +841,7 @@ Tips:
 		if !dryRun {
 			sortutil.Strings(indexFiles)
 			dbInfo := NewUnikIndexDBInfo(indexFiles)
+			dbInfo.Alias = alias
 			dbInfo.K = k
 			dbInfo.Hashed = hashed
 			dbInfo.Kmers = int(n)
@@ -854,6 +860,25 @@ Tips:
 			dbInfo.Syncmer = syncmer
 			dbInfo.SyncmerS = uint32(syncmerS)
 			checkError(dbInfo.WriteTo(filepath.Join(outDir, dbInfoFile)))
+
+			// write name_mapping.tsv
+			func() {
+				outfh, gw, w, err := outStream(filepath.Join(outDir, dbNameMappingFile), false, opt.CompressionLevel)
+				checkError(err)
+				defer func() {
+					outfh.Flush()
+					if gw != nil {
+						gw.Close()
+					}
+					w.Close()
+				}()
+
+				var name string
+				for _, _name := range names0 {
+					name, _ = filepathTrimExtension(_name)
+					outfh.WriteString(fmt.Sprintf("%s\t%s\n", _name, name))
+				}
+			}()
 		}
 
 		// ------------------------------------------------------------------------------------
@@ -872,6 +897,7 @@ func init() {
 	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files to indexing`)
 
 	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. if it's not given and -I/--in-dir is specified, index files will be saved to -I/--in-dir`)
+	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir/--in-dir. you can also manually edit in info file __db.yml`)
 
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter`)
 	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes`)

@@ -116,3 +116,24 @@ func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
 	})
 	return files, err
 }
+
+func filepathTrimExtension(file string) (string, string) {
+	unik := strings.HasSuffix(file, ".unik")
+	if unik {
+		file = file[0 : len(file)-5]
+	}
+	gz := strings.HasSuffix(file, ".gz") || strings.HasSuffix(file, ".GZ")
+	if gz {
+		file = file[0 : len(file)-3]
+	}
+
+	extension := filepath.Ext(file)
+	name := file[0 : len(file)-len(extension)]
+	if gz {
+		extension += ".gz"
+	}
+	if unik {
+		extension += ".unik"
+	}
+	return name, extension
+}
