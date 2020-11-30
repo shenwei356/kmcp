@@ -51,12 +51,13 @@ type Query struct {
 
 // QueryResult is the search result of a query sequence.
 type QueryResult struct {
-	QueryIdx uint64
+	QueryIdx uint64 // id for keep output in order
 	QueryID  []byte
 	QueryLen int
 
-	DBName string  // database name
-	FPR    float64 // fpr, p is related to database
+	DBId int // id of database, for getting database name with few space
+
+	FPR float64 // fpr, p is related to database
 
 	NumKmers int      // number of k-mers
 	Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
@@ -78,7 +79,7 @@ func (r QueryResult) Clone() QueryResult {
 		QueryIdx: r.QueryIdx,
 		QueryID:  r.QueryID,
 		QueryLen: r.QueryLen,
-		DBName:   r.DBName,
+		DBId:     r.DBId,
 		FPR:      r.FPR,
 		NumKmers: r.NumKmers,
 		Kmers:    r.Kmers,
@@ -88,19 +89,19 @@ func (r QueryResult) Clone() QueryResult {
 
 // Match is the struct of matching detail.
 type Match struct {
-	Target   string  // target name
-	NumKmers int     // matched k-mers
-	QCov     float64 // coverage of query
-	TCov     float64 // coverage of target
+	TargetIdx int     // target name index, for saving space
+	NumKmers  int     // matched k-mers
+	QCov      float64 // coverage of query
+	TCov      float64 // coverage of target
 }
 
 // Clone returns a clone of Match
 func (m Match) Clone() Match {
 	return Match{
-		Target:   m.Target,
-		NumKmers: m.NumKmers,
-		QCov:     m.QCov,
-		TCov:     m.TCov,
+		TargetIdx: m.TargetIdx,
+		NumKmers:  m.NumKmers,
+		QCov:      m.QCov,
+		TCov:      m.TCov,
 	}
 }
 
@@ -182,11 +183,12 @@ type UnikIndexDBSearchEngine struct {
 func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikIndexDBSearchEngine, error) {
 	dbs := make([]*UnikIndexDB, 0, len(dbPaths))
 	names := make([]string, 0, len(dbPaths))
-	for _, path := range dbPaths {
+	for i, path := range dbPaths {
 		db, err := NewUnikIndexDB(path, opt)
 		if err != nil {
 			return nil, errors.Wrapf(err, "open kmcp db: %s", path)
 		}
+		db.DBId = i // for returning target name by (DBId, nameIdx)
 		dbs = append(dbs, db)
 		names = append(names, filepath.Base(path))
 	}
@@ -251,6 +253,7 @@ func (sg *UnikIndexDBSearchEngine) Close() error {
 type UnikIndexDB struct {
 	Options SearchOptions
 	path    string
+	DBId    int // id for current database
 
 	InCh chan Query
 
@@ -346,8 +349,6 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	db.Indices = indices
 
 	numHashes := db.Info.NumHashes
-	nameMapping := db.Info.NameMapping
-	hasNameMapping := nameMapping != nil
 	go func() {
 	LOOP:
 		for {
@@ -396,8 +397,6 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					matches := make([]Match, 0, 8)
 					var _matches []Match
 					var _match Match
-					var ok bool
-					var _name string
 					for i := 0; i < len(db.Indices); i++ {
 						// block to read
 						_matches = <-chMatches
@@ -410,19 +409,9 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					if len(matches) > 0 {
 						db.sortAndFilterMatches(matches)
 
-						if hasNameMapping {
-							var i int
-							for i, _match = range matches {
-								if _name, ok = nameMapping[_match.Target]; ok {
-									_match.Target = _name
-									matches[i] = _match
-								}
-							}
-						}
-
 						// send result
 						result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
-						result.DBName = db.Info.Alias
+						result.DBId = db.DBId
 						result.Kmers = kmers
 						result.Matches = matches
 					}
@@ -466,7 +455,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) ([]uint64, error) {
 	var code uint64
 	var ok bool
 
-	kmers := make([]uint64, 0, len(sequence.Seq))
+	kmers := make([]uint64, 0, 8)
 
 	// using ntHash
 	if db.Info.Syncmer {
@@ -785,7 +774,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				var ix8 int
 				var k int
 
-				results := make([]Match, 0, 8)
+				results := make([]Match, 0, 1)
 
 				var c, t, T float64
 				iLast := numRowBytes - 1
@@ -813,10 +802,10 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						}
 
 						results = append(results, Match{
-							Target:   idx.Header.Names[k],
-							NumKmers: count,
-							QCov:     t,
-							TCov:     T,
+							TargetIdx: k,
+							NumKmers:  count,
+							QCov:      t,
+							TCov:      T,
 						})
 					}
 				}

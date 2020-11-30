@@ -68,8 +68,9 @@ type UnikIndexDBInfo struct {
 	Sizes     []uint64 `yaml:"kmers"`
 	Paths     []string `yaml:"unik-path"`
 
-	path        string
-	NameMapping map[string]string
+	path         string
+	NameMapping  map[string]string
+	MappingNames bool
 }
 
 func (i UnikIndexDBInfo) String() string {
@@ -117,6 +118,7 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 		info.NameMapping, err = cliutil.ReadKVs(fileNameMapping, false)
 		checkError(err)
 	}
+	info.MappingNames = len(info.NameMapping) > 0
 	return info, nil
 }
 

@@ -192,6 +192,7 @@ Attentions:
 
 		var prefix2 string
 		var t, target string
+		var _dbInfo UnikIndexDBInfo
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -200,31 +201,34 @@ Attentions:
 			if len(result.Matches) == 0 && !keepUnmatched {
 				return
 			}
+			_dbInfo = sg.DBs[result.DBId].Info
 			// query, len_query,
 			// db, num_kmers, fpr, num_matches,
 			prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
-				result.DBName, result.NumKmers, result.FPR, len(result.Matches))
+				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
 					prefix2, "", 0, float64(0), float64(0)))
 			} else {
 				for _, match := range result.Matches {
-					target = match.Target
-					if mappingNames {
+					target = _dbInfo.Names[match.TargetIdx]
+					if mappingNames { //
 						if t, ok = namesMap[target]; ok {
-							t = target
+							target = t
 						}
-					} else {
-						t = target
+					} else if _dbInfo.MappingNames { // name mapping of database
+						if t, ok = _dbInfo.NameMapping[target]; ok {
+							target = t
+						}
 					}
 
 					// query, len_query,
 					// db, num_kmers, fpr,
 					// target, num_target_kmers, qcov, tcov
 					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-						prefix2, t, match.NumKmers, match.QCov, match.TCov))
+						prefix2, target, match.NumKmers, match.QCov, match.TCov))
 				}
 			}
 		}
@@ -301,13 +305,16 @@ Attentions:
 
 				wg.Add(1)
 				go func(record *fastx.Record, id uint64) {
+					recordID := make([]byte, len(record.ID))
+					copy(recordID, record.ID)
+
 					sg.InCh <- Query{
 						Idx: id,
-						ID:  record.ID,
-						Seq: record.Seq,
+						ID:  recordID,
+						Seq: record.Seq.Clone2(),
 					}
 					wg.Done()
-				}(record.Clone(), id)
+				}(record, id)
 
 				id++
 			}
