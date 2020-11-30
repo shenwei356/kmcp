@@ -303,7 +303,7 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 
 	indices = append(indices, idx1)
 
-	db := &UnikIndexDB{Info: info, Header: idx1.Header, path: path}
+	db := &UnikIndexDB{Options: opt, Info: info, Header: idx1.Header, path: path}
 
 	db.InCh = make(chan Query, opt.Threads)
 
@@ -349,6 +349,7 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	db.Indices = indices
 
 	numHashes := db.Info.NumHashes
+	tokens := make(chan int, db.Options.Threads)
 	go func() {
 	LOOP:
 		for {
@@ -356,8 +357,10 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 			case <-db.stop:
 				break LOOP
 			case query := <-db.InCh:
-				// do not have to control max concurrence number
+				tokens <- 1
 				go func(query Query) {
+					defer func() { <-tokens }()
+
 					// compute kmers
 					kmers, err := db.generateKmers(query.Seq)
 					if err != nil {
