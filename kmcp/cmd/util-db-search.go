@@ -28,8 +28,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/clausecker/pospop"
 	"github.com/edsrzf/mmap-go"
+	"github.com/fuzxxl/pospop"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/unikmer"
@@ -650,32 +650,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 	idx.moreThanOneHash = reader.NumHashes > 1
 
-	// receive query and execute
-	go func() {
-	LOOP:
-		for {
-			select {
-			case <-idx.stop:
-				break LOOP
-			case query := <-idx.InCh:
-				// go func() { // no need
-				query.Ch <- idx.Search(query.Hashes)
-				// }()
-			}
-		}
-		idx.done <- 1
-	}()
-	return idx, nil
-}
-
-// Search searches with hashes.
-func (idx *UnikIndex) Search(hashes [][]uint64) []Match {
+	// -------------------------------------------------------
 	numNames := len(idx.Header.Names)
 	numRowBytes := idx.Header.NumRowBytes
 	numSigs := idx.Header.NumSigs
 	numSigsInt := uint64(numSigs)
 	offset0 := idx.offset0
-	fh := idx.fh
+	// fh := idx.fh
 	sizes := idx.Header.Sizes
 	sigs := idx.sigsB
 	useMmap := idx.useMmap
@@ -685,135 +666,167 @@ func (idx *UnikIndex) Search(hashes [][]uint64) []Match {
 	targetCov := idx.Options.MinTargetCov
 
 	counts := make([][8]int, numRowBytes)
+	var _count *[8]int
 
-	var offset int
+	var _offset int
 	var offset2 int64
 	var loc int
 	var i, j int
 	var hs []uint64
 	var row []byte
 	var b byte
-	var h uint64
+	var _h uint64
+	var hashes [][]uint64
 
-	buffs := idx.buffs
-	buffsT := idx.buffsT
+	// buffs := idx.buffs
+	// buffsT := idx.buffsT
 	bufIdx := 0
 	var buf *[PosPopCountBufSize]byte
 
-	for _, hs = range hashes {
-		if useMmap {
-			for i, h = range hs {
-				loc = int(h % numSigsInt)
-				offset = int(offset0 + int64(loc*numRowBytes))
+	// receive query and execute
+	go func() {
+	LOOP:
+		for {
+			select {
+			case <-idx.stop:
+				break LOOP
+			case query := <-idx.InCh:
+				// query.Ch <- idx.Search(query.Hashes)
+				hashes = query.Hashes
 
-				data[i] = sigs[offset : offset+numRowBytes]
-			}
-		} else {
-			for i, h = range hs {
-				loc = int(h % numSigsInt)
-				offset2 = offset0 + int64(loc*numRowBytes)
-
-				fh.Seek(offset2, 0)
-				io.ReadFull(fh, data[i])
-			}
-		}
-
-		// AND
-		var and []byte // must creat a new local variable
-		if moreThanOneHash {
-			and = make([]byte, numRowBytes) // create new slice to avoid edit original data source
-			copy(and, data[0])
-			for _, row = range data[1:] {
-				for i, b = range row {
-					and[i] &= b
+				// reset counts
+				bufIdx = 0
+				for i := 0; i < numRowBytes; i++ {
+					_count = &counts[i]
+					(*_count)[0] = 0
+					(*_count)[1] = 0
+					(*_count)[2] = 0
+					(*_count)[3] = 0
+					(*_count)[4] = 0
+					(*_count)[5] = 0
+					(*_count)[6] = 0
+					(*_count)[7] = 0
 				}
-			}
-		} else if useMmap { // just point to the orginial data (mmaped)
-			and = data[0]
-		} else { // ！useMmap, where io.ReadFull(fh, data[i])
-			and = make([]byte, numRowBytes) // create new slice because we don't want data in buffs point to the same data[0]
-			copy(and, data[0])
-		}
 
-		// add to buffer for counting
-		buffs[bufIdx] = and
-		bufIdx++
+				for _, hs = range hashes {
+					if useMmap {
+						for i, _h = range hs {
+							loc = int(_h % numSigsInt)
+							_offset = int(offset0 + int64(loc*numRowBytes))
 
-		if bufIdx == PosPopCountBufSize {
-			// transpose
-			for i = 0; i < numRowBytes; i++ { // every column in matrix
-				buf = &buffsT[i]
-				for j = 0; j < PosPopCountBufSize; j++ {
-					(*buf)[j] = buffs[j][i]
+							data[i] = sigs[_offset : _offset+numRowBytes]
+						}
+					} else {
+						for i, _h = range hs {
+							loc = int(_h % numSigsInt)
+							offset2 = offset0 + int64(loc*numRowBytes)
+
+							fh.Seek(offset2, 0)
+							io.ReadFull(fh, data[i])
+						}
+					}
+
+					// AND
+					var and []byte // must creat a new local variable
+					if moreThanOneHash {
+						and = make([]byte, numRowBytes) // create new slice to avoid edit original data source
+						copy(and, data[0])
+						for _, row = range data[1:] {
+							for i, b = range row {
+								and[i] &= b
+							}
+						}
+					} else if useMmap { // just point to the orginial data (mmaped)
+						and = data[0]
+					} else { // ！useMmap, where io.ReadFull(fh, data[i])
+						and = make([]byte, numRowBytes) // create new slice because we don't want data in buffs point to the same data[0]
+						copy(and, data[0])
+					}
+
+					// add to buffer for counting
+					buffs[bufIdx] = and
+					bufIdx++
+
+					if bufIdx == PosPopCountBufSize {
+						// transpose
+						for i = 0; i < numRowBytes; i++ { // every column in matrix
+							buf = &buffsT[i]
+							for j = 0; j < PosPopCountBufSize; j++ {
+								(*buf)[j] = buffs[j][i]
+							}
+						}
+
+						// count
+						for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
+							pospop.Count8(&counts[i], buffsT[i][:])
+						}
+
+						bufIdx = 0
+					}
 				}
-			}
+				// left data in buffer
+				if bufIdx > 0 {
+					// transpose
+					for i = 0; i < numRowBytes; i++ { // every column in matrix
+						buf = &buffsT[i]
+						for j = 0; j < bufIdx; j++ {
+							(*buf)[j] = buffs[j][i]
+						}
+					}
 
-			// count
-			for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
-				pospop.Count8(&counts[i], buffsT[i][:])
-			}
+					// count
+					for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
+						pospop.Count8(&counts[i], buffsT[i][0:bufIdx])
+					}
+				}
 
-			bufIdx = 0
+				var _counts [8]int
+				var count int
+				var ix8 int
+				var k int
+
+				results := make([]Match, 0, 8)
+
+				var c, t, T float64
+				iLast := numRowBytes - 1
+				for i, _counts = range counts {
+					ix8 = i << 3
+					for j = 0; j < 8; j++ {
+						count = _counts[7-j] // because count in package pospop is in reversed order
+						k = ix8 + j
+						if i == iLast && k == numNames {
+							break
+						}
+						if count == 0 {
+							continue
+						}
+
+						c = float64(count)
+
+						t = c / float64(len(hashes))
+						if t < queryCov {
+							continue
+						}
+						T = c / float64(sizes[k])
+						if T < targetCov {
+							continue
+						}
+
+						results = append(results, Match{
+							Target:   idx.Header.Names[k],
+							NumKmers: count,
+							QCov:     t,
+							TCov:     T,
+						})
+					}
+				}
+
+				query.Ch <- results
+			}
 		}
-	}
-	// left data in buffer
-	if bufIdx > 0 {
-		// transpose
-		for i = 0; i < numRowBytes; i++ { // every column in matrix
-			buf = &buffsT[i]
-			for j = 0; j < bufIdx; j++ {
-				(*buf)[j] = buffs[j][i]
-			}
-		}
-
-		// count
-		for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
-			pospop.Count8(&counts[i], buffsT[i][0:bufIdx])
-		}
-	}
-
-	var _counts [8]int
-	var count int
-	var ix8 int
-	var k int
-
-	results := make([]Match, 0, 8)
-
-	var c, t, T float64
-	iLast := numRowBytes - 1
-	for i, _counts = range counts {
-		ix8 = i << 3
-		for j = 0; j < 8; j++ {
-			count = _counts[7-j] // because count in package pospop is in reversed order
-			k = ix8 + j
-			if i == iLast && k == numNames {
-				break
-			}
-			if count == 0 {
-				continue
-			}
-
-			c = float64(count)
-
-			t = c / float64(len(hashes))
-			if t < queryCov {
-				continue
-			}
-			T = c / float64(sizes[k])
-			if T < targetCov {
-				continue
-			}
-
-			results = append(results, Match{
-				Target:   idx.Header.Names[k],
-				NumKmers: count,
-				QCov:     t,
-				TCov:     T,
-			})
-		}
-	}
-
-	return results
+		idx.done <- 1
+	}()
+	return idx, nil
 }
 
 // Close closes the index.
