@@ -199,8 +199,12 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	sg.OutCh = make(chan QueryResult, opt.Threads)
 
 	go func() {
+		// have to control maximum concurrence number to prevent memory (goroutine) leak.
+		tokens := make(chan int, sg.Options.Threads)
+
 		for query := range sg.InCh {
 			sg.wg.Add(1)
+			tokens <- 1
 			go func(query Query) {
 				query.Ch = make(chan QueryResult, len(sg.DBs))
 
@@ -222,6 +226,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				sg.wg.Done()
+				<-tokens
 			}(query)
 		}
 		sg.done <- 1

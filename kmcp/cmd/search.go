@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -211,25 +210,26 @@ Attentions:
 			if keepUnmatched && len(result.Matches) == 0 {
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
 					prefix2, "", 0, float64(0), float64(0)))
-			} else {
-				for _, match := range result.Matches {
-					target = _dbInfo.Names[match.TargetIdx]
-					if mappingNames { //
-						if t, ok = namesMap[target]; ok {
-							target = t
-						}
-					} else if _dbInfo.MappingNames { // name mapping of database
-						if t, ok = _dbInfo.NameMapping[target]; ok {
-							target = t
-						}
-					}
+				return
+			}
 
-					// query, len_query,
-					// db, num_kmers, fpr,
-					// target, num_target_kmers, qcov, tcov
-					outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-						prefix2, target, match.NumKmers, match.QCov, match.TCov))
+			for _, match := range result.Matches {
+				target = _dbInfo.Names[match.TargetIdx]
+				if mappingNames { //
+					if t, ok = namesMap[target]; ok {
+						target = t
+					}
+				} else if _dbInfo.MappingNames { // name mapping of database
+					if t, ok = _dbInfo.NameMapping[target]; ok {
+						target = t
+					}
 				}
+
+				// query, len_query,
+				// db, num_kmers, fpr,
+				// target, num_target_kmers, qcov, tcov
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
+					prefix2, target, match.NumKmers, match.QCov, match.TCov))
 			}
 		}
 
@@ -285,7 +285,6 @@ Attentions:
 		// ---------------------------------------------------------------
 		// send query
 
-		var wg sync.WaitGroup
 		var id uint64
 		for _, file := range files {
 			if opt.Verbose {
@@ -303,23 +302,19 @@ Attentions:
 					break
 				}
 
-				wg.Add(1)
-				go func(record *fastx.Record, id uint64) {
-					recordID := make([]byte, len(record.ID))
-					copy(recordID, record.ID)
+				recordID := make([]byte, len(record.ID))
+				copy(recordID, record.ID)
 
-					sg.InCh <- Query{
-						Idx: id,
-						ID:  recordID,
-						Seq: record.Seq.Clone2(),
-					}
-					wg.Done()
-				}(record, id)
+				// may block due to search engine' control
+				sg.InCh <- Query{
+					Idx: id,
+					ID:  recordID,
+					Seq: record.Seq.Clone2(),
+				}
 
 				id++
 			}
 		}
-		wg.Wait()      // all sequences being sent
 		close(sg.InCh) // close Inch
 
 		sg.Wait() // wait all searching finished
