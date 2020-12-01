@@ -231,6 +231,8 @@ Attentions:
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
 					prefix2, target, match.NumKmers, match.QCov, match.TCov))
 			}
+
+			result.Recycle()
 		}
 
 		done := make(chan int)

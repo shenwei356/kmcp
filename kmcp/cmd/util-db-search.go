@@ -367,7 +367,10 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					defer func() { <-tokens }()
 
 					// compute kmers
-					kmers, err := db.generateKmers(query.Seq)
+					// kmers, err = db.generateKmers(query.Seq)
+					// reuse []uint64 object, to reduce GC
+					kmers := poolKmers.Get().([]uint64)
+					kmers, err = db.generateKmers(query.Seq, kmers)
 					if err != nil {
 						checkError(err)
 					}
@@ -387,13 +390,17 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					}
 
 					// compute hashes
-					hashes := make([][]uint64, len(kmers))
-					for i, kmer := range kmers {
-						hashes[i] = hashValues(kmer, numHashes)
+					// hashes := make([][]uint64, len(kmers))
+					// reuse [][]uint64 object, to reduce GC
+					hashes := poolHashes.Get().([][]uint64)
+					for _, kmer := range kmers {
+						// hashes[i] = hashValues(kmer, numHashes)
+						hashes = append(hashes, hashValues(kmer, numHashes))
 					}
 
 					// send queries
-					chMatches := make(chan []Match, len(db.Indices))
+					// chMatches := make(chan []Match, len(db.Indices))
+					chMatches := poolChanMatches.Get().(chan []Match)
 					for i := len(db.Indices) - 1; i >= 0; i-- { // start from bigger files
 						db.Indices[i].InCh <- IndexQuery{
 							Hashes: hashes,
@@ -402,7 +409,9 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 					}
 
 					// get matches from all indice
-					matches := make([]Match, 0, 8)
+					// matches := make([]Match, 0, 8)
+					// reuse object
+					matches := poolMatches.Get().([]Match)
 					var _matches []Match
 					var _match Match
 					for i := 0; i < len(db.Indices); i++ {
@@ -412,6 +421,12 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 							matches = append(matches, _match)
 						}
 					}
+
+					// recycle objects
+					poolChanMatches.Put(chMatches)
+
+					hashes = hashes[:0]
+					poolHashes.Put(hashes)
 
 					// sort and filter
 					if len(matches) > 0 {
@@ -449,7 +464,7 @@ func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
 	}
 }
 
-func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) ([]uint64, error) {
+func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint64, error) {
 	scaled := db.Info.Scaled
 	scale := db.Info.Scale
 	maxHash := ^uint64(0)
@@ -463,7 +478,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) ([]uint64, error) {
 	var code uint64
 	var ok bool
 
-	kmers := make([]uint64, 0, 8)
+	// kmers := make([]uint64, 0, 8)
 
 	// using ntHash
 	if db.Info.Syncmer {
@@ -690,6 +705,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			case query := <-idx.InCh:
 				// query.Ch <- idx.Search(query.Hashes)
 				hashes = query.Hashes
+				nHashes := float64(len(hashes))
 
 				// reset counts
 				bufIdx = 0
@@ -761,6 +777,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						bufIdx = 0
 					}
 				}
+
 				// left data in buffer
 				if bufIdx > 0 {
 					// transpose
@@ -800,7 +817,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 						c = float64(count)
 
-						t = c / float64(len(hashes))
+						t = c / nHashes
 						if t < queryCov {
 							continue
 						}
@@ -844,4 +861,30 @@ func (idx *UnikIndex) Close() error {
 
 func maxFPR(p float64, k float64, l int) float64 {
 	return math.Exp(-float64(l) * (k - p) * (k - p) / 2 / (1 - p))
+}
+
+var poolKmers = &sync.Pool{New: func() interface{} {
+	return make([]uint64, 0, 8)
+}}
+
+var poolHashes = &sync.Pool{New: func() interface{} {
+	return make([][]uint64, 0, 8)
+}}
+
+var poolMatches = &sync.Pool{New: func() interface{} {
+	return make([]Match, 0, 1)
+}}
+
+var poolChanMatches = &sync.Pool{New: func() interface{} {
+	return make(chan []Match, 8)
+}}
+
+// Recycle put pooled objects back.
+func (r QueryResult) Recycle() {
+	// recycle kmer-sketch ([]uint64) object
+	r.Kmers = r.Kmers[:0]
+	poolKmers.Put(r.Kmers)
+
+	r.Matches = r.Matches[:0]
+	poolMatches.Put(r.Matches)
 }
