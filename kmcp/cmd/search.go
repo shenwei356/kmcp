@@ -69,6 +69,7 @@ Attentions:
 		outFile := getFlagString(cmd, "out-prefix")
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		targetCov := getFlagFloat64(cmd, "target-cov")
+		minCount := getFlagNonNegativeInt(cmd, "min-count")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -146,6 +147,7 @@ Attentions:
 			TopN:   topN,
 			SortBy: sortBy,
 
+			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
 		}
@@ -163,8 +165,9 @@ Attentions:
 			log.Infof("%d databases loaded", len(sg.DBs))
 
 			log.Infof("-------------------- [important parameters] --------------------")
-			log.Infof("query coverage threshold: %f", queryCov)
-			log.Infof("target coverage threshold: %f", targetCov)
+			log.Infof("minimum  matched k-mers: %f", minCount)
+			log.Infof("minimum  query coverage: %f", queryCov)
+			log.Infof("minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
 		}
 
@@ -182,7 +185,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\ttKmers\tqCov\ttCov\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\ttCov\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -333,13 +336,17 @@ Attentions:
 func init() {
 	RootCmd.AddCommand(searchCmd)
 
-	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
-
+	// database option
 	searchCmd.Flags().StringSliceP("db-dir", "d", []string{}, `database directories created by "kmcp index"`)
 	searchCmd.Flags().BoolP("use-mmap", "m", false, `load index files into memory to accelerate searching (recommended)`)
 
+	// query option
+	searchCmd.Flags().IntP("min-count", "c", 2, `minimum number of matched k-mer (sketch)`)
 	searchCmd.Flags().Float64P("query-cov", "t", 0.6, `query coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `target coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a target`)
+
+	// output
+	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)

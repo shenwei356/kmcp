@@ -894,16 +894,16 @@ func init() {
 	RootCmd.AddCommand(indexCmd)
 
 	indexCmd.Flags().StringP("in-dir", "I", "", `directory containing .unik files. if it's given and -O/--out-dir is empty, index files will be saved to -I/--in-dir`)
-	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files to indexing`)
+	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files to index`)
 
 	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. if it's not given and -I/--in-dir is specified, index files will be saved to -I/--in-dir`)
 	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir/--in-dir. you can also manually edit in info file __db.yml`)
 
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter`)
 	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes`)
-	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64. default: sqrt(#.files)`)
-	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, we creat change block size to 8. unit supported: K, M, G`)
-	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, we creat individual index for this file. unit supported: K, M, G`)
+	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: sqrt(#.files)`)
+	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, change block size is changed to 8. unit supported: K, M, G`)
+	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
 	indexCmd.Flags().BoolP("force", "", false, "overwrite tmp dir")
 	indexCmd.Flags().StringP("name-regexp", "r", "", "regular expression for extracting name from .unik file name. if not given, base name are saved")
