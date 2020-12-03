@@ -474,11 +474,11 @@ K-mer sketchs:
 					}
 					codes = append(codes, code)
 				}
+			}
 
-				if opt.Verbose {
-					bar.Increment()
-					bar.DecoratorEwmaUpdate(time.Since(startTime))
-				}
+			if opt.Verbose {
+				bar.Increment()
+				bar.DecoratorEwmaUpdate(time.Since(startTime))
 			}
 		}
 
@@ -534,7 +534,7 @@ func init() {
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
-	computeCmd.Flags().IntP("syncmer-s", "S", 0, `syncmer s`)
+	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers`)
 }

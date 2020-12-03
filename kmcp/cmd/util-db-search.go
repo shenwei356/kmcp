@@ -356,7 +356,6 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 
 	go func() {
 		tokens := make(chan int, db.Options.Threads)
-
 		for query := range db.InCh {
 			tokens <- 1
 			go func(query Query) {
@@ -370,9 +369,15 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 				// reuse []uint64 object, to reduce GC
 				kmers := poolKmers.Get().([]uint64)
 				kmers, err = db.generateKmers(query.Seq, kmers)
+				// buf := poolIdxValues.Get().([]unikmer.IdxValue)
+				// kmers, err = db.generateKmers(query.Seq, kmers, buf)
 				if err != nil {
 					checkError(err)
 				}
+
+				// recycle objects
+				// buf = buf[:0]
+				// poolIdxValues.Put(buf)
 
 				result := QueryResult{
 					QueryIdx: query.Idx,
@@ -461,6 +466,7 @@ func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
 }
 
 func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint64, error) {
+	// func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64, buf []unikmer.IdxValue) ([]uint64, error) {
 	scaled := db.Info.Scaled
 	scale := db.Info.Scale
 	maxHash := ^uint64(0)
@@ -474,13 +480,13 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 	var code uint64
 	var ok bool
 
-	// kmers := make([]uint64, 0, 8)
-
 	// using ntHash
 	if db.Info.Syncmer {
 		sketch, err = unikmer.NewSyncmerSketch(sequence, db.Header.K, int(db.Info.SyncmerS), false)
+		// sketch, err = unikmer.NewSyncmerSketchWithBuffer(sequence, db.Header.K, int(db.Info.SyncmerS), false, buf)
 	} else if db.Info.Minimizer {
 		sketch, err = unikmer.NewMinimizerSketch(sequence, db.Header.K, int(db.Info.MinimizerW), false)
+		// sketch, err = unikmer.NewMinimizerSketchWithBuffer(sequence, db.Header.K, int(db.Info.MinimizerW), false, buf)
 	} else {
 		iter, err = unikmer.NewHashIterator(sequence, db.Header.K, db.Header.Canonical, false)
 	}
@@ -885,3 +891,7 @@ func (r QueryResult) Recycle() {
 	r.Matches = r.Matches[:0]
 	poolMatches.Put(r.Matches)
 }
+
+var poolIdxValues = &sync.Pool{New: func() interface{} {
+	return make([]unikmer.IdxValue, 0, 128)
+}}
