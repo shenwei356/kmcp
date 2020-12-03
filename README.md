@@ -12,7 +12,3 @@ Kmer-based Metagenomics Classification and Profiling
     
     # search    
     time kmcp search -m -t 1 -d kmcp-db/ t_t2.fq.gz --verbose > result.tsv
-
-## TODO
-
-    minimum matched sketch number

@@ -202,9 +202,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
 		tokens := make(chan int, sg.Options.Threads)
-
+		wg := &sg.wg
 		for query := range sg.InCh {
-			sg.wg.Add(1)
+			wg.Add(1)
 			tokens <- 1
 			go func(query Query) {
 				query.Ch = make(chan QueryResult, len(sg.DBs))
@@ -226,7 +226,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					sg.OutCh <- _queryResult
 				}
 
-				sg.wg.Done()
+				wg.Done()
 				<-tokens
 			}(query)
 		}
@@ -354,95 +354,90 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 
 	db.Indices = indices
 
-	numHashes := db.Info.NumHashes
-	tokens := make(chan int, db.Options.Threads)
 	go func() {
-	LOOP:
-		for {
-			select {
-			case <-db.stop:
-				break LOOP
-			case query := <-db.InCh:
-				tokens <- 1
-				go func(query Query) {
-					defer func() { <-tokens }()
+		tokens := make(chan int, db.Options.Threads)
 
-					// compute kmers
-					// kmers, err = db.generateKmers(query.Seq)
-					// reuse []uint64 object, to reduce GC
-					kmers := poolKmers.Get().([]uint64)
-					kmers, err = db.generateKmers(query.Seq, kmers)
-					if err != nil {
-						checkError(err)
+		for query := range db.InCh {
+			tokens <- 1
+			go func(query Query) {
+				defer func() { <-tokens }()
+
+				numHashes := db.Info.NumHashes
+				indices := db.Indices
+				numIndices := len(indices)
+
+				// compute kmers
+				// reuse []uint64 object, to reduce GC
+				kmers := poolKmers.Get().([]uint64)
+				kmers, err = db.generateKmers(query.Seq, kmers)
+				if err != nil {
+					checkError(err)
+				}
+
+				result := QueryResult{
+					QueryIdx: query.Idx,
+					QueryID:  query.ID,
+					QueryLen: query.Seq.Length(),
+					NumKmers: len(kmers),
+					Kmers:    kmers,
+					Matches:  nil,
+				}
+
+				// sequence shorter than k, or too few k-mer sketchs.
+				if kmers == nil || len(kmers) < db.Options.MinMatched {
+					query.Ch <- result // still send result!
+					return
+				}
+
+				// compute hashes
+				// reuse [][]uint64 object, to reduce GC
+				hashes := poolHashes.Get().([][]uint64)
+				for _, kmer := range kmers {
+					hashes = append(hashes, hashValues(kmer, numHashes))
+				}
+
+				// send queries
+				// reuse chan []Match object, to reduce GC
+				chMatches := poolChanMatches.Get().(chan []Match)
+				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+					indices[i].InCh <- IndexQuery{
+						Hashes: hashes,
+						Ch:     chMatches,
 					}
+				}
 
-					result := QueryResult{
-						QueryIdx: query.Idx,
-						QueryID:  query.ID,
-						QueryLen: query.Seq.Length(),
-						NumKmers: len(kmers),
-						Kmers:    kmers,
-						Matches:  nil,
+				// get matches from all indice
+				// reuse []Match object
+				matches := poolMatches.Get().([]Match)
+				var _matches []Match
+				var _match Match
+				for i := 0; i < numIndices; i++ {
+					// block to read
+					_matches = <-chMatches
+					for _, _match = range _matches {
+						matches = append(matches, _match)
 					}
+				}
 
-					if kmers == nil || len(kmers) < db.Options.MinMatched { // sequence shorter than k
-						query.Ch <- result // still send result!
-						return
-					}
+				// recycle objects
+				poolChanMatches.Put(chMatches)
 
-					// compute hashes
-					// hashes := make([][]uint64, len(kmers))
-					// reuse [][]uint64 object, to reduce GC
-					hashes := poolHashes.Get().([][]uint64)
-					for _, kmer := range kmers {
-						// hashes[i] = hashValues(kmer, numHashes)
-						hashes = append(hashes, hashValues(kmer, numHashes))
-					}
+				hashes = hashes[:0]
+				poolHashes.Put(hashes)
 
-					// send queries
-					// chMatches := make(chan []Match, len(db.Indices))
-					chMatches := poolChanMatches.Get().(chan []Match)
-					for i := len(db.Indices) - 1; i >= 0; i-- { // start from bigger files
-						db.Indices[i].InCh <- IndexQuery{
-							Hashes: hashes,
-							Ch:     chMatches,
-						}
-					}
+				// sort and filter
+				if len(matches) > 0 {
+					db.sortAndFilterMatches(matches)
 
-					// get matches from all indice
-					// matches := make([]Match, 0, 8)
-					// reuse object
-					matches := poolMatches.Get().([]Match)
-					var _matches []Match
-					var _match Match
-					for i := 0; i < len(db.Indices); i++ {
-						// block to read
-						_matches = <-chMatches
-						for _, _match = range _matches {
-							matches = append(matches, _match)
-						}
-					}
+					// send result
+					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
+					result.DBId = db.DBId
+					result.Kmers = kmers
+					result.Matches = matches
+				}
 
-					// recycle objects
-					poolChanMatches.Put(chMatches)
-
-					hashes = hashes[:0]
-					poolHashes.Put(hashes)
-
-					// sort and filter
-					if len(matches) > 0 {
-						db.sortAndFilterMatches(matches)
-
-						// send result
-						result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, len(kmers))
-						result.DBId = db.DBId
-						result.Kmers = kmers
-						result.Matches = matches
-					}
-
-					query.Ch <- result
-				}(query)
-			}
+				query.Ch <- result
+			}(query)
 		}
 		db.done <- 1
 	}()
@@ -544,9 +539,8 @@ func (db *UnikIndexDB) CompatibleWith(db2 *UnikIndexDB) bool {
 
 // Close closes database.
 func (db *UnikIndexDB) Close() error {
-	close(db.stop)
-	<-db.done
 	close(db.InCh)
+	<-db.done
 
 	var err0 error
 	for _, idx := range db.Indices {

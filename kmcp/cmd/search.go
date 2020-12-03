@@ -165,7 +165,7 @@ Attentions:
 			log.Infof("%d databases loaded", len(sg.DBs))
 
 			log.Infof("-------------------- [important parameters] --------------------")
-			log.Infof("minimum  matched k-mers: %f", minCount)
+			log.Infof("minimum  matched k-mers: %d", minCount)
 			log.Infof("minimum  query coverage: %f", queryCov)
 			log.Infof("minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
