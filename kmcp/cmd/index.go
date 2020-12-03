@@ -509,6 +509,7 @@ Tips:
 		sBlock0 := sBlock
 
 		batch := make([]*UnikFileInfo, 0, sBlock)
+		blockSizes := make([]int, 0, 8)
 		var flag8, flag bool
 		var lastInfo *UnikFileInfo
 		for i := 0; i <= nFiles; i++ {
@@ -565,6 +566,8 @@ Tips:
 			if len(batch) == 0 {
 				break
 			}
+
+			blockSizes = append(blockSizes, len(batch))
 
 			b++
 
@@ -847,6 +850,7 @@ Tips:
 			dbInfo.Kmers = int(n)
 			dbInfo.FPR = fpr
 			dbInfo.BlockSize = sBlock0
+			dbInfo.BlockSizes = blockSizes
 			dbInfo.NumNames = len(names0)
 			dbInfo.Names = names0
 			dbInfo.Sizes = sizes0

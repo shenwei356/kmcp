@@ -69,7 +69,9 @@ Attentions:
 		outFile := getFlagString(cmd, "out-prefix")
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		targetCov := getFlagFloat64(cmd, "target-cov")
+		pIdent := getFlagFloat64(cmd, "ident-pct")
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
+		alignSketches := getFlagBool(cmd, "align-sketches")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -77,6 +79,7 @@ Attentions:
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
 		keepOrder := getFlagBool(cmd, "keep-order")
+
 		if !(sortBy == "qcov" || sortBy == "tcov" || sortBy == "sum") {
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
 		}
@@ -86,6 +89,9 @@ Attentions:
 		}
 		if targetCov < 0 || targetCov > 1 {
 			checkError(fmt.Errorf("value of -T/-target-cov should be in range [0, 1]"))
+		}
+		if pIdent < 0 || pIdent > 1 {
+			checkError(fmt.Errorf("value of -t/--ident-pct should be in range [0, 1]"))
 		}
 
 		var namesMap map[string]string
@@ -142,7 +148,7 @@ Attentions:
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 
-			Align: false,
+			Align: alignSketches,
 
 			TopN:   topN,
 			SortBy: sortBy,
@@ -150,6 +156,7 @@ Attentions:
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
+			MinIdentPct:  pIdent,
 		}
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
@@ -195,6 +202,7 @@ Attentions:
 		var prefix2 string
 		var t, target string
 		var _dbInfo UnikIndexDBInfo
+		var cumBlockSize []int
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -204,6 +212,7 @@ Attentions:
 				return
 			}
 			_dbInfo = sg.DBs[result.DBId].Info
+			cumBlockSize = sg.DBs[result.DBId].CumBlockSizes
 			// query, len_query,
 			// db, num_kmers, fpr, num_matches,
 			prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
@@ -217,7 +226,7 @@ Attentions:
 			}
 
 			for _, match := range result.Matches {
-				target = _dbInfo.Names[match.TargetIdx]
+				target = _dbInfo.Names[cumBlockSize[match.IndexID]+match.TargetIdx]
 				if mappingNames { //
 					if t, ok = namesMap[target]; ok {
 						target = t
@@ -342,8 +351,10 @@ func init() {
 
 	// query option
 	searchCmd.Flags().IntP("min-count", "c", 2, `minimum number of matched k-mer (sketch)`)
-	searchCmd.Flags().Float64P("query-cov", "t", 0.6, `query coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a query`)
-	searchCmd.Flags().Float64P("target-cov", "T", 0, `target coverage threshold, i.e., proportion of matched k-mers and unique k-mers of a target`)
+	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimum query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
+	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimum target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
+	searchCmd.Flags().Float64P("ident-pct", "I", 0.8, `minimum percent of identical k-mers in linear alignment`)
+	searchCmd.Flags().BoolP("align-sketches", "a", false, `align matched sketches locations`)
 
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)

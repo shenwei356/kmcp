@@ -89,6 +89,7 @@ func (r QueryResult) Clone() QueryResult {
 
 // Match is the struct of matching detail.
 type Match struct {
+	IndexID   int     // index file id
 	TargetIdx int     // target name index, for saving space
 	NumKmers  int     // matched k-mers
 	QCov      float64 // coverage of query
@@ -98,6 +99,7 @@ type Match struct {
 // Clone returns a clone of Match
 func (m Match) Clone() Match {
 	return Match{
+		IndexID:   m.IndexID,
 		TargetIdx: m.TargetIdx,
 		NumKmers:  m.NumKmers,
 		QCov:      m.QCov,
@@ -143,6 +145,7 @@ func (ms SortBySum) Less(i int, j int) bool {
 
 // IndexQuery is a query sent to multiple indice of a database.
 type IndexQuery struct {
+	Kmers  []uint64
 	Hashes [][]uint64 // related to database
 
 	Ch chan []Match // result chanel
@@ -164,6 +167,7 @@ type SearchOptions struct {
 	MinMatched   int
 	MinQueryCov  float64
 	MinTargetCov float64
+	MinIdentPct  float64
 }
 
 // UnikIndexDBSearchEngine search sequence on multiple database
@@ -259,7 +263,9 @@ func (sg *UnikIndexDBSearchEngine) Close() error {
 type UnikIndexDB struct {
 	Options SearchOptions
 	path    string
-	DBId    int // id for current database
+
+	DBId          int // id for current database
+	CumBlockSizes []int
 
 	InCh chan Query
 
@@ -293,11 +299,25 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 		return nil, err
 	}
 
+	unikPaths := make([][]string, 0, len(info.Files))
+	cumBlockSizes := make([]int, 0, len(info.Files))
+	i := 0
+	for _, nfile := range info.BlockSizes {
+		paths := make([]string, nfile)
+		for j, p := range info.Paths[i : i+nfile] {
+			paths[j] = filepath.Join(path, p)
+		}
+		unikPaths = append(unikPaths, paths)
+		cumBlockSizes = append(cumBlockSizes, i)
+		i += nfile
+	}
+
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
 	// first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt)
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, unikPaths[0])
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
+	idx1.IndexID = 0
 
 	if info.IndexVersion == idx1.Header.Version &&
 		info.K == idx1.Header.K &&
@@ -313,44 +333,45 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 
 	db.InCh = make(chan Query, opt.Threads)
 
+	db.CumBlockSizes = cumBlockSizes
+
 	db.stop = make(chan int)
 	db.done = make(chan int)
 
-	if len(info.Files) == 1 {
-		db.Indices = indices
-		return db, nil
-	}
+	if len(info.Files) > 1 {
 
-	ch := make(chan *UnikIndex, len(info.Files)-1)
-	done := make(chan int)
-	go func() {
-		for idx := range ch {
-			indices = append(indices, idx)
-		}
-		done <- 1
-	}()
-
-	var wg sync.WaitGroup
-	for _, f := range info.Files[1:] {
-		f = filepath.Join(path, f)
-
-		wg.Add(1)
-		go func(f string) {
-			defer wg.Done()
-
-			idx, err := NewUnixIndex(f, opt)
-			checkError(errors.Wrap(err, f))
-
-			if !idx.Header.Compatible(idx1.Header) {
-				checkError(fmt.Errorf("index files not compatible"))
+		ch := make(chan *UnikIndex, len(info.Files)-1)
+		done := make(chan int)
+		go func() {
+			for idx := range ch {
+				indices = append(indices, idx)
 			}
+			done <- 1
+		}()
 
-			ch <- idx
-		}(f)
+		var wg sync.WaitGroup
+		for i, f := range info.Files[1:] {
+			f = filepath.Join(path, f)
+
+			wg.Add(1)
+			go func(f string, paths []string, indexID int) {
+				defer wg.Done()
+
+				idx, err := NewUnixIndex(f, opt, paths)
+				checkError(errors.Wrap(err, f))
+				idx.IndexID = indexID
+
+				if !idx.Header.Compatible(idx1.Header) {
+					checkError(fmt.Errorf("index files not compatible"))
+				}
+
+				ch <- idx
+			}(f, unikPaths[i+1], i+1)
+		}
+		wg.Wait()
+		close(ch)
+		<-done
 	}
-	wg.Wait()
-	close(ch)
-	<-done
 
 	db.Indices = indices
 
@@ -406,6 +427,7 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 				chMatches := poolChanMatches.Get().(chan []Match)
 				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
 					indices[i].InCh <- IndexQuery{
+						Kmers:  kmers,
 						Hashes: hashes,
 						Ch:     chMatches,
 					}
@@ -448,6 +470,11 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	}()
 
 	return db, nil
+}
+
+// TargetName return name of a target
+func (db *UnikIndexDB) TargetName(indexID int, targetIdx int) string {
+	return db.Info.Names[db.CumBlockSizes[indexID]+targetIdx]
 }
 
 func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
@@ -573,7 +600,9 @@ const PosPopCountBufSize = 128
 
 // UnikIndex defines a unik index struct.
 type UnikIndex struct {
-	Options SearchOptions
+	IndexID   int // id
+	Options   SearchOptions
+	unikPaths []string
 
 	done chan int
 	InCh chan IndexQuery
@@ -603,7 +632,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open unikmer index file: %s", file)
@@ -619,6 +648,10 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		return nil, fmt.Errorf("error on seek unikmer index file: %s", file)
 	}
 
+	if opt.Align && len(unikPaths) != len(reader.Names) {
+		return nil, fmt.Errorf("unik-paths need when option 'Align' is true: %d", len(unikPaths))
+	}
+
 	h := index.Header{}
 	h.Version = reader.Version
 	h.K = reader.K
@@ -630,6 +663,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	h.NumSigs = reader.NumSigs
 	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
 	idx.useMmap = opt.UseMMap
+	idx.unikPaths = unikPaths
 
 	idx.done = make(chan int)
 	idx.InCh = make(chan IndexQuery, opt.Threads)
@@ -680,6 +714,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		queryCov := idx.Options.MinQueryCov
 		targetCov := idx.Options.MinTargetCov
 		minMatched := idx.Options.MinMatched
+		pident := idx.Options.MinIdentPct
 		buffs := idx.buffs
 		buffsT := idx.buffsT
 
@@ -703,12 +738,23 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var count int
 		var ix8 int
 		var k int
-		var c, t, T float64
+		var c, t, T, m float64
 		var lastRound bool
 
 		iLast := numRowBytes - 1
 
+		align := opt.Align
+		var kmers []uint64
+		var kmerLocMaps []map[uint64][]int
+		var kmerLocLists [][]uint64
+
+		if align {
+			kmerLocMaps = make([]map[uint64][]int, len(reader.Names))
+			kmerLocLists = make([][]uint64, len(reader.Names))
+		}
+
 		for query := range idx.InCh {
+			kmers = query.Kmers
 			hashes = query.Hashes
 			nHashes := float64(len(hashes))
 
@@ -830,7 +876,22 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						continue
 					}
 
+					// align
+					if align {
+						if kmerLocMaps[k] == nil {
+							kmerLocMaps[k], kmerLocLists[k], err = readKmersLocations(unikPaths[k])
+							if err != nil {
+								checkError(err)
+							}
+						}
+						m = float64(linnearMatched(kmers, kmerLocMaps[k], kmerLocLists[k])) / c
+						if m < pident {
+							continue
+						}
+					}
+
 					results = append(results, Match{
+						IndexID:   idx.IndexID,
 						TargetIdx: k,
 						NumKmers:  count,
 						QCov:      t,
@@ -845,6 +906,67 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		idx.done <- 1
 	}()
 	return idx, nil
+}
+
+func linnearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int {
+	var ok bool
+	var _locs []int
+	var _loc int
+	var i, j, k, j2 int
+
+	nKmers := len(kmers)
+	nKmers2 := len(kmers2)
+
+	// find a kmer that's in genome
+	i = 0
+	for {
+		_locs, ok = locs[kmers[i]]
+		if ok {
+			break
+		}
+		i++
+
+		if i >= nKmers {
+			return 0
+		}
+	}
+	max := 0
+
+	for _, _loc = range _locs { // _loc is location of the kmer in target sequence
+		matched := -1
+
+		k = 0
+		for j = i; j >= 0; j-- { // from start to 0
+			j2 = _loc - k
+			if j2 < 0 {
+				break
+			}
+			if kmers[j] == kmers2[j2] {
+				matched++
+			}
+			k++
+		}
+
+		k = 0
+		for j = i; j < nKmers; j++ {
+			j2 = _loc + k
+			if j2 >= nKmers2 {
+				break
+			}
+
+			if kmers[j] == kmers2[j2] {
+				matched++
+			}
+			k++
+		}
+		fmt.Println(matched)
+
+		if matched > max {
+			max = matched
+		}
+	}
+
+	return max
 }
 
 // Close closes the index.

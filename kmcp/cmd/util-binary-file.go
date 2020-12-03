@@ -22,7 +22,9 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 
+	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer"
 )
 
@@ -41,4 +43,49 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 	if reader0.IsScaled() != reader.IsScaled() {
 		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "unikmer stats": %s`, file))
 	}
+}
+
+func readKmersLocations(file string) (map[uint64][]int, []uint64, error) {
+	infh, r, _, err := inStream(file)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer r.Close()
+
+	reader, err := unikmer.NewReader(infh)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if reader.IsSorted() {
+		return nil, nil, fmt.Errorf(".unik file not supposed to be sorted")
+	}
+
+	m := make(map[uint64][]int, mapInitSize)
+	l := make([]uint64, 0, reader.Number)
+
+	var code uint64
+	var i int
+	var ok bool
+	var list []int
+	for {
+		code, _, err = reader.ReadCodeWithTaxid()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			checkError(errors.Wrap(err, file))
+		}
+
+		if list, ok = m[code]; ok {
+			list = append(list, i)
+		} else {
+			m[code] = []int{i}
+		}
+
+		l = append(l, code)
+
+		i++
+	}
+	return m, l, nil
 }
