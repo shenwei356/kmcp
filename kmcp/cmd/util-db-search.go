@@ -735,6 +735,11 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 
 	// receive query and execute
 	go func() {
+		var kmerLocLists [][]uint64
+		if opt.Align {
+			kmerLocLists = make([][]uint64, len(reader.Names))
+		}
+
 		numNames := len(idx.Header.Names)
 		numRowBytes := idx.Header.NumRowBytes
 		numSigs := idx.Header.NumSigs
@@ -752,6 +757,11 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 		pident := idx.Options.MinIdentPct
 		buffs := idx.buffs
 		buffsT := idx.buffsT
+		align := opt.Align
+		skipAlign := opt.SkipAlign
+
+		iLast := numRowBytes - 1
+		indexID := idx.IndexID
 
 		counts := make([][8]int, numRowBytes)
 
@@ -776,17 +786,7 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 		var c, t, T, m float64
 		var lastRound bool
 
-		iLast := numRowBytes - 1
-
-		align := opt.Align
-		skipAlign := opt.SkipAlign
 		var kmers []uint64
-		var kmerLocLists [][]uint64
-		indexID := idx.IndexID
-
-		if align {
-			kmerLocLists = make([][]uint64, len(reader.Names))
-		}
 
 		m = -1
 		for query := range idx.InCh {
@@ -922,6 +922,7 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 						}
 						m = float64(linearMatched(kmers, kmerLocLists[k])) / c
 						if m < pident {
+							kmerLocLists[k] = nil
 							continue
 						}
 					}
