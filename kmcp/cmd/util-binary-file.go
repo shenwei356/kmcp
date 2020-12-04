@@ -61,7 +61,7 @@ func readKmersLocations(file string) (map[uint64][]int, []uint64, error) {
 		return nil, nil, fmt.Errorf(".unik file not supposed to be sorted")
 	}
 
-	m := make(map[uint64][]int, mapInitSize)
+	m := make(map[uint64][]int, 1024)
 	l := make([]uint64, 0, reader.Number)
 
 	var code uint64

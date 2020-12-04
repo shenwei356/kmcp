@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"sync"
 	"time"
 
@@ -601,45 +602,63 @@ Tips:
 				var nBatchFiles int
 				nBatchFiles = int((len(files) + 7) / 8)
 
-				var sigsBlock [][]byte
-				var namesBlock []string
-				var sizesBlock []uint64
-				var chSigs chan []byte
-				var chNames chan []string
-				var chSizes chan []uint64
-				var doneSigs, doneNames, doneSizes chan int
+				sigsBlock := make([][]byte, 0, nBatchFiles)
+				namesBlock := make([]string, 0, len(files))
+				sizesBlock := make([]uint64, 0, len(files))
 
-				sigsBlock = make([][]byte, 0, nBatchFiles)
-				namesBlock = make([]string, 0, len(files))
-				sizesBlock = make([]uint64, 0, len(files))
+				chBatch8 := make(chan batch8, nBatchFiles)
+				doneBatch8 := make(chan int)
 
-				chSigs = make(chan []byte, nBatchFiles)
-				chNames = make(chan []string, nBatchFiles)
-				chSizes = make(chan []uint64, nBatchFiles)
+				buf := make(map[int]batch8)
 
-				doneSigs = make(chan int)
-				doneNames = make(chan int)
-				doneSizes = make(chan int)
 				go func() {
-					for _sigs := range chSigs {
-						sigsBlock = append(sigsBlock, _sigs)
-						if opt.Verbose && !dryRun {
-							bar.Increment()
+					var id int = 1
+					for batch := range chBatch8 {
+						if batch.id == id {
+							sigsBlock = append(sigsBlock, batch.sigs)
+							namesBlock = append(namesBlock, batch.names...)
+							sizesBlock = append(sizesBlock, batch.sizes...)
+							if opt.Verbose && !dryRun {
+								bar.Increment()
+							}
+							id++
+							continue
+						}
+						for {
+							if _batch, ok := buf[id]; ok {
+								sigsBlock = append(sigsBlock, _batch.sigs)
+								namesBlock = append(namesBlock, _batch.names...)
+								sizesBlock = append(sizesBlock, _batch.sizes...)
+								if opt.Verbose && !dryRun {
+									bar.Increment()
+								}
+								delete(buf, id)
+								id++
+							} else {
+								break
+							}
+						}
+						buf[batch.id] = batch
+					}
+					if len(buf) > 0 {
+						ids := make([]int, 0, len(buf))
+						for id := range buf {
+							ids = append(ids, id)
+						}
+						sort.Ints(ids)
+						for _, id := range ids {
+							_batch := buf[id]
+
+							sigsBlock = append(sigsBlock, _batch.sigs)
+							namesBlock = append(namesBlock, _batch.names...)
+							sizesBlock = append(sizesBlock, _batch.sizes...)
+							if opt.Verbose && !dryRun {
+								bar.Increment()
+							}
 						}
 					}
-					doneSigs <- 1
-				}()
-				go func() {
-					for _names := range chNames {
-						namesBlock = append(namesBlock, _names...)
-					}
-					doneNames <- 1
-				}()
-				go func() {
-					for _sizes := range chSizes {
-						sizesBlock = append(sizesBlock, _sizes...)
-					}
-					doneSizes <- 1
+
+					doneBatch8 <- 1
 				}()
 
 				numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
@@ -671,7 +690,7 @@ Tips:
 					var outFile string
 
 					// 8 files
-					go func(_files []*UnikFileInfo, bb int, maxElements int64, numSigs uint64, outFile string) {
+					go func(_files []*UnikFileInfo, bb int, maxElements int64, numSigs uint64, outFile string, id int) {
 						defer func() {
 							wg.Done()
 							<-tokens
@@ -766,23 +785,22 @@ Tips:
 							<-tokensOpenFiles
 						}
 
-						chSigs <- sigs
-						chNames <- names
-						chSizes <- sizes
+						chBatch8 <- batch8{
+							id:    id,
+							sigs:  sigs,
+							names: names,
+							sizes: sizes,
+						}
 						// if opt.Verbose {
 						// 	log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
 						// }
 
-					}(files[ii:jj], bb, maxElements, numSigs, outFile)
+					}(files[ii:jj], bb, maxElements, numSigs, outFile, bb)
 				}
 
 				wg.Wait()
-				close(chSigs)
-				close(chNames)
-				close(chSizes)
-				<-doneSigs
-				<-doneNames
-				<-doneSizes
+				close(chBatch8)
+				<-doneBatch8
 
 				blockFile := filepath.Join(outDir, fmt.Sprintf("_block%03d%s", b, extIndex))
 
@@ -917,4 +935,13 @@ func init() {
 	indexCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	indexCmd.Flags().IntP("syncmer-s", "S", 0, `syncmer s`)
 
+}
+
+// batch8 contains data from 8 files, just for keeping order of all files of a block
+type batch8 struct {
+	id int
+
+	sigs  []byte
+	names []string
+	sizes []uint64
 }

@@ -189,11 +189,10 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	dbs := make([]*UnikIndexDB, 0, len(dbPaths))
 	names := make([]string, 0, len(dbPaths))
 	for i, path := range dbPaths {
-		db, err := NewUnikIndexDB(path, opt)
+		db, err := NewUnikIndexDB(path, opt, i)
 		if err != nil {
 			return nil, errors.Wrapf(err, "open kmcp db: %s", path)
-		}
-		db.DBId = i // for returning target name by (DBId, nameIdx)
+		} // for returning target name by (DBId, nameIdx)
 		dbs = append(dbs, db)
 		names = append(names, filepath.Base(path))
 	}
@@ -284,7 +283,7 @@ func (db *UnikIndexDB) String() string {
 }
 
 // NewUnikIndexDB opens and read from database directory.
-func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
+func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, error) {
 	info, err := UnikIndexDBInfoFromFile(filepath.Join(path, dbInfoFile))
 	if err != nil {
 		return nil, err
@@ -315,9 +314,8 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
 	// first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, unikPaths[0])
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, unikPaths[0], 0)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
-	idx1.IndexID = 0
 
 	if info.IndexVersion == idx1.Header.Version &&
 		info.K == idx1.Header.K &&
@@ -334,6 +332,7 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 	db.InCh = make(chan Query, opt.Threads)
 
 	db.CumBlockSizes = cumBlockSizes
+	db.DBId = dbID
 
 	db.stop = make(chan int)
 	db.done = make(chan int)
@@ -357,9 +356,8 @@ func NewUnikIndexDB(path string, opt SearchOptions) (*UnikIndexDB, error) {
 			go func(f string, paths []string, indexID int) {
 				defer wg.Done()
 
-				idx, err := NewUnixIndex(f, opt, paths)
+				idx, err := NewUnixIndex(f, opt, paths, indexID)
 				checkError(errors.Wrap(err, f))
-				idx.IndexID = indexID
 
 				if !idx.Header.Compatible(idx1.Header) {
 					checkError(fmt.Errorf("index files not compatible"))
@@ -632,7 +630,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID int) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open unikmer index file: %s", file)
@@ -661,9 +659,11 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikInde
 	h.Sizes = reader.Sizes
 	h.NumRowBytes = reader.NumRowBytes
 	h.NumSigs = reader.NumSigs
+
 	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
 	idx.useMmap = opt.UseMMap
 	idx.unikPaths = unikPaths
+	idx.IndexID = indexID
 
 	idx.done = make(chan int)
 	idx.InCh = make(chan IndexQuery, opt.Threads)
@@ -747,6 +747,7 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikInde
 		var kmers []uint64
 		var kmerLocMaps []map[uint64][]int
 		var kmerLocLists [][]uint64
+		indexID := idx.IndexID
 
 		if align {
 			kmerLocMaps = make([]map[uint64][]int, len(reader.Names))
@@ -884,14 +885,14 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikInde
 								checkError(err)
 							}
 						}
-						m = float64(linnearMatched(kmers, kmerLocMaps[k], kmerLocLists[k])) / c
+						m = float64(linearMatched(kmers, kmerLocMaps[k], kmerLocLists[k])) / c
 						if m < pident {
 							continue
 						}
 					}
 
 					results = append(results, Match{
-						IndexID:   idx.IndexID,
+						IndexID:   indexID,
 						TargetIdx: k,
 						NumKmers:  count,
 						QCov:      t,
@@ -908,7 +909,7 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string) (*UnikInde
 	return idx, nil
 }
 
-func linnearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int {
+func linearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int {
 	var ok bool
 	var _locs []int
 	var _loc int
@@ -959,7 +960,6 @@ func linnearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int 
 			}
 			k++
 		}
-		fmt.Println(matched)
 
 		if matched > max {
 			max = matched
