@@ -574,6 +574,9 @@ Tips:
 
 			prefix = fmt.Sprintf("[block #%03d]", b)
 
+			wg0.Add(1)
+			tokens0 <- 1
+
 			var bar *mpb.Bar
 			if opt.Verbose && !dryRun {
 				bar = pbs.AddBar(int64((len(batch)+7)/8),
@@ -586,8 +589,6 @@ Tips:
 				)
 			}
 
-			wg0.Add(1)
-			tokens0 <- 1
 			go func(files []*UnikFileInfo, b int, prefix string, bar *mpb.Bar) {
 				var wg sync.WaitGroup
 				tokens := make(chan int, opt.NumCPUs)
