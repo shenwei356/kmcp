@@ -72,6 +72,7 @@ Attentions:
 		pIdent := getFlagFloat64(cmd, "ident-pct")
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
 		alignSketches := getFlagBool(cmd, "align-sketches")
+		skipAlign := getFlagPositiveInt(cmd, "skip-align")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -80,7 +81,10 @@ Attentions:
 		sortBy := getFlagString(cmd, "sort-by")
 		keepOrder := getFlagBool(cmd, "keep-order")
 
-		if !(sortBy == "qcov" || sortBy == "tcov" || sortBy == "sum") {
+		switch sortBy {
+		case "qcov", "pidt", "tcov", "sum12", "sum13", "sum123":
+			break
+		default:
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
 		}
 
@@ -148,7 +152,9 @@ Attentions:
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 
-			Align: alignSketches,
+			Align:       alignSketches,
+			SkipAlign:   skipAlign,
+			MinIdentPct: pIdent,
 
 			TopN:   topN,
 			SortBy: sortBy,
@@ -156,7 +162,6 @@ Attentions:
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
-			MinIdentPct:  pIdent,
 		}
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
@@ -192,7 +197,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\ttCov\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\tpIdt\ttCov\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -239,9 +244,9 @@ Attentions:
 
 				// query, len_query,
 				// db, num_kmers, fpr,
-				// target, num_target_kmers, qcov, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-					prefix2, target, match.NumKmers, match.QCov, match.TCov))
+				// target, num_target_kmers, qcov, pidt, tcov
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2, target, match.NumKmers, match.QCov, match.PIdt, match.TCov))
 			}
 
 			result.Recycle()
@@ -350,11 +355,14 @@ func init() {
 	searchCmd.Flags().BoolP("use-mmap", "m", false, `load index files into memory to accelerate searching (recommended)`)
 
 	// query option
-	searchCmd.Flags().IntP("min-count", "c", 2, `minimum number of matched k-mer (sketch)`)
+	searchCmd.Flags().IntP("min-count", "c", 3, `minimum number of matched k-mers (sketch)`)
 	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimum query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimum target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
+
+	// query option for alignment
 	searchCmd.Flags().Float64P("ident-pct", "I", 0.8, `minimum percent of identical k-mers in linear alignment`)
-	searchCmd.Flags().BoolP("align-sketches", "a", false, `align matched sketches locations`)
+	searchCmd.Flags().BoolP("align-sketches", "a", false, `align k-mers locations`)
+	searchCmd.Flags().IntP("skip-align", "A", 100, `do not align when >= N k-mers matched`)
 
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
@@ -363,6 +371,6 @@ func init() {
 	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
-	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, tcov or sum (qcov+tcov)`)
+	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, pidt, tcov, sum12 (qcov+pidt), sum13 (qcov+tcov) or sum123 (qcov+pidt+tcov`)
 
 }

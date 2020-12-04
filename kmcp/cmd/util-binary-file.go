@@ -45,29 +45,24 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 	}
 }
 
-func readKmersLocations(file string) (map[uint64][]int, []uint64, error) {
+func readKmers(file string) ([]uint64, error) {
 	infh, r, _, err := inStream(file)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer r.Close()
 
 	reader, err := unikmer.NewReader(infh)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
 	if reader.IsSorted() {
-		return nil, nil, fmt.Errorf(".unik file not supposed to be sorted")
+		return nil, fmt.Errorf(".unik file not supposed to be sorted")
 	}
 
-	m := make(map[uint64][]int, 1024)
 	l := make([]uint64, 0, reader.Number)
 
 	var code uint64
-	var i int
-	var ok bool
-	var list []int
 	for {
 		code, _, err = reader.ReadCodeWithTaxid()
 		if err != nil {
@@ -76,16 +71,7 @@ func readKmersLocations(file string) (map[uint64][]int, []uint64, error) {
 			}
 			checkError(errors.Wrap(err, file))
 		}
-
-		if list, ok = m[code]; ok {
-			list = append(list, i)
-		} else {
-			m[code] = []int{i}
-		}
-
 		l = append(l, code)
-
-		i++
 	}
-	return m, l, nil
+	return l, nil
 }

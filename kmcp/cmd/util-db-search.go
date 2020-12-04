@@ -89,11 +89,13 @@ func (r QueryResult) Clone() QueryResult {
 
 // Match is the struct of matching detail.
 type Match struct {
-	IndexID   int     // index file id
-	TargetIdx int     // target name index, for saving space
-	NumKmers  int     // matched k-mers
-	QCov      float64 // coverage of query
-	TCov      float64 // coverage of target
+	IndexID   int // index file id
+	TargetIdx int // target name index, for saving space
+	NumKmers  int // mat	ched k-mers
+
+	QCov float64 // coverage of query
+	TCov float64 // coverage of target
+	PIdt float64 // percent of ident linearly matched kmers
 }
 
 // Clone returns a clone of Match
@@ -104,6 +106,7 @@ func (m Match) Clone() Match {
 		NumKmers:  m.NumKmers,
 		QCov:      m.QCov,
 		TCov:      m.TCov,
+		PIdt:      m.PIdt,
 	}
 }
 
@@ -121,10 +124,18 @@ func (ms Matches) Less(i int, j int) bool {
 	return ms[i].QCov > ms[j].QCov && ms[i].NumKmers > ms[j].NumKmers
 }
 
-// SortByQCov is used to sort matches by qcov
+// SortByQCov is used to sort matches by qcov.
 type SortByQCov struct{ Matches }
 
-// SortByTCov is used to sort matches by tcov
+// SortByPIdt is used to sort matches by pindent.
+type SortByPIdt struct{ Matches }
+
+// Less judges if element is i is less than element in j.
+func (ms SortByPIdt) Less(i int, j int) bool {
+	return ms.Matches[i].PIdt > ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+}
+
+// SortByTCov is used to sort matches by tcov.
 type SortByTCov struct{ Matches }
 
 // Less judges if element is i is less than element in j.
@@ -132,12 +143,28 @@ func (ms SortByTCov) Less(i int, j int) bool {
 	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
-// SortBySum is used to sort matches by tcov
-type SortBySum struct{ Matches }
+// SortBySum12 is used to sort matches by qcov + pidt.
+type SortBySum12 struct{ Matches }
 
 // Less judges if element is i is less than element in j.
-func (ms SortBySum) Less(i int, j int) bool {
+func (ms SortBySum12) Less(i int, j int) bool {
+	return ms.Matches[i].QCov+ms.Matches[i].PIdt > ms.Matches[j].QCov+ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+}
+
+// SortBySum13 is used to sort matches by qcov + tcov.
+type SortBySum13 struct{ Matches }
+
+// Less judges if element is i is less than element in j.
+func (ms SortBySum13) Less(i int, j int) bool {
 	return ms.Matches[i].QCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+}
+
+// SortBySum123 is used to sort matches by qcov + pidt + tcov.
+type SortBySum123 struct{ Matches }
+
+// Less judges if element is i is less than element in j.
+func (ms SortBySum123) Less(i int, j int) bool {
+	return ms.Matches[i].QCov+ms.Matches[i].TCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
@@ -158,7 +185,10 @@ type SearchOptions struct {
 	UseMMap bool
 	Threads int
 
-	Align bool
+	// for align
+	Align       bool
+	SkipAlign   int
+	MinIdentPct float64
 
 	KeepUnmatched bool
 	TopN          int
@@ -167,7 +197,6 @@ type SearchOptions struct {
 	MinMatched   int
 	MinQueryCov  float64
 	MinTargetCov float64
-	MinIdentPct  float64
 }
 
 // UnikIndexDBSearchEngine search sequence on multiple database
@@ -479,10 +508,16 @@ func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
 	switch db.Options.SortBy {
 	case "qcov":
 		sorts.Quicksort(Matches(matches))
+	case "pidt":
+		sorts.Quicksort(SortByPIdt{Matches(matches)})
 	case "tcov":
 		sorts.Quicksort(SortByTCov{Matches(matches)})
-	case "sum":
-		sorts.Quicksort(SortBySum{Matches(matches)})
+	case "sum12":
+		sorts.Quicksort(SortBySum12{Matches(matches)})
+	case "sum13":
+		sorts.Quicksort(SortBySum13{Matches(matches)})
+	case "sum123":
+		sorts.Quicksort(SortBySum123{Matches(matches)})
 	}
 
 	if db.Options.TopN > 0 && db.Options.TopN < len(matches) {
@@ -744,16 +779,16 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 		iLast := numRowBytes - 1
 
 		align := opt.Align
+		skipAlign := opt.SkipAlign
 		var kmers []uint64
-		var kmerLocMaps []map[uint64][]int
 		var kmerLocLists [][]uint64
 		indexID := idx.IndexID
 
 		if align {
-			kmerLocMaps = make([]map[uint64][]int, len(reader.Names))
 			kmerLocLists = make([][]uint64, len(reader.Names))
 		}
 
+		m = -1
 		for query := range idx.InCh {
 			kmers = query.Kmers
 			hashes = query.Hashes
@@ -878,14 +913,14 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 					}
 
 					// align
-					if align {
-						if kmerLocMaps[k] == nil {
-							kmerLocMaps[k], kmerLocLists[k], err = readKmersLocations(unikPaths[k])
+					if align && count < skipAlign {
+						if kmerLocLists[k] == nil {
+							kmerLocLists[k], err = readKmers(unikPaths[k])
 							if err != nil {
 								checkError(err)
 							}
 						}
-						m = float64(linearMatched(kmers, kmerLocMaps[k], kmerLocLists[k])) / c
+						m = float64(linearMatched(kmers, kmerLocLists[k])) / c
 						if m < pident {
 							continue
 						}
@@ -897,6 +932,7 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 						NumKmers:  count,
 						QCov:      t,
 						TCov:      T,
+						PIdt:      m,
 					})
 				}
 			}
@@ -909,36 +945,34 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 	return idx, nil
 }
 
-func linearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int {
-	var ok bool
-	var _locs []int
-	var _loc int
-	var i, j, k, j2 int
-
-	nKmers := len(kmers)
-	nKmers2 := len(kmers2)
-
+func linearMatched(kmers []uint64, kmers2 []uint64) int {
 	// find a kmer that's in genome
-	i = 0
-	for {
-		_locs, ok = locs[kmers[i]]
-		if ok {
+	var kmer, kmer2 uint64
+	var i, j int
+	locs := make([]int, 0, 2) // kmer at i in kmers matchs kmers at locs in kmers2
+	for i, kmer = range kmers {
+		for j, kmer2 = range kmers2 {
+			if kmer == kmer2 {
+				locs = append(locs, j)
+			}
+		}
+		if len(locs) > 0 {
 			break
 		}
-		i++
-
-		if i >= nKmers {
-			return 0
-		}
 	}
-	max := 0
 
-	for _, _loc = range _locs { // _loc is location of the kmer in target sequence
+	// find the longest match
+	var _loc int
+	var k, j2 int
+	nKmers := len(kmers)
+	nKmers2 := len(kmers2)
+	max := 0
+	for _, _loc = range locs { // _loc is location of the kmer in target sequence
 		matched := -1
 
 		k = 0
 		for j = i; j >= 0; j-- { // from start to 0
-			j2 = _loc - k
+			j2 = _loc - k // locatin in kmer2
 			if j2 < 0 {
 				break
 			}
@@ -949,12 +983,11 @@ func linearMatched(kmers []uint64, locs map[uint64][]int, kmers2 []uint64) int {
 		}
 
 		k = 0
-		for j = i; j < nKmers; j++ {
+		for j = i; j < nKmers; j++ { // from start to end
 			j2 = _loc + k
 			if j2 >= nKmers2 {
 				break
 			}
-
 			if kmers[j] == kmers2[j2] {
 				matched++
 			}
