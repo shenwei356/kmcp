@@ -736,10 +736,8 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 	// receive query and execute
 	go func() {
 		var kmerLocLists [][]uint64
-		var kmerLocListsSorted [][][2]uint64
 		if opt.Align {
 			kmerLocLists = make([][]uint64, len(reader.Names))
-			kmerLocListsSorted = make([][][2]uint64, len(reader.Names))
 		}
 
 		for query := range idx.InCh {
@@ -794,7 +792,6 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 				var kmers []uint64
 
 				m = -1
-				var m0 int
 
 				kmers = query.Kmers
 				hashes = query.Hashes
@@ -926,12 +923,9 @@ func NewUnixIndex(file string, opt SearchOptions, unikPaths []string, indexID in
 									checkError(err)
 								}
 							}
-							// m = float64(linearMatched(kmers, kmerLocLists[k])) / c
-							m0, kmerLocListsSorted[k] = linearMatched2(kmers, kmerLocLists[k], kmerLocListsSorted[k])
-							m = float64(m0) / c
+							m = float64(linearMatched(kmers, kmerLocLists[k])) / c
 							if m < pident {
 								kmerLocLists[k] = nil
-								kmerLocListsSorted[k] = nil
 								continue
 							}
 						}
@@ -962,117 +956,6 @@ type loc2vals [][2]uint64
 func (l2v loc2vals) Len() int               { return len(l2v) }
 func (l2v loc2vals) Less(i int, j int) bool { return l2v[i][1] < l2v[j][1] }
 func (l2v loc2vals) Swap(i int, j int)      { l2v[i], l2v[j] = l2v[j], l2v[i] }
-
-func linearMatched2(kmers []uint64, kmers2 []uint64, kmers2Sorted [][2]uint64) (int, [][2]uint64) {
-	// sort location-value pairs for faser search.
-	// we do not use map, cause it costs  too much space, and takes time to build map.
-	var sortedKmer2 [][2]uint64
-	if kmers2Sorted == nil {
-		sortedKmer2 = make([][2]uint64, len(kmers2))
-		for i, kmer := range kmers2 {
-			sortedKmer2[i] = [2]uint64{uint64(i), kmer}
-		}
-		sorts.Quicksort(loc2vals(sortedKmer2))
-	} else {
-		sortedKmer2 = kmers2Sorted
-	}
-
-	// find a kmer that's in genome
-	var start, end, mid int
-	var kmer, val uint64
-	var l2v [2]uint64
-	var i, j int
-	locs := make([]int, 0, 2)   // kmer at i in kmers matchs kmers at locs in kmers2
-	for i, kmer = range kmers { // test kmer one by one
-		// binary search
-		start, end = 0, len(sortedKmer2)-1
-		for {
-			if start > end {
-				break
-			}
-
-			mid = (end + start) / 2
-			l2v = sortedKmer2[mid]
-			val = l2v[1]
-			if kmer == val {
-				locs = append(locs, int(l2v[0]))
-				j = mid
-				for {
-					j--
-					l2v = sortedKmer2[j]
-					if l2v[1] == kmer {
-						locs = append(locs, int(l2v[0]))
-					} else {
-						break
-					}
-				}
-				for {
-					j++
-					l2v = sortedKmer2[j]
-					if l2v[1] == kmer {
-						locs = append(locs, int(l2v[0]))
-					} else {
-						break
-					}
-				}
-
-				break
-			}
-
-			if kmer < val {
-				end = mid - 1
-			} else {
-				start = mid + 1
-			}
-
-		}
-
-		if len(locs) > 0 {
-			break
-		}
-	}
-
-	// find the longest match
-	var _loc int
-	var k, j2 int
-	nKmers := len(kmers)
-	nKmers2 := len(kmers2)
-	max := 0
-	for _, _loc = range locs { // _loc is location of the kmer in target sequence
-		matched := -1
-
-		k = 0
-		for j = i; j >= 0; j-- { // from start to 0
-			j2 = _loc - k // locatin in kmer2
-			if j2 < 0 {
-				break
-			}
-			if kmers[j] == kmers2[j2] {
-				matched++
-			}
-			k++
-		}
-
-		k = 0
-		for j = i; j < nKmers; j++ { // from start to end
-			j2 = _loc + k
-			if j2 >= nKmers2 {
-				break
-			}
-			if kmers[j] == kmers2[j2] {
-				matched++
-			}
-			k++
-		}
-
-		if matched > max {
-			max = matched
-		}
-	}
-
-	return max, sortedKmer2
-
-}
 
 func linearMatched(kmers []uint64, kmers2 []uint64) int {
 	// find a kmer that's in genome
