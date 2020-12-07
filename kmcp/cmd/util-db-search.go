@@ -421,6 +421,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numIndices := len(indices)
 				cumBlockSizes = db.CumBlockSizes
 				pident := db.Options.MinIdentPct
+				threads := db.Options.Threads
 
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
@@ -476,43 +477,71 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				matches := poolMatches.Get().([]Match)
 				var _matches []Match
 				var _match Match
-				var ok bool
-				var k int
-				var m float64
-				for i := 0; i < numIndices; i++ {
-					// block to read
-					_matches = <-chMatches
+				// var ok bool
+				// var k int
+				// var m float64
 
-					if !align {
+				if !align {
+					for i := 0; i < numIndices; i++ {
+						// block to read
+						_matches = <-chMatches
 						for _, _match = range _matches {
 							matches = append(matches, _match)
 						}
-						continue
 					}
+				} else {
+					var wg sync.WaitGroup
+					chMatches2 := make(chan Match, threads)
+					tokens2 := make(chan int, threads)
+					done := make(chan int)
 
-					for _, _match = range _matches {
-						ok = true
-						if _match.NumKmers < skipAlign {
-							k = cumBlockSizes[_match.IndexID] + _match.TargetIdx
-
-							if kmerLocLists[k] == nil {
-								kmerLocLists[k], err = readKmers(unikPaths[k])
-								if err != nil {
-									checkError(err)
-								}
-							}
-							m = float64(linearMatched(kmers, kmerLocLists[k])) / nKmersF
-							if m < pident {
-								kmerLocLists[k] = nil
-								ok = false
-							}
-						}
-
-						if ok {
-							_match.PIdt = m
+					go func() {
+						for _match := range chMatches2 {
 							matches = append(matches, _match)
 						}
+						done <- 1
+					}()
+
+					for i := 0; i < numIndices; i++ {
+						_matches = <-chMatches
+
+						for _, _match = range _matches {
+							if _match.NumKmers >= skipAlign {
+								_match.PIdt = 2
+								chMatches2 <- _match
+								continue
+							}
+
+							wg.Add(1)
+							tokens2 <- 1
+							go func(_match Match) {
+								defer func() {
+									wg.Done()
+									<-tokens2
+								}()
+
+								k := cumBlockSizes[_match.IndexID] + _match.TargetIdx
+
+								if kmerLocLists[k] == nil {
+									kmerLocLists[k], err = readKmers(unikPaths[k])
+									if err != nil {
+										checkError(err)
+									}
+								}
+								m := float64(linearMatched(kmers, kmerLocLists[k])) / nKmersF
+								if m < pident {
+									kmerLocLists[k] = nil
+									return
+								}
+
+								_match.PIdt = m
+								chMatches2 <- _match
+							}(_match)
+						}
 					}
+					wg.Wait()
+					close(chMatches2)
+					<-done
 				}
 
 				// recycle objects
@@ -953,13 +982,42 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 			}
 
 			query.Ch <- results
-
-			//	}(query)
 		}
 
 		idx.done <- 1
 	}()
 	return idx, nil
+}
+
+func readKmers(file string) ([]uint64, error) {
+	infh, r, _, err := inStream(file)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	reader, err := unikmer.NewReader(infh)
+	if err != nil {
+		return nil, err
+	}
+	if reader.IsSorted() {
+		return nil, fmt.Errorf(".unik file not supposed to be sorted")
+	}
+
+	kmers := make([]uint64, 0, reader.Number)
+
+	var code uint64
+	for {
+		code, _, err = reader.ReadCodeWithTaxid()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			checkError(errors.Wrap(err, file))
+		}
+		kmers = append(kmers, code)
+	}
+	return kmers, nil
 }
 
 type loc2vals [][2]uint64

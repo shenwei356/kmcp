@@ -23,9 +23,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io"
 
-	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer"
 )
 
@@ -48,35 +46,4 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 	if bytes.Compare(reader0.Description, reader.Description) != 0 {
 		checkError(fmt.Errorf(`description (sketch information) not consistent, please check with "unikmer info -a ": %s`, file))
 	}
-}
-
-func readKmers(file string) ([]uint64, error) {
-	infh, r, _, err := inStream(file)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	reader, err := unikmer.NewReader(infh)
-	if err != nil {
-		return nil, err
-	}
-	if reader.IsSorted() {
-		return nil, fmt.Errorf(".unik file not supposed to be sorted")
-	}
-
-	l := make([]uint64, 0, reader.Number)
-
-	var code uint64
-	for {
-		code, _, err = reader.ReadCodeWithTaxid()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			checkError(errors.Wrap(err, file))
-		}
-		l = append(l, code)
-	}
-	return l, nil
 }
