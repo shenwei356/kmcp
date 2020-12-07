@@ -47,13 +47,13 @@ var computeCmd = &cobra.Command{
 Attentions:
   1. K-mers (sketchs) are not sorted and duplicates remained.
 
-K-mer:
-  1. ntHash of k-mer (-k)
-
-K-mer sketchs:
-  1. Scaled MinHash (-k -D)
-  2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
-  3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
+Supported types:
+  1. K-mer:
+     1. ntHash of k-mer (-k)
+  2. K-mer sketchs:
+     1. Scaled MinHash (-k -D)
+     2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
+     3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -143,14 +143,14 @@ K-mer sketchs:
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("k: %d", k)
 			log.Infof("circular genome: %v", circular)
-			if scaled {
-				log.Infof("down-sampling scale: %d", scale)
-			}
 			if minimizer {
-				log.Infof("minizimer window: %d", minimizerW)
+				log.Infof("minimizer window: %d", minimizerW)
 			}
 			if syncmer {
-				log.Infof("syncmer s: %d", syncmerS)
+				log.Infof("bounded syncmer size: %d", syncmerS)
+			}
+			if scaled {
+				log.Infof("down-sampling scale: %d", scale)
 			}
 			log.Infof("-------------------- [main parameters] --------------------")
 		}
@@ -328,6 +328,11 @@ K-mer sketchs:
 					}
 
 					writer.Number = int64(n)
+					if syncmer {
+						writer.Description = []byte(fmt.Sprintf("syncmer:%d", syncmerS))
+					} else if minimizer {
+						writer.Description = []byte(fmt.Sprintf("minimizer:%d", minimizerW))
+					}
 
 					for _, code = range codes {
 						writer.WriteCode(code)
@@ -507,6 +512,11 @@ K-mer sketchs:
 		}
 
 		writer.Number = int64(n)
+		if syncmer {
+			writer.Description = []byte(fmt.Sprintf("syncmer:%d", syncmerS))
+		} else if minimizer {
+			writer.Description = []byte(fmt.Sprintf("minimizer:%d", minimizerW))
+		}
 
 		if opt.Verbose {
 			log.Infof("starting writing to %s ...", outFile)

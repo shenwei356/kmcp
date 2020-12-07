@@ -8,7 +8,7 @@ Kmer-based Metagenomics Classification and Profiling
     time kmcp compute -i <(find genomes/ -name "*fa.gz") -O kmcp-db -W 16 --force --verbose
 
     # index sketch
-    time kmcp index -I kmcp-db/ -W 16 --verbose
+    time kmcp index -I kmcp-db/ -a db-alias --verbose
     
     # search    
-    time kmcp search -m -t 1 -d kmcp-db/ t_t2.fq.gz --verbose > result.tsv
+    time kmcp search -d kmcp-db/ -d kmcp -db2/ -m -t 1 t_t2.fq.gz --verbose -o result.tsv

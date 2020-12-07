@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 
@@ -32,16 +33,20 @@ const extDataFile = ".unik"
 
 func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file string) {
 	if reader0.K != reader.K {
-		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "unikmer stats": %s`, reader0.K, reader.K, file))
+		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "unikmer info": %s`, reader0.K, reader.K, file))
 	}
 	if reader0.IsCanonical() != reader.IsCanonical() {
-		checkError(fmt.Errorf(`'canonical' flags not consistent, please check with "unikmer stats": %s`, file))
+		checkError(fmt.Errorf(`'canonical' flags not consistent, please check with "unikmer info": %s`, file))
 	}
 	if reader0.IsHashed() != reader.IsHashed() {
-		checkError(fmt.Errorf(`'hashed' flags not consistent, please check with "unikmer stats": %s`, file))
+		checkError(fmt.Errorf(`'hashed' flags not consistent, please check with "unikmer info": %s`, file))
 	}
 	if reader0.IsScaled() != reader.IsScaled() {
-		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "unikmer stats": %s`, file))
+		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "unikmer info": %s`, file))
+	}
+
+	if bytes.Compare(reader0.Description, reader.Description) != 0 {
+		checkError(fmt.Errorf(`description (sketch information) not consistent, please check with "unikmer info -a ": %s`, file))
 	}
 }
 
