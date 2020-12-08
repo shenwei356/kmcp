@@ -73,6 +73,7 @@ Attentions:
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
 		alignSketches := getFlagBool(cmd, "align-sketches")
 		skipAlign := getFlagPositiveInt(cmd, "skip-align")
+		refuseAlign := getFlagPositiveInt(cmd, "refuse-align")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -154,6 +155,7 @@ Attentions:
 
 			Align:       alignSketches,
 			SkipAlign:   skipAlign,
+			RefuseAlign: refuseAlign,
 			MinIdentPct: pIdent,
 
 			TopN:   topN,
@@ -197,7 +199,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\tpIdt\ttCov\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\ttCov\tpIdt\tloc\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -225,8 +227,8 @@ Attentions:
 				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\n",
-					prefix2, "", 0, float64(0), float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%d\n",
+					prefix2, "", 0, float64(0), float64(0), -1))
 				return
 			}
 
@@ -245,8 +247,8 @@ Attentions:
 				// query, len_query,
 				// db, num_kmers, fpr,
 				// target, num_target_kmers, qcov, pidt, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, target, match.NumKmers, match.QCov, match.PIdt, match.TCov))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+					prefix2, target, match.NumKmers, match.QCov, match.TCov, match.PIdt, match.Loc+1))
 			}
 
 			result.Recycle()
@@ -363,6 +365,7 @@ func init() {
 	searchCmd.Flags().Float64P("ident-pct", "I", 0.8, `minimum percent of identical k-mers in linear alignment`)
 	searchCmd.Flags().BoolP("align-sketches", "a", false, `align k-mers locations`)
 	searchCmd.Flags().IntP("skip-align", "A", 100, `do not align when >= N k-mers matched`)
+	searchCmd.Flags().IntP("refuse-align", "R", 100, `do not align when >= N matches found for a query`)
 
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)

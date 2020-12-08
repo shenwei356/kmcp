@@ -11,4 +11,4 @@ Kmer-based Metagenomics Classification and Profiling
     time kmcp index -I kmcp-db/ -a db-alias --verbose
     
     # search    
-    time kmcp search -d kmcp-db/ -d kmcp -db2/ -m -t 1 t_t2.fq.gz --verbose -o result.tsv
+    time kmcp search -d kmcp-db/ -d kmcp-db2/ -t 1 t_t2.fq.gz -o result.tsv --verbose 

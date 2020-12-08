@@ -95,7 +95,9 @@ type Match struct {
 
 	QCov float64 // coverage of query
 	TCov float64 // coverage of target
+
 	PIdt float64 // percent of ident linearly matched kmers
+	Loc  int
 }
 
 // Clone returns a clone of Match
@@ -107,6 +109,7 @@ func (m Match) Clone() Match {
 		QCov:      m.QCov,
 		TCov:      m.TCov,
 		PIdt:      m.PIdt,
+		Loc:       m.Loc,
 	}
 }
 
@@ -188,6 +191,7 @@ type SearchOptions struct {
 	// for align
 	Align       bool
 	SkipAlign   int
+	RefuseAlign int
 	MinIdentPct float64
 
 	KeepUnmatched bool
@@ -418,6 +422,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				indices := db.Indices
 				align := opt.Align
 				skipAlign := opt.SkipAlign
+				refuseAlign := opt.RefuseAlign
 				numIndices := len(indices)
 				cumBlockSizes = db.CumBlockSizes
 				pident := db.Options.MinIdentPct
@@ -477,71 +482,89 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				matches := poolMatches.Get().([]Match)
 				var _matches []Match
 				var _match Match
-				// var ok bool
-				// var k int
-				// var m float64
-
-				if !align {
-					for i := 0; i < numIndices; i++ {
-						// block to read
-						_matches = <-chMatches
-						for _, _match = range _matches {
-							matches = append(matches, _match)
-						}
+				for i := 0; i < numIndices; i++ {
+					// block to read
+					_matches = <-chMatches
+					for _, _match = range _matches {
+						matches = append(matches, _match)
 					}
-				} else {
+				}
+
+				// alignment
+				if align {
+					if len(matches) >= refuseAlign { // too much matches
+						// recycle objects
+						poolChanMatches.Put(chMatches)
+
+						hashes = hashes[:0]
+						poolHashes.Put(hashes)
+
+						matches = matches[:0]
+						poolMatches.Put(matches)
+
+						query.Ch <- result // still send result!
+						return
+					}
+
 					var wg sync.WaitGroup
-					chMatches2 := make(chan Match, threads)
 					tokens2 := make(chan int, threads)
 					done := make(chan int)
 
+					chMatches2 := make(chan Match, threads)
+					matches2 := poolMatches.Get().([]Match)
+
 					go func() {
 						for _match := range chMatches2 {
-							matches = append(matches, _match)
+							matches2 = append(matches2, _match)
 						}
 						done <- 1
 					}()
 
-					for i := 0; i < numIndices; i++ {
-						_matches = <-chMatches
+					for _, _match = range matches {
+						if _match.NumKmers >= skipAlign {
+							_match.PIdt = 100
+							_match.Loc = -1
+							chMatches2 <- _match
+							continue
+						}
 
-						for _, _match = range _matches {
-							if _match.NumKmers >= skipAlign {
-								_match.PIdt = 2
-								chMatches2 <- _match
-								continue
+						wg.Add(1)
+						tokens2 <- 1
+						go func(_match Match) {
+							defer func() {
+								wg.Done()
+								<-tokens2
+							}()
+
+							k := cumBlockSizes[_match.IndexID] + _match.TargetIdx
+
+							if kmerLocLists[k] == nil {
+								kmerLocLists[k], err = readKmers(unikPaths[k])
+								if err != nil {
+									checkError(err)
+								}
+							}
+							_m, loc := linearMatched(kmers, kmerLocLists[k])
+							m := float64(_m) / nKmersF
+							if m < pident {
+								kmerLocLists[k] = nil
+								return
 							}
 
-							wg.Add(1)
-							tokens2 <- 1
-							go func(_match Match) {
-								defer func() {
-									wg.Done()
-									<-tokens2
-								}()
+							_match.PIdt = m
+							_match.Loc = loc
+							chMatches2 <- _match
+						}(_match)
 
-								k := cumBlockSizes[_match.IndexID] + _match.TargetIdx
-
-								if kmerLocLists[k] == nil {
-									kmerLocLists[k], err = readKmers(unikPaths[k])
-									if err != nil {
-										checkError(err)
-									}
-								}
-								m := float64(linearMatched(kmers, kmerLocLists[k])) / nKmersF
-								if m < pident {
-									kmerLocLists[k] = nil
-									return
-								}
-
-								_match.PIdt = m
-								chMatches2 <- _match
-							}(_match)
-						}
 					}
 					wg.Wait()
 					close(chMatches2)
 					<-done
+
+					matches = matches[:0]
+					poolMatches.Put(matches)
+
+					matches = matches2
 				}
 
 				// recycle objects
@@ -977,6 +1000,7 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 						QCov:      t,
 						TCov:      T,
 						PIdt:      m,
+						Loc:       -2,
 					})
 				}
 			}
@@ -1026,15 +1050,16 @@ func (l2v loc2vals) Len() int               { return len(l2v) }
 func (l2v loc2vals) Less(i int, j int) bool { return l2v[i][1] < l2v[j][1] }
 func (l2v loc2vals) Swap(i int, j int)      { l2v[i], l2v[j] = l2v[j], l2v[i] }
 
-func linearMatched(kmers []uint64, kmers2 []uint64) int {
+func linearMatched(kmers []uint64, kmers2 []uint64) (int, int) {
 	// find a kmer that's in genome
 	var kmer, kmer2 uint64
-	var i, j int
+	var i0 int                // location in query kmers
+	var j0 int                // location in target kmers2
 	locs := make([]int, 0, 2) // kmer at i in kmers matchs kmers at locs in kmers2
-	for i, kmer = range kmers {
-		for j, kmer2 = range kmers2 {
+	for i0, kmer = range kmers {
+		for j0, kmer2 = range kmers2 {
 			if kmer == kmer2 {
-				locs = append(locs, j)
+				locs = append(locs, j0)
 			}
 		}
 		if len(locs) > 0 {
@@ -1043,33 +1068,35 @@ func linearMatched(kmers []uint64, kmers2 []uint64) int {
 	}
 
 	// find the longest match
-	var _loc int
-	var k, j2 int
 	nKmers := len(kmers)
 	nKmers2 := len(kmers2)
 	max := 0
-	for _, _loc = range locs { // _loc is location of the kmer in target sequence
+	maxLoc := -1
+	var i int                // location in query kmers
+	var j int                // location in target kmers2
+	var k int                // a tmp variable
+	for _, j0 = range locs { // _loc is location of the kmer in target sequence
 		matched := -1
 
 		k = 0
-		for j = i; j >= 0; j-- { // from start to 0
-			j2 = _loc - k // locatin in kmer2
-			if j2 < 0 {
+		for i = i0; i >= 0; i-- { // from start to 0 in kmer
+			j = j0 - k // locatin in kmer2
+			if j < 0 {
 				break
 			}
-			if kmers[j] == kmers2[j2] {
+			if kmers[i] == kmers2[j] {
 				matched++
 			}
 			k++
 		}
 
 		k = 0
-		for j = i; j < nKmers; j++ { // from start to end
-			j2 = _loc + k
-			if j2 >= nKmers2 {
+		for i = i0; i < nKmers; i++ { // from start to end
+			j = j0 + k
+			if j >= nKmers2 {
 				break
 			}
-			if kmers[j] == kmers2[j2] {
+			if kmers[i] == kmers2[j] {
 				matched++
 			}
 			k++
@@ -1077,10 +1104,11 @@ func linearMatched(kmers []uint64, kmers2 []uint64) int {
 
 		if matched > max {
 			max = matched
+			maxLoc = j0
 		}
 	}
 
-	return max
+	return max, maxLoc
 }
 
 // Close closes the index.
@@ -1112,6 +1140,10 @@ var poolHashes = &sync.Pool{New: func() interface{} {
 
 var poolMatches = &sync.Pool{New: func() interface{} {
 	return make([]Match, 0, 1)
+}}
+
+var poolChanMatch = &sync.Pool{New: func() interface{} {
+	return make(chan Match, 8)
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
