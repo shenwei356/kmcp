@@ -426,6 +426,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numIndices := len(indices)
 				cumBlockSizes = db.CumBlockSizes
 				pident := db.Options.MinIdentPct
+				pdiff := 1 - pident
 				threads := db.Options.Threads
 
 				// compute kmers
@@ -544,12 +545,17 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 									checkError(err)
 								}
 							}
-							_m, loc := linearMatched(kmers, kmerLocLists[k])
-							m := float64(_m) / nKmersF
-							if m < pident {
+							_m, loc, ok := linearMatched(kmers, kmerLocLists[k], int(nKmersF*pdiff))
+							if !ok {
 								kmerLocLists[k] = nil
 								return
 							}
+
+							m := float64(_m) / nKmersF
+							// if m < pident {
+							// 	kmerLocLists[k] = nil
+							// 	return
+							// }
 
 							_match.PIdt = m
 							_match.Loc = loc
@@ -1050,7 +1056,8 @@ func (l2v loc2vals) Len() int               { return len(l2v) }
 func (l2v loc2vals) Less(i int, j int) bool { return l2v[i][1] < l2v[j][1] }
 func (l2v loc2vals) Swap(i int, j int)      { l2v[i], l2v[j] = l2v[j], l2v[i] }
 
-func linearMatched(kmers []uint64, kmers2 []uint64) (int, int) {
+// return: num_matched, location, ok
+func linearMatched(kmers []uint64, kmers2 []uint64, maxMismatch int) (int, int, bool) {
 	// find a kmer that's in genome
 	var kmer, kmer2 uint64
 	var i0 int                // location in query kmers
@@ -1070,45 +1077,70 @@ func linearMatched(kmers []uint64, kmers2 []uint64) (int, int) {
 	// find the longest match
 	nKmers := len(kmers)
 	nKmers2 := len(kmers2)
+	mismatch := 0
 	max := 0
 	maxLoc := -1
+	var failed bool
 	var i int                // location in query kmers
 	var j int                // location in target kmers2
-	var k int                // a tmp variable
 	for _, j0 = range locs { // _loc is location of the kmer in target sequence
-		matched := -1
+		matched := 1
+		mismatch = 0
 
-		k = 0
-		for i = i0; i >= 0; i-- { // from start to 0 in kmer
-			j = j0 - k // locatin in kmer2
+		failed = false
+		j = j0 - 1                    // locatin in kmer2
+		for i = i0 - 1; i >= 0; i-- { // from start to 0 in kmer
 			if j < 0 {
 				break
 			}
 			if kmers[i] == kmers2[j] {
 				matched++
+			} else {
+				mismatch++
+				if mismatch > maxMismatch {
+					failed = true
+					break
+				}
 			}
-			k++
+			j--
+		}
+		if failed {
+			break
 		}
 
-		k = 0
-		for i = i0; i < nKmers; i++ { // from start to end
-			j = j0 + k
+		j = j0 + 1
+		for i = i0 + 1; i < nKmers; i++ { // from start to end
 			if j >= nKmers2 {
 				break
 			}
 			if kmers[i] == kmers2[j] {
 				matched++
+			} else {
+				mismatch++
+				if mismatch > maxMismatch {
+					failed = true
+					break
+				}
 			}
-			k++
+			j++
+		}
+		if failed {
+			break
 		}
 
 		if matched > max {
 			max = matched
 			maxLoc = j0
+		} else if matched == max {
+			break // may be mulitple copies sequences
 		}
 	}
 
-	return max, maxLoc
+	if max > 0 {
+		return max, maxLoc, true
+	}
+
+	return max, maxLoc, false
 }
 
 // Close closes the index.

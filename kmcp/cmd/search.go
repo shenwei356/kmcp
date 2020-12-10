@@ -364,8 +364,8 @@ func init() {
 	// query option for alignment
 	searchCmd.Flags().Float64P("ident-pct", "I", 0.8, `minimum percent of identical k-mers in linear alignment`)
 	searchCmd.Flags().BoolP("align-sketches", "a", false, `align k-mers locations`)
-	searchCmd.Flags().IntP("skip-align", "A", 100, `do not align when >= N k-mers matched`)
-	searchCmd.Flags().IntP("refuse-align", "R", 100, `do not align when >= N matches found for a query`)
+	searchCmd.Flags().IntP("skip-align", "S", 100, `skip alignment when >= N k-mers matched`)
+	searchCmd.Flags().IntP("refuse-align", "R", 100, `refuse alignment when >= N matches found for a query`)
 
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
