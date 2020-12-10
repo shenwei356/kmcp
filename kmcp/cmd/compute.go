@@ -80,6 +80,7 @@ Supported types:
 		outDir := getFlagString(cmd, "out-dir")
 		force := getFlagBool(cmd, "force")
 		exactNumber := getFlagBool(cmd, "exact-number")
+		compress := getFlagBool(cmd, "compress")
 
 		if outDir == "" && outFile == "" {
 			checkError(fmt.Errorf("flag -o/--out-prefix OR -O/--out-dir is needed"))
@@ -204,7 +205,7 @@ Supported types:
 					startTime := time.Now()
 
 					outFile := filepath.Join(outDir, fmt.Sprintf("%s%s", filepath.Base(file), extDataFile))
-					outfh, gw, w, err := outStream(outFile, opt.Compress, opt.CompressionLevel)
+					outfh, gw, w, err := outStream(outFile, compress, opt.CompressionLevel)
 					checkError(err)
 					defer func() {
 						checkError(outfh.Flush())
@@ -359,7 +360,7 @@ Supported types:
 		if !isStdout(outFile) {
 			outFile += extDataFile
 		}
-		outfh, gw, w, err := outStream(outFile, opt.Compress, opt.CompressionLevel)
+		outfh, gw, w, err := outStream(outFile, compress, opt.CompressionLevel)
 		checkError(err)
 		defer func() {
 			checkError(outfh.Flush())
@@ -547,4 +548,5 @@ func init() {
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers`)
+	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files`)
 }
