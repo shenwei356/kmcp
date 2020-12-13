@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -71,22 +72,32 @@ Supported types:
 		// ---------------------------------------------------------------
 		// basic flags
 
-		var err error
-
 		k := getFlagPositiveInt(cmd, "kmer-len")
 		circular := getFlagBool(cmd, "circular")
 
-		outFile := getFlagString(cmd, "out-prefix")
 		outDir := getFlagString(cmd, "out-dir")
 		force := getFlagBool(cmd, "force")
 		exactNumber := getFlagBool(cmd, "exact-number")
 		compress := getFlagBool(cmd, "compress")
 
-		if outDir == "" && outFile == "" {
-			checkError(fmt.Errorf("flag -o/--out-prefix OR -O/--out-dir is needed"))
-		} else if outDir != "" && outFile != "" {
-			checkError(fmt.Errorf("either flag -o/--out-prefix OR -O/--out-dir is allowed"))
+		if outDir == "" {
+			checkError(fmt.Errorf("flag -O/--out-dir is needed"))
 		}
+
+		// ---------------------------------------------------------------
+		// flags for splitting sequence
+		splitS := getFlagNonNegativeInt(cmd, "split-size")
+		splitO := getFlagNonNegativeInt(cmd, "split-overlap")
+		splitSeq := splitS > 0
+		if splitSeq {
+			if splitS < k {
+				checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
+			}
+			if splitS <= splitO {
+				checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
+			}
+		}
+		step := splitS - splitO
 
 		// ---------------------------------------------------------------
 		// flags of sketch
@@ -157,111 +168,122 @@ Supported types:
 		}
 
 		// ---------------------------------------------------------------
-		// compute for every file and output to a directory
-		if outputDir {
 
-			// process bar
-			var pbs *mpb.Progress
-			var bar *mpb.Bar
-			var chDuration chan time.Duration
-			var doneDuration chan int
+		// process bar
+		var pbs *mpb.Progress
+		var bar *mpb.Bar
+		var chDuration chan time.Duration
+		var doneDuration chan int
 
-			if opt.Verbose {
-				pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
-				bar = pbs.AddBar(int64(len(files)),
-					mpb.BarStyle("[=>-]<+"),
-					mpb.PrependDecorators(
-						decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
-						decor.Name("", decor.WCSyncSpaceR),
-						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
-					),
-					mpb.AppendDecorators(
-						decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
-						decor.EwmaETA(decor.ET_STYLE_GO, 60),
-						decor.OnComplete(decor.Name(""), ". done"),
-					),
-				)
+		if opt.Verbose {
+			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
+			bar = pbs.AddBar(int64(len(files)),
+				mpb.BarStyle("[=>-]<+"),
+				mpb.PrependDecorators(
+					decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
+					decor.Name("", decor.WCSyncSpaceR),
+					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+				),
+				mpb.AppendDecorators(
+					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
+					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+					decor.OnComplete(decor.Name(""), ". done"),
+				),
+			)
 
-				chDuration = make(chan time.Duration, opt.NumCPUs)
-				doneDuration = make(chan int)
-				go func() {
-					for t := range chDuration {
-						bar.Increment()
-						bar.DecoratorEwmaUpdate(t)
+			chDuration = make(chan time.Duration, opt.NumCPUs)
+			doneDuration = make(chan int)
+			go func() {
+				for t := range chDuration {
+					bar.Increment()
+					bar.DecoratorEwmaUpdate(t)
+				}
+				doneDuration <- 1
+			}()
+		}
+
+		// wait group
+		var wg sync.WaitGroup
+		tokens := make(chan int, opt.NumCPUs)
+
+		for _, file := range files {
+			tokens <- 1
+			wg.Add(1)
+
+			go func(file string) {
+				startTime := time.Now()
+				defer func() {
+					wg.Done()
+					<-tokens
+
+					if opt.Verbose {
+						chDuration <- time.Duration(float64(time.Since(startTime)) / float64(opt.NumCPUs))
 					}
-					doneDuration <- 1
 				}()
-			}
 
-			// wait group
-			var wg sync.WaitGroup
-			tokens := make(chan int, opt.NumCPUs)
+				var err error
+				var record *fastx.Record
+				var fastxReader *fastx.Reader
+				var ok bool
+				var code uint64
+				var iter *unikmer.Iterator
+				var sketch *unikmer.Sketch
+				var n int
 
-			for _, file := range files {
-				tokens <- 1
-				wg.Add(1)
+				var slider func() (*seq.Seq, bool)
+				var _seq *seq.Seq
+				var _ok bool
+				var slidIdx int
+				var greedy bool = true
+				var seqID string
+				var outFile string
+				var baseFile = filepath.Base(file)
 
-				go func(file string) {
-					startTime := time.Now()
+				var codes []uint64
 
-					outFile := filepath.Join(outDir, fmt.Sprintf("%s%s", filepath.Base(file), extDataFile))
-					outfh, gw, w, err := outStream(outFile, compress, opt.CompressionLevel)
-					checkError(err)
-					defer func() {
-						checkError(outfh.Flush())
-						if gw != nil {
-							checkError(gw.Close())
+				if !splitSeq {
+					codes = make([]uint64, 0, mapInitSize)
+				} else {
+					codes = make([]uint64, 0, splitS)
+				}
+
+				fastxReader, err = fastx.NewDefaultReader(file)
+				checkError(errors.Wrap(err, file))
+
+				for {
+					record, err = fastxReader.Read()
+					if err != nil {
+						if err == io.EOF {
+							break
 						}
-						checkError(w.Close())
+						checkError(errors.Wrap(err, file))
+						break
+					}
+					seqID = string(record.ID)
 
-						wg.Done()
-						<-tokens
-
-						if opt.Verbose {
-							chDuration <- time.Duration(float64(time.Since(startTime)) / float64(opt.NumCPUs))
-						}
-					}()
-
-					var writer *unikmer.Writer
-					var mode uint32
-					var n int
-
-					mode |= unikmer.UnikCanonical
-					mode |= unikmer.UnikHashed
-
-					writer, err = unikmer.NewWriter(outfh, k, mode)
-					checkError(errors.Wrap(err, outFile))
-					if scaled {
-						writer.SetScale(uint32(scale))
+					if !splitSeq {
+						splitS = len(record.Seq.Seq)
+						step = 1
+						greedy = false
 					}
 
-					var record *fastx.Record
-					var fastxReader *fastx.Reader
-					var ok bool
-					var code uint64
-					var iter *unikmer.Iterator
-					var sketch *unikmer.Sketch
-					codes := make([]uint64, 0, mapInitSize)
+					slider = record.Seq.Slider(splitS, step, circular, greedy)
 
-					fastxReader, err = fastx.NewDefaultReader(file)
-					checkError(errors.Wrap(err, file))
-
+					slidIdx = 0
 					for {
-						record, err = fastxReader.Read()
-						if err != nil {
-							if err == io.EOF {
-								break
-							}
-							checkError(errors.Wrap(err, file))
+						_seq, _ok = slider()
+						if !_ok {
 							break
 						}
 
+						codes = codes[:0] // reset
+
 						if syncmer {
-							sketch, err = unikmer.NewSyncmerSketch(record.Seq, k, syncmerS, circular)
+							sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
 						} else if minimizer {
-							sketch, err = unikmer.NewMinimizerSketch(record.Seq, k, minimizerW, circular)
+							sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
 						} else {
-							iter, err = unikmer.NewHashIterator(record.Seq, k, true, circular)
+							iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
 						}
 						if err != nil {
 							if err == unikmer.ErrShortSeq {
@@ -282,10 +304,7 @@ Supported types:
 								}
 								codes = append(codes, code)
 							}
-							continue
-						}
-
-						if minimizer {
+						} else if minimizer {
 							for {
 								code, ok = sketch.NextMinimizer()
 								if !ok {
@@ -296,248 +315,126 @@ Supported types:
 								}
 								codes = append(codes, code)
 							}
-							continue
-						}
-
-						for {
-							code, ok = iter.NextHash()
-							if !ok {
-								break
-							}
-							if scaled && code > maxHash {
-								continue
-							}
-							codes = append(codes, code)
-						}
-					}
-
-					n = len(codes)
-
-					if exactNumber {
-						// compute exact number of unique k-mers
-						codes2 := make([]uint64, n)
-						copy(codes2, codes)
-						sortutil.Uint64s(codes2)
-						var pre uint64 = 0
-						n = 0
-						for _, code = range codes2 {
-							if code != pre {
-								n++
-								pre = code
+						} else {
+							for {
+								code, ok = iter.NextHash()
+								if !ok {
+									break
+								}
+								if scaled && code > maxHash {
+									continue
+								}
+								codes = append(codes, code)
 							}
 						}
-					}
 
-					writer.Number = int64(n)
-					if syncmer {
-						writer.Description = []byte(fmt.Sprintf("syncmer:%d", syncmerS))
-					} else if minimizer {
-						writer.Description = []byte(fmt.Sprintf("minimizer:%d", minimizerW))
-					}
+						n = len(codes)
 
-					for _, code = range codes {
-						writer.WriteCode(code)
-					}
-
-					checkError(writer.Flush())
-				}(file)
-			}
-
-			wg.Wait()
-
-			if opt.Verbose {
-				close(chDuration)
-				<-doneDuration
-				pbs.Wait()
-			}
-
-			return
-		}
-
-		// ---------------------------------------------------------------
-		// compute from all input files and output to a single file
-
-		if !isStdout(outFile) {
-			outFile += extDataFile
-		}
-		outfh, gw, w, err := outStream(outFile, compress, opt.CompressionLevel)
-		checkError(err)
-		defer func() {
-			checkError(outfh.Flush())
-			if gw != nil {
-				checkError(gw.Close())
-			}
-			checkError(w.Close())
-		}()
-
-		var writer *unikmer.Writer
-		var mode uint32
-		var n int
-
-		mode |= unikmer.UnikCanonical
-		mode |= unikmer.UnikHashed
-
-		writer, err = unikmer.NewWriter(outfh, k, mode)
-		checkError(errors.Wrap(err, outFile))
-		if scaled {
-			writer.SetScale(uint32(scale))
-		}
-
-		var record *fastx.Record
-		var fastxReader *fastx.Reader
-		var ok bool
-		var code uint64
-		var iter *unikmer.Iterator
-		var sketch *unikmer.Sketch
-		codes := make([]uint64, 0, mapInitSize)
-
-		var pbs *mpb.Progress
-		var bar *mpb.Bar
-		var startTime time.Time
-		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
-			bar = pbs.AddBar(int64(len(files)),
-				mpb.BarStyle("[=>-]<+"),
-				mpb.PrependDecorators(
-					decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
-					decor.Name("", decor.WCSyncSpaceR),
-					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
-				),
-				mpb.AppendDecorators(
-					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
-					decor.EwmaETA(decor.ET_STYLE_GO, 60),
-					decor.OnComplete(decor.Name(""), ". done"),
-				),
-			)
-		}
-
-		for _, file := range files {
-			startTime = time.Now()
-
-			fastxReader, err = fastx.NewDefaultReader(file)
-			checkError(errors.Wrap(err, file))
-
-			for {
-				record, err = fastxReader.Read()
-				if err != nil {
-					if err == io.EOF {
-						break
-					}
-					checkError(errors.Wrap(err, file))
-					break
-				}
-
-				if syncmer {
-					sketch, err = unikmer.NewSyncmerSketch(record.Seq, k, syncmerS, circular)
-				} else if minimizer {
-					sketch, err = unikmer.NewMinimizerSketch(record.Seq, k, minimizerW, circular)
-				} else {
-					iter, err = unikmer.NewHashIterator(record.Seq, k, true, circular)
-				}
-				if err != nil {
-					if err == unikmer.ErrShortSeq {
-						continue
-					} else {
-						checkError(errors.Wrapf(err, "seq: %s", record.Name))
-					}
-				}
-
-				if syncmer {
-					for {
-						code, ok = sketch.NextSyncmer()
-						if !ok {
-							break
+						if exactNumber {
+							// compute exact number of unique k-mers
+							codes2 := make([]uint64, n)
+							copy(codes2, codes)
+							sortutil.Uint64s(codes2)
+							var pre uint64 = 0
+							n = 0
+							for _, code = range codes2 {
+								if code != pre {
+									n++
+									pre = code
+								}
+							}
 						}
-						if scaled && code > maxHash {
-							continue
+
+						// write to file
+						if splitSeq {
+							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s-loc%d%s", baseFile, seqID, slidIdx, extDataFile))
+						} else {
+							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
 						}
-						codes = append(codes, code)
+
+						meta := Meta{
+							SeqID:  seqID,
+							SeqLoc: slidIdx,
+
+							Syncmer:      syncmer,
+							SyncmerS:     syncmerS,
+							Minimizer:    minimizer,
+							MinimizerW:   minimizerW,
+							SplitSeq:     splitSeq,
+							SplitSize:    splitS,
+							SplitOverlap: splitO,
+						}
+						writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,
+							scaled, scale, meta)
+
+						slidIdx++
 					}
-					continue
+
 				}
 
-				if minimizer {
-					for {
-						code, ok = sketch.NextMinimizer()
-						if !ok {
-							break
-						}
-						if scaled && code > maxHash {
-							continue
-						}
-						codes = append(codes, code)
-					}
-					continue
-				}
-
-				for {
-					code, ok = iter.NextHash()
-					if !ok {
-						break
-					}
-					if scaled && code > maxHash {
-						continue
-					}
-					codes = append(codes, code)
-				}
-			}
-
-			if opt.Verbose {
-				bar.Increment()
-				bar.DecoratorEwmaUpdate(time.Since(startTime))
-			}
+			}(file)
 		}
+
+		wg.Wait()
 
 		if opt.Verbose {
+			close(chDuration)
+			<-doneDuration
 			pbs.Wait()
 		}
 
-		n = len(codes)
-
-		if exactNumber {
-			// compute exact number of unique k-mers
-			if opt.Verbose {
-				log.Infof("sorting and counting unique k-mers ...")
-			}
-			codes2 := make([]uint64, n)
-			copy(codes2, codes)
-			sortutil.Uint64s(codes2)
-			var pre uint64 = 0
-			n = 0
-			for _, code = range codes2 {
-				if code != pre {
-					n++
-					pre = code
-				}
-			}
-		}
-
-		writer.Number = int64(n)
-		if syncmer {
-			writer.Description = []byte(fmt.Sprintf("syncmer:%d", syncmerS))
-		} else if minimizer {
-			writer.Description = []byte(fmt.Sprintf("minimizer:%d", minimizerW))
-		}
-
-		if opt.Verbose {
-			log.Infof("starting writing to %s ...", outFile)
-		}
-		for _, code = range codes {
-			writer.WriteCode(code)
-		}
-
-		checkError(writer.Flush())
-		if opt.Verbose {
-			log.Infof("%d unique k-mers saved to %s", n, outFile)
-		}
 	},
+}
+
+func writeKmers(k int, codes []uint64, n int,
+	outFile string, compress bool, compressLevel int,
+	scaled bool, scale int, meta Meta) {
+
+	outfh, gw, w, err := outStream(outFile, compress, compressLevel)
+	checkError(err)
+
+	defer func() {
+		checkError(outfh.Flush())
+		if gw != nil {
+			checkError(gw.Close())
+		}
+		checkError(w.Close())
+	}()
+
+	var writer *unikmer.Writer
+	var mode uint32
+
+	mode |= unikmer.UnikCanonical
+	mode |= unikmer.UnikHashed
+
+	writer, err = unikmer.NewWriter(outfh, k, mode)
+	if err != nil {
+		checkError(errors.Wrap(err, outFile))
+	}
+
+	if scaled {
+		writer.SetScale(uint32(scale))
+	}
+
+	writer.Number = int64(n)
+
+	metatext, err := json.Marshal(meta)
+	if err != nil {
+		checkError(errors.Wrap(err, outFile))
+	}
+	writer.Description = metatext
+
+	for _, code := range codes {
+		writer.WriteCode(code)
+	}
+
+	checkError(writer.Flush())
 }
 
 func init() {
 	RootCmd.AddCommand(computeCmd)
 
-	computeCmd.Flags().StringP("out-dir", "O", "", `output directory, overide -o/--out-prefix`)
-	computeCmd.Flags().StringP("out-prefix", "o", "", `out file prefix ("-" for stdout)`)
+	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
 	computeCmd.Flags().IntP("kmer-len", "k", 31, "k-mer length")
@@ -549,4 +446,7 @@ func init() {
 
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers`)
 	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files`)
+
+	computeCmd.Flags().IntP("split-size", "s", 0, `split fragment size`)
+	computeCmd.Flags().IntP("split-overlap", "l", 0, `split fragment overlap`)
 }
