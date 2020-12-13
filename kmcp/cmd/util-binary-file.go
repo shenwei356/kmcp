@@ -21,7 +21,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/shenwei356/unikmer"
@@ -29,7 +28,7 @@ import (
 
 const extDataFile = ".unik"
 
-func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file string) {
+func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file string, meta0 *Meta, meta *Meta) {
 	if reader0.K != reader.K {
 		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "unikmer info": %s`, reader0.K, reader.K, file))
 	}
@@ -43,7 +42,12 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "unikmer info": %s`, file))
 	}
 
-	if bytes.Compare(reader0.Description, reader.Description) != 0 {
-		checkError(fmt.Errorf(`description (sketch information) not consistent, please check with "unikmer info -a ": %s`, file))
+	if meta0.MinimizerW == meta.MinimizerW &&
+		meta0.SyncmerS == meta.SyncmerS &&
+		meta0.SplitSize == meta.SplitSize &&
+		meta0.SplitOverlap == meta.SplitOverlap {
+		return
 	}
+	checkError(fmt.Errorf(`description (sketch information) not consistent, please check with "unikmer info -a ": %s`, file))
+
 }

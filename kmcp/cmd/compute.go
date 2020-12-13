@@ -347,7 +347,7 @@ Supported types:
 
 						// write to file
 						if splitSeq {
-							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s-loc%d%s", baseFile, seqID, slidIdx, extDataFile))
+							outFile = filepath.Join(outDir, fmt.Sprintf("%s/%s-loc%d%s", baseFile, seqID, slidIdx, extDataFile))
 						} else {
 							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
 						}

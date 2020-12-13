@@ -361,12 +361,6 @@ func init() {
 	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimum query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimum target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
-	// query option for alignment
-	searchCmd.Flags().Float64P("ident-pct", "I", 0.8, `minimum percent of identical k-mers in linear alignment`)
-	searchCmd.Flags().BoolP("align-sketches", "a", false, `align k-mers locations`)
-	searchCmd.Flags().IntP("skip-align", "S", 100, `skip alignment when >= N k-mers matched`)
-	searchCmd.Flags().IntP("refuse-align", "R", 100, `refuse alignment when >= N matches found for a query`)
-
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)

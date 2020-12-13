@@ -68,8 +68,6 @@ type UnikIndexDBInfo struct {
 	Names      []string `yaml:"names"`
 	Sizes      []uint64 `yaml:"kmers"`
 
-	Paths []string `yaml:"unik-paths"`
-
 	path         string
 	NameMapping  map[string]string
 	MappingNames bool

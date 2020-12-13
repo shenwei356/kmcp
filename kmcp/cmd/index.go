@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -30,8 +31,6 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -89,10 +88,6 @@ Tips:
 		outDir := getFlagString(cmd, "out-dir")
 
 		inDir := getFlagString(cmd, "in-dir")
-
-		if outDir == "" && inDir == "" {
-			checkError(fmt.Errorf("flag -I/--in-dir OR -O/--out-dir is needed"))
-		}
 
 		readFromDir := inDir != ""
 		if readFromDir {
@@ -154,28 +149,17 @@ Tips:
 			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
 		}
 
-		// -------------------------------------------------------
-		// flags for extracting names
-
-		nameRegexp := getFlagString(cmd, "name-regexp")
-		extractName := nameRegexp != ""
-		var reName *regexp.Regexp
-		if extractName {
-			if !regexp.MustCompile(`\(.+\)`).MatchString(nameRegexp) {
-				checkError(fmt.Errorf(`value of -r (--name-regexp) must contains "(" and ")" to extract name`))
-			}
-			reName, err = regexp.Compile(nameRegexp)
-			checkError(errors.Wrapf(err, "parsing regular expression for extracting name: %s", nameRegexp))
-		}
-
 		// ---------------------------------------------------------------
 		// out dir
 
 		if outDir == "" {
 			if inDir != "" {
-				outDir = inDir
+				outDir = filepath.Clean(inDir) + ".kmcp-db"
+			} else {
+				outDir = "kmcp-db"
 			}
-		} else if !dryRun {
+		}
+		if !dryRun {
 			makeOutDir(outDir, force)
 		}
 		if alias == "" {
@@ -266,10 +250,7 @@ Tips:
 		var canonical bool
 		var scaled bool
 		var scale uint32
-		var minimizerW int
-		var minimizer bool
-		var syncmerS int
-		var syncmer bool
+		var meta0 Meta
 
 		var n int64
 		var nfiles = len(files)
@@ -282,6 +263,15 @@ Tips:
 
 			reader, err := unikmer.NewReader(infh)
 			checkError(errors.Wrap(err, file))
+
+			var meta Meta
+
+			if len(reader.Description) > 0 {
+				err := json.Unmarshal(reader.Description, &meta)
+				if err != nil {
+					checkError(fmt.Errorf("unsupported metadata: %s", reader.Description))
+				}
+			}
 
 			if first {
 				reader0 = reader
@@ -297,28 +287,10 @@ Tips:
 				}
 				scaled = reader.IsScaled()
 				scale = reader.GetScale()
-				if len(reader.Description) > 0 {
-					desc := strings.Split(string(reader.Description), ":")
-					if len(desc) != 2 {
-						checkError(fmt.Errorf(`unsupported sketch information: %s, are the files created by 'kmcp compute'? `, reader.Description))
-					}
-					switch desc[0] {
-					case "syncmer":
-						syncmer = true
-						syncmerS, err = strconv.Atoi(desc[1])
-						if err != nil {
-							checkError(fmt.Errorf(`unsupported sketch information: %s, are the files created by 'kmcp compute'? `, reader.Description))
-						}
-					case "minimizer":
-						minimizer = true
-						minimizerW, err = strconv.Atoi(desc[1])
-						if err != nil {
-							checkError(fmt.Errorf(`unsupported sketch information: %s, are the files created by 'kmcp compute'? `, reader.Description))
-						}
-					}
-				}
+
+				meta0 = meta
 			} else {
-				checkCompatibility(reader0, reader, file)
+				checkCompatibility(reader0, reader, file, &meta0, &meta)
 				if scaled && scale != reader.GetScale() {
 					checkError(fmt.Errorf(`scales not consistent, please check with "unikmer info": %s`, file))
 				}
@@ -327,24 +299,16 @@ Tips:
 			if reader.Number < 0 {
 				checkError(fmt.Errorf("binary file not sorted or no k-mers number found: %s", file))
 			}
+
 			var name string
-			if extractName {
-				found := reName.FindAllStringSubmatch(filepath.Base(file), -1)
-				if len(found) > 0 {
-					name = found[0][1]
-				} else {
-					name = filepath.Base(file)
-				}
+			if meta.SplitSeq {
+				name = fmt.Sprintf("%s--%d", meta.SeqID, meta.SeqLoc)
 			} else {
-				name = filepath.Base(file)
+				name = meta.SeqID
 			}
 
-			var relPath string
-			relPath, err = filepath.Rel(outDir, file)
-			checkError(err)
-
 			checkError(r.Close())
-			return UnikFileInfo{Path: file, RelPath: relPath, Name: name, Kmers: reader.Number}
+			return UnikFileInfo{Path: file, Name: name, Kmers: reader.Number}
 		}
 
 		file := files[0]
@@ -423,12 +387,10 @@ Tips:
 
 		names0 := make([]string, 0, len(files))
 		sizes0 := make([]uint64, 0, len(files))
-		paths0 := make([]string, 0, len(files))
 		for _, info := range fileInfos {
 			n += info.Kmers
 			names0 = append(names0, info.Name)
 			sizes0 = append(sizes0, uint64(info.Kmers))
-			paths0 = append(paths0, info.RelPath)
 		}
 
 		if opt.Verbose {
@@ -457,11 +419,14 @@ Tips:
 		}
 
 		if opt.Verbose {
-			if minimizer {
-				log.Infof("minimizer window: %d", minimizerW)
+			if meta0.Minimizer {
+				log.Infof("minimizer window: %d", meta0.MinimizerW)
 			}
-			if syncmer {
-				log.Infof("bounded syncmer size: %d", syncmerS)
+			if meta0.Syncmer {
+				log.Infof("bounded syncmer size: %d", meta0.SyncmerS)
+			}
+			if meta0.SplitSeq {
+				log.Infof("split seq size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
 			}
 			if scaled {
 				log.Infof("down-sampling scale: %d", scale)
@@ -875,15 +840,14 @@ Tips:
 			dbInfo.NumNames = len(names0)
 			dbInfo.Names = names0
 			dbInfo.Sizes = sizes0
-			dbInfo.Paths = paths0
 			dbInfo.NumHashes = numHashes
 			dbInfo.Canonical = canonical
 			dbInfo.Scaled = scaled
 			dbInfo.Scale = scale
-			dbInfo.Minimizer = minimizer
-			dbInfo.MinimizerW = uint32(minimizerW)
-			dbInfo.Syncmer = syncmer
-			dbInfo.SyncmerS = uint32(syncmerS)
+			dbInfo.Minimizer = meta0.Minimizer
+			dbInfo.MinimizerW = uint32(meta0.MinimizerW)
+			dbInfo.Syncmer = meta0.Syncmer
+			dbInfo.SyncmerS = uint32(meta0.SyncmerS)
 			checkError(dbInfo.WriteTo(filepath.Join(outDir, dbInfoFile)))
 
 			// write name_mapping.tsv
@@ -900,7 +864,8 @@ Tips:
 
 				var name string
 				for _, _name := range names0 {
-					name, _ = filepathTrimExtension(_name)
+					// name, _ = filepathTrimExtension(_name)
+					name = _name
 					outfh.WriteString(fmt.Sprintf("%s\t%s\n", _name, name))
 				}
 			}()
@@ -931,7 +896,6 @@ func init() {
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
 	indexCmd.Flags().BoolP("force", "", false, "overwrite tmp dir")
-	indexCmd.Flags().StringP("name-regexp", "r", "", "regular expression for extracting name from .unik file name. if not given, base name are saved")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
 	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful to adjust parameters")
 }

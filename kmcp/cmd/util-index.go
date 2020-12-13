@@ -34,10 +34,9 @@ const extIndex = ".uniki"
 
 // UnikFileInfo store basic info of .unik file.
 type UnikFileInfo struct {
-	Path    string
-	RelPath string
-	Name    string
-	Kmers   int64
+	Path  string
+	Name  string
+	Kmers int64
 }
 
 func (i UnikFileInfo) String() string {

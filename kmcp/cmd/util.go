@@ -28,6 +28,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/iafan/cwalk"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
@@ -104,16 +105,30 @@ func makeOutDir(outDir string, force bool) {
 }
 
 func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
-	files := make([]string, 0, 128)
-	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	files := make([]string, 0, 512)
+	ch := make(chan string, 8)
+	done := make(chan int)
+	go func() {
+		for file := range ch {
+			files = append(files, file)
+		}
+		done <- 1
+	}()
+	err := cwalk.Walk(path, func(_path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() && pattern.MatchString(info.Name()) {
-			files = append(files, filepath.Join(path))
+			ch <- filepath.Join(path, _path)
 		}
 		return nil
 	})
+	close(ch)
+	<-done
+	if err != nil {
+		return nil, err
+	}
+
 	return files, err
 }
 

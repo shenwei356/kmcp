@@ -338,10 +338,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		i += nfile
 	}
 
-	unikPaths := make([]string, len(info.Paths))
-	for j, p := range info.Paths {
-		unikPaths[j] = filepath.Join(path, p)
-	}
+	// unikPaths := make([]string, len(info.Paths))
+	// for j, p := range info.Paths {
+	// 	unikPaths[j] = filepath.Join(path, p)
+	// }
 
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
@@ -407,11 +407,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	go func() {
 
-		var kmerLocLists [][]uint64
-		if opt.Align {
-			kmerLocLists = make([][]uint64, len(db.Info.Names))
-		}
-
 		tokens := make(chan int, db.Options.Threads)
 		for query := range db.InCh {
 			tokens <- 1
@@ -420,15 +415,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				numHashes := db.Info.NumHashes
 				indices := db.Indices
-				align := opt.Align
-				skipAlign := opt.SkipAlign
-				refuseAlign := opt.RefuseAlign
 				numIndices := len(indices)
 				cumBlockSizes = db.CumBlockSizes
-				pident := db.Options.MinIdentPct
-				pdiff := 1 - pident
-				threads := db.Options.Threads
-
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
 				kmers := poolKmers.Get().([]uint64)
@@ -439,7 +427,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					checkError(err)
 				}
 				nKmers := len(kmers)
-				nKmersF := float64(len(kmers))
 
 				// recycle objects
 				// buf = buf[:0]
@@ -489,88 +476,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					for _, _match = range _matches {
 						matches = append(matches, _match)
 					}
-				}
-
-				// alignment
-				if align {
-					if len(matches) >= refuseAlign { // too much matches
-						// recycle objects
-						poolChanMatches.Put(chMatches)
-
-						hashes = hashes[:0]
-						poolHashes.Put(hashes)
-
-						matches = matches[:0]
-						poolMatches.Put(matches)
-
-						query.Ch <- result // still send result!
-						return
-					}
-
-					var wg sync.WaitGroup
-					tokens2 := make(chan int, threads)
-					done := make(chan int)
-
-					chMatches2 := make(chan Match, threads)
-					matches2 := poolMatches.Get().([]Match)
-
-					go func() {
-						for _match := range chMatches2 {
-							matches2 = append(matches2, _match)
-						}
-						done <- 1
-					}()
-
-					for _, _match = range matches {
-						if _match.NumKmers >= skipAlign {
-							_match.PIdt = 100
-							_match.Loc = -1
-							chMatches2 <- _match
-							continue
-						}
-
-						wg.Add(1)
-						tokens2 <- 1
-						go func(_match Match) {
-							defer func() {
-								wg.Done()
-								<-tokens2
-							}()
-
-							k := cumBlockSizes[_match.IndexID] + _match.TargetIdx
-
-							if kmerLocLists[k] == nil {
-								kmerLocLists[k], err = readKmers(unikPaths[k])
-								if err != nil {
-									checkError(err)
-								}
-							}
-							_m, loc, ok := linearMatched(kmers, kmerLocLists[k], int(nKmersF*pdiff))
-							if !ok {
-								kmerLocLists[k] = nil
-								return
-							}
-
-							m := float64(_m) / nKmersF
-							// if m < pident {
-							// 	kmerLocLists[k] = nil
-							// 	return
-							// }
-
-							_match.PIdt = m
-							_match.Loc = loc
-							chMatches2 <- _match
-						}(_match)
-
-					}
-					wg.Wait()
-					close(chMatches2)
-					<-done
-
-					matches = matches[:0]
-					poolMatches.Put(matches)
-
-					matches = matches2
 				}
 
 				// recycle objects
@@ -1048,99 +953,6 @@ func readKmers(file string) ([]uint64, error) {
 		kmers = append(kmers, code)
 	}
 	return kmers, nil
-}
-
-type loc2vals [][2]uint64
-
-func (l2v loc2vals) Len() int               { return len(l2v) }
-func (l2v loc2vals) Less(i int, j int) bool { return l2v[i][1] < l2v[j][1] }
-func (l2v loc2vals) Swap(i int, j int)      { l2v[i], l2v[j] = l2v[j], l2v[i] }
-
-// return: num_matched, location, ok
-func linearMatched(kmers []uint64, kmers2 []uint64, maxMismatch int) (int, int, bool) {
-	// find a kmer that's in genome
-	var kmer, kmer2 uint64
-	var i0 int                // location in query kmers
-	var j0 int                // location in target kmers2
-	locs := make([]int, 0, 2) // kmer at i in kmers matchs kmers at locs in kmers2
-	for i0, kmer = range kmers {
-		for j0, kmer2 = range kmers2 {
-			if kmer == kmer2 {
-				locs = append(locs, j0)
-			}
-		}
-		if len(locs) > 0 {
-			break
-		}
-	}
-
-	// find the longest match
-	nKmers := len(kmers)
-	nKmers2 := len(kmers2)
-	mismatch := 0
-	max := 0
-	maxLoc := -1
-	var failed bool
-	var i int                // location in query kmers
-	var j int                // location in target kmers2
-	for _, j0 = range locs { // _loc is location of the kmer in target sequence
-		matched := 1
-		mismatch = 0
-
-		failed = false
-		j = j0 - 1                    // locatin in kmer2
-		for i = i0 - 1; i >= 0; i-- { // from start to 0 in kmer
-			if j < 0 {
-				break
-			}
-			if kmers[i] == kmers2[j] {
-				matched++
-			} else {
-				mismatch++
-				if mismatch > maxMismatch {
-					failed = true
-					break
-				}
-			}
-			j--
-		}
-		if failed {
-			break
-		}
-
-		j = j0 + 1
-		for i = i0 + 1; i < nKmers; i++ { // from start to end
-			if j >= nKmers2 {
-				break
-			}
-			if kmers[i] == kmers2[j] {
-				matched++
-			} else {
-				mismatch++
-				if mismatch > maxMismatch {
-					failed = true
-					break
-				}
-			}
-			j++
-		}
-		if failed {
-			break
-		}
-
-		if matched > max {
-			max = matched
-			maxLoc = j0
-		} else if matched == max {
-			break // may be mulitple copies sequences
-		}
-	}
-
-	if max > 0 {
-		return max, maxLoc, true
-	}
-
-	return max, maxLoc, false
 }
 
 // Close closes the index.
