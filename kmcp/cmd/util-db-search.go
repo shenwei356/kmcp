@@ -59,8 +59,8 @@ type QueryResult struct {
 
 	FPR float64 // fpr, p is related to database
 
-	NumKmers int      // number of k-mers
-	Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
+	NumKmers int // number of k-mers
+	// Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
 
 	Matches []Match // all matches
 }
@@ -380,8 +380,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					QueryID:  query.ID,
 					QueryLen: query.Seq.Length(),
 					NumKmers: nKmers,
-					Kmers:    kmers,
-					Matches:  nil,
+					// Kmers:    kmers,
+					Matches: nil,
 				}
 
 				// sequence shorter than k, or too few k-mer sketchs.
@@ -396,6 +396,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				for _, kmer := range kmers {
 					hashes = append(hashes, hashValues(kmer, numHashes))
 				}
+
+				// recycle kmer-sketch ([]uint64) object
+				kmers = kmers[:0]
+				poolKmers.Put(kmers)
 
 				// send queries
 				// reuse chan []Match object, to reduce GC
@@ -434,7 +438,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					// send result
 					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
 					result.DBId = db.DBId
-					result.Kmers = kmers
 					result.Matches = matches
 				}
 
@@ -933,10 +936,6 @@ var poolChanMatches = &sync.Pool{New: func() interface{} {
 
 // Recycle put pooled objects back.
 func (r QueryResult) Recycle() {
-	// recycle kmer-sketch ([]uint64) object
-	r.Kmers = r.Kmers[:0]
-	poolKmers.Put(r.Kmers)
-
 	r.Matches = r.Matches[:0]
 	poolMatches.Put(r.Matches)
 }
