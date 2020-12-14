@@ -123,23 +123,24 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 }
 
 // WriteTo dumps UnikIndexDBInfo to file.
-func (i UnikIndexDBInfo) WriteTo(file string) error {
+func (i UnikIndexDBInfo) WriteTo(file string) (int, error) {
 	data, err := yaml.Marshal(i)
 	if err != nil {
-		return fmt.Errorf("fail to marshal uniker index db info")
+		return 0, fmt.Errorf("fail to marshal database info")
 	}
 
 	w, err := os.Create(file)
 	if err != nil {
-		return fmt.Errorf("fail to write kmcp database info file: %s", file)
+		return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
 	}
-	_, err = w.Write(data)
+	var n int
+	n, err = w.Write(data)
 	if err != nil {
-		return fmt.Errorf("fail to write kmcp database info file: %s", file)
+		return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
 	}
 
 	w.Close()
-	return nil
+	return n, nil
 }
 
 // CompatibleWith checks whether two databases have the same parameters.

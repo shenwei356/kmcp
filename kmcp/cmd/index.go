@@ -44,6 +44,7 @@ import (
 	"github.com/twotwotwo/sorts/sortutil"
 	"github.com/vbauerster/mpb"
 	"github.com/vbauerster/mpb/decor"
+	"gopkg.in/yaml.v2"
 )
 
 var indexCmd = &cobra.Command{
@@ -59,9 +60,10 @@ Tips:
      memory occupation and I/O pressure, sqrt(#cpus) is recommended.
      #threads * #threads files are simultaneously opened, and max number
      of opened files is limited by flag -F/--max-open-files.
-  2. Value of block size -b/--block-size better be multiple of 64.
-  3. Use --dry-run to adjust parameters and see final #index files 
-     and total file size.
+  2. Value of block size -b/--block-size better be multiple of 64.	 
+  3. Use --dry-run to adjust parameters and check final number of 
+     index files (#index-files) and total file size. 
+     #index-files >= #cpus is recommended for better parallelization.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -426,7 +428,7 @@ Tips:
 				log.Infof("bounded syncmer size: %d", meta0.SyncmerS)
 			}
 			if meta0.SplitSeq {
-				log.Infof("split seq size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
+				log.Infof("split seqequence size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
 			}
 			if scaled {
 				log.Infof("down-sampling scale: %d", scale)
@@ -827,28 +829,32 @@ Tips:
 			pbs.Wait()
 		}
 
+		sortutil.Strings(indexFiles)
+		dbInfo := NewUnikIndexDBInfo(indexFiles)
+		dbInfo.Alias = alias
+		dbInfo.K = k
+		dbInfo.Hashed = hashed
+		dbInfo.Kmers = int(n)
+		dbInfo.FPR = fpr
+		dbInfo.BlockSize = sBlock0
+		dbInfo.BlockSizes = blockSizes
+		dbInfo.NumNames = len(names0)
+		dbInfo.Names = names0
+		dbInfo.Sizes = sizes0
+		dbInfo.NumHashes = numHashes
+		dbInfo.Canonical = canonical
+		dbInfo.Scaled = scaled
+		dbInfo.Scale = scale
+		dbInfo.Minimizer = meta0.Minimizer
+		dbInfo.MinimizerW = uint32(meta0.MinimizerW)
+		dbInfo.Syncmer = meta0.Syncmer
+		dbInfo.SyncmerS = uint32(meta0.SyncmerS)
+
 		if !dryRun {
-			sortutil.Strings(indexFiles)
-			dbInfo := NewUnikIndexDBInfo(indexFiles)
-			dbInfo.Alias = alias
-			dbInfo.K = k
-			dbInfo.Hashed = hashed
-			dbInfo.Kmers = int(n)
-			dbInfo.FPR = fpr
-			dbInfo.BlockSize = sBlock0
-			dbInfo.BlockSizes = blockSizes
-			dbInfo.NumNames = len(names0)
-			dbInfo.Names = names0
-			dbInfo.Sizes = sizes0
-			dbInfo.NumHashes = numHashes
-			dbInfo.Canonical = canonical
-			dbInfo.Scaled = scaled
-			dbInfo.Scale = scale
-			dbInfo.Minimizer = meta0.Minimizer
-			dbInfo.MinimizerW = uint32(meta0.MinimizerW)
-			dbInfo.Syncmer = meta0.Syncmer
-			dbInfo.SyncmerS = uint32(meta0.SyncmerS)
-			checkError(dbInfo.WriteTo(filepath.Join(outDir, dbInfoFile)))
+			var n2 int
+			n2, err = dbInfo.WriteTo(filepath.Join(outDir, dbInfoFile))
+			checkError(err)
+			fileSize += float64(n2)
 
 			// write name_mapping.tsv
 			func() {
@@ -863,19 +869,38 @@ Tips:
 				}()
 
 				var name string
+				var line string
 				for _, _name := range names0 {
 					// name, _ = filepathTrimExtension(_name)
 					name = _name
-					outfh.WriteString(fmt.Sprintf("%s\t%s\n", _name, name))
+					line = fmt.Sprintf("%s\t%s\n", _name, name)
+					fileSize += float64(len(line))
+					outfh.WriteString(line)
 				}
 			}()
+		} else { // compute file size of __db.yaml and __name_mapping.tsv
+			// __db.yaml
+			data, err := yaml.Marshal(dbInfo)
+			if err != nil {
+				checkError(fmt.Errorf("fail to marshal database info"))
+			}
+			fileSize += float64(len(data))
+
+			// __name_mapping.tsv
+			var name string
+			var line string
+			for _, _name := range names0 {
+				name = _name
+				line = fmt.Sprintf("%s\t%s\n", _name, name)
+				fileSize += float64(len(line))
+			}
 		}
 
 		// ------------------------------------------------------------------------------------
 
 		if opt.Verbose {
 			log.Infof("kmcp database with %d k-mers saved to %s", n, outDir)
-			log.Infof("#index files: %d, total file size: %s", len(indexFiles), bytesize.ByteSize(fileSize))
+			log.Infof("#index-files: %d, total file size: %s", len(indexFiles), bytesize.ByteSize(fileSize))
 		}
 	},
 }
@@ -883,21 +908,21 @@ Tips:
 func init() {
 	RootCmd.AddCommand(indexCmd)
 
-	indexCmd.Flags().StringP("in-dir", "I", "", `directory containing .unik files. if it's given and -O/--out-dir is empty, index files will be saved to -I/--in-dir`)
+	indexCmd.Flags().StringP("in-dir", "I", "", `directory containing .unik files. directory symlinks are followed`)
 	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files to index`)
 
-	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. if it's not given and -I/--in-dir is specified, index files will be saved to -I/--in-dir`)
-	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir/--in-dir. you can also manually edit in info file __db.yml`)
+	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. default: ${indir}.kmcp-db`)
+	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir. you can also manually edit it in info file: ${outdir}/__db.yml`)
 
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter`)
-	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes`)
+	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes of bloom filters`)
 	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: sqrt(#.files)`)
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, change block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
-	indexCmd.Flags().BoolP("force", "", false, "overwrite tmp dir")
+	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
-	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful to adjust parameters")
+	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful for adjusting parameters (recommended)")
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block

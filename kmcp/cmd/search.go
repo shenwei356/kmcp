@@ -69,11 +69,7 @@ Attentions:
 		outFile := getFlagString(cmd, "out-prefix")
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		targetCov := getFlagFloat64(cmd, "target-cov")
-		pIdent := getFlagFloat64(cmd, "ident-pct")
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
-		alignSketches := getFlagBool(cmd, "align-sketches")
-		skipAlign := getFlagPositiveInt(cmd, "skip-align")
-		refuseAlign := getFlagPositiveInt(cmd, "refuse-align")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -94,9 +90,6 @@ Attentions:
 		}
 		if targetCov < 0 || targetCov > 1 {
 			checkError(fmt.Errorf("value of -T/-target-cov should be in range [0, 1]"))
-		}
-		if pIdent < 0 || pIdent > 1 {
-			checkError(fmt.Errorf("value of -t/--ident-pct should be in range [0, 1]"))
 		}
 
 		var namesMap map[string]string
@@ -153,11 +146,6 @@ Attentions:
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 
-			Align:       alignSketches,
-			SkipAlign:   skipAlign,
-			RefuseAlign: refuseAlign,
-			MinIdentPct: pIdent,
-
 			TopN:   topN,
 			SortBy: sortBy,
 
@@ -176,7 +164,7 @@ Attentions:
 			}
 		}
 		if opt.Verbose {
-			log.Infof("%d databases loaded", len(sg.DBs))
+			log.Infof("%d database(s) loaded", len(sg.DBs))
 
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Infof("minimum  matched k-mers: %d", minCount)
@@ -357,9 +345,9 @@ func init() {
 	searchCmd.Flags().BoolP("use-mmap", "m", true, `load index files into memory to accelerate searching`)
 
 	// query option
-	searchCmd.Flags().IntP("min-count", "c", 3, `minimum number of matched k-mers (sketch)`)
-	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimum query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
-	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimum target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
+	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
+	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
+	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)

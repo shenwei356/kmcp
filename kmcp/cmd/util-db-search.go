@@ -188,12 +188,6 @@ type SearchOptions struct {
 	UseMMap bool
 	Threads int
 
-	// for align
-	Align       bool
-	SkipAlign   int
-	RefuseAlign int
-	MinIdentPct float64
-
 	KeepUnmatched bool
 	TopN          int
 	SortBy        string

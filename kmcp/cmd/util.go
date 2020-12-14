@@ -114,7 +114,8 @@ func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
 		}
 		done <- 1
 	}()
-	err := cwalk.Walk(path, func(_path string, info os.FileInfo, err error) error {
+
+	err := cwalk.WalkWithSymlinks(path, func(_path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

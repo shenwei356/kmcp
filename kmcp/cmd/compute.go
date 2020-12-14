@@ -48,13 +48,19 @@ var computeCmd = &cobra.Command{
 Attentions:
   1. K-mers (sketchs) are not sorted and duplicates remained.
 
-Supported types:
+Supported kmer (sketches) types:
   1. K-mer:
      1. ntHash of k-mer (-k)
   2. K-mer sketchs:
      1. Scaled MinHash (-k -D)
      2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
      3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
+
+About splitting sequences:
+  1. Sequences can be splitted into fragments (-s/--split-size)
+	 with overlap (-l/--split-overlap).
+  2. Both sequence IDs and fragments indice are saved for later use,
+	 in form of meta/description data in .unik files.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -73,7 +79,7 @@ Supported types:
 		// basic flags
 
 		k := getFlagPositiveInt(cmd, "kmer-len")
-		circular := getFlagBool(cmd, "circular")
+		circular0 := getFlagBool(cmd, "circular")
 
 		outDir := getFlagString(cmd, "out-dir")
 		force := getFlagBool(cmd, "force")
@@ -86,18 +92,19 @@ Supported types:
 
 		// ---------------------------------------------------------------
 		// flags for splitting sequence
-		splitS := getFlagNonNegativeInt(cmd, "split-size")
-		splitO := getFlagNonNegativeInt(cmd, "split-overlap")
-		splitSeq := splitS > 0
+
+		splitSize := getFlagNonNegativeInt(cmd, "split-size")
+		splitOverlap := getFlagNonNegativeInt(cmd, "split-overlap")
+		splitSeq := splitSize > 0
 		if splitSeq {
-			if splitS < k {
+			if splitSize < k {
 				checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
 			}
-			if splitS <= splitO {
+			if splitSize <= splitOverlap {
 				checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
 			}
 		}
-		step := splitS - splitO
+		step := splitSize - splitOverlap
 
 		// ---------------------------------------------------------------
 		// flags of sketch
@@ -154,7 +161,10 @@ Supported types:
 		if opt.Verbose {
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("k: %d", k)
-			log.Infof("circular genome: %v", circular)
+			log.Infof("circular genome: %v", circular0)
+			if splitSeq {
+				log.Infof("split seqequence size: %d, overlap: %d", splitSize, splitOverlap)
+			}
 			if minimizer {
 				log.Infof("minimizer window: %d", minimizerW)
 			}
@@ -205,6 +215,7 @@ Supported types:
 		// wait group
 		var wg sync.WaitGroup
 		tokens := make(chan int, opt.NumCPUs)
+		threadsFloat := float64(opt.NumCPUs)
 
 		for _, file := range files {
 			tokens <- 1
@@ -217,7 +228,7 @@ Supported types:
 					<-tokens
 
 					if opt.Verbose {
-						chDuration <- time.Duration(float64(time.Since(startTime)) / float64(opt.NumCPUs))
+						chDuration <- time.Duration(float64(time.Since(startTime)) / threadsFloat)
 					}
 				}()
 
@@ -238,13 +249,16 @@ Supported types:
 				var seqID string
 				var outFile string
 				var baseFile = filepath.Base(file)
+				var circular bool
 
 				var codes []uint64
 
 				if !splitSeq {
 					codes = make([]uint64, 0, mapInitSize)
+					circular = circular0
 				} else {
-					codes = make([]uint64, 0, splitS)
+					codes = make([]uint64, 0, splitSize)
+					circular = false // split seq is linear, right?
 				}
 
 				fastxReader, err = fastx.NewDefaultReader(file)
@@ -261,13 +275,13 @@ Supported types:
 					}
 					seqID = string(record.ID)
 
-					if !splitSeq {
-						splitS = len(record.Seq.Seq)
+					if !splitSeq { // whole sequence
+						splitSize = len(record.Seq.Seq)
 						step = 1
 						greedy = false
 					}
 
-					slider = record.Seq.Slider(splitS, step, circular, greedy)
+					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
 
 					slidIdx = 0
 					for {
@@ -361,8 +375,8 @@ Supported types:
 							Minimizer:    minimizer,
 							MinimizerW:   minimizerW,
 							SplitSeq:     splitSeq,
-							SplitSize:    splitS,
-							SplitOverlap: splitO,
+							SplitSize:    splitSize,
+							SplitOverlap: splitOverlap,
 						}
 						writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,
 							scaled, scale, meta)
