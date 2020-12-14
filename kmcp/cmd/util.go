@@ -104,9 +104,9 @@ func makeOutDir(outDir string, force bool) {
 	}
 }
 
-func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
+func getFileListFromDir(path string, pattern *regexp.Regexp, threads int) ([]string, error) {
 	files := make([]string, 0, 512)
-	ch := make(chan string, 8)
+	ch := make(chan string, threads)
 	done := make(chan int)
 	go func() {
 		for file := range ch {
@@ -115,6 +115,7 @@ func getFileListFromDir(path string, pattern *regexp.Regexp) ([]string, error) {
 		done <- 1
 	}()
 
+	cwalk.NumWorkers = threads
 	err := cwalk.WalkWithSymlinks(path, func(_path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

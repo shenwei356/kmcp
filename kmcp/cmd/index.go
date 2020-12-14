@@ -178,7 +178,7 @@ Tips:
 
 		var files []string
 		if readFromDir {
-			files, err = getFileListFromDir(inDir, reFile)
+			files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
 			checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
 		} else {
 			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)

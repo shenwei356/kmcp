@@ -220,7 +220,6 @@ Attentions:
 			}
 
 			for _, match := range result.Matches {
-				// target = _dbInfo.Names[cumBlockSize[match.IndexID]+match.TargetIdx]
 				target = match.Target
 				if mappingNames { //
 					if t, ok = namesMap[target]; ok {
