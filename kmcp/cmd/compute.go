@@ -244,7 +244,7 @@ About splitting sequences:
 				var slider func() (*seq.Seq, bool)
 				var _seq *seq.Seq
 				var _ok bool
-				var slidIdx int
+				var slidIdx uint32
 				var greedy bool = true
 				var seqID string
 				var outFile string

@@ -187,7 +187,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tmKmers\tqCov\ttCov\tpIdt\tloc\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tloc\tmKmers\tqCov\ttCov\tpIdt\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -214,8 +214,8 @@ Attentions:
 				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%d\n",
-					prefix2, "", 0, float64(0), float64(0), -1))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
+					prefix2, "", 0, 0, float64(0), float64(0)))
 				return
 			}
 
@@ -234,8 +234,8 @@ Attentions:
 				// query, len_query,
 				// db, num_kmers, fpr,
 				// target, num_target_kmers, qcov, pidt, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-					prefix2, target, match.NumKmers, match.QCov, match.TCov, match.PIdt, match.Loc+1))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2, target, match.TargetIdx, match.NumKmers, match.QCov, match.TCov, match.PIdt))
 			}
 
 			result.Recycle()

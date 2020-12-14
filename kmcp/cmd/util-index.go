@@ -36,6 +36,7 @@ const extIndex = ".uniki"
 type UnikFileInfo struct {
 	Path  string
 	Name  string
+	Index uint32
 	Kmers int64
 }
 
@@ -82,6 +83,7 @@ func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string)
 
 	var header index.Header
 	names := make([]string, 0, len(files)*8)
+	indices := make([]uint32, 0, len(files)*8)
 	sizes := make([]uint64, 0, len(files)*8)
 
 	// retrieve header of the first file, and names in all files
@@ -98,6 +100,7 @@ func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string)
 		}
 
 		names = append(names, _reader.Names...)
+		indices = append(indices, _reader.Indices...)
 		sizes = append(sizes, _reader.Sizes...)
 
 		checkError(r.Close())
@@ -153,7 +156,7 @@ func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string)
 			w.Close()
 		}()
 
-		writer, err := index.NewWriter(outfh, header.K, header.Canonical, header.NumHashes, header.NumSigs, names, sizes)
+		writer, err := index.NewWriter(outfh, header.K, header.Canonical, header.NumHashes, header.NumSigs, names, indices, sizes)
 		checkError(err)
 		defer func() {
 			checkError(writer.Flush())
@@ -195,7 +198,7 @@ func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string)
 // Meta contains some meta information
 type Meta struct {
 	SeqID  string `json:"id"`  // sequence ID
-	SeqLoc int    `json:"idx"` // sequence location index
+	SeqLoc uint32 `json:"idx"` // sequence location index
 
 	Syncmer  bool `json:"sm"` // syncmer
 	SyncmerS int  `json:"sm-s"`

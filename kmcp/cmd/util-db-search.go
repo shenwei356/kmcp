@@ -67,14 +67,14 @@ type QueryResult struct {
 
 // Match is the struct of matching detail.
 type Match struct {
-	Target   string // target name
-	NumKmers int    // mat	ched k-mers
+	Target    string // target name
+	TargetIdx uint32
+	NumKmers  int // mat	ched k-mers
 
 	QCov float64 // coverage of query
 	TCov float64 // coverage of target
 
 	PIdt float64 // percent of ident linearly matched kmers
-	Loc  int
 }
 
 // Matches is list of Matches, for sorting.
@@ -628,6 +628,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	h.Canonical = reader.Canonical
 	h.NumHashes = reader.NumHashes
 	h.Names = reader.Names
+	h.Indices = reader.Indices
 	h.Sizes = reader.Sizes
 	h.NumRowBytes = reader.NumRowBytes
 	h.NumSigs = reader.NumSigs
@@ -672,6 +673,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	go func() {
 
 		names := idx.Header.Names
+		indices := idx.Header.Indices
 		numNames := len(idx.Header.Names)
 		numRowBytes := idx.Header.NumRowBytes
 		numSigs := idx.Header.NumSigs
@@ -841,12 +843,12 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					}
 
 					results = append(results, Match{
-						Target:   names[k],
-						NumKmers: count,
-						QCov:     t,
-						TCov:     T,
-						PIdt:     m,
-						Loc:      -2,
+						Target:    names[k],
+						TargetIdx: indices[k],
+						NumKmers:  count,
+						QCov:      t,
+						TCov:      T,
+						PIdt:      m,
 					})
 				}
 			}

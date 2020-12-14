@@ -303,15 +303,8 @@ Tips:
 				checkError(fmt.Errorf("binary file not sorted or no k-mers number found: %s", file))
 			}
 
-			var name string
-			if meta.SplitSeq {
-				name = fmt.Sprintf("%s--%d", meta.SeqID, meta.SeqLoc)
-			} else {
-				name = meta.SeqID
-			}
-
 			checkError(r.Close())
-			return UnikFileInfo{Path: file, Name: name, Kmers: reader.Number}
+			return UnikFileInfo{Path: file, Name: meta.SeqID, Index: meta.SeqLoc, Kmers: reader.Number}
 		}
 
 		file := files[0]
@@ -328,8 +321,10 @@ Tips:
 		}
 
 		fileInfos = append(fileInfos, info)
+		namesMap0 := make(map[string]interface{}, 1024)
 		namesMap := make(map[uint64]interface{}, nfiles)
-		namesMap[xxhash.Sum64String(info.Name)] = struct{}{}
+		namesMap[xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
+		namesMap0[info.Name] = struct{}{}
 
 		// left files
 		var wgGetInfo sync.WaitGroup
@@ -343,11 +338,14 @@ Tips:
 				fileInfos = append(fileInfos, info)
 				n += info.Kmers
 
-				nameHash = xxhash.Sum64String(info.Name)
+				nameHash = xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
 				if _, ok = namesMap[nameHash]; ok {
 					log.Warningf("duplicated name: %s", info.Name)
 				} else {
 					namesMap[nameHash] = struct{}{}
+					if _, ok = namesMap0[info.Name]; !ok {
+						namesMap0[info.Name] = struct{}{}
+					}
 				}
 			}
 			doneGetInfo <- 1
@@ -391,10 +389,12 @@ Tips:
 		sorts.Quicksort(UnikFileInfos(fileInfos))
 
 		names0 := make([]string, 0, len(files))
+		indices0 := make([]uint32, 0, len(files))
 		sizes0 := make([]uint64, 0, len(files))
 		for _, info := range fileInfos {
 			n += info.Kmers
 			names0 = append(names0, info.Name)
+			indices0 = append(indices0, info.Index)
 			sizes0 = append(sizes0, uint64(info.Kmers))
 		}
 
@@ -482,7 +482,6 @@ Tips:
 		sBlock0 := sBlock
 
 		batch := make([]*UnikFileInfo, 0, sBlock)
-		blockSizes := make([]int, 0, 8)
 		var flag8, flag bool
 		var lastInfo *UnikFileInfo
 		for i := 0; i <= nFiles; i++ {
@@ -540,8 +539,6 @@ Tips:
 				break
 			}
 
-			blockSizes = append(blockSizes, len(batch))
-
 			b++
 
 			prefix = fmt.Sprintf("[block #%03d]", b)
@@ -577,6 +574,7 @@ Tips:
 
 				sigsBlock := make([][]byte, 0, nBatchFiles)
 				namesBlock := make([]string, 0, len(files))
+				indicesBlock := make([]uint32, 0, len(files))
 				sizesBlock := make([]uint64, 0, len(files))
 
 				chBatch8 := make(chan batch8, nBatchFiles)
@@ -590,6 +588,7 @@ Tips:
 						if batch.id == id {
 							sigsBlock = append(sigsBlock, batch.sigs)
 							namesBlock = append(namesBlock, batch.names...)
+							indicesBlock = append(indicesBlock, batch.indices...)
 							sizesBlock = append(sizesBlock, batch.sizes...)
 							if opt.Verbose && !dryRun {
 								bar.Increment()
@@ -601,6 +600,7 @@ Tips:
 							if _batch, ok := buf[id]; ok {
 								sigsBlock = append(sigsBlock, _batch.sigs)
 								namesBlock = append(namesBlock, _batch.names...)
+								indicesBlock = append(indicesBlock, _batch.indices...)
 								sizesBlock = append(sizesBlock, _batch.sizes...)
 								if opt.Verbose && !dryRun {
 									bar.Increment()
@@ -624,6 +624,7 @@ Tips:
 
 							sigsBlock = append(sigsBlock, _batch.sigs)
 							namesBlock = append(namesBlock, _batch.names...)
+							indicesBlock = append(indicesBlock, _batch.indices...)
 							sizesBlock = append(sizesBlock, _batch.sizes...)
 							if opt.Verbose && !dryRun {
 								bar.Increment()
@@ -670,9 +671,11 @@ Tips:
 						}()
 
 						names := make([]string, 0, 8)
+						indices := make([]uint32, 0, 8)
 						sizes := make([]uint64, 0, 8)
 						for _, info := range _files {
 							names = append(names, info.Name)
+							indices = append(indices, info.Index)
 							sizes = append(sizes, uint64(info.Kmers))
 						}
 
@@ -759,10 +762,11 @@ Tips:
 						}
 
 						chBatch8 <- batch8{
-							id:    id,
-							sigs:  sigs,
-							names: names,
-							sizes: sizes,
+							id:      id,
+							sigs:    sigs,
+							names:   names,
+							indices: indices,
+							sizes:   sizes,
 						}
 						// if opt.Verbose {
 						// 	log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
@@ -789,7 +793,7 @@ Tips:
 						w.Close()
 					}()
 
-					writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, sizesBlock)
+					writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, indicesBlock, sizesBlock)
 					checkError(err)
 					defer func() {
 						checkError(writer.Flush())
@@ -840,10 +844,7 @@ Tips:
 		dbInfo.Kmers = int(n)
 		dbInfo.FPR = fpr
 		dbInfo.BlockSize = sBlock0
-		// dbInfo.BlockSizes = blockSizes
 		dbInfo.NumNames = len(names0)
-		// dbInfo.Names = names0
-		// dbInfo.Sizes = sizes0
 		dbInfo.NumHashes = numHashes
 		dbInfo.Canonical = canonical
 		dbInfo.Scaled = scaled
@@ -871,12 +872,9 @@ Tips:
 					w.Close()
 				}()
 
-				var name string
 				var line string
-				for _, _name := range names0 {
-					// name, _ = filepathTrimExtension(_name)
-					name = _name
-					line = fmt.Sprintf("%s\t%s\n", _name, name)
+				for name := range namesMap0 {
+					line = fmt.Sprintf("%s\t%s\n", name, name)
 					fileSize += float64(len(line))
 					outfh.WriteString(line)
 				}
@@ -890,11 +888,9 @@ Tips:
 			fileSize += float64(len(data))
 
 			// __name_mapping.tsv
-			var name string
 			var line string
-			for _, _name := range names0 {
-				name = _name
-				line = fmt.Sprintf("%s\t%s\n", _name, name)
+			for name := range namesMap0 {
+				line = fmt.Sprintf("%s\t%s\n", name, name)
 				fileSize += float64(len(line))
 			}
 		}
@@ -932,7 +928,10 @@ func init() {
 type batch8 struct {
 	id int
 
-	sigs  []byte
-	names []string
-	sizes []uint64
+	sigs    []byte
+	names   []string
+	indices []uint32
+	sizes   []uint64
 }
+
+var sepNameIdx = "-+-"
