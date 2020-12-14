@@ -58,19 +58,16 @@ type UnikIndexDBInfo struct {
 	Syncmer    bool   `yaml:"syncmer"`
 	SyncmerS   uint32 `yaml:"syncmer-s"`
 
-	NumHashes  int      `yaml:"hashes"`
-	FPR        float64  `yaml:"fpr"`
-	BlockSize  int      `yaml:"blocksize"`
-	Kmers      int      `yaml:"totalKmers"`
-	Files      []string `yaml:"files"`
-	BlockSizes []int    `yaml:"num-files-in-blocks"`
-	NumNames   int      `yaml:"numNames"`
-	Names      []string `yaml:"names"`
-	Sizes      []uint64 `yaml:"kmers"`
+	NumHashes int      `yaml:"hashes"`
+	FPR       float64  `yaml:"fpr"`
+	BlockSize int      `yaml:"blocksize"`
+	Kmers     int      `yaml:"totalKmers"`
+	Files     []string `yaml:"files"`
+	NumNames  int      `yaml:"numNames"`
 
-	path         string
-	NameMapping  map[string]string
-	MappingNames bool
+	path         string            `yaml:"path,omitempty"`
+	NameMapping  map[string]string `yaml:"name-mapping,omitempty"`
+	MappingNames bool              `yaml:"mapping-names,omitempty"`
 }
 
 func (i UnikIndexDBInfo) String() string {

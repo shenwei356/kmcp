@@ -34,6 +34,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cespare/xxhash"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/unikmer/index"
@@ -219,7 +220,7 @@ Tips:
 		var doneDuration chan int
 
 		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
+			pbs = mpb.New(mpb.WithWidth(40), mpb.WithOutput(os.Stderr))
 			bar = pbs.AddBar(int64(len(files)),
 				mpb.BarStyle("[=>-]<+"),
 				mpb.PrependDecorators(
@@ -327,8 +328,8 @@ Tips:
 		}
 
 		fileInfos = append(fileInfos, info)
-		namesMap := make(map[string]interface{}, nfiles)
-		namesMap[info.Name] = struct{}{}
+		namesMap := make(map[uint64]interface{}, nfiles)
+		namesMap[xxhash.Sum64String(info.Name)] = struct{}{}
 
 		// left files
 		var wgGetInfo sync.WaitGroup
@@ -337,14 +338,16 @@ Tips:
 		doneGetInfo := make(chan int)
 		go func() {
 			var ok bool
+			var nameHash uint64
 			for info := range chInfos {
 				fileInfos = append(fileInfos, info)
 				n += info.Kmers
 
-				if _, ok = namesMap[info.Name]; ok {
+				nameHash = xxhash.Sum64String(info.Name)
+				if _, ok = namesMap[nameHash]; ok {
 					log.Warningf("duplicated name: %s", info.Name)
 				} else {
-					namesMap[info.Name] = struct{}{}
+					namesMap[nameHash] = struct{}{}
 				}
 			}
 			doneGetInfo <- 1
@@ -440,7 +443,7 @@ Tips:
 		}
 
 		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
+			pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
 		}
 
 		nIndexFiles := int((len(files) + sBlock - 1) / sBlock) // may be more if using -m and -M
@@ -837,10 +840,10 @@ Tips:
 		dbInfo.Kmers = int(n)
 		dbInfo.FPR = fpr
 		dbInfo.BlockSize = sBlock0
-		dbInfo.BlockSizes = blockSizes
+		// dbInfo.BlockSizes = blockSizes
 		dbInfo.NumNames = len(names0)
-		dbInfo.Names = names0
-		dbInfo.Sizes = sizes0
+		// dbInfo.Names = names0
+		// dbInfo.Sizes = sizes0
 		dbInfo.NumHashes = numHashes
 		dbInfo.Canonical = canonical
 		dbInfo.Scaled = scaled

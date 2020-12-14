@@ -65,52 +65,16 @@ type QueryResult struct {
 	Matches []Match // all matches
 }
 
-// Clone returns a clone of QueryResult
-func (r QueryResult) Clone() QueryResult {
-	var matches []Match
-	if len(r.Matches) > 0 {
-		matches = make([]Match, len(r.Matches))
-		for i := 0; i < len(r.Matches); i++ {
-			matches[i] = r.Matches[i].Clone()
-		}
-	}
-
-	return QueryResult{
-		QueryIdx: r.QueryIdx,
-		QueryID:  r.QueryID,
-		QueryLen: r.QueryLen,
-		DBId:     r.DBId,
-		FPR:      r.FPR,
-		NumKmers: r.NumKmers,
-		Kmers:    r.Kmers,
-		Matches:  matches,
-	}
-}
-
 // Match is the struct of matching detail.
 type Match struct {
-	IndexID   int // index file id
-	TargetIdx int // target name index, for saving space
-	NumKmers  int // mat	ched k-mers
+	Target   string // target name
+	NumKmers int    // mat	ched k-mers
 
 	QCov float64 // coverage of query
 	TCov float64 // coverage of target
 
 	PIdt float64 // percent of ident linearly matched kmers
 	Loc  int
-}
-
-// Clone returns a clone of Match
-func (m Match) Clone() Match {
-	return Match{
-		IndexID:   m.IndexID,
-		TargetIdx: m.TargetIdx,
-		NumKmers:  m.NumKmers,
-		QCov:      m.QCov,
-		TCov:      m.TCov,
-		PIdt:      m.PIdt,
-		Loc:       m.Loc,
-	}
 }
 
 // Matches is list of Matches, for sorting.
@@ -171,9 +135,9 @@ func (ms SortBySum123) Less(i int, j int) bool {
 }
 
 // ---------------------------------------------------------------
-// messenging between database and indice
+// messenging between databases and indices
 
-// IndexQuery is a query sent to multiple indice of a database.
+// IndexQuery is a query sent to multiple indices of a database.
 type IndexQuery struct {
 	// Kmers  []uint64
 	Hashes [][]uint64 // related to database
@@ -290,8 +254,7 @@ type UnikIndexDB struct {
 	Options SearchOptions
 	path    string
 
-	DBId          int // id for current database
-	CumBlockSizes []int
+	DBId int // id for current database
 
 	InCh chan Query
 
@@ -325,22 +288,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		return nil, err
 	}
 
-	cumBlockSizes := make([]int, 0, len(info.Files))
-	i := 0
-	for _, nfile := range info.BlockSizes {
-		cumBlockSizes = append(cumBlockSizes, i)
-		i += nfile
-	}
-
-	// unikPaths := make([]string, len(info.Paths))
-	// for j, p := range info.Paths {
-	// 	unikPaths[j] = filepath.Join(path, p)
-	// }
-
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
 	// first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, 0)
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -357,7 +308,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	db.InCh = make(chan Query, opt.Threads)
 
-	db.CumBlockSizes = cumBlockSizes
 	db.DBId = dbID
 
 	db.stop = make(chan int)
@@ -375,14 +325,14 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		}()
 
 		var wg sync.WaitGroup
-		for i, f := range info.Files[1:] {
+		for _, f := range info.Files[1:] {
 			f = filepath.Join(path, f)
 
 			wg.Add(1)
-			go func(f string, indexID int) {
+			go func(f string) {
 				defer wg.Done()
 
-				idx, err := NewUnixIndex(f, opt, indexID)
+				idx, err := NewUnixIndex(f, opt)
 				checkError(errors.Wrap(err, f))
 
 				if !idx.Header.Compatible(idx1.Header) {
@@ -390,7 +340,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				}
 
 				ch <- idx
-			}(f, i+1)
+			}(f)
 		}
 		wg.Wait()
 		close(ch)
@@ -410,7 +360,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numHashes := db.Info.NumHashes
 				indices := db.Indices
 				numIndices := len(indices)
-				cumBlockSizes = db.CumBlockSizes
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
 				kmers := poolKmers.Get().([]uint64)
@@ -459,7 +408,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					}
 				}
 
-				// get matches from all indice
+				// get matches from all indices
 				// reuse []Match object
 				matches := poolMatches.Get().([]Match)
 				var _matches []Match
@@ -496,11 +445,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	}()
 
 	return db, nil
-}
-
-// TargetName return name of a target
-func (db *UnikIndexDB) TargetName(indexID int, targetIdx int) string {
-	return db.Info.Names[db.CumBlockSizes[indexID]+targetIdx]
 }
 
 func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
@@ -632,7 +576,6 @@ const PosPopCountBufSize = 128
 
 // UnikIndex defines a unik index struct.
 type UnikIndex struct {
-	IndexID int // id
 	Options SearchOptions
 
 	done chan int
@@ -663,7 +606,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open unikmer index file: %s", file)
@@ -691,7 +634,6 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 
 	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
 	idx.useMmap = opt.UseMMap
-	idx.IndexID = indexID
 
 	idx.done = make(chan int)
 	idx.InCh = make(chan IndexQuery, opt.Threads)
@@ -729,6 +671,7 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 	// receive query and execute
 	go func() {
 
+		names := idx.Header.Names
 		numNames := len(idx.Header.Names)
 		numRowBytes := idx.Header.NumRowBytes
 		numSigs := idx.Header.NumSigs
@@ -747,7 +690,6 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 		buffsT := idx.buffsT
 
 		iLast := numRowBytes - 1
-		indexID := idx.IndexID
 
 		var _count *[8]int
 
@@ -899,13 +841,12 @@ func NewUnixIndex(file string, opt SearchOptions, indexID int) (*UnikIndex, erro
 					}
 
 					results = append(results, Match{
-						IndexID:   indexID,
-						TargetIdx: k,
-						NumKmers:  count,
-						QCov:      t,
-						TCov:      T,
-						PIdt:      m,
-						Loc:       -2,
+						Target:   names[k],
+						NumKmers: count,
+						QCov:     t,
+						TCov:     T,
+						PIdt:     m,
+						Loc:      -2,
 					})
 				}
 			}

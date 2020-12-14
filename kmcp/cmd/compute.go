@@ -59,7 +59,7 @@ Supported kmer (sketches) types:
 About splitting sequences:
   1. Sequences can be splitted into fragments (-s/--split-size)
 	 with overlap (-l/--split-overlap).
-  2. Both sequence IDs and fragments indice are saved for later use,
+  2. Both sequence IDs and fragments indices are saved for later use,
 	 in form of meta/description data in .unik files.
 
 `,
@@ -186,7 +186,7 @@ About splitting sequences:
 		var doneDuration chan int
 
 		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(60), mpb.WithOutput(os.Stderr))
+			pbs = mpb.New(mpb.WithWidth(40), mpb.WithOutput(os.Stderr))
 			bar = pbs.AddBar(int64(len(files)),
 				mpb.BarStyle("[=>-]<+"),
 				mpb.PrependDecorators(

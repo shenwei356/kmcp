@@ -197,7 +197,7 @@ Attentions:
 		var prefix2 string
 		var t, target string
 		var _dbInfo UnikIndexDBInfo
-		var cumBlockSize []int
+		// var cumBlockSize []int
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -207,7 +207,6 @@ Attentions:
 				return
 			}
 			_dbInfo = sg.DBs[result.DBId].Info
-			cumBlockSize = sg.DBs[result.DBId].CumBlockSizes
 			// query, len_query,
 			// db, num_kmers, fpr, num_matches,
 			prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
@@ -221,7 +220,8 @@ Attentions:
 			}
 
 			for _, match := range result.Matches {
-				target = _dbInfo.Names[cumBlockSize[match.IndexID]+match.TargetIdx]
+				// target = _dbInfo.Names[cumBlockSize[match.IndexID]+match.TargetIdx]
+				target = match.Target
 				if mappingNames { //
 					if t, ok = namesMap[target]; ok {
 						target = t
