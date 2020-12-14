@@ -366,6 +366,10 @@ About splitting sequences:
 							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
 						}
 
+						if !splitSeq {
+							splitSize = 0 // reset
+						}
+
 						meta := Meta{
 							SeqID:  seqID,
 							SeqLoc: slidIdx,

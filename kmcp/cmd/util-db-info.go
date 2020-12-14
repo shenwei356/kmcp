@@ -58,6 +58,10 @@ type UnikIndexDBInfo struct {
 	Syncmer    bool   `yaml:"syncmer"`
 	SyncmerS   uint32 `yaml:"syncmer-s"`
 
+	SplitSeq     bool `yaml:"split-seq"`
+	SplitSize    int  `yaml:"split-size"`
+	SplitOverlap int  `yaml:"split-overlap"`
+
 	NumHashes int      `yaml:"hashes"`
 	FPR       float64  `yaml:"fpr"`
 	BlockSize int      `yaml:"blocksize"`

@@ -360,6 +360,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numHashes := db.Info.NumHashes
 				indices := db.Indices
 				numIndices := len(indices)
+				sortBy := db.Options.SortBy
+				topN := db.Options.TopN
+				onlyTopN := topN > 0
+
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
 				kmers := poolKmers.Get().([]uint64)
@@ -433,7 +437,24 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// sort and filter
 				if len(matches) > 0 {
-					db.sortAndFilterMatches(matches)
+					switch sortBy {
+					case "qcov":
+						sorts.Quicksort(Matches(matches))
+					case "pidt":
+						sorts.Quicksort(SortByPIdt{Matches(matches)})
+					case "tcov":
+						sorts.Quicksort(SortByTCov{Matches(matches)})
+					case "sum12":
+						sorts.Quicksort(SortBySum12{Matches(matches)})
+					case "sum13":
+						sorts.Quicksort(SortBySum13{Matches(matches)})
+					case "sum123":
+						sorts.Quicksort(SortBySum123{Matches(matches)})
+					}
+
+					if onlyTopN && len(matches) > topN {
+						matches = matches[:topN]
+					}
 
 					// send result
 					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
@@ -448,27 +469,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	}()
 
 	return db, nil
-}
-
-func (db *UnikIndexDB) sortAndFilterMatches(matches []Match) {
-	switch db.Options.SortBy {
-	case "qcov":
-		sorts.Quicksort(Matches(matches))
-	case "pidt":
-		sorts.Quicksort(SortByPIdt{Matches(matches)})
-	case "tcov":
-		sorts.Quicksort(SortByTCov{Matches(matches)})
-	case "sum12":
-		sorts.Quicksort(SortBySum12{Matches(matches)})
-	case "sum13":
-		sorts.Quicksort(SortBySum13{Matches(matches)})
-	case "sum123":
-		sorts.Quicksort(SortBySum123{Matches(matches)})
-	}
-
-	if db.Options.TopN > 0 && db.Options.TopN < len(matches) {
-		matches = matches[0:db.Options.TopN]
-	}
 }
 
 func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint64, error) {
@@ -681,11 +681,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		numRowBytes := idx.Header.NumRowBytes
 		numSigs := idx.Header.NumSigs
 		numSigsInt := uint64(numSigs)
+		numSigsIntM1 := numSigsInt - 1
 		offset0 := idx.offset0
 		fh := idx.fh
 		sizes := idx.Header.Sizes
 		sigs := idx.sigsB
-		useMmap := idx.useMmap
+		// useMmap := idx.useMmap
+		useMmap := opt.UseMMap
 		data := idx._data
 		moreThanOneHash := idx.moreThanOneHash
 		queryCov := idx.Options.MinQueryCov
@@ -695,8 +697,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buffsT := idx.buffsT
 
 		iLast := numRowBytes - 1
-
-		var _count *[8]int
 
 		var _offset int
 		var offset2 int64
@@ -718,6 +718,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var c, t, T, m float64
 		var lastRound bool
 
+		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
 
 		for query := range idx.InCh {
@@ -729,30 +730,24 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 			// reset counts
 			bufIdx = 0
-			for i := 0; i < numRowBytes; i++ {
-				_count = &counts[i]
-				_counts = *_count
-				(*_count)[0] = 0
-				(*_count)[1] = 0
-				(*_count)[2] = 0
-				(*_count)[3] = 0
-				(*_count)[4] = 0
-				(*_count)[5] = 0
-				(*_count)[6] = 0
-				(*_count)[7] = 0
-			}
+			// for i := 0; i < numRowBytes; i++ {
+			// 	counts[i] = [8]int{}
+			// }
+			copy(counts, counts0)
 
 			for _, hs = range hashes {
 				if useMmap {
 					for i, _h = range hs {
-						loc = int(_h % numSigsInt)
+						// loc = int(_h % numSigsInt)
+						loc = int(_h & numSigsIntM1) // &Xis faster than %X when X is power of 2
 						_offset = int(offset0 + int64(loc*numRowBytes))
 
 						data[i] = sigs[_offset : _offset+numRowBytes]
 					}
 				} else {
 					for i, _h = range hs {
-						loc = int(_h % numSigsInt)
+						// loc = int(_h % numSigsInt)
+						loc = int(_h & numSigsIntM1) // &Xis faster than %X when X is power of 2
 						offset2 = offset0 + int64(loc*numRowBytes)
 
 						fh.Seek(offset2, 0)
@@ -788,11 +783,9 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						for j = 0; j < PosPopCountBufSize; j++ {
 							(*buf)[j] = buffs[j][i]
 						}
-					}
 
-					// count
-					for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
-						pospop.Count8(&counts[i], buffsT[i][:])
+						// count
+						pospop.Count8(&counts[i], (*buf)[:])
 					}
 
 					bufIdx = 0
@@ -807,11 +800,9 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					for j = 0; j < bufIdx; j++ {
 						(*buf)[j] = buffs[j][i]
 					}
-				}
 
-				// count
-				for i = 0; i < numRowBytes; i++ { // every row in transposed matrix
-					pospop.Count8(&counts[i], buffsT[i][0:bufIdx])
+					// count
+					pospop.Count8(&counts[i], (*buf)[:bufIdx])
 				}
 			}
 

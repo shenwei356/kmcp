@@ -635,7 +635,7 @@ Tips:
 					doneBatch8 <- 1
 				}()
 
-				numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
+				numSigs := roundup64(CalcSignatureSize(uint64(maxElements), numHashes, fpr))
 				var eFileSize float64
 				eFileSize = 24
 				for _, info := range files {
@@ -853,6 +853,9 @@ Tips:
 		dbInfo.MinimizerW = uint32(meta0.MinimizerW)
 		dbInfo.Syncmer = meta0.Syncmer
 		dbInfo.SyncmerS = uint32(meta0.SyncmerS)
+		dbInfo.SplitSeq = meta0.SplitSeq
+		dbInfo.SplitSize = meta0.SplitSize
+		dbInfo.SplitOverlap = meta0.SplitOverlap
 
 		if !dryRun {
 			var n2 int
