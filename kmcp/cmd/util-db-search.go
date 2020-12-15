@@ -660,13 +660,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buffs[i] = make([]byte, reader.NumRowBytes)
 	}
 
-	// transpose of buffs
-	buffsT := make([][PosPopCountBufSize]byte, reader.NumRowBytes)
-	for i := 0; i < reader.NumRowBytes; i++ {
-		buffsT[i] = [PosPopCountBufSize]byte{}
-	}
 	idx.buffs = buffs
-	idx.buffsT = buffsT
 
 	idx.moreThanOneHash = reader.NumHashes > 1
 
@@ -694,7 +688,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		targetCov := idx.Options.MinTargetCov
 		minMatched := idx.Options.MinMatched
 		buffs := idx.buffs
-		buffsT := idx.buffsT
 
 		iLast := numRowBytes - 1
 
@@ -709,7 +702,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var hashes [][]uint64
 		var nHashes float64
 		var bufIdx int
-		var buf *[PosPopCountBufSize]byte
 
 		var _counts [8]int
 		var count int
@@ -720,6 +712,8 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
+
+		buf := make([]byte, PosPopCountBufSize)
 
 		for query := range idx.InCh {
 
@@ -779,13 +773,12 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				if bufIdx == PosPopCountBufSize {
 					// transpose
 					for i = 0; i < numRowBytes; i++ { // every column in matrix
-						buf = &buffsT[i]
 						for j = 0; j < PosPopCountBufSize; j++ {
-							(*buf)[j] = buffs[j][i]
+							buf[j] = buffs[j][i]
 						}
 
 						// count
-						pospop.Count8(&counts[i], (*buf)[:])
+						pospop.Count8(&counts[i], buf)
 					}
 
 					bufIdx = 0
@@ -796,13 +789,12 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			if bufIdx > 0 {
 				// transpose
 				for i = 0; i < numRowBytes; i++ { // every column in matrix
-					buf = &buffsT[i]
 					for j = 0; j < bufIdx; j++ {
-						(*buf)[j] = buffs[j][i]
+						buf[j] = buffs[j][i]
 					}
 
 					// count
-					pospop.Count8(&counts[i], (*buf)[:bufIdx])
+					pospop.Count8(&counts[i], buf[:bufIdx])
 				}
 			}
 
