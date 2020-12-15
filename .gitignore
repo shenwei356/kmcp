@@ -25,3 +25,7 @@ t_*
 *.nextflow.log*
 *.brename_detail.txt
 */Rplots.pdf
+
+*cpu.pprof
+*mem.pprof
+*trace.out

@@ -28,7 +28,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/unikmer/index"
-	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"gopkg.in/yaml.v2"
 )
@@ -112,14 +111,6 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 	p, _ := filepath.Abs(file)
 	info.path = filepath.Dir(p)
 
-	fileNameMapping := filepath.Join(filepath.Dir(file), dbNameMappingFile)
-	var existed bool
-	existed, err = pathutil.Exists(fileNameMapping)
-	if existed {
-		info.NameMapping, err = cliutil.ReadKVs(fileNameMapping, false)
-		checkError(err)
-	}
-	info.MappingNames = len(info.NameMapping) > 0
 	return info, nil
 }
 

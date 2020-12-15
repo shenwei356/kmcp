@@ -72,6 +72,7 @@ Attentions:
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
 		useMmap := getFlagBool(cmd, "use-mmap")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
+		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
 		topN := getFlagNonNegativeInt(cmd, "keep-top")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
@@ -152,6 +153,8 @@ Attentions:
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
+
+			LoadDefaultNameMap: loadDefaultNameMap,
 		}
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
@@ -351,6 +354,7 @@ func init() {
 	// output
 	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
+	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)

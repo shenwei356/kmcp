@@ -34,6 +34,8 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/unikmer/index"
+	"github.com/shenwei356/util/cliutil"
+	"github.com/shenwei356/util/pathutil"
 	"github.com/twotwotwo/sorts"
 )
 
@@ -159,6 +161,8 @@ type SearchOptions struct {
 	MinMatched   int
 	MinQueryCov  float64
 	MinTargetCov float64
+
+	LoadDefaultNameMap bool
 }
 
 // UnikIndexDBSearchEngine search sequence on multiple database
@@ -286,6 +290,17 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	err = info.Check()
 	if err != nil {
 		return nil, err
+	}
+
+	if opt.LoadDefaultNameMap {
+		fileNameMapping := filepath.Join(path, dbNameMappingFile)
+		var existed bool
+		existed, err = pathutil.Exists(fileNameMapping)
+		if existed {
+			info.NameMapping, err = cliutil.ReadKVs(fileNameMapping, false)
+			checkError(err)
+		}
+		info.MappingNames = len(info.NameMapping) > 0
 	}
 
 	indices := make([]*UnikIndex, 0, len(info.Files))
@@ -674,8 +689,8 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		numNames := len(idx.Header.Names)
 		numRowBytes := idx.Header.NumRowBytes
 		numSigs := idx.Header.NumSigs
-		numSigsInt := uint64(numSigs)
-		numSigsIntM1 := numSigsInt - 1
+		numSigsUint := uint64(numSigs)
+		numSigsUintM1 := numSigsUint - 1
 		offset0 := idx.offset0
 		fh := idx.fh
 		sizes := idx.Header.Sizes
@@ -691,7 +706,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 		iLast := numRowBytes - 1
 
-		var _offset int
+		var offset int
 		var offset2 int64
 		var loc int
 		var i, j int
@@ -724,24 +739,21 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 			// reset counts
 			bufIdx = 0
-			// for i := 0; i < numRowBytes; i++ {
-			// 	counts[i] = [8]int{}
-			// }
 			copy(counts, counts0)
 
 			for _, hs = range hashes {
 				if useMmap {
 					for i, _h = range hs {
-						// loc = int(_h % numSigsInt)
-						loc = int(_h & numSigsIntM1) // &Xis faster than %X when X is power of 2
-						_offset = int(offset0 + int64(loc*numRowBytes))
+						// loc = int(_h % numSigsUint)
+						loc = int(_h & numSigsUintM1) // &Xis faster than %X when X is power of 2
+						offset = int(offset0 + int64(loc*numRowBytes))
 
-						data[i] = sigs[_offset : _offset+numRowBytes]
+						data[i] = sigs[offset : offset+numRowBytes]
 					}
 				} else {
 					for i, _h = range hs {
-						// loc = int(_h % numSigsInt)
-						loc = int(_h & numSigsIntM1) // &Xis faster than %X when X is power of 2
+						// loc = int(_h % numSigsUint)
+						loc = int(_h & numSigsUintM1) // &Xis faster than %X when X is power of 2
 						offset2 = offset0 + int64(loc*numRowBytes)
 
 						fh.Seek(offset2, 0)
