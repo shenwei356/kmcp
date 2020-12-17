@@ -190,7 +190,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tloc\tmKmers\tqCov\ttCov\tpIdt\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tfrag\tmKmers\tqCov\ttCov\tpIdt\n")
 		}
 
 		var fastxReader *fastx.Reader

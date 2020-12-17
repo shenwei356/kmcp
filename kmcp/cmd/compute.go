@@ -47,20 +47,29 @@ var computeCmd = &cobra.Command{
 
 Attentions:
   1. K-mers (sketchs) are not sorted and duplicates remained.
+  2. Sequence IDs in all input files should be unique.
+     Multiple sequences belonging to a same group can be mapped
+     to their group name via name mapping file after indexing.
 
 Supported kmer (sketches) types:
   1. K-mer:
      1. ntHash of k-mer (-k)
-  2. K-mer sketchs:
+  2. K-mer sketchs (all using ntHash):
      1. Scaled MinHash (-k -D)
      2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
      3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
 
-About splitting sequences:
+Splitting sequences:
   1. Sequences can be splitted into fragments (-s/--split-size)
-	 with overlap (-l/--split-overlap).
+     with overlap (-l/--split-overlap).
   2. Both sequence IDs and fragments indices are saved for later use,
-	 in form of meta/description data in .unik files.
+     in form of meta/description data in .unik files.
+
+Output:
+  1. All .unik files are saved in ${outdir}, with path
+     ${outdir}${infile}-id${seqID}.unik
+  2. For splitting sequence mode (--split-size > 0), output files are
+     ${outdir}/${infile}/{seqID}-frag${fragIdx}.unik
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -361,7 +370,7 @@ About splitting sequences:
 
 						// write to file
 						if splitSeq {
-							outFile = filepath.Join(outDir, fmt.Sprintf("%s/%s-loc%d%s", baseFile, seqID, slidIdx, extDataFile))
+							outFile = filepath.Join(outDir, fmt.Sprintf("%s/%s-frag%d%s", baseFile, seqID, slidIdx, extDataFile))
 						} else {
 							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
 						}
@@ -371,8 +380,8 @@ About splitting sequences:
 						}
 
 						meta := Meta{
-							SeqID:  seqID,
-							SeqLoc: slidIdx,
+							SeqID:   seqID,
+							FragIdx: slidIdx,
 
 							Syncmer:      syncmer,
 							SyncmerS:     syncmerS,

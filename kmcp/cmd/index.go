@@ -304,7 +304,7 @@ Tips:
 			}
 
 			checkError(r.Close())
-			return UnikFileInfo{Path: file, Name: meta.SeqID, Index: meta.SeqLoc, Kmers: reader.Number}
+			return UnikFileInfo{Path: file, Name: meta.SeqID, Index: meta.FragIdx, Kmers: reader.Number}
 		}
 
 		file := files[0]
@@ -402,7 +402,7 @@ Tips:
 			log.Infof("names (first and last 5 names):")
 			for i, info := range fileInfos {
 				if i < 5 || i >= len(fileInfos)-5 {
-					log.Infof("name [%d/%d]: %s, #k-mers: %d, file: %s ", i+1, len(fileInfos), info.Name, info.Kmers, info.Path)
+					log.Infof("name [%5d / %5d]: %s, frag: %d, #k-mers: %d, file: %s ", i+1, len(fileInfos), info.Name, info.Index, info.Kmers, info.Path)
 				}
 			}
 		}
@@ -644,7 +644,7 @@ Tips:
 				eFileSize += float64(numSigs * uint64(nBatchFiles))
 
 				if opt.Verbose && dryRun {
-					log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
+					log.Infof("%s #files: %5d, max #k-mers: %d, #signatures: %d, file size: %8s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
 				}
 
 				// split into batches with 8 files

@@ -197,8 +197,8 @@ func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string)
 
 // Meta contains some meta information
 type Meta struct {
-	SeqID  string `json:"id"`  // sequence ID
-	SeqLoc uint32 `json:"idx"` // sequence location index
+	SeqID   string `json:"id"`  // sequence ID
+	FragIdx uint32 `json:"idx"` // sequence location index
 
 	Syncmer  bool `json:"sm"` // syncmer
 	SyncmerS int  `json:"sm-s"`
