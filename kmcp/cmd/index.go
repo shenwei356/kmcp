@@ -105,6 +105,9 @@ Tips:
 		reFileStr := getFlagString(cmd, "file-regexp")
 		var reFile *regexp.Regexp
 		if reFileStr != "" {
+			if !reIgnoreCase.MatchString(reFileStr) {
+				reFileStr = reIgnoreCaseStr + reFileStr
+			}
 			reFile, err = regexp.Compile(reFileStr)
 			checkError(errors.Wrapf(err, "parsing regular expression for matching file: %s", reFileStr))
 		}
@@ -180,13 +183,14 @@ Tips:
 		if readFromDir {
 			files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
 			checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
+			if len(files) == 0 {
+				log.Warningf("no files matching patttern: %s", reFileStr)
+			}
 		} else {
 			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
 			if opt.Verbose {
 				if len(files) == 1 && isStdin(files[0]) {
 					log.Info("no files given, reading from stdin")
-				} else {
-					log.Infof("%d input file(s) given", len(files))
 				}
 			}
 		}
@@ -911,7 +915,7 @@ func init() {
 	RootCmd.AddCommand(indexCmd)
 
 	indexCmd.Flags().StringP("in-dir", "I", "", `directory containing .unik files. directory symlinks are followed`)
-	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files to index`)
+	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files in -I/--in-dir to index, case ignored`)
 
 	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. default: ${indir}.kmcp-db`)
 	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir. you can also manually edit it in info file: ${outdir}/__db.yml`)

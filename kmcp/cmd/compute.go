@@ -26,6 +26,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sync"
 	"time"
@@ -34,6 +35,7 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts/sortutil"
 	"github.com/vbauerster/mpb"
@@ -49,7 +51,9 @@ Attentions:
   1. K-mers (sketchs) are not sorted and duplicates remained.
   2. Sequence IDs in all input files should be unique.
      Multiple sequences belonging to a same group can be mapped
-     to their group name via name mapping file after indexing.
+	 to their group name via name mapping file after indexing.
+  3. By default, we compute k-mers (sketches) of every file,
+     you can also use --by-seq to compute for every file.
 
 Supported kmer (sketches) types:
   1. K-mer:
@@ -94,9 +98,34 @@ Output:
 		force := getFlagBool(cmd, "force")
 		exactNumber := getFlagBool(cmd, "exact-number")
 		compress := getFlagBool(cmd, "compress")
+		bySeq := getFlagBool(cmd, "by-seq")
 
 		if outDir == "" {
 			checkError(fmt.Errorf("flag -O/--out-dir is needed"))
+		}
+
+		var err error
+
+		inDir := getFlagString(cmd, "in-dir")
+
+		readFromDir := inDir != ""
+		if readFromDir {
+			var isDir bool
+			isDir, err = pathutil.IsDir(inDir)
+			checkError(errors.Wrapf(err, "checking -I/--in-dir: %s", inDir))
+			if !isDir {
+				checkError(fmt.Errorf("value of -I/--in-dir should be a directory: %s", inDir))
+			}
+		}
+
+		reFileStr := getFlagString(cmd, "file-regexp")
+		var reFile *regexp.Regexp
+		if reFileStr != "" {
+			if !reIgnoreCase.MatchString(reFileStr) {
+				reFileStr = reIgnoreCaseStr + reFileStr
+			}
+			reFile, err = regexp.Compile(reFileStr)
+			checkError(errors.Wrapf(err, "parsing regular expression for matching file: %s", reFileStr))
 		}
 
 		// ---------------------------------------------------------------
@@ -112,6 +141,7 @@ Output:
 			if splitSize <= splitOverlap {
 				checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
 			}
+			bySeq = true
 		}
 		step := splitSize - splitOverlap
 
@@ -155,13 +185,26 @@ Output:
 		if opt.Verbose {
 			log.Info("checking input files ...")
 		}
-		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if opt.Verbose {
-			if len(files) == 1 && isStdin(files[0]) {
-				log.Info("no files given, reading from stdin")
-			} else {
-				log.Infof("%d input file(s) given", len(files))
+
+		var files []string
+		if readFromDir {
+			files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
+			checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
+			if len(files) == 0 {
+				log.Warningf("no files matching patttern: %s", reFileStr)
 			}
+		} else {
+			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
+			if opt.Verbose {
+				if len(files) == 1 && isStdin(files[0]) {
+					log.Info("no files given, reading from stdin")
+				}
+			}
+		}
+		if len(files) < 1 {
+			checkError(fmt.Errorf("FASTA/Q files needed"))
+		} else if opt.Verbose {
+			log.Infof("%d input file(s) given", len(files))
 		}
 
 		// ---------------------------------------------------------------
@@ -273,6 +316,8 @@ Output:
 				fastxReader, err = fastx.NewDefaultReader(file)
 				checkError(errors.Wrap(err, file))
 
+				slidIdx = 0
+
 				for {
 					record, err = fastxReader.Read()
 					if err != nil {
@@ -292,14 +337,19 @@ Output:
 
 					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
 
-					slidIdx = 0
+					if bySeq {
+						slidIdx = 0
+					}
+
 					for {
 						_seq, _ok = slider()
 						if !_ok {
 							break
 						}
 
-						codes = codes[:0] // reset
+						if bySeq {
+							codes = codes[:0] // reset
+						}
 
 						if syncmer {
 							sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
@@ -351,6 +401,10 @@ Output:
 							}
 						}
 
+						if !bySeq {
+							break
+						}
+
 						n = len(codes)
 
 						if exactNumber {
@@ -398,6 +452,51 @@ Output:
 					}
 
 				}
+
+				if bySeq {
+					return
+				}
+
+				n = len(codes)
+
+				if exactNumber {
+					// compute exact number of unique k-mers
+					codes2 := make([]uint64, n)
+					copy(codes2, codes)
+					sortutil.Uint64s(codes2)
+					var pre uint64 = 0
+					n = 0
+					for _, code = range codes2 {
+						if code != pre {
+							n++
+							pre = code
+						}
+					}
+				}
+
+				// write to file
+				outFile = filepath.Join(outDir, fmt.Sprintf("%s%s", baseFile, extDataFile))
+
+				if !splitSeq {
+					splitSize = 0 // reset
+				}
+
+				meta := Meta{
+					SeqID:   seqID,
+					FragIdx: slidIdx,
+
+					Syncmer:      syncmer,
+					SyncmerS:     syncmerS,
+					Minimizer:    minimizer,
+					MinimizerW:   minimizerW,
+					SplitSeq:     splitSeq,
+					SplitSize:    splitSize,
+					SplitOverlap: splitOverlap,
+				}
+				writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,
+					scaled, scale, meta)
+
+				slidIdx++
 
 			}(file)
 		}
@@ -461,6 +560,9 @@ func writeKmers(k int, codes []uint64, n int,
 func init() {
 	RootCmd.AddCommand(computeCmd)
 
+	computeCmd.Flags().StringP("in-dir", "I", "", `directory containing FASTA/Q files. directory symlinks are followed`)
+	computeCmd.Flags().StringP("file-regexp", "", ".f[aq](st[aq])?(.gz)?$", `regular expression for matching files in -I/--in-dir to compute, case ignored`)
+
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
@@ -477,4 +579,9 @@ func init() {
 	computeCmd.Flags().IntP("split-size", "s", 0, `split fragment size`)
 	computeCmd.Flags().IntP("split-overlap", "l", 0, `split fragment overlap`)
 
+	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mer (sketch) for every sequence`)
+
 }
+
+var reIgnoreCaseStr = "(?i)"
+var reIgnoreCase = regexp.MustCompile(`\(\?i\)`)
