@@ -429,8 +429,13 @@ Output:
 							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
 						}
 
-						if !splitSeq {
-							splitSize = 0 // reset
+						// reset
+						if bySeq {
+							if !splitSeq {
+								splitSize = 0
+							}
+						} else {
+							splitSize = 0
 						}
 
 						meta := Meta{
@@ -477,12 +482,18 @@ Output:
 				// write to file
 				outFile = filepath.Join(outDir, fmt.Sprintf("%s%s", baseFile, extDataFile))
 
-				if !splitSeq {
-					splitSize = 0 // reset
+				// reset
+				if bySeq {
+					if !splitSeq {
+						splitSize = 0
+					}
+				} else {
+					splitSize = 0
 				}
 
+				fileprefix, _ := filepathTrimExtension(filepath.Base(file))
 				meta := Meta{
-					SeqID:   seqID,
+					SeqID:   fileprefix,
 					FragIdx: slidIdx,
 
 					Syncmer:      syncmer,
@@ -490,7 +501,6 @@ Output:
 					Minimizer:    minimizer,
 					MinimizerW:   minimizerW,
 					SplitSeq:     splitSeq,
-					SplitSize:    splitSize,
 					SplitOverlap: splitOverlap,
 				}
 				writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,

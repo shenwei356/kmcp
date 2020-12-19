@@ -48,6 +48,7 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 		meta0.SplitOverlap == meta.SplitOverlap {
 		return
 	}
-	checkError(fmt.Errorf(`description (sketch information) not consistent, please check with "unikmer info -a ": %s`, file))
+	checkError(fmt.Errorf(`sketch information (description) not consistent, please check with "unikmer info -a ": %s. file1: %s, file: %s`,
+		file, meta0, meta))
 
 }

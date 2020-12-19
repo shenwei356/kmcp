@@ -144,8 +144,29 @@ func filepathTrimExtension(file string) (string, string) {
 		file = file[0 : len(file)-3]
 	}
 
+	fasta := strings.HasSuffix(file, ".fasta") || strings.HasSuffix(file, ".FASTA")
+	fastq := strings.HasSuffix(file, ".fastq") || strings.HasSuffix(file, ".FASTQ")
+	var fa, fq bool
+	if fasta || fastq {
+		file = file[0 : len(file)-6]
+	} else {
+		fa = strings.HasSuffix(file, ".fa") || strings.HasSuffix(file, ".FA")
+		fq = strings.HasSuffix(file, ".fq") || strings.HasSuffix(file, ".FQ")
+
+	}
+
 	extension := filepath.Ext(file)
 	name := file[0 : len(file)-len(extension)]
+	switch {
+	case fasta:
+		extension += ".fasta"
+	case fastq:
+		extension += ".fastq"
+	case fa:
+		extension += ".fa"
+	case fq:
+		extension += ".fq"
+	}
 	if gz {
 		extension += ".gz"
 	}

@@ -210,3 +210,8 @@ type Meta struct {
 	SplitSize    int  `json:"sp-s"`
 	SplitOverlap int  `json:"sp-o"`
 }
+
+func (m Meta) String() string {
+	return fmt.Sprintf("seqID: %s; fragIdx: %d; syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, size: %d, overlap: %d",
+		m.SeqID, m.FragIdx, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitSize, m.SplitOverlap)
+}

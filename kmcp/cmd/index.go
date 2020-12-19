@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -58,7 +57,7 @@ Attentions:
 
 Tips:
   1. Increase value of -j/--threads for acceleratation in cost of more
-     memory occupation and I/O pressure, sqrt(#cpus) is recommended.
+     memory occupation and I/O pressure.
      #threads * #threads files are simultaneously opened, and max number
      of opened files is limited by flag -F/--max-open-files.
   2. Value of block size -b/--block-size better be multiple of 64.	 
@@ -419,7 +418,8 @@ Tips:
 		}
 		nFiles := len(fileInfos)
 		if sBlock <= 0 {
-			sBlock = int((math.Sqrt(float64(nFiles))+7)/8) * 8
+			// sBlock = int((math.Sqrt(float64(nFiles))+7)/8) * 8
+			sBlock = (int(float64(nFiles)/float64(runtime.NumCPU())) + 7) / 8 * 8
 		}
 		if sBlock < 8 {
 			sBlock = 8
@@ -922,7 +922,7 @@ func init() {
 
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter`)
 	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes of bloom filters`)
-	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: sqrt(#.files)`)
+	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#cpu, 8)`)
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, change block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
