@@ -24,10 +24,11 @@ import (
 	"math"
 )
 
-// CalcSignatureSize is from https://github.com/bingmann/cobs/blob/master/cobs/util/calc_signature_size.cpp
+// CalcSignatureSize is from https://github.com/bingmann/cobs/blob/master/cobs/util/calc_signature_size.cpp .
+// but we roundup to 2^n.
 func CalcSignatureSize(numElements uint64, numHashes int, falsePositiveRate float64) uint64 {
 	ratio := float64(-numHashes) / (math.Log(1 - math.Pow(falsePositiveRate, 1/float64(numHashes))))
-	return uint64(math.Ceil(float64(numElements) * ratio))
+	return roundup64(uint64(math.Ceil(float64(numElements) * ratio)))
 }
 
 // get the two basic hash function values for data.
@@ -51,6 +52,25 @@ func hashLocations(hash uint64, numHashes int, numSigs uint64) []int {
 	a, b := baseHashes(hash)
 	for i := uint32(0); i < uint32(numHashes); i++ {
 		locs[i] = int(uint64(a+b*i) % numSigs)
+	}
+	return locs
+}
+
+// return locations in bitset for a hash, faster with AND operation
+func hashLocationsFaster(hash uint64, numHashes int, numSigsM1 uint64) []int {
+	if numHashes < 1 {
+		return nil
+	}
+
+	locs := make([]int, numHashes)
+	if numHashes == 1 {
+		locs[0] = int(hash & numSigsM1)
+		return locs
+	}
+
+	a, b := baseHashes(hash)
+	for i := uint32(0); i < uint32(numHashes); i++ {
+		locs[i] = int(uint64(a+b*i) & numSigsM1)
 	}
 	return locs
 }

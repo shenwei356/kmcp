@@ -639,7 +639,7 @@ Tips:
 					doneBatch8 <- 1
 				}()
 
-				numSigs := roundup64(CalcSignatureSize(uint64(maxElements), numHashes, fpr))
+				numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
 				var eFileSize float64
 				eFileSize = 24
 				for _, info := range files {
@@ -684,6 +684,7 @@ Tips:
 						}
 
 						sigs := make([]byte, numSigs)
+						numSigsM1 := numSigs - 1
 
 						// every file in 8 files
 						for _k, info := range _files {
@@ -713,7 +714,8 @@ Tips:
 											checkError(errors.Wrap(err, info.Path))
 										}
 
-										sigs[code%numSigs] |= 1 << (7 - _k)
+										// sigs[code%numSigs] |= 1 << (7 - _k)
+										sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
 									}
 								} else {
 									for {
@@ -725,7 +727,8 @@ Tips:
 											checkError(errors.Wrap(err, info.Path))
 										}
 
-										for _, loc = range hashLocations(code, numHashes, numSigs) {
+										// for _, loc = range hashLocations(code, numHashes, numSigs) {
+										for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
 											sigs[loc] |= 1 << (7 - _k)
 										}
 									}
@@ -741,7 +744,8 @@ Tips:
 											checkError(errors.Wrap(err, info.Path))
 										}
 
-										sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+										// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+										sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
 									}
 								} else {
 									for {
@@ -753,7 +757,8 @@ Tips:
 											checkError(errors.Wrap(err, info.Path))
 										}
 
-										for _, loc = range hashLocations(hash64(code), numHashes, numSigs) {
+										// for _, loc = range hashLocations(code, numHashes, numSigs) {
+										for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
 											sigs[loc] |= 1 << (7 - _k)
 										}
 									}
@@ -772,10 +777,6 @@ Tips:
 							indices: indices,
 							sizes:   sizes,
 						}
-						// if opt.Verbose {
-						// 	log.Infof("%s batch #%03d/%d: %d signatures loaded\r", prefix, bb, nBatchFiles, len(sigs))
-						// }
-
 					}(files[ii:jj], bb, maxElements, numSigs, outFile, bb)
 				}
 
