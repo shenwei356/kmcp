@@ -450,6 +450,7 @@ Tips:
 			pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
 		}
 
+		// really begin.
 		nIndexFiles := int((len(files) + sBlock - 1) / sBlock) // may be more if using -m and -M
 		indexFiles := make([]string, 0, nIndexFiles)
 

@@ -121,6 +121,18 @@ func (i UnikIndexDBInfo) WriteTo(file string) (int, error) {
 		return 0, fmt.Errorf("fail to marshal database info")
 	}
 
+	dir := filepath.Dir(file)
+	dirExisted, err := pathutil.DirExists(dir)
+	if err != nil {
+		return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
+	}
+	if !dirExisted {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
+		}
+	}
+
 	w, err := os.Create(file)
 	if err != nil {
 		return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)

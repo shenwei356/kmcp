@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -50,6 +51,34 @@ type UnikFileInfos []UnikFileInfo
 func (l UnikFileInfos) Len() int               { return len(l) }
 func (l UnikFileInfos) Less(i int, j int) bool { return l[i].Kmers < l[j].Kmers }
 func (l UnikFileInfos) Swap(i int, j int)      { l[i], l[j] = l[j], l[i] }
+
+// UnikFileInfosByName is used to sort infos by name and indices
+type UnikFileInfosByName []UnikFileInfo
+
+func (l UnikFileInfosByName) Len() int { return len(l) }
+func (l UnikFileInfosByName) Less(i int, j int) bool {
+	return strings.Compare(l[i].Name, l[j].Name) <= 0 && l[i].Index < l[j].Index
+}
+func (l UnikFileInfosByName) Swap(i int, j int) { l[i], l[j] = l[j], l[i] }
+
+// UnikFileInfoGroup represents a slice of UnikFileInfos
+type UnikFileInfoGroup struct {
+	Infos []UnikFileInfo
+	Kmers int64
+}
+
+func (i UnikFileInfoGroup) String() string {
+	return fmt.Sprintf("UnikFileGroups{Files: %d, Kmers: %d}", len(i.Infos), i.Kmers)
+}
+
+// UnikFileInfoGroups is just a slice of UnikFileInfoGroup
+type UnikFileInfoGroups []UnikFileInfoGroup
+
+func (l UnikFileInfoGroups) Len() int               { return len(l) }
+func (l UnikFileInfoGroups) Less(i int, j int) bool { return l[i].Kmers < l[j].Kmers }
+func (l UnikFileInfoGroups) Swap(i int, j int)      { l[i], l[j] = l[j], l[i] }
+
+// -------------------------------------------------
 
 // MergeUnikIndex merges multiple index files to one (not used)
 func MergeUnikIndex(opt *Options, prefix string, files []string, outFile string) error {
