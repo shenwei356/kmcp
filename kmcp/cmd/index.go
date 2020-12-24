@@ -48,7 +48,7 @@ import (
 )
 
 var indexCmd = &cobra.Command{
-	Use:   "index-s",
+	Use:   "index",
 	Short: "Construct database from k-mer files",
 	Long: `Construct database from k-mer files
 
@@ -771,21 +771,41 @@ Tips:
 								sizes = append(sizes, uint64(_size))
 							}
 
-							sigs := make([]byte, numSigs)
+							// sigs := make([]byte, numSigs)
+							sigs := poolBytes.Get().([]byte)
+							fmt.Println("before: ", len(sigs), int(numSigs))
+							if len(sigs) < int(numSigs) {
+								for _i := 0; _i < int(numSigs)-len(sigs); _i++ {
+									sigs = append(sigs, 0)
+								}
+							}
+							fmt.Println("after: ", len(sigs), int(numSigs))
+							// reset
+							sigs = sigs[:numSigs]
+							for _i := 0; _i < int(numSigs); _i++ {
+								sigs[_i] = 0
+							}
+
 							numSigsM1 := numSigs - 1
+
+							var _wg sync.WaitGroup
+							_tokens := make(chan int, opt.NumCPUs)
 
 							_ch := make(chan []byte, 8)
 							_done := make(chan int)
 							go func() {
+								var _i int
+								var _s byte
 								for _sigs := range _ch {
-									for _i := range sigs {
-										sigs[_i] |= _sigs[_i]
+									for _i, _s = range _sigs {
+										sigs[_i] |= _s
 									}
+
+									// _sigs = _sigs[:0]
+									poolBytes.Put(_sigs)
 								}
 								_done <- 1
 							}()
-							var _wg sync.WaitGroup
-							_tokens := make(chan int, opt.NumCPUs)
 
 							// every file in 8 file groups
 							for _k, infos := range _batch {
@@ -801,7 +821,17 @@ Tips:
 											<-tokensOpenFiles
 										}()
 
-										_sigs := make([]byte, numSigs)
+										// _sigs := make([]byte, numSigs)
+										_sigs := poolBytes.Get().([]byte)
+										if len(_sigs) < int(numSigs) {
+											for _i := 0; _i < int(numSigs)-len(_sigs); _i++ {
+												_sigs = append(_sigs, 0)
+											}
+										}
+										_sigs = _sigs[:numSigs]
+										for _i := 0; _i < int(numSigs); _i++ {
+											_sigs[_i] = 0
+										}
 
 										var infh *bufio.Reader
 										var r *os.File
@@ -881,9 +911,15 @@ Tips:
 
 										r.Close()
 
+										_ch <- _sigs
+
 									}(_k, info)
 								}
 							}
+
+							_wg.Wait()
+							close(_ch)
+							<-_done
 
 							chBatch8 <- batch8s{
 								id:      id,
@@ -1062,3 +1098,7 @@ type batch8s struct {
 }
 
 var sepNameIdx = "-id"
+
+var poolBytes = &sync.Pool{New: func() interface{} {
+	return make([]byte, 0, 10<<20)
+}}

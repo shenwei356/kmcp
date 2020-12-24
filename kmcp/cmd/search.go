@@ -23,6 +23,8 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -30,6 +32,7 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/util/cliutil"
+	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts/sortutil"
 )
@@ -62,8 +65,8 @@ Attentions:
 
 		// ---------------------------------------------------------------
 
-		dbDirs := getFlagStringSlice(cmd, "db-dir")
-		if len(dbDirs) == 0 {
+		dbDir := getFlagString(cmd, "db-dir")
+		if dbDir == "" {
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
 		outFile := getFlagString(cmd, "out-prefix")
@@ -92,6 +95,39 @@ Attentions:
 		if targetCov < 0 || targetCov > 1 {
 			checkError(fmt.Errorf("value of -T/-target-cov should be in range [0, 1]"))
 		}
+
+		// ---------------------------------------------------------------
+		// check Database
+
+		subFiles, err := ioutil.ReadDir(dbDir)
+		if err != nil {
+			checkError(fmt.Errorf("read database error: " + dbDir))
+		}
+
+		dbDirs := make([]string, 0, 8)
+		for _, file := range subFiles {
+			if file.Name() == "." || file.Name() == ".." {
+				continue
+			}
+			path := filepath.Join(dbDir, file.Name())
+
+			if !file.IsDir() {
+				continue
+			}
+			existed, err := pathutil.Exists(filepath.Join(path, dbInfoFile))
+			if err != nil {
+				checkError(fmt.Errorf("read database error: " + dbDir))
+			}
+			if existed {
+				dbDirs = append(dbDirs, path)
+			}
+		}
+		if len(dbDirs) == 0 {
+			checkError(fmt.Errorf("invalid kmcp database: %s", dbDir))
+		}
+
+		// ---------------------------------------------------------------
+		// name mapping files
 
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
@@ -195,10 +231,10 @@ Attentions:
 
 		var fastxReader *fastx.Reader
 		var record *fastx.Record
-		var ok bool
+		// var ok bool
 
 		var prefix2 string
-		var t, target string
+		// var t, target string
 		var _dbInfo UnikIndexDBInfo
 		// var cumBlockSize []int
 
@@ -222,24 +258,24 @@ Attentions:
 				return
 			}
 
-			for _, match := range result.Matches {
-				target = match.Target
-				if mappingNames { //
-					if t, ok = namesMap[target]; ok {
-						target = t
-					}
-				} else if _dbInfo.MappingNames { // name mapping of database
-					if t, ok = _dbInfo.NameMapping[target]; ok {
-						target = t
-					}
-				}
+			// for _, match := range result.Matches {
+			// 	target = match.Target
+			// 	if mappingNames { //
+			// 		if t, ok = namesMap[target]; ok {
+			// 			target = t
+			// 		}
+			// 	} else if _dbInfo.MappingNames { // name mapping of database
+			// 		if t, ok = _dbInfo.NameMapping[target]; ok {
+			// 			target = t
+			// 		}
+			// 	}
 
-				// query, len_query,
-				// db, num_kmers, fpr,
-				// target, num_target_kmers, qcov, pidt, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, target, match.TargetIdx, match.NumKmers, match.QCov, match.TCov, match.PIdt))
-			}
+			// 	// query, len_query,
+			// 	// db, num_kmers, fpr,
+			// 	// target, num_target_kmers, qcov, pidt, tcov
+			// 	outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+			// 		prefix2, target, match.TargetIdx, match.NumKmers, match.QCov, match.TCov, match.PIdt))
+			// }
 
 			result.Recycle()
 		}
@@ -343,7 +379,7 @@ func init() {
 	RootCmd.AddCommand(searchCmd)
 
 	// database option
-	searchCmd.Flags().StringSliceP("db-dir", "d", []string{}, `database directories created by "kmcp index"`)
+	searchCmd.Flags().StringP("db-dir", "d", "", `database directories created by "kmcp index"`)
 	searchCmd.Flags().BoolP("use-mmap", "m", true, `load index files into memory to accelerate searching`)
 
 	// query option

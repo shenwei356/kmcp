@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/shenwei356/unikmer/index"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/util/pathutil"
 	"gopkg.in/yaml.v2"
 )
@@ -39,7 +39,7 @@ const dbNameMappingFile = "__name_mapping.tsv"
 var ErrVersionMismatch = errors.New("kmcp/index: version mismatch")
 
 // UnikIndexDBVersion is the version of database.
-const UnikIndexDBVersion uint8 = 3
+const UnikIndexDBVersion uint8 = 4
 
 // UnikIndexDBInfo is the meta data of a database.
 type UnikIndexDBInfo struct {

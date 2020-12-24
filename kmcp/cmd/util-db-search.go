@@ -32,8 +32,8 @@ import (
 	"github.com/fuzxxl/pospop"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
-	"github.com/shenwei356/unikmer/index"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/twotwotwo/sorts"
@@ -67,10 +67,16 @@ type QueryResult struct {
 	Matches []Match // all matches
 }
 
+// Name2Idx is a struct of name and index
+type Name2Idx struct {
+	Name  string
+	Index uint32
+}
+
 // Match is the struct of matching detail.
 type Match struct {
-	Target    string // target name
-	TargetIdx uint32
+	Target    []string // target name
+	TargetIdx []uint32
 	NumKmers  int // mat	ched k-mers
 
 	QCov float64 // coverage of query
@@ -201,6 +207,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
 		tokens := make(chan int, sg.Options.Threads)
 		wg := &sg.wg
+		nDBs := len(sg.DBs)
 		for query := range sg.InCh {
 			wg.Add(1)
 			tokens <- 1
@@ -214,15 +221,33 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				// get matches from all databases
 				var _queryResult QueryResult
-				for i := 0; i < len(sg.DBs); i++ {
+				m := make(map[Name2Idx]int, 8)
+				var _match Match
+				var _name string
+				var key Name2Idx
+				var j, count int
+				for i := 0; i < nDBs; i++ {
 					// block to read
 					_queryResult = <-query.Ch
 					if _queryResult.Matches == nil && !opt.KeepUnmatched {
 						continue
 					}
 
-					sg.OutCh <- _queryResult
+					for _, _match = range _queryResult.Matches {
+						for j, _name = range _match.Target {
+							key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
+							m[key]++
+						}
+					}
 				}
+				for key, count = range m {
+					if count != nDBs {
+						continue
+					}
+					fmt.Println(key.Name, key.Index)
+				}
+
+				sg.OutCh <- _queryResult
 
 				wg.Done()
 				<-tokens
