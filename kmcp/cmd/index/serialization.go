@@ -166,11 +166,12 @@ func (writer *Writer) WriteHeader() (err error) {
 		return err
 	}
 
-	var n int
 	var name string
 	for _, names := range writer.Names {
+		n := 0
+
 		// 4 bytes length of Names
-		for _, name := range writer.Names {
+		for _, name := range names {
 			n += len(name) + 1
 		}
 
@@ -361,9 +362,11 @@ func (reader *Reader) readHeader() (err error) {
 		if err != nil {
 			return err
 		}
+
 		_names := strings.Split(string(namesData), "\n")
 		names[i] = _names[0 : len(_names)-1]
 	}
+	reader.Names = names
 
 	// ----------------------------------------------------------
 	// Indices
@@ -389,6 +392,7 @@ func (reader *Reader) readHeader() (err error) {
 		}
 		indices[i] = indicesData
 	}
+	reader.Indices = indices
 
 	// Sizes
 	sizesData := make([]uint64, len(names))

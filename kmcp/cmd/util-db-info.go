@@ -66,7 +66,7 @@ type UnikIndexDBInfo struct {
 	BlockSize int      `yaml:"blocksize"`
 	Kmers     int      `yaml:"totalKmers"`
 	Files     []string `yaml:"files"`
-	NumNames  int      `yaml:"numNames"`
+	NumNames  int      `yaml:"numNameGroups"`
 
 	path         string            `yaml:"path,omitempty"`
 	NameMapping  map[string]string `yaml:"name-mapping,omitempty"`

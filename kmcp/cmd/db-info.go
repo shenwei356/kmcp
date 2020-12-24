@@ -27,7 +27,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/shenwei356/unikmer/index"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/spf13/cobra"
 )
 
@@ -72,7 +72,7 @@ var infoCmd = &cobra.Command{
 		}()
 
 		if all {
-			outfh.WriteString(fmt.Sprintf("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\tnames\n"))
+			outfh.WriteString(fmt.Sprintf("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\tnames\nindices\n"))
 		} else {
 			outfh.WriteString(fmt.Sprintf("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\n"))
 		}
@@ -90,7 +90,23 @@ var infoCmd = &cobra.Command{
 			}
 
 			if all {
-				outfh.WriteString(fmt.Sprintf("%s\t%d\t%v\t%d\t%d\t%d\t%s\n", file, h.K, h.Canonical, h.NumHashes, h.NumSigs, len(h.Names), strings.Join(h.Names, ";")))
+				names := make([]string, len(reader.Names))
+				for _i, _names := range reader.Names {
+					names[_i] = strings.Join(_names, ",")
+				}
+
+				indices := make([]string, len(reader.Names))
+				for _i, _indices := range reader.Indices {
+					_indicesS := make([]string, len(_indices))
+					for _j, _idx := range _indices {
+						_indicesS[_j] = fmt.Sprintf("%d", _idx)
+					}
+					indices[_i] = strings.Join(_indicesS, ",")
+				}
+
+				outfh.WriteString(fmt.Sprintf("%s\t%d\t%v\t%d\t%d\t%d\t%s\t%s\n",
+					file, h.K, h.Canonical, h.NumHashes, h.NumSigs, len(h.Names),
+					strings.Join(names, "; "), strings.Join(indices, "; ")))
 			} else {
 				outfh.WriteString(fmt.Sprintf("%s\t%d\t%v\t%d\t%d\t%d\n", file, h.K, h.Canonical, h.NumHashes, h.NumSigs, len(h.Names)))
 			}
