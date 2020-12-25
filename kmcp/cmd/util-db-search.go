@@ -196,7 +196,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				// get matches from all databases
-				var _queryResult QueryResult
+				var queryResult *QueryResult
 				m := make(map[Name2Idx][]*Match, 8)
 				// var _match Match
 				var _name string
@@ -204,10 +204,14 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				var j int
 				var nDBWithHits int
 				var ok bool
-				var _matches []*Match
 				for i := 0; i < nDBs; i++ {
 					// block to read
-					_queryResult = <-query.Ch
+					_queryResult := <-query.Ch
+
+					if queryResult == nil {
+						queryResult = &_queryResult
+					}
+
 					if _queryResult.Matches == nil {
 						continue
 					}
@@ -224,7 +228,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						}
 					}
 				}
-				_matches2 := make([]Match, 0, 1)
+
+				var _matches []*Match
+				_matches2 := poolMatches.Get().([]Match)
 				for key, _matches = range m {
 					if len(_matches) != nDBWithHits {
 						continue
@@ -252,8 +258,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						sorts.Quicksort(SortBySum{Matches(_matches2)})
 					}
 				}
-				_queryResult.Matches = _matches2
-				sg.OutCh <- _queryResult
+
+				queryResult.Matches = _matches2
+				sg.OutCh <- *queryResult
 
 				wg.Done()
 				<-tokens
