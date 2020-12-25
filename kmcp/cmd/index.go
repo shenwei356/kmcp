@@ -769,24 +769,11 @@ Tips:
 								sizes = append(sizes, uint64(_size))
 							}
 
-							// sigs := make([]byte, numSigs)
-							sigs := poolBytes.Get().([]byte)
-							if len(sigs) < int(numSigs) {
-								_n := int(numSigs) - len(sigs)
-								for _i := 0; _i < _n; _i++ {
-									sigs = append(sigs, 0)
-								}
-							}
-							// reset
-							sigs = sigs[:numSigs]
-							for _i := 0; _i < int(numSigs); _i++ {
-								sigs[_i] = 0
-							}
+							sigs := make([]byte, numSigs)
 
 							numSigsM1 := numSigs - 1
 
 							var _wg sync.WaitGroup
-							_tokens := make(chan int, opt.NumCPUs)
 
 							_ch := make(chan []byte, 8)
 							_done := make(chan int)
@@ -797,39 +784,20 @@ Tips:
 									for _i, _s = range _sigs {
 										sigs[_i] |= _s
 									}
-
-									// _sigs = _sigs[:0]
-									poolBytes.Put(_sigs)
 								}
 								_done <- 1
 							}()
 
 							// every file in 8 file groups
 							for _k, infos := range _batch {
-								for _, info := range infos {
-									_wg.Add(1)
-									_tokens <- 1
-									go func(_k int, info UnikFileInfo) {
+								_sigs := make([]byte, numSigs)
+								_wg.Add(1)
+								go func(_k int, infos []UnikFileInfo) {
+									for _, info := range infos {
+										// go func(_k int, info UnikFileInfo) {
 										tokensOpenFiles <- 1
 
-										defer func() {
-											_wg.Done()
-											<-_tokens
-											<-tokensOpenFiles
-										}()
-
 										// _sigs := make([]byte, numSigs)
-										_sigs := poolBytes.Get().([]byte)
-										if len(_sigs) < int(numSigs) {
-											_n := int(numSigs) - len(_sigs)
-											for _i := 0; _i < _n; _i++ {
-												_sigs = append(_sigs, 0)
-											}
-										}
-										_sigs = _sigs[:numSigs]
-										for _i := 0; _i < int(numSigs); _i++ {
-											_sigs[_i] = 0
-										}
 
 										var infh *bufio.Reader
 										var r *os.File
@@ -909,10 +877,12 @@ Tips:
 
 										r.Close()
 
-										_ch <- _sigs
+										<-tokensOpenFiles
+									}
 
-									}(_k, info)
-								}
+									_ch <- _sigs
+									_wg.Done()
+								}(_k, infos)
 							}
 
 							_wg.Wait()
@@ -1096,7 +1066,3 @@ type batch8s struct {
 }
 
 var sepNameIdx = "-id"
-
-var poolBytes = &sync.Pool{New: func() interface{} {
-	return make([]byte, 0, 10<<20)
-}}

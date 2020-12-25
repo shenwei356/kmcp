@@ -963,3 +963,7 @@ func (r QueryResult) Recycle() {
 var poolIdxValues = &sync.Pool{New: func() interface{} {
 	return make([]unikmer.IdxValue, 0, 128)
 }}
+
+var poolBytes = &sync.Pool{New: func() interface{} {
+	return make([]byte, 0, 10<<20)
+}}
