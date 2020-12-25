@@ -28,8 +28,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/clausecker/pospop"
 	"github.com/edsrzf/mmap-go"
-	"github.com/fuzxxl/pospop"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"

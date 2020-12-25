@@ -42,8 +42,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
 	"github.com/twotwotwo/sorts/sortutil"
-	"github.com/vbauerster/mpb"
-	"github.com/vbauerster/mpb/decor"
+	"github.com/vbauerster/mpb/v5"
+	"github.com/vbauerster/mpb/v5/decor"
 	"gopkg.in/yaml.v2"
 )
 
@@ -201,9 +201,7 @@ Tips:
 				}
 			}
 		}
-		if len(files) < 2 {
-			checkError(fmt.Errorf("at least two .unik files needed"))
-		} else if opt.Verbose {
+		if opt.Verbose {
 			log.Infof("%d input file(s) given", len(files))
 		}
 
@@ -773,13 +771,12 @@ Tips:
 
 							// sigs := make([]byte, numSigs)
 							sigs := poolBytes.Get().([]byte)
-							fmt.Println("before: ", len(sigs), int(numSigs))
 							if len(sigs) < int(numSigs) {
-								for _i := 0; _i < int(numSigs)-len(sigs); _i++ {
+								_n := int(numSigs) - len(sigs)
+								for _i := 0; _i < _n; _i++ {
 									sigs = append(sigs, 0)
 								}
 							}
-							fmt.Println("after: ", len(sigs), int(numSigs))
 							// reset
 							sigs = sigs[:numSigs]
 							for _i := 0; _i < int(numSigs); _i++ {
@@ -824,7 +821,8 @@ Tips:
 										// _sigs := make([]byte, numSigs)
 										_sigs := poolBytes.Get().([]byte)
 										if len(_sigs) < int(numSigs) {
-											for _i := 0; _i < int(numSigs)-len(_sigs); _i++ {
+											_n := int(numSigs) - len(_sigs)
+											for _i := 0; _i < _n; _i++ {
 												_sigs = append(_sigs, 0)
 											}
 										}
