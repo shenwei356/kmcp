@@ -161,6 +161,9 @@ Tips:
 		if numRepeats < 1 {
 			checkError(fmt.Errorf("value of -R/--num-repititions should be >= 1"))
 		}
+		if numBuckets > 0 && sBlock00 > numBuckets {
+			checkError(fmt.Errorf("value of -b/--block-size (%d) should be small than -B/--num-buckets (%d)", sBlock00, numBuckets))
+		}
 
 		// ---------------------------------------------------------------
 		// out dir
@@ -469,7 +472,10 @@ Tips:
 			var sBlock int
 			if sBlock00 <= 0 { // block size from command line
 				sBlock = (int(float64(nFiles)/float64(runtime.NumCPU())) + 7) / 8 * 8
+			} else {
+				sBlock = sBlock00
 			}
+
 			if sBlock < 8 {
 				sBlock = 8
 			} else if sBlock > nFiles {
@@ -623,8 +629,9 @@ Tips:
 					var wg sync.WaitGroup
 					tokens := make(chan int, opt.NumCPUs)
 
-					// max elements of UNION, but it hard to compute without loading whole data,
-					// so we use sum of elements, which should be higher than actual size.
+					// max elements of UNION of all sets,
+					// but it takes time to compute for reading whole data,
+					// so we use sum of elements, which is slightly higher than actual size.
 					var maxElements int64
 					var totalKmer int64
 					for _, infos := range batch {
@@ -632,7 +639,6 @@ Tips:
 						for _, info := range infos {
 							totalKmer += info.Kmers
 						}
-
 						if maxElements < totalKmer {
 							maxElements = totalKmer
 						}
@@ -743,7 +749,7 @@ Tips:
 						var outFile string
 
 						// 8 files
-						go func(_batch [][]UnikFileInfo, bb int, maxElements int64, numSigs uint64, outFile string, id int) {
+						go func(_batch [][]UnikFileInfo, bb int, numSigs uint64, outFile string, id int) {
 							defer func() {
 								wg.Done()
 								<-tokens
@@ -896,7 +902,7 @@ Tips:
 								indices: indices,
 								sizes:   sizes,
 							}
-						}(batch[ii:jj], bb, maxElements, numSigs, outFile, bb)
+						}(batch[ii:jj], bb, numSigs, outFile, bb)
 					}
 
 					wg.Wait()
@@ -1047,8 +1053,8 @@ func init() {
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, change block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
-	indexCmd.Flags().IntP("num-repititions", "R", 10, "number of repititions")
-	indexCmd.Flags().IntP("num-buckets", "B", 1000, "number of buckets per repitition, 0 for one set per bucket")
+	indexCmd.Flags().IntP("num-repititions", "R", 1, "number of repititions")
+	indexCmd.Flags().IntP("num-buckets", "B", 0, "number of buckets per repitition, 0 for one set per bucket")
 
 	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
@@ -1066,3 +1072,68 @@ type batch8s struct {
 }
 
 var sepNameIdx = "-id"
+
+// compute exact max elements by reading all file.
+func maxElements(opt Options, tokensOpenFiles chan int, batch [][]UnikFileInfo) (maxElements int64) {
+	var _wg sync.WaitGroup
+	_tokens := make(chan int, opt.NumCPUs)
+	_ch := make(chan int64, len(batch))
+	_done := make(chan int)
+	go func() {
+		var totalKmer int64
+		for totalKmer = range _ch {
+			if maxElements < totalKmer {
+				maxElements = totalKmer
+			}
+		}
+		_done <- 1
+	}()
+	for _, infos := range batch {
+		_wg.Add(1)
+		_tokens <- 1
+		go func(infos []UnikFileInfo) {
+			defer func() {
+				_wg.Done()
+				<-_tokens
+			}()
+
+			_m := make(map[uint64]struct{}, mapInitSize)
+
+			for _, _info := range infos {
+				tokensOpenFiles <- 1
+
+				infh, r, _, err := inStream(_info.Path)
+				if err != nil {
+					checkError(err)
+				}
+				defer r.Close()
+
+				reader, err := unikmer.NewReader(infh)
+				if err != nil {
+					checkError(err)
+				}
+
+				var code uint64
+				for {
+					code, _, err = reader.ReadCodeWithTaxid()
+					if err != nil {
+						if err == io.EOF {
+							break
+						}
+						checkError(errors.Wrap(err, _info.Path))
+					}
+					_m[code] = struct{}{}
+				}
+
+				<-tokensOpenFiles
+			}
+
+			_ch <- int64(len(_m))
+		}(infos)
+	}
+	_wg.Wait()
+	close(_ch)
+	<-_done
+
+	return
+}

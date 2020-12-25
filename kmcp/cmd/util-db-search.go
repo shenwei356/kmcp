@@ -77,12 +77,10 @@ type Name2Idx struct {
 type Match struct {
 	Target    []string // target name
 	TargetIdx []uint32
-	NumKmers  int // mat	ched k-mers
+	NumKmers  int // matched k-mers
 
 	QCov float64 // coverage of query
 	TCov float64 // coverage of target
-
-	PIdt float64 // percent of ident linearly matched kmers
 }
 
 // Matches is list of Matches, for sorting.
@@ -102,14 +100,6 @@ func (ms Matches) Less(i int, j int) bool {
 // SortByQCov is used to sort matches by qcov.
 type SortByQCov struct{ Matches }
 
-// SortByPIdt is used to sort matches by pindent.
-type SortByPIdt struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortByPIdt) Less(i int, j int) bool {
-	return ms.Matches[i].PIdt > ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
 // SortByTCov is used to sort matches by tcov.
 type SortByTCov struct{ Matches }
 
@@ -118,28 +108,12 @@ func (ms SortByTCov) Less(i int, j int) bool {
 	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
-// SortBySum12 is used to sort matches by qcov + pidt.
-type SortBySum12 struct{ Matches }
+// SortBySum is used to sort matches by qcov + tcov.
+type SortBySum struct{ Matches }
 
 // Less judges if element is i is less than element in j.
-func (ms SortBySum12) Less(i int, j int) bool {
-	return ms.Matches[i].QCov+ms.Matches[i].PIdt > ms.Matches[j].QCov+ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
-// SortBySum13 is used to sort matches by qcov + tcov.
-type SortBySum13 struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortBySum13) Less(i int, j int) bool {
+func (ms SortBySum) Less(i int, j int) bool {
 	return ms.Matches[i].QCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
-// SortBySum123 is used to sort matches by qcov + pidt + tcov.
-type SortBySum123 struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortBySum123) Less(i int, j int) bool {
-	return ms.Matches[i].QCov+ms.Matches[i].TCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
@@ -208,6 +182,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		tokens := make(chan int, sg.Options.Threads)
 		wg := &sg.wg
 		nDBs := len(sg.DBs)
+		sortBy := opt.SortBy
+
 		for query := range sg.InCh {
 			wg.Add(1)
 			tokens <- 1
@@ -221,32 +197,62 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				// get matches from all databases
 				var _queryResult QueryResult
-				m := make(map[Name2Idx]int, 8)
-				var _match Match
+				m := make(map[Name2Idx][]*Match, 8)
+				// var _match Match
 				var _name string
 				var key Name2Idx
-				var j, count int
+				var j int
+				var nDBWithHits int
+				var ok bool
+				var _matches []*Match
 				for i := 0; i < nDBs; i++ {
 					// block to read
 					_queryResult = <-query.Ch
-					if _queryResult.Matches == nil && !opt.KeepUnmatched {
+					if _queryResult.Matches == nil {
 						continue
 					}
+					nDBWithHits++
 
-					for _, _match = range _queryResult.Matches {
+					for _i := range _queryResult.Matches {
+						_match := _queryResult.Matches[_i]
 						for j, _name = range _match.Target {
 							key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
-							m[key]++
+							if _, ok = m[key]; !ok {
+								m[key] = make([]*Match, 0, 1)
+							}
+							m[key] = append(m[key], &_match)
 						}
 					}
 				}
-				for key, count = range m {
-					if count != nDBs {
+				_matches2 := make([]Match, 0, 1)
+				for key, _matches = range m {
+					if len(_matches) != nDBWithHits {
 						continue
 					}
-					fmt.Println(key.Name, key.Index)
-				}
 
+					// find the match with minimal matched k-mers
+					var _theMatch *Match
+					for _, _match := range _matches {
+						if _theMatch == nil {
+							_theMatch = _match
+						} else if _match.NumKmers < _theMatch.NumKmers {
+							_theMatch = _match
+						}
+					}
+					_theMatch.Target = []string{key.Name}
+					_theMatch.TargetIdx = []uint32{key.Index}
+					_matches2 = append(_matches2, *_theMatch)
+
+					switch sortBy {
+					case "qcov":
+						sorts.Quicksort(Matches(_matches2))
+					case "tcov":
+						sorts.Quicksort(SortByTCov{Matches(_matches2)})
+					case "sum":
+						sorts.Quicksort(SortBySum{Matches(_matches2)})
+					}
+				}
+				_queryResult.Matches = _matches2
 				sg.OutCh <- _queryResult
 
 				wg.Done()
@@ -400,7 +406,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numHashes := db.Info.NumHashes
 				indices := db.Indices
 				numIndices := len(indices)
-				sortBy := db.Options.SortBy
 				topN := db.Options.TopN
 				onlyTopN := topN > 0
 
@@ -475,23 +480,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				hashes = hashes[:0]
 				poolHashes.Put(hashes)
 
-				// sort and filter
+				// filter
 				if len(matches) > 0 {
-					switch sortBy {
-					case "qcov":
-						sorts.Quicksort(Matches(matches))
-					case "pidt":
-						sorts.Quicksort(SortByPIdt{Matches(matches)})
-					case "tcov":
-						sorts.Quicksort(SortByTCov{Matches(matches)})
-					case "sum12":
-						sorts.Quicksort(SortBySum12{Matches(matches)})
-					case "sum13":
-						sorts.Quicksort(SortBySum13{Matches(matches)})
-					case "sum123":
-						sorts.Quicksort(SortBySum123{Matches(matches)})
-					}
-
 					if onlyTopN && len(matches) > topN {
 						matches = matches[:topN]
 					}
@@ -747,7 +737,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var count int
 		var ix8 int
 		var k int
-		var c, t, T, m float64
+		var c, t, T float64
 		var lastRound bool
 
 		counts0 := make([][8]int, numRowBytes)
@@ -756,9 +746,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buf := make([]byte, PosPopCountBufSize)
 
 		for query := range idx.InCh {
-
-			m = -1
-
 			hashes = query.Hashes
 			nHashes = float64(len(hashes))
 
@@ -871,7 +858,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						NumKmers:  count,
 						QCov:      t,
 						TCov:      T,
-						PIdt:      m,
 					})
 				}
 			}
