@@ -197,14 +197,17 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				// get matches from all databases
 				var queryResult *QueryResult
-				m := make(map[Name2Idx][]*Match, 8)
-				// TODO use sort instead of sorting
+				m := make(map[Name2Idx]*Match, 8)
+				m2 := make(map[Name2Idx]interface{}, 8) // mark shared keys
 				// var _match Match
 				var _name string
 				var key Name2Idx
 				var j int
-				var nDBWithHits int
 				var ok bool
+				var fisrtDB bool
+				var _match0 *Match
+				var toDelete []Name2Idx
+				toDelete = make([]Name2Idx, 1024)
 				for i := 0; i < nDBs; i++ {
 					// block to read
 					_queryResult := <-query.Ch
@@ -216,39 +219,47 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					if _queryResult.Matches == nil {
 						continue
 					}
-					nDBWithHits++
+
+					toDelete = toDelete[:0]
+
+					fisrtDB = i == 0
 
 					for _i := range _queryResult.Matches {
 						_match := _queryResult.Matches[_i]
 						for j, _name = range _match.Target {
 							key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
-							if _, ok = m[key]; !ok {
-								m[key] = make([]*Match, 0, 1)
+							if fisrtDB {
+								m[key] = &_match
+								continue
 							}
-							m[key] = append(m[key], &_match)
+
+							if _match0, ok = m[key]; ok { // shared
+								if _match.NumKmers < _match0.NumKmers { // update
+									m[key] = &_match
+								}
+								m2[key] = struct{}{} // mark shared keys
+							}
 						}
+					}
+					if fisrtDB {
+						continue
+					}
+					for key = range m {
+						if _, ok = m2[key]; !ok {
+							toDelete = append(toDelete, key)
+						}
+					}
+					for _, key = range toDelete {
+						delete(m, key)
 					}
 				}
 
-				var _matches []*Match
+				var _match *Match
 				_matches2 := poolMatches.Get().([]Match)
-				for key, _matches = range m {
-					if len(_matches) != nDBWithHits {
-						continue
-					}
-
-					// find the match with minimal matched k-mers
-					var _theMatch *Match
-					for _, _match := range _matches {
-						if _theMatch == nil {
-							_theMatch = _match
-						} else if _match.NumKmers < _theMatch.NumKmers {
-							_theMatch = _match
-						}
-					}
-					_theMatch.Target = []string{key.Name}
-					_theMatch.TargetIdx = []uint32{key.Index}
-					_matches2 = append(_matches2, *_theMatch)
+				for key, _match = range m {
+					_match.Target = []string{key.Name}
+					_match.TargetIdx = []uint32{key.Index}
+					_matches2 = append(_matches2, *_match)
 
 					switch sortBy {
 					case "qcov":

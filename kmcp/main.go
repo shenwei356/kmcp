@@ -26,7 +26,6 @@ import (
 	"runtime"
 
 	colorable "github.com/mattn/go-colorable"
-	"github.com/pkg/profile"
 	"github.com/shenwei356/go-logging"
 	"github.com/shenwei356/kmcp/kmcp/cmd"
 )
@@ -54,7 +53,7 @@ func main() {
 
 	// go tool pprof -http=:8080 mem.pprof
 	// defer profile.Start(profile.MemProfile, profile.MemProfileRate(1), profile.ProfilePath(".")).Stop()
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	cmd.Execute()
 }
