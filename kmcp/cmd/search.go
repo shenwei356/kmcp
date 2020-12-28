@@ -23,6 +23,8 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -30,6 +32,7 @@ import (
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/util/cliutil"
+	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts/sortutil"
 )
@@ -62,8 +65,8 @@ Attentions:
 
 		// ---------------------------------------------------------------
 
-		dbDirs := getFlagStringSlice(cmd, "db-dir")
-		if len(dbDirs) == 0 {
+		dbDir := getFlagString(cmd, "db-dir")
+		if dbDir == "" {
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
 		outFile := getFlagString(cmd, "out-prefix")
@@ -80,7 +83,7 @@ Attentions:
 		keepOrder := getFlagBool(cmd, "keep-order")
 
 		switch sortBy {
-		case "qcov", "pidt", "tcov", "sum12", "sum13", "sum123":
+		case "qcov", "sum", "tcov":
 			break
 		default:
 			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
@@ -92,6 +95,39 @@ Attentions:
 		if targetCov < 0 || targetCov > 1 {
 			checkError(fmt.Errorf("value of -T/-target-cov should be in range [0, 1]"))
 		}
+
+		// ---------------------------------------------------------------
+		// check Database
+
+		subFiles, err := ioutil.ReadDir(dbDir)
+		if err != nil {
+			checkError(fmt.Errorf("read database error: " + dbDir))
+		}
+
+		dbDirs := make([]string, 0, 8)
+		for _, file := range subFiles {
+			if file.Name() == "." || file.Name() == ".." {
+				continue
+			}
+			path := filepath.Join(dbDir, file.Name())
+
+			if !file.IsDir() {
+				continue
+			}
+			existed, err := pathutil.Exists(filepath.Join(path, dbInfoFile))
+			if err != nil {
+				checkError(fmt.Errorf("read database error: " + dbDir))
+			}
+			if existed {
+				dbDirs = append(dbDirs, path)
+			}
+		}
+		if len(dbDirs) == 0 {
+			checkError(fmt.Errorf("invalid kmcp database: %s", dbDir))
+		}
+
+		// ---------------------------------------------------------------
+		// name mapping files
 
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
@@ -190,7 +226,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tfrag\tmKmers\tqCov\ttCov\tpIdt\n")
+			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tfrag\tmKmers\tqCov\ttCov\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -200,7 +236,6 @@ Attentions:
 		var prefix2 string
 		var t, target string
 		var _dbInfo UnikIndexDBInfo
-		// var cumBlockSize []int
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -217,13 +252,13 @@ Attentions:
 				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, "", 0, 0, float64(0), float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\n",
+					prefix2, "", 0, 0, float64(0)))
 				return
 			}
 
 			for _, match := range result.Matches {
-				target = match.Target
+				target = match.Target[0]
 				if mappingNames { //
 					if t, ok = namesMap[target]; ok {
 						target = t
@@ -236,9 +271,9 @@ Attentions:
 
 				// query, len_query,
 				// db, num_kmers, fpr,
-				// target, num_target_kmers, qcov, pidt, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, target, match.TargetIdx, match.NumKmers, match.QCov, match.TCov, match.PIdt))
+				// target, num_target_kmers, qcov, tcov
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
+					prefix2, target, match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
 			}
 
 			result.Recycle()
@@ -343,7 +378,7 @@ func init() {
 	RootCmd.AddCommand(searchCmd)
 
 	// database option
-	searchCmd.Flags().StringSliceP("db-dir", "d", []string{}, `database directories created by "kmcp index"`)
+	searchCmd.Flags().StringP("db-dir", "d", "", `database directories created by "kmcp index"`)
 	searchCmd.Flags().BoolP("use-mmap", "m", true, `load index files into memory to accelerate searching`)
 
 	// query option
@@ -359,6 +394,6 @@ func init() {
 	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
-	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, pidt, tcov, sum12 (qcov+pidt), sum13 (qcov+tcov) or sum123 (qcov+pidt+tcov`)
+	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, tcov or sum (qcov+tcov)`)
 
 }

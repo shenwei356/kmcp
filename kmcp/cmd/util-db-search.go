@@ -28,12 +28,12 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/clausecker/pospop"
 	"github.com/edsrzf/mmap-go"
-	"github.com/fuzxxl/pospop"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
-	"github.com/shenwei356/unikmer/index"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/twotwotwo/sorts"
@@ -67,16 +67,20 @@ type QueryResult struct {
 	Matches []Match // all matches
 }
 
+// Name2Idx is a struct of name and index
+type Name2Idx struct {
+	Name  string
+	Index uint32
+}
+
 // Match is the struct of matching detail.
 type Match struct {
-	Target    string // target name
-	TargetIdx uint32
-	NumKmers  int // mat	ched k-mers
+	Target    []string // target name
+	TargetIdx []uint32
+	NumKmers  int // matched k-mers
 
 	QCov float64 // coverage of query
 	TCov float64 // coverage of target
-
-	PIdt float64 // percent of ident linearly matched kmers
 }
 
 // Matches is list of Matches, for sorting.
@@ -96,14 +100,6 @@ func (ms Matches) Less(i int, j int) bool {
 // SortByQCov is used to sort matches by qcov.
 type SortByQCov struct{ Matches }
 
-// SortByPIdt is used to sort matches by pindent.
-type SortByPIdt struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortByPIdt) Less(i int, j int) bool {
-	return ms.Matches[i].PIdt > ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
 // SortByTCov is used to sort matches by tcov.
 type SortByTCov struct{ Matches }
 
@@ -112,28 +108,12 @@ func (ms SortByTCov) Less(i int, j int) bool {
 	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
-// SortBySum12 is used to sort matches by qcov + pidt.
-type SortBySum12 struct{ Matches }
+// SortBySum is used to sort matches by qcov + tcov.
+type SortBySum struct{ Matches }
 
 // Less judges if element is i is less than element in j.
-func (ms SortBySum12) Less(i int, j int) bool {
-	return ms.Matches[i].QCov+ms.Matches[i].PIdt > ms.Matches[j].QCov+ms.Matches[j].PIdt && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
-// SortBySum13 is used to sort matches by qcov + tcov.
-type SortBySum13 struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortBySum13) Less(i int, j int) bool {
+func (ms SortBySum) Less(i int, j int) bool {
 	return ms.Matches[i].QCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
-}
-
-// SortBySum123 is used to sort matches by qcov + pidt + tcov.
-type SortBySum123 struct{ Matches }
-
-// Less judges if element is i is less than element in j.
-func (ms SortBySum123) Less(i int, j int) bool {
-	return ms.Matches[i].QCov+ms.Matches[i].TCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
@@ -196,11 +176,15 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	sg.done = make(chan int)
 	sg.InCh = make(chan Query, opt.Threads)
 	sg.OutCh = make(chan QueryResult, opt.Threads)
+	multipleDBs := len(dbs) > 1
 
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
 		tokens := make(chan int, sg.Options.Threads)
 		wg := &sg.wg
+		nDBs := len(sg.DBs)
+		sortBy := opt.SortBy
+
 		for query := range sg.InCh {
 			wg.Add(1)
 			tokens <- 1
@@ -213,16 +197,86 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				// get matches from all databases
-				var _queryResult QueryResult
-				for i := 0; i < len(sg.DBs); i++ {
+				var queryResult *QueryResult
+				m := make(map[Name2Idx]*Match, 8)
+				m2 := make(map[Name2Idx]interface{}, 8) // mark shared keys
+				// var _match Match
+				var _name string
+				var key Name2Idx
+				var j int
+				var ok bool
+				var fisrtDB bool
+				var _match0 *Match
+				var toDelete []Name2Idx
+				toDelete = make([]Name2Idx, 1024)
+				for i := 0; i < nDBs; i++ {
 					// block to read
-					_queryResult = <-query.Ch
-					if _queryResult.Matches == nil && !opt.KeepUnmatched {
+					_queryResult := <-query.Ch
+
+					if queryResult == nil {
+						queryResult = &_queryResult
+					}
+
+					if _queryResult.Matches == nil {
 						continue
 					}
 
-					sg.OutCh <- _queryResult
+					toDelete = toDelete[:0]
+
+					fisrtDB = i == 0
+
+					for _i := range _queryResult.Matches {
+						_match := _queryResult.Matches[_i]
+						for j, _name = range _match.Target {
+							key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
+							if fisrtDB {
+								m[key] = &_match
+								continue
+							}
+
+							if _match0, ok = m[key]; ok { // shared
+								if _match.NumKmers < _match0.NumKmers { // update
+									m[key] = &_match
+								}
+								m2[key] = struct{}{} // mark shared keys
+							}
+						}
+					}
+					if fisrtDB {
+						continue
+					}
+					for key = range m {
+						if _, ok = m2[key]; !ok {
+							toDelete = append(toDelete, key)
+						}
+					}
+					for _, key = range toDelete {
+						delete(m, key)
+					}
 				}
+
+				var _match *Match
+				_matches2 := poolMatches.Get().([]Match)
+				for key, _match = range m {
+					_match.Target = []string{key.Name}
+					_match.TargetIdx = []uint32{key.Index}
+					if multipleDBs {
+						_match.TCov = 0
+					}
+					_matches2 = append(_matches2, *_match)
+
+					switch sortBy {
+					case "qcov":
+						sorts.Quicksort(Matches(_matches2))
+					case "tcov":
+						sorts.Quicksort(SortByTCov{Matches(_matches2)})
+					case "sum":
+						sorts.Quicksort(SortBySum{Matches(_matches2)})
+					}
+				}
+
+				queryResult.Matches = _matches2
+				sg.OutCh <- *queryResult
 
 				wg.Done()
 				<-tokens
@@ -375,7 +429,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				numHashes := db.Info.NumHashes
 				indices := db.Indices
 				numIndices := len(indices)
-				sortBy := db.Options.SortBy
 				topN := db.Options.TopN
 				onlyTopN := topN > 0
 
@@ -450,23 +503,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				hashes = hashes[:0]
 				poolHashes.Put(hashes)
 
-				// sort and filter
+				// filter
 				if len(matches) > 0 {
-					switch sortBy {
-					case "qcov":
-						sorts.Quicksort(Matches(matches))
-					case "pidt":
-						sorts.Quicksort(SortByPIdt{Matches(matches)})
-					case "tcov":
-						sorts.Quicksort(SortByTCov{Matches(matches)})
-					case "sum12":
-						sorts.Quicksort(SortBySum12{Matches(matches)})
-					case "sum13":
-						sorts.Quicksort(SortBySum13{Matches(matches)})
-					case "sum123":
-						sorts.Quicksort(SortBySum123{Matches(matches)})
-					}
-
 					if onlyTopN && len(matches) > topN {
 						matches = matches[:topN]
 					}
@@ -722,7 +760,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var count int
 		var ix8 int
 		var k int
-		var c, t, T, m float64
+		var c, t, T float64
 		var lastRound bool
 
 		counts0 := make([][8]int, numRowBytes)
@@ -731,9 +769,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buf := make([]byte, PosPopCountBufSize)
 
 		for query := range idx.InCh {
-
-			m = -1
-
 			hashes = query.Hashes
 			nHashes = float64(len(hashes))
 
@@ -846,7 +881,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						NumKmers:  count,
 						QCov:      t,
 						TCov:      T,
-						PIdt:      m,
 					})
 				}
 			}
@@ -937,4 +971,8 @@ func (r QueryResult) Recycle() {
 
 var poolIdxValues = &sync.Pool{New: func() interface{} {
 	return make([]unikmer.IdxValue, 0, 128)
+}}
+
+var poolBytes = &sync.Pool{New: func() interface{} {
+	return make([]byte, 0, 10<<20)
 }}

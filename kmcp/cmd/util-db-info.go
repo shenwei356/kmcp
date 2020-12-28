@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/shenwei356/unikmer/index"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/util/pathutil"
 	"gopkg.in/yaml.v2"
 )
@@ -39,7 +39,7 @@ const dbNameMappingFile = "__name_mapping.tsv"
 var ErrVersionMismatch = errors.New("kmcp/index: version mismatch")
 
 // UnikIndexDBVersion is the version of database.
-const UnikIndexDBVersion uint8 = 3
+const UnikIndexDBVersion uint8 = 4
 
 // UnikIndexDBInfo is the meta data of a database.
 type UnikIndexDBInfo struct {
@@ -66,7 +66,7 @@ type UnikIndexDBInfo struct {
 	BlockSize int      `yaml:"blocksize"`
 	Kmers     int      `yaml:"totalKmers"`
 	Files     []string `yaml:"files"`
-	NumNames  int      `yaml:"numNames"`
+	NumNames  int      `yaml:"numNameGroups"`
 
 	path         string            `yaml:"path,omitempty"`
 	NameMapping  map[string]string `yaml:"name-mapping,omitempty"`
@@ -119,6 +119,18 @@ func (i UnikIndexDBInfo) WriteTo(file string) (int, error) {
 	data, err := yaml.Marshal(i)
 	if err != nil {
 		return 0, fmt.Errorf("fail to marshal database info")
+	}
+
+	dir := filepath.Dir(file)
+	dirExisted, err := pathutil.DirExists(dir)
+	if err != nil {
+		return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
+	}
+	if !dirExisted {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return 0, fmt.Errorf("fail to write kmcp database info file: %s", file)
+		}
 	}
 
 	w, err := os.Create(file)

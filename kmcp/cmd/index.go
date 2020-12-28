@@ -35,15 +35,15 @@ import (
 
 	"github.com/cespare/xxhash"
 	"github.com/pkg/errors"
+	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
-	"github.com/shenwei356/unikmer/index"
 	"github.com/shenwei356/util/bytesize"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
 	"github.com/twotwotwo/sorts/sortutil"
-	"github.com/vbauerster/mpb"
-	"github.com/vbauerster/mpb/decor"
+	"github.com/vbauerster/mpb/v5"
+	"github.com/vbauerster/mpb/v5/decor"
 	"gopkg.in/yaml.v2"
 )
 
@@ -118,7 +118,7 @@ Tips:
 		// ---------------------------------------------------------------
 		// index flags
 
-		sBlock := getFlagInt(cmd, "block-size")
+		sBlock00 := getFlagInt(cmd, "block-size")
 
 		fpr := getFlagPositiveFloat64(cmd, "false-positive-rate")
 		numHashes := getFlagPositiveInt(cmd, "num-hash")
@@ -152,6 +152,17 @@ Tips:
 
 		if kmerThreshold8 >= kmerThresholdS {
 			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
+		}
+
+		// ---------------------------------------------------------------
+		// index flags
+		numRepeats := getFlagPositiveInt(cmd, "num-repititions")
+		numBuckets := getFlagNonNegativeInt(cmd, "num-buckets")
+		if numRepeats < 1 {
+			checkError(fmt.Errorf("value of -R/--num-repititions should be >= 1"))
+		}
+		if numBuckets > 0 && sBlock00 > numBuckets {
+			checkError(fmt.Errorf("value of -b/--block-size (%d) should be small than -B/--num-buckets (%d)", sBlock00, numBuckets))
 		}
 
 		// ---------------------------------------------------------------
@@ -193,9 +204,7 @@ Tips:
 				}
 			}
 		}
-		if len(files) < 2 {
-			checkError(fmt.Errorf("at least two .unik files needed"))
-		} else if opt.Verbose {
+		if opt.Verbose {
 			log.Infof("%d input file(s) given", len(files))
 		}
 
@@ -249,7 +258,7 @@ Tips:
 			}()
 		}
 
-		fileInfos := make([]UnikFileInfo, 0, len(files))
+		fileInfos0 := make([]UnikFileInfo, 0, len(files))
 
 		var k int = -1
 		var hashed bool
@@ -258,7 +267,6 @@ Tips:
 		var scale uint32
 		var meta0 Meta
 
-		var n int64
 		var nfiles = len(files)
 
 		var reader0 *unikmer.Reader
@@ -310,20 +318,22 @@ Tips:
 			return UnikFileInfo{Path: file, Name: meta.SeqID, Index: meta.FragIdx, Kmers: reader.Number}
 		}
 
+		// first file
 		file := files[0]
 		var t time.Time
 		if opt.Verbose {
 			t = time.Now()
 		}
 
+		var n int64
 		info := getInfo(file, true)
-
+		n += info.Kmers
 		if opt.Verbose {
 			bar.Increment()
 			bar.DecoratorEwmaUpdate(time.Since(t))
 		}
 
-		fileInfos = append(fileInfos, info)
+		fileInfos0 = append(fileInfos0, info)
 		namesMap0 := make(map[string]interface{}, 1024)
 		namesMap := make(map[uint64]interface{}, nfiles)
 		namesMap[xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
@@ -338,7 +348,7 @@ Tips:
 			var ok bool
 			var nameHash uint64
 			for info := range chInfos {
-				fileInfos = append(fileInfos, info)
+				fileInfos0 = append(fileInfos0, info)
 				n += info.Kmers
 
 				nameHash = xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
@@ -389,45 +399,12 @@ Tips:
 			log.Infof("finished checking %d .unik files", nfiles)
 		}
 
-		sorts.Quicksort(UnikFileInfos(fileInfos))
-
-		names0 := make([]string, 0, len(files))
-		indices0 := make([]uint32, 0, len(files))
-		sizes0 := make([]uint64, 0, len(files))
-		for _, info := range fileInfos {
-			n += info.Kmers
-			names0 = append(names0, info.Name)
-			indices0 = append(indices0, info.Index)
-			sizes0 = append(sizes0, uint64(info.Kmers))
-		}
-
-		if opt.Verbose {
-			log.Infof("names (first and last 5 names):")
-			for i, info := range fileInfos {
-				if i < 5 || i >= len(fileInfos)-5 {
-					log.Infof("name [%5d / %5d]: %s, frag: %d, #k-mers: %d, file: %s ", i+1, len(fileInfos), info.Name, info.Index, info.Kmers, info.Path)
-				}
-			}
-		}
-
 		// ------------------------------------------------------------------------------------
 		// begin creating index
 		if opt.Verbose {
 			log.Infof("------------------------------------------------------------")
 			log.Infof("starting indexing ...")
-		}
-		nFiles := len(fileInfos)
-		if sBlock <= 0 {
-			// sBlock = int((math.Sqrt(float64(nFiles))+7)/8) * 8
-			sBlock = (int(float64(nFiles)/float64(runtime.NumCPU())) + 7) / 8 * 8
-		}
-		if sBlock < 8 {
-			sBlock = 8
-		} else if sBlock > nFiles {
-			sBlock = nFiles
-		}
 
-		if opt.Verbose {
 			if meta0.Minimizer {
 				log.Infof("minimizer window: %d", meta0.MinimizerW)
 			}
@@ -440,168 +417,288 @@ Tips:
 			if scaled {
 				log.Infof("down-sampling scale: %d", scale)
 			}
-			log.Infof("block size: %d", sBlock)
 			log.Infof("block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
 			log.Infof("block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
 			log.Infof("buiding index ...")
 		}
 
-		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
+		// ------------------------------------------------------------------------------------
+
+		singleRepeat := numRepeats == 1
+		var singleSet bool
+		if numBuckets == 0 { // special case, just like BIGSI/cobs
+			singleSet = true
+			numBuckets = len(fileInfos0)
+			numRepeats = 1
 		}
+		numBucketsUint64 := uint64(numBuckets)
 
-		nIndexFiles := int((len(files) + sBlock - 1) / sBlock) // may be more if using -m and -M
-		indexFiles := make([]string, 0, nIndexFiles)
+		var fileSize0 float64
 
-		ch := make(chan string, nIndexFiles)
-		done := make(chan int)
-		go func() {
-			for f := range ch {
-				indexFiles = append(indexFiles, f)
-			}
-			done <- 1
-		}()
+		// repeatedly randomly shuffle names into buckets
+		for rr := 0; rr < numRepeats; rr++ {
+			dirR := fmt.Sprintf("R%03d", rr+1)
 
-		var fileSize float64
-		chFileSize := make(chan float64, nIndexFiles)
-		doneFileSize := make(chan int)
-		go func() {
-			for f := range chFileSize {
-				fileSize += f
-			}
-			doneFileSize <- 1
-		}()
-
-		var prefix string
-
-		var b int
-		var wg0 sync.WaitGroup
-		maxConc := opt.NumCPUs
-		if dryRun {
-			maxConc = 1 // just for loging in order
-		}
-		tokens0 := make(chan int, maxConc)
-		tokensOpenFiles := make(chan int, maxOpenFiles)
-
-		sBlock0 := sBlock
-
-		batch := make([]*UnikFileInfo, 0, sBlock)
-		var flag8, flag bool
-		var lastInfo *UnikFileInfo
-		for i := 0; i <= nFiles; i++ {
-			if i == nFiles { // process lastInfo
-				// process files in batch or the last file
-				if flag {
-					batch = append(batch, lastInfo)
+			buckets := make([][]UnikFileInfo, numBuckets)
+			var bIdx int
+			var h1, h2 uint32
+			for jj, info := range fileInfos0 {
+				if singleSet {
+					bIdx = jj
+				} else {
+					h1, h2 = baseHashes(xxhash.Sum64([]byte(info.Path)))
+					bIdx = int(uint64(h1+h2*uint32(rr+1)) % numBucketsUint64) // add seed
 				}
-			} else {
-				info := fileInfos[i]
 
-				if flag || flag8 {
-					if flag {
-						batch = append(batch, lastInfo)
-						lastInfo = &info
-					} else if info.Kmers > kmerThresholdS {
-						// meet a very big file the first time
-						flag = true      // mark
-						lastInfo = &info // leave this file process in the next round
-						// and we have to process files aleady in batch
-					} else { // flag8 && !flag
-						if lastInfo != nil { // right after found the first file > kmerThreshold8
-							batch = append(batch, lastInfo)
-							lastInfo = nil
+				if buckets[bIdx] == nil {
+					buckets[bIdx] = make([]UnikFileInfo, 0, 8)
+				}
+				buckets[bIdx] = append(buckets[bIdx], info)
+			}
+
+			fileInfoGroups := make([]UnikFileInfoGroup, len(buckets))
+			for bb, infos := range buckets {
+				var totalKmers int64
+				for _, info := range infos {
+					totalKmers += info.Kmers
+				}
+				fileInfoGroups[bb] = UnikFileInfoGroup{Infos: infos, Kmers: totalKmers}
+			}
+
+			// sort by group kmer size
+			sorts.Quicksort(UnikFileInfoGroups(fileInfoGroups))
+
+			nFiles := len(fileInfoGroups)
+			var sBlock int
+			if sBlock00 <= 0 { // block size from command line
+				sBlock = (int(float64(nFiles)/float64(runtime.NumCPU())) + 7) / 8 * 8
+			} else {
+				sBlock = sBlock00
+			}
+
+			if sBlock < 8 {
+				sBlock = 8
+			} else if sBlock > nFiles {
+				sBlock = nFiles
+			}
+
+			if opt.Verbose {
+				if singleRepeat {
+					log.Infof("block size: %d", sBlock)
+				} else {
+					log.Infof("[Repeat %d/%d] block size: %d", rr+1, numRepeats, sBlock)
+				}
+			}
+
+			if opt.Verbose {
+				pbs = mpb.New(mpb.WithWidth(50), mpb.WithOutput(os.Stderr))
+			}
+
+			// really begin
+			nIndexFiles := int((nFiles + sBlock - 1) / sBlock) // may be more if using -m and -M
+			indexFiles := make([]string, 0, nIndexFiles)
+
+			ch := make(chan string, nIndexFiles)
+			done := make(chan int)
+			go func() {
+				for f := range ch {
+					indexFiles = append(indexFiles, f)
+				}
+				done <- 1
+			}()
+
+			var fileSize float64
+			chFileSize := make(chan float64, nIndexFiles)
+			doneFileSize := make(chan int)
+			go func() {
+				for f := range chFileSize {
+					fileSize += f
+				}
+				doneFileSize <- 1
+			}()
+
+			var prefix string
+
+			var b int
+			var wg0 sync.WaitGroup
+			maxConc := opt.NumCPUs
+			if dryRun {
+				maxConc = 1 // just for loging in order
+			}
+			tokens0 := make(chan int, maxConc)
+			tokensOpenFiles := make(chan int, maxOpenFiles)
+
+			sBlock0 := sBlock // save for later use
+
+			batch := make([][]UnikFileInfo, 0, sBlock)
+			var flag8, flag bool
+			var lastInfos []UnikFileInfo
+			var infoGroup UnikFileInfoGroup
+
+			for i := 0; i <= nFiles; i++ {
+				if i == nFiles { // process lastInfo
+					// add previous file to batch
+					if flag || flag8 {
+						if lastInfos != nil {
+							batch = append(batch, lastInfos)
+							lastInfos = nil
+						}
+					}
+				} else {
+					infoGroup = fileInfoGroups[i]
+					infos := infoGroup.Infos
+					if infoGroup.Kmers == 0 { // skip empty buckets
+						continue
+					}
+
+					if flag || flag8 {
+						// add previous file to batch
+						if lastInfos != nil {
+							batch = append(batch, lastInfos)
+							lastInfos = nil
 						}
 
-						batch = append(batch, &info)
+						if flag {
+							lastInfos = infos // leave this file process in the next round
+							// and we have to process files aleady in batch
+						} else if infoGroup.Kmers > kmerThresholdS {
+							// meet a very big file the first time
+							flag = true       // mark
+							lastInfos = infos // leave this file process in the next round
+							// and we have to process files aleady in batch
+						} else { // flag8 && !flag
+							batch = append(batch, infos)
+							if len(batch) < sBlock { // not filled
+								continue
+							}
+						}
+					} else if infoGroup.Kmers > kmerThreshold8 {
+						if infoGroup.Kmers > kmerThresholdS {
+							// meet a very big file the first time
+							flag = true       // mark
+							lastInfos = infos // leave this file process in the next round
+							// and we have to process files aleady in batch
+						} else {
+							// meet a big file > kmerThreshold8
+							sBlock = 8
+							flag8 = true      // mark
+							lastInfos = infos // leave this file process in the next batch
+							// and we have to process files aleady in batch
+						}
+					} else {
+						batch = append(batch, infos)
 						if len(batch) < sBlock { // not filled
 							continue
 						}
 					}
-				} else if info.Kmers > kmerThreshold8 {
-					if info.Kmers > kmerThresholdS {
-						// meet a very big file the first time
-						flag = true      // mark
-						lastInfo = &info // leave this file process in the next round
-						// and we have to process files aleady in batch
+
+				}
+
+				if len(batch) == 0 {
+					if lastInfos == nil {
+						break
 					} else {
-						// meet a big file > kmerThreshold8
-						sBlock = 8
-						flag8 = true     // mark
-						lastInfo = &info // leave this file process in the next batch
-						// and we have to process files aleady in batch
-					}
-				} else {
-					batch = append(batch, &info)
-					if len(batch) < sBlock { // not filled
 						continue
 					}
 				}
 
-			}
+				b++
 
-			if len(batch) == 0 {
-				break
-			}
-
-			b++
-
-			prefix = fmt.Sprintf("[block #%03d]", b)
-
-			wg0.Add(1)
-			tokens0 <- 1
-
-			var bar *mpb.Bar
-			if opt.Verbose && !dryRun {
-				bar = pbs.AddBar(int64((len(batch)+7)/8),
-					mpb.PrependDecorators(
-						decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
-						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
-					),
-					mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
-					mpb.BarFillerClearOnComplete(),
-				)
-			}
-
-			go func(files []*UnikFileInfo, b int, prefix string, bar *mpb.Bar) {
-				var wg sync.WaitGroup
-				tokens := make(chan int, opt.NumCPUs)
-
-				var maxElements int64
-				for _, info := range files {
-					if maxElements < info.Kmers {
-						maxElements = info.Kmers
-					}
+				if singleRepeat {
+					prefix = fmt.Sprintf("[block #%03d]", b)
+				} else {
+					prefix = fmt.Sprintf("[Repeat %d/%d][block #%03d]", rr+1, numRepeats, b)
 				}
 
-				var nBatchFiles int
-				nBatchFiles = int((len(files) + 7) / 8)
+				wg0.Add(1)
+				tokens0 <- 1
 
-				sigsBlock := make([][]byte, 0, nBatchFiles)
-				namesBlock := make([]string, 0, len(files))
-				indicesBlock := make([]uint32, 0, len(files))
-				sizesBlock := make([]uint64, 0, len(files))
+				var bar *mpb.Bar
+				if opt.Verbose && !dryRun {
+					bar = pbs.AddBar(int64((len(batch)+7)/8),
+						mpb.PrependDecorators(
+							decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
+							decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+						),
+						mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
+						mpb.BarFillerClearOnComplete(),
+					)
+				}
 
-				chBatch8 := make(chan batch8, nBatchFiles)
-				doneBatch8 := make(chan int)
+				go func(batch [][]UnikFileInfo, b int, prefix string, bar *mpb.Bar) {
+					var wg sync.WaitGroup
+					tokens := make(chan int, opt.NumCPUs)
 
-				buf := make(map[int]batch8)
-
-				go func() {
-					var id int = 1
-					for batch := range chBatch8 {
-						if batch.id == id {
-							sigsBlock = append(sigsBlock, batch.sigs)
-							namesBlock = append(namesBlock, batch.names...)
-							indicesBlock = append(indicesBlock, batch.indices...)
-							sizesBlock = append(sizesBlock, batch.sizes...)
-							if opt.Verbose && !dryRun {
-								bar.Increment()
-							}
-							id++
-							continue
+					// max elements of UNION of all sets,
+					// but it takes time to compute for reading whole data,
+					// so we use sum of elements, which is slightly higher than actual size.
+					var maxElements int64
+					var totalKmer int64
+					for _, infos := range batch {
+						totalKmer = 0
+						for _, info := range infos {
+							totalKmer += info.Kmers
 						}
-						for {
-							if _batch, ok := buf[id]; ok {
+						if maxElements < totalKmer {
+							maxElements = totalKmer
+						}
+					}
+
+					nInfoGroups := len(batch)
+					var nBatchFiles int
+					nBatchFiles = int((nInfoGroups + 7) / 8)
+
+					sigsBlock := make([][]byte, 0, nBatchFiles)
+
+					namesBlock := make([][]string, 0, nInfoGroups)
+					indicesBlock := make([][]uint32, 0, nInfoGroups)
+					sizesBlock := make([]uint64, 0, nInfoGroups)
+
+					chBatch8 := make(chan batch8s, nBatchFiles)
+					doneBatch8 := make(chan int)
+
+					buf := make(map[int]batch8s)
+
+					go func() {
+						var id int = 1
+						for batch2 := range chBatch8 {
+							if batch2.id == id {
+								sigsBlock = append(sigsBlock, batch2.sigs)
+								namesBlock = append(namesBlock, batch2.names...)
+								indicesBlock = append(indicesBlock, batch2.indices...)
+								sizesBlock = append(sizesBlock, batch2.sizes...)
+								if opt.Verbose && !dryRun {
+									bar.Increment()
+								}
+								id++
+								continue
+							}
+							for {
+								if _batch, ok := buf[id]; ok {
+									sigsBlock = append(sigsBlock, _batch.sigs)
+									namesBlock = append(namesBlock, _batch.names...)
+									indicesBlock = append(indicesBlock, _batch.indices...)
+									sizesBlock = append(sizesBlock, _batch.sizes...)
+									if opt.Verbose && !dryRun {
+										bar.Increment()
+									}
+									delete(buf, id)
+									id++
+								} else {
+									break
+								}
+							}
+							buf[batch2.id] = batch2
+						}
+						if len(buf) > 0 {
+							ids := make([]int, 0, len(buf))
+							for id := range buf {
+								ids = append(ids, id)
+							}
+							sort.Ints(ids)
+							for _, id := range ids {
+								_batch := buf[id]
+
 								sigsBlock = append(sigsBlock, _batch.sigs)
 								namesBlock = append(namesBlock, _batch.names...)
 								indicesBlock = append(indicesBlock, _batch.indices...)
@@ -609,186 +706,295 @@ Tips:
 								if opt.Verbose && !dryRun {
 									bar.Increment()
 								}
-								delete(buf, id)
-								id++
-							} else {
-								break
 							}
 						}
-						buf[batch.id] = batch
-					}
-					if len(buf) > 0 {
-						ids := make([]int, 0, len(buf))
-						for id := range buf {
-							ids = append(ids, id)
-						}
-						sort.Ints(ids)
-						for _, id := range ids {
-							_batch := buf[id]
 
-							sigsBlock = append(sigsBlock, _batch.sigs)
-							namesBlock = append(namesBlock, _batch.names...)
-							indicesBlock = append(indicesBlock, _batch.indices...)
-							sizesBlock = append(sizesBlock, _batch.sizes...)
-							if opt.Verbose && !dryRun {
-								bar.Increment()
+						doneBatch8 <- 1
+					}()
+
+					numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
+					var eFileSize float64
+					eFileSize = 24
+					for _, infos := range batch {
+						for _, info := range infos {
+							eFileSize += float64(len(info.Name) + 1 + 8) // may be inaccurent
+						}
+					}
+					eFileSize += float64(numSigs * uint64(nBatchFiles))
+
+					if opt.Verbose && dryRun {
+						if singleRepeat {
+							log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
+								prefix, len(batch), maxElements, numSigs, bytesize.ByteSize(eFileSize))
+						} else {
+							log.Infof("%s #buckets: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
+								prefix, len(batch), maxElements, numSigs, bytesize.ByteSize(eFileSize))
+						}
+					}
+
+					// split into batches with 8 files
+					var bb, jj int
+					for ii := 0; ii < nInfoGroups; ii += 8 {
+						if dryRun {
+							continue
+						}
+						jj = ii + 8
+						if jj > nInfoGroups {
+							jj = nInfoGroups
+						}
+						wg.Add(1)
+						tokens <- 1
+						bb++
+
+						var outFile string
+
+						// 8 files
+						go func(_batch [][]UnikFileInfo, bb int, numSigs uint64, outFile string, id int) {
+							defer func() {
+								wg.Done()
+								<-tokens
+							}()
+
+							names := make([][]string, 0, 8)
+							indices := make([][]uint32, 0, 8)
+							sizes := make([]uint64, 0, 8)
+							for _, infos := range _batch {
+								_names := make([]string, len(infos))
+								_indices := make([]uint32, len(infos))
+								var _size int64
+
+								sorts.Quicksort(UnikFileInfosByName(infos))
+
+								for iii, info := range infos {
+									_names[iii] = info.Name
+									_indices[iii] = info.Index
+									_size += info.Kmers
+								}
+								names = append(names, _names)
+								indices = append(indices, _indices)
+								sizes = append(sizes, uint64(_size))
 							}
-						}
+
+							sigs := make([]byte, numSigs)
+
+							numSigsM1 := numSigs - 1
+
+							var _wg sync.WaitGroup
+
+							_ch := make(chan []byte, 8)
+							_done := make(chan int)
+							go func() {
+								var _i int
+								var _s byte
+								for _sigs := range _ch {
+									for _i, _s = range _sigs {
+										sigs[_i] |= _s
+									}
+								}
+								_done <- 1
+							}()
+
+							// every file in 8 file groups
+							for _k, infos := range _batch {
+								_sigs := make([]byte, numSigs)
+								_wg.Add(1)
+								go func(_k int, infos []UnikFileInfo) {
+									for _, info := range infos {
+										// go func(_k int, info UnikFileInfo) {
+										tokensOpenFiles <- 1
+
+										// _sigs := make([]byte, numSigs)
+
+										var infh *bufio.Reader
+										var r *os.File
+										var reader *unikmer.Reader
+										var err error
+										var code uint64
+										var loc int
+
+										infh, r, _, err = inStream(info.Path)
+										checkError(errors.Wrap(err, info.Path))
+
+										reader, err = unikmer.NewReader(infh)
+										checkError(errors.Wrap(err, info.Path))
+										singleHash := numHashes == 1
+
+										if reader.IsHashed() {
+											if singleHash {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													// sigs[code%numSigs] |= 1 << (7 - _k)
+													_sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													// for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
+														_sigs[loc] |= 1 << (7 - _k)
+													}
+												}
+											}
+										} else {
+											if singleHash {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+													_sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													// for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
+														_sigs[loc] |= 1 << (7 - _k)
+													}
+												}
+											}
+										}
+
+										r.Close()
+
+										<-tokensOpenFiles
+									}
+
+									_ch <- _sigs
+									_wg.Done()
+								}(_k, infos)
+							}
+
+							_wg.Wait()
+							close(_ch)
+							<-_done
+
+							chBatch8 <- batch8s{
+								id:      id,
+								sigs:    sigs,
+								names:   names,
+								indices: indices,
+								sizes:   sizes,
+							}
+						}(batch[ii:jj], bb, numSigs, outFile, bb)
 					}
 
-					doneBatch8 <- 1
-				}()
+					wg.Wait()
+					close(chBatch8)
+					<-doneBatch8
 
-				numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
-				var eFileSize float64
-				eFileSize = 24
-				for _, info := range files {
-					eFileSize += float64(len(info.Name) + 1 + 8)
-				}
-				eFileSize += float64(numSigs * uint64(nBatchFiles))
+					blockFile := filepath.Join(outDir,
+						dirR,
+						fmt.Sprintf("_block%03d%s", b, extIndex))
 
-				if opt.Verbose && dryRun {
-					log.Infof("%s #files: %5d, max #k-mers: %d, #signatures: %d, file size: %8s", prefix, len(files), maxElements, numSigs, bytesize.ByteSize(eFileSize))
-				}
+					if !dryRun {
 
-				// split into batches with 8 files
-				var bb, jj int
-				for ii := 0; ii < len(files); ii += 8 {
-					if dryRun {
-						continue
-					}
-					jj = ii + 8
-					if jj > len(files) {
-						jj = len(files)
-					}
-					wg.Add(1)
-					tokens <- 1
-					bb++
-
-					var outFile string
-
-					// 8 files
-					go func(_files []*UnikFileInfo, bb int, maxElements int64, numSigs uint64, outFile string, id int) {
+						outfh, gw, w, err := outStream(blockFile, false, opt.CompressionLevel)
+						checkError(err)
 						defer func() {
-							wg.Done()
-							<-tokens
+							outfh.Flush()
+							if gw != nil {
+								gw.Close()
+							}
+							w.Close()
 						}()
 
-						names := make([]string, 0, 8)
-						indices := make([]uint32, 0, 8)
-						sizes := make([]uint64, 0, 8)
-						for _, info := range _files {
-							names = append(names, info.Name)
-							indices = append(indices, info.Index)
-							sizes = append(sizes, uint64(info.Kmers))
-						}
+						writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, indicesBlock, sizesBlock)
+						checkError(err)
+						defer func() {
+							checkError(writer.Flush())
+						}()
 
-						sigs := make([]byte, numSigs)
-						numSigsM1 := numSigs - 1
-
-						// every file in 8 files
-						for _k, info := range _files {
-							var infh *bufio.Reader
-							var r *os.File
-							var reader *unikmer.Reader
-							var err error
-							var code uint64
-							var loc int
-
-							tokensOpenFiles <- 1
-							infh, r, _, err = inStream(info.Path)
-							checkError(errors.Wrap(err, info.Path))
-
-							reader, err = unikmer.NewReader(infh)
-							checkError(errors.Wrap(err, info.Path))
-							singleHash := numHashes == 1
-
-							if reader.IsHashed() {
-								if singleHash {
-									for {
-										code, _, err = reader.ReadCodeWithTaxid()
-										if err != nil {
-											if err == io.EOF {
-												break
-											}
-											checkError(errors.Wrap(err, info.Path))
-										}
-
-										// sigs[code%numSigs] |= 1 << (7 - _k)
-										sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
-									}
-								} else {
-									for {
-										code, _, err = reader.ReadCodeWithTaxid()
-										if err != nil {
-											if err == io.EOF {
-												break
-											}
-											checkError(errors.Wrap(err, info.Path))
-										}
-
-										// for _, loc = range hashLocations(code, numHashes, numSigs) {
-										for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
-											sigs[loc] |= 1 << (7 - _k)
-										}
-									}
+						if nBatchFiles == 1 {
+							checkError(writer.WriteBatch(sigsBlock[0], len(sigsBlock[0])))
+						} else {
+							row := make([]byte, nBatchFiles)
+							for ii := 0; ii < int(numSigs); ii++ {
+								for jj = 0; jj < nBatchFiles; jj++ {
+									row[jj] = sigsBlock[jj][ii]
 								}
-							} else {
-								if singleHash {
-									for {
-										code, _, err = reader.ReadCodeWithTaxid()
-										if err != nil {
-											if err == io.EOF {
-												break
-											}
-											checkError(errors.Wrap(err, info.Path))
-										}
-
-										// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
-										sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
-									}
-								} else {
-									for {
-										code, _, err = reader.ReadCodeWithTaxid()
-										if err != nil {
-											if err == io.EOF {
-												break
-											}
-											checkError(errors.Wrap(err, info.Path))
-										}
-
-										// for _, loc = range hashLocations(code, numHashes, numSigs) {
-										for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
-											sigs[loc] |= 1 << (7 - _k)
-										}
-									}
-								}
+								checkError(writer.Write(row))
 							}
-
-							r.Close()
-
-							<-tokensOpenFiles
 						}
+					}
 
-						chBatch8 <- batch8{
-							id:      id,
-							sigs:    sigs,
-							names:   names,
-							indices: indices,
-							sizes:   sizes,
-						}
-					}(files[ii:jj], bb, maxElements, numSigs, outFile, bb)
-				}
+					ch <- filepath.Base(blockFile)
+					chFileSize <- eFileSize
 
-				wg.Wait()
-				close(chBatch8)
-				<-doneBatch8
+					wg0.Done()
+					<-tokens0
+				}(batch, b, prefix, bar)
 
-				blockFile := filepath.Join(outDir, fmt.Sprintf("_block%03d%s", b, extIndex))
+				batch = make([][]UnikFileInfo, 0, sBlock)
+			}
 
-				if !dryRun {
+			wg0.Wait()
 
-					outfh, gw, w, err := outStream(blockFile, false, opt.CompressionLevel)
+			close(ch)
+			close(chFileSize)
+			<-done
+			<-doneFileSize
+
+			if opt.Verbose && !dryRun {
+				pbs.Wait()
+			}
+
+			sortutil.Strings(indexFiles)
+			dbInfo := NewUnikIndexDBInfo(indexFiles)
+			dbInfo.Alias = alias
+			dbInfo.K = k
+			dbInfo.Hashed = hashed
+			dbInfo.Kmers = int(n)
+			dbInfo.FPR = fpr
+			dbInfo.BlockSize = sBlock0
+			dbInfo.NumNames = len(fileInfoGroups)
+			dbInfo.NumHashes = numHashes
+			dbInfo.Canonical = canonical
+			dbInfo.Scaled = scaled
+			dbInfo.Scale = scale
+			dbInfo.Minimizer = meta0.Minimizer
+			dbInfo.MinimizerW = uint32(meta0.MinimizerW)
+			dbInfo.Syncmer = meta0.Syncmer
+			dbInfo.SyncmerS = uint32(meta0.SyncmerS)
+			dbInfo.SplitSeq = meta0.SplitSeq
+			dbInfo.SplitSize = meta0.SplitSize
+			dbInfo.SplitOverlap = meta0.SplitOverlap
+
+			if !dryRun {
+				var n2 int
+				n2, err = dbInfo.WriteTo(filepath.Join(outDir, dirR, dbInfoFile))
+				checkError(err)
+				fileSize += float64(n2)
+
+				// write name_mapping.tsv
+				func() {
+					outfh, gw, w, err := outStream(filepath.Join(outDir, dirR, dbNameMappingFile), false, opt.CompressionLevel)
 					checkError(err)
 					defer func() {
 						outfh.Flush()
@@ -798,116 +1004,36 @@ Tips:
 						w.Close()
 					}()
 
-					writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, indicesBlock, sizesBlock)
-					checkError(err)
-					defer func() {
-						checkError(writer.Flush())
-					}()
-
-					if nBatchFiles == 1 {
-						checkError(writer.WriteBatch(sigsBlock[0], len(sigsBlock[0])))
-					} else {
-						row := make([]byte, nBatchFiles)
-						for ii := 0; ii < int(numSigs); ii++ {
-							for jj = 0; jj < nBatchFiles; jj++ {
-								row[jj] = sigsBlock[jj][ii]
-							}
-							checkError(writer.Write(row))
-						}
+					var line string
+					for name := range namesMap0 {
+						line = fmt.Sprintf("%s\t%s\n", name, name)
+						fileSize += float64(len(line))
+						outfh.WriteString(line)
 					}
-					// if opt.Verbose {
-					// 	log.Infof("%s signatures saved", prefix)
-					// }
-				}
-
-				ch <- filepath.Base(blockFile)
-				chFileSize <- eFileSize
-
-				wg0.Done()
-				<-tokens0
-			}(batch, b, prefix, bar)
-
-			batch = make([]*UnikFileInfo, 0, sBlock)
-		}
-
-		wg0.Wait()
-
-		close(ch)
-		close(chFileSize)
-		<-done
-		<-doneFileSize
-
-		if opt.Verbose && !dryRun {
-			pbs.Wait()
-		}
-
-		sortutil.Strings(indexFiles)
-		dbInfo := NewUnikIndexDBInfo(indexFiles)
-		dbInfo.Alias = alias
-		dbInfo.K = k
-		dbInfo.Hashed = hashed
-		dbInfo.Kmers = int(n)
-		dbInfo.FPR = fpr
-		dbInfo.BlockSize = sBlock0
-		dbInfo.NumNames = len(names0)
-		dbInfo.NumHashes = numHashes
-		dbInfo.Canonical = canonical
-		dbInfo.Scaled = scaled
-		dbInfo.Scale = scale
-		dbInfo.Minimizer = meta0.Minimizer
-		dbInfo.MinimizerW = uint32(meta0.MinimizerW)
-		dbInfo.Syncmer = meta0.Syncmer
-		dbInfo.SyncmerS = uint32(meta0.SyncmerS)
-		dbInfo.SplitSeq = meta0.SplitSeq
-		dbInfo.SplitSize = meta0.SplitSize
-		dbInfo.SplitOverlap = meta0.SplitOverlap
-
-		if !dryRun {
-			var n2 int
-			n2, err = dbInfo.WriteTo(filepath.Join(outDir, dbInfoFile))
-			checkError(err)
-			fileSize += float64(n2)
-
-			// write name_mapping.tsv
-			func() {
-				outfh, gw, w, err := outStream(filepath.Join(outDir, dbNameMappingFile), false, opt.CompressionLevel)
-				checkError(err)
-				defer func() {
-					outfh.Flush()
-					if gw != nil {
-						gw.Close()
-					}
-					w.Close()
 				}()
+			} else { // compute file size of __db.yaml and __name_mapping.tsv
+				// __db.yaml
+				data, err := yaml.Marshal(dbInfo)
+				if err != nil {
+					checkError(fmt.Errorf("fail to marshal database info"))
+				}
+				fileSize += float64(len(data))
 
+				// __name_mapping.tsv
 				var line string
 				for name := range namesMap0 {
 					line = fmt.Sprintf("%s\t%s\n", name, name)
 					fileSize += float64(len(line))
-					outfh.WriteString(line)
 				}
-			}()
-		} else { // compute file size of __db.yaml and __name_mapping.tsv
-			// __db.yaml
-			data, err := yaml.Marshal(dbInfo)
-			if err != nil {
-				checkError(fmt.Errorf("fail to marshal database info"))
 			}
-			fileSize += float64(len(data))
 
-			// __name_mapping.tsv
-			var line string
-			for name := range namesMap0 {
-				line = fmt.Sprintf("%s\t%s\n", name, name)
-				fileSize += float64(len(line))
-			}
+			// ------------------------------------------------------------------------------------
+			fileSize0 += fileSize
 		}
-
-		// ------------------------------------------------------------------------------------
 
 		if opt.Verbose {
 			log.Infof("kmcp database with %d k-mers saved to %s", n, outDir)
-			log.Infof("#index-files: %d, total file size: %s", len(indexFiles), bytesize.ByteSize(fileSize))
+			log.Infof("total file size: %s", bytesize.ByteSize(fileSize0))
 		}
 	},
 }
@@ -927,19 +1053,87 @@ func init() {
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if kmers of single .unik file exceeds this threshold, change block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if kmers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 
+	indexCmd.Flags().IntP("num-repititions", "R", 1, "number of repititions")
+	indexCmd.Flags().IntP("num-buckets", "B", 0, "number of buckets per repitition, 0 for one set per bucket")
+
 	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
 	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful for adjusting parameters (recommended)")
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block
-type batch8 struct {
+type batch8s struct {
 	id int
 
 	sigs    []byte
-	names   []string
-	indices []uint32
+	names   [][]string
+	indices [][]uint32
 	sizes   []uint64
 }
 
-var sepNameIdx = "-+-"
+var sepNameIdx = "-id"
+
+// compute exact max elements by reading all file.
+func maxElements(opt Options, tokensOpenFiles chan int, batch [][]UnikFileInfo) (maxElements int64) {
+	var _wg sync.WaitGroup
+	_tokens := make(chan int, opt.NumCPUs)
+	_ch := make(chan int64, len(batch))
+	_done := make(chan int)
+	go func() {
+		var totalKmer int64
+		for totalKmer = range _ch {
+			if maxElements < totalKmer {
+				maxElements = totalKmer
+			}
+		}
+		_done <- 1
+	}()
+	for _, infos := range batch {
+		_wg.Add(1)
+		_tokens <- 1
+		go func(infos []UnikFileInfo) {
+			defer func() {
+				_wg.Done()
+				<-_tokens
+			}()
+
+			_m := make(map[uint64]struct{}, mapInitSize)
+
+			for _, _info := range infos {
+				tokensOpenFiles <- 1
+
+				infh, r, _, err := inStream(_info.Path)
+				if err != nil {
+					checkError(err)
+				}
+				defer r.Close()
+
+				reader, err := unikmer.NewReader(infh)
+				if err != nil {
+					checkError(err)
+				}
+
+				var code uint64
+				for {
+					code, _, err = reader.ReadCodeWithTaxid()
+					if err != nil {
+						if err == io.EOF {
+							break
+						}
+						checkError(errors.Wrap(err, _info.Path))
+					}
+					_m[code] = struct{}{}
+				}
+
+				<-tokensOpenFiles
+			}
+
+			_ch <- int64(len(_m))
+		}(infos)
+	}
+	_wg.Wait()
+	close(_ch)
+	<-_done
+
+	return
+}
