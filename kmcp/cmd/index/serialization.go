@@ -297,16 +297,17 @@ func NewReader(r io.Reader) (reader *Reader, err error) {
 }
 
 func (reader *Reader) readHeader() (err error) {
-	// check Magic number
-	var m [8]byte
+	buf := make([]byte, 56)
 	r := reader.r
-	err = binary.Read(r, be, &m)
+
+	// check Magic number (8 byte)
+	_, err = io.ReadFull(r, buf[:8])
 	if err != nil {
 		return err
 	}
 	same := true
 	for i := 0; i < 8; i++ {
-		if Magic[i] != m[i] {
+		if Magic[i] != buf[i] {
 			same = false
 			break
 		}
@@ -316,49 +317,51 @@ func (reader *Reader) readHeader() (err error) {
 	}
 
 	// 4 bytes meta info
-	var meta [4]uint8
-	err = binary.Read(r, be, &meta)
+	_, err = io.ReadFull(r, buf[:4])
 	if err != nil {
 		return err
 	}
 	// check compatibility
-	if Version != meta[0] {
+	if Version != buf[0] {
 		return ErrVersionMismatch
 	}
-	reader.Version = meta[0]
-	reader.K = int(meta[1])
-	if meta[2] > 0 {
+	reader.Version = buf[0]
+	reader.K = int(buf[1])
+	if buf[2] > 0 {
 		reader.Canonical = true
 	}
-	reader.NumHashes = meta[3]
+	reader.NumHashes = buf[3]
 
 	// 8 bytes signature size
-	err = binary.Read(r, be, &reader.NumSigs)
+	_, err = io.ReadFull(r, buf[:8])
 	if err != nil {
 		return err
 	}
+	reader.NumSigs = be.Uint64(buf[:8])
 
 	// ----------------------------------------------------------
 	// names
 
 	// 4 bytes length of Names groups
 	var n uint32
-	err = binary.Read(r, be, &n)
+	_, err = io.ReadFull(r, buf[:4])
 	if err != nil {
 		return err
 	}
+	n = be.Uint32(buf[:4])
+
 	names := make([][]string, n)
 
 	for i := 0; i < int(n); i++ {
 		// 4 bytes length of Names
-		var _n uint32
-		err = binary.Read(r, be, &_n)
+		_, err = io.ReadFull(r, buf[:4])
 		if err != nil {
 			return err
 		}
+
 		// Names
-		namesData := make([]byte, _n)
-		err = binary.Read(r, be, &namesData)
+		namesData := make([]byte, be.Uint32(buf[:4]))
+		_, err = io.ReadFull(r, namesData)
 		if err != nil {
 			return err
 		}
@@ -372,34 +375,51 @@ func (reader *Reader) readHeader() (err error) {
 	// Indices
 
 	// 4 bytes length of Indices groups
-	err = binary.Read(r, be, &n)
+	_, err = io.ReadFull(r, buf[:4])
 	if err != nil {
 		return err
 	}
+	n = be.Uint32(buf[:4])
 	indices := make([][]uint32, n)
 
+	var _n int
+	var j int
+	var buf2 []byte
+	var k int
 	for i := 0; i < int(n); i++ {
-		var _n uint32
-		err = binary.Read(r, be, &_n)
+		_, err = io.ReadFull(r, buf[:4])
+		if err != nil {
+			return err
+		}
+		_n = int(be.Uint32(buf[:4]))
+		buf2 = make([]byte, _n<<2)
+		_, err = io.ReadFull(r, buf2)
 		if err != nil {
 			return err
 		}
 
-		indicesData := make([]uint32, int(_n))
-		err = binary.Read(r, be, &indicesData)
-		if err != nil {
-			return err
+		indicesData := make([]uint32, _n)
+		for j = 0; j < _n; j++ {
+			k = j << 2
+			indicesData[j] = be.Uint32(buf2[k : k+4])
 		}
 		indices[i] = indicesData
 	}
 	reader.Indices = indices
 
 	// Sizes
-	sizesData := make([]uint64, len(names))
-	err = binary.Read(r, be, &sizesData)
+	buf2 = make([]byte, len(names)<<3)
+	_, err = io.ReadFull(r, buf2)
 	if err != nil {
 		return err
 	}
+
+	sizesData := make([]uint64, len(names))
+	for j = 0; j < len(names); j++ {
+		k = j << 3
+		sizesData[j] = be.Uint64(buf2[k : k+8])
+	}
+
 	reader.Sizes = sizesData
 
 	return nil

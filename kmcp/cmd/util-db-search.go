@@ -198,6 +198,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				// get matches from all databases
 				var queryResult *QueryResult
 				m := make(map[Name2Idx][]*Match, 8)
+				// TODO use sort instead of sorting
 				// var _match Match
 				var _name string
 				var key Name2Idx

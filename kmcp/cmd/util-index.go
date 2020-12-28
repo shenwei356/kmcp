@@ -51,7 +51,14 @@ type UnikFileInfosByName []UnikFileInfo
 
 func (l UnikFileInfosByName) Len() int { return len(l) }
 func (l UnikFileInfosByName) Less(i int, j int) bool {
-	return strings.Compare(l[i].Name, l[j].Name) <= 0 && l[i].Index < l[j].Index
+	v := strings.Compare(l[i].Name, l[j].Name)
+	switch {
+	case v < 0:
+		return true
+	case v > 0:
+		return false
+	}
+	return l[i].Index < l[j].Index
 }
 func (l UnikFileInfosByName) Swap(i int, j int) { l[i], l[j] = l[j], l[i] }
 
