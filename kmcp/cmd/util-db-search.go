@@ -176,6 +176,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	sg.done = make(chan int)
 	sg.InCh = make(chan Query, opt.Threads)
 	sg.OutCh = make(chan QueryResult, opt.Threads)
+	multipleDBs := len(dbs) > 1
 
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
@@ -259,6 +260,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				for key, _match = range m {
 					_match.Target = []string{key.Name}
 					_match.TargetIdx = []uint32{key.Index}
+					if multipleDBs {
+						_match.TCov = 0
+					}
 					_matches2 = append(_matches2, *_match)
 
 					switch sortBy {
