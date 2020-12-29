@@ -132,19 +132,19 @@ Output:
 		// ---------------------------------------------------------------
 		// flags for splitting sequence
 
-		splitSize := getFlagNonNegativeInt(cmd, "split-size")
+		splitSize0 := getFlagNonNegativeInt(cmd, "split-size")
 		splitOverlap := getFlagNonNegativeInt(cmd, "split-overlap")
-		splitSeq := splitSize > 0
+		splitSeq := splitSize0 > 0
 		if splitSeq {
-			if splitSize < k {
+			if splitSize0 < k {
 				checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
 			}
-			if splitSize <= splitOverlap {
+			if splitSize0 <= splitOverlap {
 				checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
 			}
 			bySeq = true
 		}
-		step := splitSize - splitOverlap
+		step := splitSize0 - splitOverlap
 
 		// ---------------------------------------------------------------
 		// flags of sketch
@@ -216,7 +216,7 @@ Output:
 			log.Infof("k: %d", k)
 			log.Infof("circular genome: %v", circular0)
 			if splitSeq {
-				log.Infof("split seqequence size: %d, overlap: %d", splitSize, splitOverlap)
+				log.Infof("split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
 			}
 			if minimizer {
 				log.Infof("minimizer window: %d", minimizerW)
@@ -305,6 +305,7 @@ Output:
 				var outFile string
 				var baseFile = filepath.Base(file)
 				var circular bool
+				var splitSize int
 
 				var codes []uint64
 
@@ -322,7 +323,7 @@ Output:
 					codes = make([]uint64, 0, mapInitSize)
 					circular = circular0
 				} else {
-					codes = make([]uint64, 0, splitSize)
+					codes = make([]uint64, 0, splitSize0)
 					circular = false // split seq is linear, right?
 				}
 
@@ -342,6 +343,7 @@ Output:
 					}
 					seqID = string(record.ID)
 
+					splitSize = splitSize0
 					if !splitSeq { // whole sequence
 						splitSize = len(record.Seq.Seq)
 						step = 1
@@ -447,15 +449,6 @@ Output:
 						}
 						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
 
-						// reset
-						if bySeq {
-							if !splitSeq {
-								splitSize = 0
-							}
-						} else {
-							splitSize = 0
-						}
-
 						meta := Meta{
 							SeqID:   seqID,
 							FragIdx: slidIdx,
@@ -465,7 +458,7 @@ Output:
 							Minimizer:    minimizer,
 							MinimizerW:   minimizerW,
 							SplitSeq:     splitSeq,
-							SplitSize:    splitSize,
+							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
 						writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
@@ -500,15 +493,6 @@ Output:
 				// write to file
 				outFile = filepath.Join(outDir, dir1, dir2, fmt.Sprintf("%s%s", baseFile, extDataFile))
 
-				// reset
-				if bySeq {
-					if !splitSeq {
-						splitSize = 0
-					}
-				} else {
-					splitSize = 0
-				}
-
 				fileprefix, _ := filepathTrimExtension(filepath.Base(file))
 				meta := Meta{
 					SeqID:   fileprefix,
@@ -519,6 +503,7 @@ Output:
 					Minimizer:    minimizer,
 					MinimizerW:   minimizerW,
 					SplitSeq:     splitSeq,
+					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
 				writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
