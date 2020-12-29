@@ -164,6 +164,7 @@ Tips:
 		if numBuckets > 0 && sBlock00 > numBuckets {
 			checkError(fmt.Errorf("value of -b/--block-size (%d) should be small than -B/--num-buckets (%d)", sBlock00, numBuckets))
 		}
+		seed := getFlagPositiveInt(cmd, "seed")
 
 		// ---------------------------------------------------------------
 		// out dir
@@ -447,7 +448,7 @@ Tips:
 					bIdx = jj
 				} else {
 					h1, h2 = baseHashes(xxhash.Sum64([]byte(info.Path)))
-					bIdx = int(uint64(h1+h2*uint32(rr+1)) % numBucketsUint64) // add seed
+					bIdx = int(uint64(h1+h2*uint32(rr+seed)) % numBucketsUint64) // add seed
 				}
 
 				if buckets[bIdx] == nil {
@@ -1055,6 +1056,7 @@ func init() {
 
 	indexCmd.Flags().IntP("num-repititions", "R", 1, "number of repititions")
 	indexCmd.Flags().IntP("num-buckets", "B", 0, "number of buckets per repitition, 0 for one set per bucket")
+	indexCmd.Flags().IntP("seed", "", 1, "seed for randomly assigning names to buckets")
 
 	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
@@ -1073,7 +1075,7 @@ type batch8s struct {
 
 var sepNameIdx = "-id"
 
-// compute exact max elements by reading all file.
+// compute exact max elements by reading all file. not used.
 func maxElements(opt Options, tokensOpenFiles chan int, batch [][]UnikFileInfo) (maxElements int64) {
 	var _wg sync.WaitGroup
 	_tokens := make(chan int, opt.NumCPUs)

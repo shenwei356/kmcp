@@ -26,9 +26,37 @@ import (
 
 // CalcSignatureSize is from https://github.com/bingmann/cobs/blob/master/cobs/util/calc_signature_size.cpp .
 // but we roundup to 2^n.
+/*
+def roundup(x):
+    x -= 1
+    x |= x >> 1
+    x |= x >> 2
+    x |= x >> 4
+    x |= x >> 8
+    x |= x >> 16
+    x |= x >> 32
+    return (x | x>>64) + 1
+
+f=lambda ne,nh,fpr: math.ceil(-nh/(math.log(1-math.pow(fpr,1/nh)))*ne)
+
+roundup(f(300000, 1, 0.25))
+*/
 func CalcSignatureSize(numElements uint64, numHashes int, falsePositiveRate float64) uint64 {
 	ratio := float64(-numHashes) / (math.Log(1 - math.Pow(falsePositiveRate, 1/float64(numHashes))))
 	return roundup64(uint64(math.Ceil(float64(numElements) * ratio)))
+}
+
+/*
+p, fpr of single bloom filter.
+k, theshold of query coverage.
+l, number of k-mers.
+
+fpr = lambda p,k,l: math.exp(-l * (k - p) * (k - p) / 2 / (1 - p))
+
+fpr(0.3, 0.8, 60)
+*/
+func maxFPR(p float64, k float64, l int) float64 {
+	return math.Exp(-float64(l) * (k - p) * (k - p) / 2 / (1 - p))
 }
 
 // get the two basic hash function values for data.
