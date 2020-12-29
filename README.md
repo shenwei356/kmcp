@@ -4,11 +4,11 @@ Kmer-based Metagenomics Classification and Profiling
 
 ## Quick Start
 
-    # compute k-mer sketch
-    time kmcp compute -i <(find genomes/ -name "*fa.gz") -O kmcp-db -W 16 --force --verbose
+    # compute minimizer sketch
+    time kmcp compute -I genomes -O genomes.m16 -k 31 -W 16 --force --verbose
 
     # index sketch
-    time kmcp index -I kmcp-db/ -a db-alias --verbose
+    time kmcp index -I genomes.m16 -O genomes.m16.db -a minimizer-16 --verbose
     
     # search    
-    time kmcp search -d kmcp-db/ -d kmcp-db2/ -t 1 t_t2.fq.gz -o result.tsv --verbose 
+    time kmcp search -d genomes.m16.db -t 0.9 t_t1.fq.gz -o result.tsv --verbose 

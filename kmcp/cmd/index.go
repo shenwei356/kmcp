@@ -134,10 +134,10 @@ Tips:
 		if err != nil {
 			checkError(fmt.Errorf("invalid size: %s", kmerThreshold8Str))
 		}
-		kmerThreshold8 := int64(kmerThreshold8Float)
-		if kmerThreshold8 <= 0 {
-			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 should be positive: %d", kmerThreshold8))
+		if kmerThreshold8Float <= 0 {
+			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 should be positive: %d", kmerThreshold8Float))
 		}
+		kmerThreshold8 := uint64(kmerThreshold8Float)
 
 		// block-max-kmers-t2
 		kmerThresholdSStr := getFlagString(cmd, "block-max-kmers-t2")
@@ -145,10 +145,10 @@ Tips:
 		if err != nil {
 			checkError(fmt.Errorf("invalid size: %s", kmerThresholdSStr))
 		}
-		kmerThresholdS := int64(kmerThresholdSFloat)
-		if kmerThresholdS <= 0 {
-			checkError(fmt.Errorf("value of flag -M/--block-max-kmers-t2 should be positive: %d", kmerThresholdS))
+		if kmerThresholdSFloat <= 0 {
+			checkError(fmt.Errorf("value of flag -M/--block-max-kmers-t2 should be positive: %d", kmerThresholdSFloat))
 		}
+		kmerThresholdS := uint64(kmerThresholdSFloat)
 
 		if kmerThreshold8 >= kmerThresholdS {
 			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
@@ -325,7 +325,7 @@ Tips:
 			t = time.Now()
 		}
 
-		var n int64
+		var n uint64
 		info := getInfo(file, true)
 		n += info.Kmers
 		if opt.Verbose {
@@ -458,7 +458,7 @@ Tips:
 
 			fileInfoGroups := make([]UnikFileInfoGroup, len(buckets))
 			for bb, infos := range buckets {
-				var totalKmers int64
+				var totalKmers uint64
 				for _, info := range infos {
 					totalKmers += info.Kmers
 				}
@@ -632,8 +632,8 @@ Tips:
 					// max elements of UNION of all sets,
 					// but it takes time to compute for reading whole data,
 					// so we use sum of elements, which is slightly higher than actual size.
-					var maxElements int64
-					var totalKmer int64
+					var maxElements uint64
+					var totalKmer uint64
 					for _, infos := range batch {
 						totalKmer = 0
 						for _, info := range infos {
@@ -761,7 +761,7 @@ Tips:
 							for _, infos := range _batch {
 								_names := make([]string, len(infos))
 								_indices := make([]uint32, len(infos))
-								var _size int64
+								var _size uint64
 
 								sorts.Quicksort(UnikFileInfosByName(infos))
 
@@ -970,7 +970,7 @@ Tips:
 			dbInfo.Alias = alias
 			dbInfo.K = k
 			dbInfo.Hashed = hashed
-			dbInfo.Kmers = int(n)
+			dbInfo.Kmers = n
 			dbInfo.FPR = fpr
 			dbInfo.BlockSize = sBlock0
 			dbInfo.NumNames = len(fileInfoGroups)

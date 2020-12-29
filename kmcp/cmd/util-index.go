@@ -32,7 +32,7 @@ type UnikFileInfo struct {
 	Path  string
 	Name  string
 	Index uint32
-	Kmers int64
+	Kmers uint64
 }
 
 func (i UnikFileInfo) String() string {
@@ -65,7 +65,7 @@ func (l UnikFileInfosByName) Swap(i int, j int) { l[i], l[j] = l[j], l[i] }
 // UnikFileInfoGroup represents a slice of UnikFileInfos
 type UnikFileInfoGroup struct {
 	Infos []UnikFileInfo
-	Kmers int64
+	Kmers uint64
 }
 
 func (i UnikFileInfoGroup) String() string {

@@ -450,7 +450,7 @@ Output:
 							SplitSize:    splitSize,
 							SplitOverlap: splitOverlap,
 						}
-						writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,
+						writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 							scaled, scale, meta)
 
 						slidIdx++
@@ -503,7 +503,7 @@ Output:
 					SplitSeq:     splitSeq,
 					SplitOverlap: splitOverlap,
 				}
-				writeKmers(k, codes, n, outFile, compress, opt.CompressionLevel,
+				writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 					scaled, scale, meta)
 
 				slidIdx++
@@ -522,7 +522,7 @@ Output:
 	},
 }
 
-func writeKmers(k int, codes []uint64, n int,
+func writeKmers(k int, codes []uint64, n uint64,
 	outFile string, compress bool, compressLevel int,
 	scaled bool, scale int, meta Meta) {
 
@@ -552,7 +552,7 @@ func writeKmers(k int, codes []uint64, n int,
 		writer.SetScale(uint32(scale))
 	}
 
-	writer.Number = int64(n)
+	writer.Number = n
 
 	metatext, err := json.Marshal(meta)
 	if err != nil {

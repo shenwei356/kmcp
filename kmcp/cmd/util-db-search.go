@@ -893,37 +893,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	return idx, nil
 }
 
-func readKmers(file string) ([]uint64, error) {
-	infh, r, _, err := inStream(file)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	reader, err := unikmer.NewReader(infh)
-	if err != nil {
-		return nil, err
-	}
-	if reader.IsSorted() {
-		return nil, fmt.Errorf(".unik file not supposed to be sorted")
-	}
-
-	kmers := make([]uint64, 0, reader.Number)
-
-	var code uint64
-	for {
-		code, _, err = reader.ReadCodeWithTaxid()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			checkError(errors.Wrap(err, file))
-		}
-		kmers = append(kmers, code)
-	}
-	return kmers, nil
-}
-
 // Close closes the index.
 func (idx *UnikIndex) Close() error {
 	close(idx.InCh) // close InCh

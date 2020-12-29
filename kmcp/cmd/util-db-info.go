@@ -64,7 +64,7 @@ type UnikIndexDBInfo struct {
 	NumHashes int      `yaml:"hashes"`
 	FPR       float64  `yaml:"fpr"`
 	BlockSize int      `yaml:"blocksize"`
-	Kmers     int      `yaml:"totalKmers"`
+	Kmers     uint64   `yaml:"totalKmers"`
 	Files     []string `yaml:"files"`
 	NumNames  int      `yaml:"numNameGroups"`
 

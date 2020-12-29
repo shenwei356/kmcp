@@ -185,8 +185,8 @@ github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba h1:UvnrxFDPm
 github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba/go.mod h1:LiqYp/K5yCEWOi7Ux/iOF/kjDxtsdYjOGcKHDbEOXFU=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
-github.com/shenwei356/unikmer v0.15.0 h1:HiQvjT6Gv+12dNECN0k6XPs2tnEpopnBY9pOYSRbITU=
-github.com/shenwei356/unikmer v0.15.0/go.mod h1:KQIvOZerlb2P+1N0qRONxEQq91htcC/2Vupbpj/A8KU=
+github.com/shenwei356/unikmer v0.16.1 h1:K5P+MN6jZneFKBt6EZdOTwDc56acWkF2WJN6kTETdyA=
+github.com/shenwei356/unikmer v0.16.1/go.mod h1:QYwRJ8S3c+cNKVAi3w7VYU1GAYncoWRU3O8skG4xvSU=
 github.com/shenwei356/util v0.0.0-20201214054755-2942125340cd h1:11sa/TyR/91v63OA9VnyjRontqtsDFZN1wCLNaaAa38=
 github.com/shenwei356/util v0.0.0-20201214054755-2942125340cd/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
 github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992 h1:RXEEyKj0JL3SrRIYsWIEyy4AwjHbI3I8aDGK6CA4+YI=
