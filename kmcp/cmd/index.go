@@ -717,8 +717,10 @@ Tips:
 					var eFileSize float64
 					eFileSize = 24
 					for _, infos := range batch {
+						eFileSize += 8 // length of Names (4) and indices (4)
 						for _, info := range infos {
-							eFileSize += float64(len(info.Name) + 1 + 8) // may be inaccurent
+							// name + "\n" (1) + indice (4) + size (8)
+							eFileSize += float64(len(info.Name) + 13)
 						}
 					}
 					eFileSize += float64(numSigs * uint64(nBatchFiles))
