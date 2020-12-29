@@ -31,6 +31,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cespare/xxhash"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
@@ -269,11 +270,13 @@ Output:
 		tokens := make(chan int, opt.NumCPUs)
 		threadsFloat := float64(opt.NumCPUs)
 
+		multiLevelFileTree := bySeq || len(files) > 1000
+
 		for _, file := range files {
 			tokens <- 1
 			wg.Add(1)
 
-			go func(file string) {
+			go func(file string, multiLevelFileTree bool) {
 				startTime := time.Now()
 				defer func() {
 					wg.Done()
@@ -304,6 +307,16 @@ Output:
 				var circular bool
 
 				var codes []uint64
+
+				// compute directory for saving files
+				var dir1, dir2 string
+				var fileHash uint64
+				if multiLevelFileTree {
+					fileHash = xxhash.Sum64String(baseFile)
+					dir1 = fmt.Sprintf("%03d", fileHash&1023)
+					dir2 = fmt.Sprintf("%03d", (fileHash>>10)&1023)
+				}
+				var outFileBase, dir3 string
 
 				if !splitSeq {
 					codes = make([]uint64, 0, mapInitSize)
@@ -422,12 +435,17 @@ Output:
 							}
 						}
 
-						// write to file
 						if splitSeq {
-							outFile = filepath.Join(outDir, fmt.Sprintf("%s/%s-frag%d%s", baseFile, seqID, slidIdx, extDataFile))
+							outFileBase = fmt.Sprintf("%s/%s-frag%d%s", baseFile, seqID, slidIdx, extDataFile)
 						} else {
-							outFile = filepath.Join(outDir, fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile))
+							outFileBase = fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile)
 						}
+						// write to file
+						if multiLevelFileTree {
+							fileHash = xxhash.Sum64String(baseFile)
+							dir3 = fmt.Sprintf("%03d", fileHash&1023)
+						}
+						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
 
 						// reset
 						if bySeq {
@@ -480,7 +498,7 @@ Output:
 				}
 
 				// write to file
-				outFile = filepath.Join(outDir, fmt.Sprintf("%s%s", baseFile, extDataFile))
+				outFile = filepath.Join(outDir, dir1, dir2, fmt.Sprintf("%s%s", baseFile, extDataFile))
 
 				// reset
 				if bySeq {
@@ -508,7 +526,7 @@ Output:
 
 				slidIdx++
 
-			}(file)
+			}(file, multiLevelFileTree)
 		}
 
 		wg.Wait()
