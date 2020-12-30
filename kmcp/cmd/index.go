@@ -271,7 +271,7 @@ Tips:
 
 			nfiles = len(fileInfos0)
 			if opt.Verbose {
-				log.Infof("%d cached file info loaded", nfiles)
+				log.Infof("%d cached file infos loaded", nfiles)
 			}
 
 			if len(fileInfos0) == 0 {
@@ -474,7 +474,7 @@ Tips:
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
 			log.Infof("block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
-			log.Infof("buiding index ...")
+			log.Infof("building index ...")
 		}
 
 		// ------------------------------------------------------------------------------------
