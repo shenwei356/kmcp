@@ -82,37 +82,41 @@ func (l UnikFileInfoGroups) Len() int               { return len(l) }
 func (l UnikFileInfoGroups) Less(i int, j int) bool { return l[i].Kmers < l[j].Kmers }
 func (l UnikFileInfoGroups) Swap(i int, j int)      { l[i], l[j] = l[j], l[i] }
 
-func readUnikFileInfos(file string) ([]UnikFileInfo, error) {
-	fn := func(line string) (interface{}, bool, error) {
-		if len(line) > 0 && line[len(line)-1] == '\n' {
-			line = line[:len(line)-1]
-		}
-		if len(line) == 0 {
-			return nil, false, nil
-		}
-
-		items := strings.Split(line, "\t")
-		if len(items) < 4 {
-			return nil, false, nil
-		}
-		idx, err := strconv.Atoi(items[2])
-		if err != nil || idx < 0 {
-			return nil, false, err
-		}
-		kmers, err := strconv.Atoi(items[3])
-		if err != nil || idx < 0 {
-			return nil, false, err
-		}
-		return UnikFileInfo{
-			Path:  items[0],
-			Name:  items[1],
-			Index: uint32(idx),
-			Kmers: uint64(kmers),
-		}, true, nil
+var fnParseUnikInfoFile = func(line string) (interface{}, bool, error) {
+	if len(line) > 0 && line[len(line)-1] == '\n' {
+		line = line[:len(line)-1]
 	}
+	if len(line) == 0 {
+		return nil, false, nil
+	}
+	if line[0] == '#' {
+		return nil, false, nil
+	}
+
+	items := strings.Split(line, "\t")
+	if len(items) < 4 {
+		return nil, false, nil
+	}
+	idx, err := strconv.Atoi(items[2])
+	if err != nil || idx < 0 {
+		return nil, false, err
+	}
+	kmers, err := strconv.Atoi(items[3])
+	if err != nil || kmers < 0 {
+		return nil, false, err
+	}
+	return UnikFileInfo{
+		Path:  items[0],
+		Name:  items[1],
+		Index: uint32(idx),
+		Kmers: uint64(kmers),
+	}, true, nil
+}
+
+func readUnikFileInfos(file string) ([]UnikFileInfo, error) {
 	infos := make([]UnikFileInfo, 0, mapInitSize)
 
-	reader, err := breader.NewBufferedReader(file, 2, 10, fn)
+	reader, err := breader.NewBufferedReader(file, 4, 100, fnParseUnikInfoFile)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +135,7 @@ func readUnikFileInfos(file string) ([]UnikFileInfo, error) {
 func dumpUnikFileInfos(fileInfos []UnikFileInfo, file string) {
 	outfh, gw, w, err := outStream(file, false, -1)
 	checkError(err)
-	go func() {
+	defer func() {
 		outfh.Flush()
 		if gw != nil {
 			gw.Close()
@@ -139,6 +143,7 @@ func dumpUnikFileInfos(fileInfos []UnikFileInfo, file string) {
 		w.Close()
 	}()
 
+	outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tkmers\n"))
 	for _, info := range fileInfos {
 		outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\n", info.Path, info.Name, info.Index, info.Kmers))
 	}

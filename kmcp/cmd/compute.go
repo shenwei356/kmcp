@@ -232,6 +232,27 @@ Output:
 
 		// ---------------------------------------------------------------
 
+		// file info
+		outfh, gw, w, err := outStream(filepath.Join(outDir, fileUnikInfos), false, -1)
+		checkError(err)
+		defer func() {
+			outfh.Flush()
+			if gw != nil {
+				gw.Close()
+			}
+			w.Close()
+		}()
+
+		ch := make(chan UnikFileInfo, opt.NumCPUs)
+		done := make(chan int)
+		go func() {
+			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tkmers\n"))
+			for info := range ch {
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\n", info.Path, info.Name, info.Index, info.Kmers))
+			}
+			done <- 1
+		}()
+
 		// process bar
 		var pbs *mpb.Progress
 		var bar *mpb.Bar
@@ -464,6 +485,13 @@ Output:
 						writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 							scaled, scale, meta)
 
+						ch <- UnikFileInfo{
+							Path:  outFile,
+							Name:  seqID,
+							Index: slidIdx,
+							Kmers: uint64(n),
+						}
+
 						slidIdx++
 					}
 
@@ -509,6 +537,13 @@ Output:
 				writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 					scaled, scale, meta)
 
+				ch <- UnikFileInfo{
+					Path:  outFile,
+					Name:  fileprefix,
+					Index: slidIdx,
+					Kmers: uint64(n),
+				}
+
 				slidIdx++
 
 			}(file, multiLevelFileTree)
@@ -522,6 +557,8 @@ Output:
 			pbs.Wait()
 		}
 
+		close(ch)
+		<-done
 	},
 }
 
@@ -598,3 +635,5 @@ func init() {
 
 var reIgnoreCaseStr = "(?i)"
 var reIgnoreCase = regexp.MustCompile(`\(\?i\)`)
+
+var fileUnikInfos = "_info.txt"

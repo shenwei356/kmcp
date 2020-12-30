@@ -186,7 +186,7 @@ Tips:
 		// ---------------------------------------------------------------
 		// cached file info
 
-		fileInfoCache := getFlagString(cmd, "unik-cache")
+		fileInfoCache := filepath.Join(inDir, fileUnikInfos)
 
 		var hasInfoCache bool
 		var InfoCacheOK bool
@@ -254,16 +254,13 @@ Tips:
 
 		fileInfos0 := make([]UnikFileInfo, 0, 1024)
 
-		if fileInfoCache == "" {
-			fileInfoCache = fmt.Sprintf("%s.cache", filepath.Base(inDir))
-		}
 		hasInfoCache, err = pathutil.Exists(fileInfoCache)
 		if err != nil {
-			checkError(fmt.Errorf("check fileinfo cache file: %s", err))
+			checkError(fmt.Errorf("check .unik file info file: %s", err))
 		}
 		if hasInfoCache {
 			if opt.Verbose {
-				log.Infof("load .unik file info from cache file: %s", fileInfoCache)
+				log.Infof("loading .unik file info from file: %s", fileInfoCache)
 			}
 
 			// read
@@ -271,21 +268,26 @@ Tips:
 			if err != nil {
 				checkError(fmt.Errorf("fail to read fileinfo cache file: %s", err))
 			}
-			namesMap0 = make(map[string]interface{}, 1024)
+
 			nfiles = len(fileInfos0)
-
-			for _, info := range fileInfos0 {
-				n += info.Kmers
-				namesMap0[info.Name] = struct{}{}
-			}
-
-			// read some basic data
-			getInfo(fileInfos0[0].Path, true)
-
-			InfoCacheOK = true
-
 			if opt.Verbose {
 				log.Infof("%d cached file info loaded", nfiles)
+			}
+
+			if len(fileInfos0) == 0 {
+				InfoCacheOK = false
+			} else {
+				namesMap0 = make(map[string]interface{}, 1024)
+
+				for _, info := range fileInfos0 {
+					n += info.Kmers
+					namesMap0[info.Name] = struct{}{}
+				}
+
+				// read some basic data
+				getInfo(fileInfos0[0].Path, true)
+
+				InfoCacheOK = true
 			}
 		}
 
@@ -440,9 +442,9 @@ Tips:
 		}
 
 		// ------------------------------------------------------------------------------------
-		// cache
+		// .unik info
 
-		if dryRun && (!hasInfoCache || !InfoCacheOK) { // dump to cache file
+		if !hasInfoCache || !InfoCacheOK { // dump to info file
 			log.Infof("write unik file info to file: %s", fileInfoCache)
 			dumpUnikFileInfos(fileInfos0, fileInfoCache)
 		}
@@ -493,6 +495,7 @@ Tips:
 		// repeatedly randomly shuffle names into buckets
 		for rr := 0; rr < numRepeats; rr++ {
 			dirR := fmt.Sprintf("R%03d", rr+1)
+			runtime.GC()
 
 			buckets := make([][]UnikFileInfo, numBuckets)
 			var bIdx int
@@ -857,10 +860,7 @@ Tips:
 								_wg.Add(1)
 								go func(_k int, infos []UnikFileInfo) {
 									for _, info := range infos {
-										// go func(_k int, info UnikFileInfo) {
 										tokensOpenFiles <- 1
-
-										// _sigs := make([]byte, numSigs)
 
 										var infh *bufio.Reader
 										var r *os.File
@@ -1117,8 +1117,6 @@ func init() {
 	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
 	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful for adjusting parameters (recommended)")
-
-	indexCmd.Flags().StringP("unik-cache", "c", "", ".unik file info cache, used along with --dry-run, default: ${indir}.cache")
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block
