@@ -63,10 +63,10 @@ type UnikIndexDBInfo struct {
 
 	NumHashes int      `yaml:"hashes"`
 	FPR       float64  `yaml:"fpr"`
+	NumNames  int      `yaml:"numNameGroups"`
 	BlockSize int      `yaml:"blocksize"`
 	Kmers     uint64   `yaml:"totalKmers"`
 	Files     []string `yaml:"files"`
-	NumNames  int      `yaml:"numNameGroups"`
 
 	path         string            `yaml:"path,omitempty"`
 	NameMapping  map[string]string `yaml:"name-mapping,omitempty"`
@@ -172,10 +172,10 @@ func (i UnikIndexDBInfo) Check() error {
 		file = filepath.Join(i.path, file)
 		ok, err := pathutil.Exists(file)
 		if err != nil {
-			return fmt.Errorf("error on checking unikmer index file: %s: %s", file, err)
+			return fmt.Errorf("error on checking kmcp index file: %s: %s", file, err)
 		}
 		if !ok {
-			return fmt.Errorf("unikmer index file missing: %s", file)
+			return fmt.Errorf("kmcp index file missing: %s", file)
 		}
 	}
 	return nil

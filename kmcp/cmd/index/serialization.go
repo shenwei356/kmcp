@@ -73,7 +73,7 @@ type Header struct {
 }
 
 func (h Header) String() string {
-	return fmt.Sprintf("unikmer index file v%d: k: %d, canonical: %v, #hashes: %d, #signatures: %d, #names: %d",
+	return fmt.Sprintf("kmcp index file v%d: k: %d, canonical: %v, #hashes: %d, #signatures: %d, #names: %d",
 		h.Version, h.K, h.Canonical, h.NumHashes, h.NumSigs, len(h.Names))
 }
 

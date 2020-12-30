@@ -452,7 +452,7 @@ Tips:
 		// ------------------------------------------------------------------------------------
 		// begin creating index
 		if opt.Verbose {
-			log.Infof("------------------------------------------------------------")
+			log.Info()
 			log.Infof("starting indexing ...")
 
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -489,6 +489,8 @@ Tips:
 		numBucketsUint64 := uint64(numBuckets)
 
 		var fileSize0 float64
+
+		var totalIndexFiles int
 
 		var pbs *mpb.Progress
 
@@ -541,6 +543,7 @@ Tips:
 			}
 
 			if opt.Verbose {
+				log.Info()
 				if singleRepeat {
 					log.Infof("block size: %d", sBlock)
 				} else {
@@ -1022,6 +1025,8 @@ Tips:
 				pbs.Wait()
 			}
 
+			totalIndexFiles += len(indexFiles)
+
 			sortutil.Strings(indexFiles)
 			dbInfo := NewUnikIndexDBInfo(indexFiles)
 			dbInfo.Alias = alias
@@ -1089,8 +1094,10 @@ Tips:
 		}
 
 		if opt.Verbose {
+			log.Info()
 			log.Infof("kmcp database with %d k-mers saved to %s", n, outDir)
 			log.Infof("total file size: %s", bytesize.ByteSize(fileSize0))
+			log.Infof("total index files: %d", totalIndexFiles)
 		}
 	},
 }

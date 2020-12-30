@@ -664,17 +664,17 @@ func (idx *UnikIndex) String() string {
 func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open unikmer index file: %s", file)
+		return nil, err
 	}
 
 	reader, err := index.NewReader(fh)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read unikmer index file: %s", file)
+		return nil, err
 	}
 
 	offset, err := fh.Seek(0, 1)
 	if err != nil {
-		return nil, fmt.Errorf("error on seek unikmer index file: %s", file)
+		return nil, err
 	}
 
 	h := index.Header{}
