@@ -49,14 +49,20 @@ var computeCmd = &cobra.Command{
 	Long: `Generate k-mers (sketchs) from FASTA/Q sequences
 
 Attentions:
-  1. K-mers (sketchs) are not sorted and duplicates remained.
-  2. Sequence IDs in all input files should be unique.
+  1. Input files can be given as list of FASTA/Q files via
+     positional arguments or a directory containing files
+     via flag -I/--in-dir. Regular expression for matching
+     sequencing file is given by -r/--file-regexp.
+  2. K-mers (sketchs) are not sorted and duplicates remained.
+  3. Sequence IDs in all input files should be unique.
      Multiple sequences belonging to a same group can be mapped
-	 to their group name via name mapping file after indexing.
-  3. By default, we compute k-mers (sketches) of every file,
+     to their group name via name mapping file after indexing.
+  4. By default, we compute k-mers (sketches) of every file,
      you can also use --by-seq to compute for every file.
+  5. It also supports splitting sequences into fragment via
+     flag -s/--split-size and -l/--split-overlap.
 
-Supported kmer (sketches) types:
+Supported k-mer (sketches) types:
   1. K-mer:
      1. ntHash of k-mer (-k)
   2. K-mer sketchs (all using ntHash):
@@ -71,10 +77,11 @@ Splitting sequences:
      in form of meta/description data in .unik files.
 
 Output:
-  1. All .unik files are saved in ${outdir}, with path
-     ${outdir}${infile}-id${seqID}.unik
+  1. All outputted .unik files are saved in ${outdir}, with path
+     ${outdir}/xxx/yyy/zzz/${infile}-id${seqID}.unik
+     where dirctory tree '/xxx/yyy/zzz/' is built for > 1000 output files.
   2. For splitting sequence mode (--split-size > 0), output files are
-     ${outdir}/${infile}/{seqID}-frag${fragIdx}.unik
+     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag${fragIdx}.unik
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -85,6 +92,7 @@ Output:
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
+				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 			}
 		}()
@@ -113,7 +121,9 @@ Output:
 		if readFromDir {
 			var isDir bool
 			isDir, err = pathutil.IsDir(inDir)
-			checkError(errors.Wrapf(err, "checking -I/--in-dir: %s", inDir))
+			if err != nil {
+				checkError(errors.Wrapf(err, "checking -I/--in-dir"))
+			}
 			if !isDir {
 				checkError(fmt.Errorf("value of -I/--in-dir should be a directory: %s", inDir))
 			}
@@ -190,9 +200,11 @@ Output:
 		var files []string
 		if readFromDir {
 			files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
-			checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
+			if err != nil {
+				checkError(errors.Wrapf(err, "walking dir: %s", inDir))
+			}
 			if len(files) == 0 {
-				log.Warningf("no files matching patttern: %s", reFileStr)
+				log.Warningf("no files matching regular expression: %s", reFileStr)
 			}
 		} else {
 			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
@@ -212,6 +224,7 @@ Output:
 		// log
 
 		if opt.Verbose {
+			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("k: %d", k)
 			log.Infof("circular genome: %v", circular0)
@@ -228,6 +241,8 @@ Output:
 				log.Infof("down-sampling scale: %d", scale)
 			}
 			log.Infof("-------------------- [main parameters] --------------------")
+			log.Info()
+			log.Infof("computing ...")
 		}
 
 		// ---------------------------------------------------------------
@@ -330,7 +345,7 @@ Output:
 
 				var codes []uint64
 
-				// compute directory for saving files
+				// multiple level file tree for saving files
 				var dir1, dir2 string
 				var fileHash uint64
 				if multiLevelFileTree {
@@ -345,7 +360,7 @@ Output:
 					circular = circular0
 				} else {
 					codes = make([]uint64, 0, splitSize0)
-					circular = false // split seq is linear, right?
+					circular = false // split seq is linear, isn't it?
 				}
 
 				fastxReader, err = fastx.NewDefaultReader(file)
@@ -611,25 +626,25 @@ func init() {
 	RootCmd.AddCommand(computeCmd)
 
 	computeCmd.Flags().StringP("in-dir", "I", "", `directory containing FASTA/Q files. directory symlinks are followed`)
-	computeCmd.Flags().StringP("file-regexp", "", ".f[aq](st[aq])?(.gz)?$", `regular expression for matching files in -I/--in-dir to compute, case ignored`)
+	computeCmd.Flags().StringP("file-regexp", "r", `.f[aq](st[aq])?(.gz)?$`, `regular expression for matching files in -I/--in-dir to compute, case ignored`)
 
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
-	computeCmd.Flags().IntP("kmer-len", "k", 31, "k-mer length")
-	computeCmd.Flags().BoolP("circular", "", false, "circular genome")
+	computeCmd.Flags().IntP("kmer-len", "k", 31, `k-mer length`)
+	computeCmd.Flags().BoolP("circular", "", false, `input sequence is curcular`)
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
-	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers`)
-	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files`)
+	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
+	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files (can save little space`)
 
-	computeCmd.Flags().IntP("split-size", "s", 0, `split fragment size`)
-	computeCmd.Flags().IntP("split-overlap", "l", 0, `split fragment overlap`)
+	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences`)
+	computeCmd.Flags().IntP("split-overlap", "l", 0, `fragment overlap for splitting sequences`)
 
-	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mer (sketch) for every sequence`)
+	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
 
 }
 

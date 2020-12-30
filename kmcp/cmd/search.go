@@ -43,9 +43,9 @@ var searchCmd = &cobra.Command{
 	Long: `Search sequence from database
 
 Attentions:
-  0. Input format should be (gzipped) FASTA or FASTQ from file or stdin.
-  1. Increase value of -j/--threads for acceleratation.
-  2. Switch on -m/--use-mmap to load index files into memory to 
+  1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+  2. Increase value of -j/--threads for acceleratation.
+  3. Switch on -m/--use-mmap to load index files into memory to 
      accelerate searching, memory usage is roughly equal to size of index files.
 
 `,
@@ -57,6 +57,7 @@ Attentions:
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
+				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 			}
 		}()
@@ -207,18 +208,17 @@ Attentions:
 			}
 		}
 		if opt.Verbose {
-			log.Infof("%d database(s) loaded", len(sg.DBs))
-
+			log.Infof("database loaded")
+			log.Info()
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Infof("minimum  matched k-mers: %d", minCount)
 			log.Infof("minimum  query coverage: %f", queryCov)
 			log.Infof("minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
+			log.Info()
+			log.Info("searching ...")
 		}
 
-		// if !isStdout(outFile) {
-		// 	outFile += ".txt"
-		// }
 		outfh, gw, w, err := outStream(outFile, false, opt.CompressionLevel)
 		checkError(err)
 		defer func() {
@@ -382,7 +382,7 @@ func init() {
 	RootCmd.AddCommand(searchCmd)
 
 	// database option
-	searchCmd.Flags().StringP("db-dir", "d", "", `database directories created by "kmcp index"`)
+	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
 	searchCmd.Flags().BoolP("use-mmap", "m", true, `load index files into memory to accelerate searching`)
 
 	// query option
@@ -395,7 +395,7 @@ func init() {
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
-	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order input sequences`)
+	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, tcov or sum (qcov+tcov)`)

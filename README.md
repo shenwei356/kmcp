@@ -11,4 +11,4 @@ Kmer-based Metagenomics Classification and Profiling
     time kmcp index -I genomes.m16 -O genomes.m16.db -a minimizer-16 --verbose
     
     # search    
-    time kmcp search -d genomes.m16.db -t 0.9 t_t1.fq.gz -o result.tsv --verbose 
+    time kmcp search -d genomes.m16.db -t 0.9 test.fa.gz -o result.tsv --verbose 

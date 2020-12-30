@@ -276,7 +276,7 @@ func (writer *Writer) Flush() (err error) {
 
 // ------------------------------------------------------------------------
 
-// Reader is for reading KmerCode.
+// Reader is for reading signatures.
 type Reader struct {
 	Header
 	r io.Reader
