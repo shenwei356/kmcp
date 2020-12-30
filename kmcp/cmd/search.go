@@ -101,7 +101,7 @@ Attentions:
 
 		subFiles, err := ioutil.ReadDir(dbDir)
 		if err != nil {
-			checkError(fmt.Errorf("read database error: " + dbDir))
+			checkError(fmt.Errorf("read database error: %s", err))
 		}
 
 		dbDirs := make([]string, 0, 8)
@@ -116,7 +116,7 @@ Attentions:
 			}
 			existed, err := pathutil.Exists(filepath.Join(path, dbInfoFile))
 			if err != nil {
-				checkError(fmt.Errorf("read database error: " + dbDir))
+				checkError(fmt.Errorf("read database error: %s", err))
 			}
 			if existed {
 				dbDirs = append(dbDirs, path)
@@ -135,12 +135,16 @@ Attentions:
 			var nameMappingFile string
 			nameMappingFile = nameMappingFiles[0]
 			namesMap, err = cliutil.ReadKVs(nameMappingFile, false)
-			checkError(errors.Wrap(err, nameMappingFile))
+			if err != nil {
+				checkError(errors.Wrap(err, nameMappingFile))
+			}
 
 			if len(nameMappingFiles) > 1 {
 				for _, _nameMappingFile := range nameMappingFiles[1:] {
 					_namesMap, err := cliutil.ReadKVs(_nameMappingFile, false)
-					checkError(errors.Wrap(err, nameMappingFile))
+					if err != nil {
+						checkError(errors.Wrap(err, nameMappingFile))
+					}
 					for _k, _v := range _namesMap {
 						namesMap[_k] = _v
 					}
@@ -252,8 +256,8 @@ Attentions:
 				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\n",
-					prefix2, "", 0, 0, float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
+					prefix2, "", -1, 0, float64(0), float64(0)))
 				return
 			}
 

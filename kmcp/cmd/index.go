@@ -261,6 +261,8 @@ Tips:
 
 		fileInfos0 := make([]UnikFileInfo, 0, len(files))
 
+		// TODO: cache file infos for dry-run
+
 		var k int = -1
 		var hashed bool
 		var canonical bool
