@@ -184,84 +184,12 @@ Tips:
 		}
 
 		// ---------------------------------------------------------------
-		// input files
+		// cached file info
 
-		if opt.Verbose {
-			log.Info("checking input files ...")
-		}
+		fileInfoCache := getFlagString(cmd, "unik-cache")
 
-		var files []string
-		if readFromDir {
-			files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
-			checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
-			if len(files) == 0 {
-				log.Warningf("no files matching patttern: %s", reFileStr)
-			}
-		} else {
-			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-			if opt.Verbose {
-				if len(files) == 1 && isStdin(files[0]) {
-					log.Info("no files given, reading from stdin")
-				}
-			}
-		}
-		if opt.Verbose {
-			log.Infof("%d input file(s) given", len(files))
-		}
-
-		// ---------------------------------------------------------------
-		// log
-
-		if opt.Verbose {
-			log.Infof("-------------------- [main parameters] --------------------")
-			log.Infof("number of hashes: %d", numHashes)
-			log.Infof("false positive rate: %f", fpr)
-			log.Infof("-------------------- [main parameters] --------------------")
-
-		}
-
-		// ---------------------------------------------------------------
-		// check unik files and read k-mers numbers
-
-		if opt.Verbose {
-			log.Info("checking .unik files ...")
-		}
-
-		var pbs *mpb.Progress
-		var bar *mpb.Bar
-		var chDuration chan time.Duration
-		var doneDuration chan int
-
-		if opt.Verbose {
-			pbs = mpb.New(mpb.WithWidth(40), mpb.WithOutput(os.Stderr))
-			bar = pbs.AddBar(int64(len(files)),
-				mpb.BarStyle("[=>-]<+"),
-				mpb.PrependDecorators(
-					decor.Name("checking .unik file: ", decor.WC{W: len("checking .unik file: "), C: decor.DidentRight}),
-					decor.Name("", decor.WCSyncSpaceR),
-					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
-				),
-				mpb.AppendDecorators(
-					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
-					decor.EwmaETA(decor.ET_STYLE_GO, 60),
-					decor.OnComplete(decor.Name(""), ". done"),
-				),
-			)
-
-			chDuration = make(chan time.Duration, opt.NumCPUs)
-			doneDuration = make(chan int)
-			go func() {
-				for t := range chDuration {
-					bar.Increment()
-					bar.DecoratorEwmaUpdate(t)
-				}
-				doneDuration <- 1
-			}()
-		}
-
-		fileInfos0 := make([]UnikFileInfo, 0, len(files))
-
-		// TODO: cache file infos for dry-run
+		var hasInfoCache bool
+		var InfoCacheOK bool
 
 		var k int = -1
 		var hashed bool
@@ -270,7 +198,10 @@ Tips:
 		var scale uint32
 		var meta0 Meta
 
-		var nfiles = len(files)
+		var files []string
+		var nfiles int
+		var n uint64
+		var namesMap0 map[string]interface{}
 
 		var reader0 *unikmer.Reader
 
@@ -321,85 +252,199 @@ Tips:
 			return UnikFileInfo{Path: file, Name: meta.SeqID, Index: meta.FragIdx, Kmers: reader.Number}
 		}
 
-		// first file
-		file := files[0]
-		var t time.Time
-		if opt.Verbose {
-			t = time.Now()
+		fileInfos0 := make([]UnikFileInfo, 0, 1024)
+
+		if fileInfoCache == "" {
+			fileInfoCache = fmt.Sprintf("%s.cache", filepath.Base(inDir))
 		}
-
-		var n uint64
-		info := getInfo(file, true)
-		n += info.Kmers
-		if opt.Verbose {
-			bar.Increment()
-			bar.DecoratorEwmaUpdate(time.Since(t))
+		hasInfoCache, err = pathutil.Exists(fileInfoCache)
+		if err != nil {
+			checkError(fmt.Errorf("check fileinfo cache file: %s", err))
 		}
+		if hasInfoCache {
+			if opt.Verbose {
+				log.Infof("load .unik file info from cache file: %s", fileInfoCache)
+			}
 
-		fileInfos0 = append(fileInfos0, info)
-		namesMap0 := make(map[string]interface{}, 1024)
-		namesMap := make(map[uint64]interface{}, nfiles)
-		namesMap[xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
-		namesMap0[info.Name] = struct{}{}
+			// read
+			fileInfos0, err = readUnikFileInfos(fileInfoCache)
+			if err != nil {
+				checkError(fmt.Errorf("fail to read fileinfo cache file: %s", err))
+			}
+			namesMap0 = make(map[string]interface{}, 1024)
+			nfiles = len(fileInfos0)
 
-		// left files
-		var wgGetInfo sync.WaitGroup
-		chInfos := make(chan UnikFileInfo, opt.NumCPUs)
-		tokensGetInfo := make(chan int, opt.NumCPUs)
-		doneGetInfo := make(chan int)
-		go func() {
-			var ok bool
-			var nameHash uint64
-			for info := range chInfos {
-				fileInfos0 = append(fileInfos0, info)
+			for _, info := range fileInfos0 {
 				n += info.Kmers
+				namesMap0[info.Name] = struct{}{}
+			}
 
-				nameHash = xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
-				if _, ok = namesMap[nameHash]; ok {
-					log.Warningf("duplicated name: %s", info.Name)
-				} else {
-					namesMap[nameHash] = struct{}{}
-					if _, ok = namesMap0[info.Name]; !ok {
-						namesMap0[info.Name] = struct{}{}
+			// read some basic data
+			getInfo(fileInfos0[0].Path, true)
+
+			InfoCacheOK = true
+
+			if opt.Verbose {
+				log.Infof("%d cached file info loaded", nfiles)
+			}
+		}
+
+		if hasInfoCache && InfoCacheOK {
+			// do not have to check file again
+		} else {
+
+			// ---------------------------------------------------------------
+			// input files
+
+			if opt.Verbose {
+				log.Info("checking input files ...")
+			}
+
+			if readFromDir {
+				files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
+				checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
+				if len(files) == 0 {
+					log.Warningf("no files matching patttern: %s", reFileStr)
+				}
+			} else {
+				files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
+				if opt.Verbose {
+					if len(files) == 1 && isStdin(files[0]) {
+						log.Info("no files given, reading from stdin")
 					}
 				}
 			}
-			doneGetInfo <- 1
-		}()
+			if opt.Verbose {
+				log.Infof("%d input file(s) given", len(files))
+			}
+			nfiles = len(files)
 
-		for _, file := range files[1:] {
-			wgGetInfo.Add(1)
-			tokensGetInfo <- 1
-			go func(file string) {
-				defer func() {
-					wgGetInfo.Done()
-					<-tokensGetInfo
+			// ---------------------------------------------------------------
+			// check unik files and read k-mers numbers
+
+			if opt.Verbose {
+				log.Info("checking .unik files ...")
+			}
+
+			var pbs *mpb.Progress
+			var bar *mpb.Bar
+			var chDuration chan time.Duration
+			var doneDuration chan int
+
+			if opt.Verbose {
+				pbs = mpb.New(mpb.WithWidth(40), mpb.WithOutput(os.Stderr))
+				bar = pbs.AddBar(int64(len(files)),
+					mpb.BarStyle("[=>-]<+"),
+					mpb.PrependDecorators(
+						decor.Name("checking .unik file: ", decor.WC{W: len("checking .unik file: "), C: decor.DidentRight}),
+						decor.Name("", decor.WCSyncSpaceR),
+						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+					),
+					mpb.AppendDecorators(
+						decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
+						decor.EwmaETA(decor.ET_STYLE_GO, 60),
+						decor.OnComplete(decor.Name(""), ". done"),
+					),
+				)
+
+				chDuration = make(chan time.Duration, opt.NumCPUs)
+				doneDuration = make(chan int)
+				go func() {
+					for t := range chDuration {
+						bar.Increment()
+						bar.DecoratorEwmaUpdate(t)
+					}
+					doneDuration <- 1
 				}()
-				var t time.Time
-				if opt.Verbose {
-					t = time.Now()
-				}
+			}
 
-				chInfos <- getInfo(file, false)
+			// first file
+			file := files[0]
+			var t time.Time
+			if opt.Verbose {
+				t = time.Now()
+			}
 
-				if opt.Verbose {
-					chDuration <- time.Duration(float64(time.Since(t)) / float64(opt.NumCPUs))
+			info := getInfo(file, true)
+			n += info.Kmers
+			if opt.Verbose {
+				bar.Increment()
+				bar.DecoratorEwmaUpdate(time.Since(t))
+			}
+
+			fileInfos0 = append(fileInfos0, info)
+			namesMap0 = make(map[string]interface{}, 1024)
+			namesMap := make(map[uint64]interface{}, nfiles)
+			namesMap[xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
+			namesMap0[info.Name] = struct{}{}
+
+			// left files
+			var wgGetInfo sync.WaitGroup
+			chInfos := make(chan UnikFileInfo, opt.NumCPUs)
+			tokensGetInfo := make(chan int, opt.NumCPUs)
+			doneGetInfo := make(chan int)
+			go func() {
+				var ok bool
+				var nameHash uint64
+				for info := range chInfos {
+					fileInfos0 = append(fileInfos0, info)
+					n += info.Kmers
+
+					nameHash = xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
+					if _, ok = namesMap[nameHash]; ok {
+						log.Warningf("duplicated name: %s", info.Name)
+					} else {
+						namesMap[nameHash] = struct{}{}
+						if _, ok = namesMap0[info.Name]; !ok {
+							namesMap0[info.Name] = struct{}{}
+						}
+					}
 				}
-			}(file)
+				doneGetInfo <- 1
+			}()
+
+			for _, file := range files[1:] {
+				wgGetInfo.Add(1)
+				tokensGetInfo <- 1
+				go func(file string) {
+					defer func() {
+						wgGetInfo.Done()
+						<-tokensGetInfo
+					}()
+					var t time.Time
+					if opt.Verbose {
+						t = time.Now()
+					}
+
+					chInfos <- getInfo(file, false)
+
+					if opt.Verbose {
+						chDuration <- time.Duration(float64(time.Since(t)) / float64(opt.NumCPUs))
+					}
+				}(file)
+			}
+
+			wgGetInfo.Wait()
+			close(chInfos)
+			<-doneGetInfo
+
+			if opt.Verbose {
+				close(chDuration)
+				<-doneDuration
+				pbs.Wait()
+			}
+
+			if opt.Verbose {
+				log.Infof("finished checking %d .unik files", nfiles)
+			}
 		}
 
-		wgGetInfo.Wait()
-		close(chInfos)
-		<-doneGetInfo
+		// ------------------------------------------------------------------------------------
+		// cache
 
-		if opt.Verbose {
-			close(chDuration)
-			<-doneDuration
-			pbs.Wait()
-		}
-
-		if opt.Verbose {
-			log.Infof("finished checking %d .unik files", nfiles)
+		if dryRun && (!hasInfoCache || !InfoCacheOK) { // dump to cache file
+			log.Infof("write unik file info to file: %s", fileInfoCache)
+			dumpUnikFileInfos(fileInfos0, fileInfoCache)
 		}
 
 		// ------------------------------------------------------------------------------------
@@ -407,6 +452,10 @@ Tips:
 		if opt.Verbose {
 			log.Infof("------------------------------------------------------------")
 			log.Infof("starting indexing ...")
+
+			log.Infof("-------------------- [main parameters] --------------------")
+			log.Infof("number of hashes: %d", numHashes)
+			log.Infof("false positive rate: %f", fpr)
 
 			if meta0.Minimizer {
 				log.Infof("minimizer window: %d", meta0.MinimizerW)
@@ -420,6 +469,7 @@ Tips:
 			if scaled {
 				log.Infof("down-sampling scale: %d", scale)
 			}
+			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
 			log.Infof("block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
 			log.Infof("buiding index ...")
@@ -437,6 +487,8 @@ Tips:
 		numBucketsUint64 := uint64(numBuckets)
 
 		var fileSize0 float64
+
+		var pbs *mpb.Progress
 
 		// repeatedly randomly shuffle names into buckets
 		for rr := 0; rr < numRepeats; rr++ {
@@ -1065,6 +1117,8 @@ func init() {
 	indexCmd.Flags().BoolP("force", "", false, "overwrite output directory")
 	indexCmd.Flags().IntP("max-open-files", "F", 256, "maximum number of opened files")
 	indexCmd.Flags().BoolP("dry-run", "", false, "dry run, useful for adjusting parameters (recommended)")
+
+	indexCmd.Flags().StringP("unik-cache", "c", "", ".unik file info cache, used along with --dry-run, default: ${indir}.cache")
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block
