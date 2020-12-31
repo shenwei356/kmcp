@@ -176,8 +176,6 @@ References:
 			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
 		}
 
-		lowMem := getFlagBool(cmd, "low-mem")
-
 		// ---------------------------------------------------------------
 		// index flags
 		numRepeats := getFlagPositiveInt(cmd, "num-repititions")
@@ -865,142 +863,91 @@ References:
 
 							numSigsM1 := numSigs - 1
 
-							var _wg sync.WaitGroup
-
-							numTokens8 := 8
-							if lowMem {
-								numTokens8 = 1
-							}
-							_tokens8 := make(chan int, numTokens8)
-
-							var _ch chan []byte
-							var _done chan int
-							if !lowMem {
-								_ch = make(chan []byte, 8)
-								_done = make(chan int)
-								go func() {
-									var _i int
-									var _s byte
-									for _sigs := range _ch {
-										for _i, _s = range _sigs {
-											sigs[_i] |= _s
-										}
-									}
-
-									_done <- 1
-								}()
-							}
-
 							// every file in 8 file groups
 							for _k, infos := range _batch {
-								_wg.Add(1)
-								_tokens8 <- 1
-								go func(_k int, infos []UnikFileInfo) {
-									var _sigs []byte
-									if lowMem {
-										_sigs = sigs
-									} else {
-										_sigs = make([]byte, numSigs)
-									}
+								for _, info := range infos {
+									tokensOpenFiles <- 1
 
-									for _, info := range infos {
-										tokensOpenFiles <- 1
+									var infh *bufio.Reader
+									var r *os.File
+									var reader *unikmer.Reader
+									var err error
+									var code uint64
+									var loc int
 
-										var infh *bufio.Reader
-										var r *os.File
-										var reader *unikmer.Reader
-										var err error
-										var code uint64
-										var loc int
+									infh, r, _, err = inStream(info.Path)
+									checkError(errors.Wrap(err, info.Path))
 
-										infh, r, _, err = inStream(info.Path)
-										checkError(errors.Wrap(err, info.Path))
+									reader, err = unikmer.NewReader(infh)
+									checkError(errors.Wrap(err, info.Path))
+									singleHash := numHashes == 1
 
-										reader, err = unikmer.NewReader(infh)
-										checkError(errors.Wrap(err, info.Path))
-										singleHash := numHashes == 1
-
-										if reader.IsHashed() {
-											if singleHash {
-												for {
-													code, _, err = reader.ReadCodeWithTaxid()
-													if err != nil {
-														if err == io.EOF {
-															break
-														}
-														checkError(errors.Wrap(err, info.Path))
+									if reader.IsHashed() {
+										if singleHash {
+											for {
+												code, _, err = reader.ReadCodeWithTaxid()
+												if err != nil {
+													if err == io.EOF {
+														break
 													}
-
-													// sigs[code%numSigs] |= 1 << (7 - _k)
-													_sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+													checkError(errors.Wrap(err, info.Path))
 												}
-											} else {
-												for {
-													code, _, err = reader.ReadCodeWithTaxid()
-													if err != nil {
-														if err == io.EOF {
-															break
-														}
-														checkError(errors.Wrap(err, info.Path))
-													}
 
-													// for _, loc = range hashLocations(code, numHashes, numSigs) {
-													for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
-														_sigs[loc] |= 1 << (7 - _k)
-													}
-												}
+												// sigs[code%numSigs] |= 1 << (7 - _k)
+												sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
 											}
 										} else {
-											if singleHash {
-												for {
-													code, _, err = reader.ReadCodeWithTaxid()
-													if err != nil {
-														if err == io.EOF {
-															break
-														}
-														checkError(errors.Wrap(err, info.Path))
+											for {
+												code, _, err = reader.ReadCodeWithTaxid()
+												if err != nil {
+													if err == io.EOF {
+														break
 													}
-
-													// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
-													_sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+													checkError(errors.Wrap(err, info.Path))
 												}
-											} else {
-												for {
-													code, _, err = reader.ReadCodeWithTaxid()
-													if err != nil {
-														if err == io.EOF {
-															break
-														}
-														checkError(errors.Wrap(err, info.Path))
-													}
 
-													// for _, loc = range hashLocations(code, numHashes, numSigs) {
-													for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
-														_sigs[loc] |= 1 << (7 - _k)
-													}
+												// for _, loc = range hashLocations(code, numHashes, numSigs) {
+												for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
+													sigs[loc] |= 1 << (7 - _k)
 												}
 											}
 										}
+									} else {
+										if singleHash {
+											for {
+												code, _, err = reader.ReadCodeWithTaxid()
+												if err != nil {
+													if err == io.EOF {
+														break
+													}
+													checkError(errors.Wrap(err, info.Path))
+												}
 
-										r.Close()
+												// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+												sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+											}
+										} else {
+											for {
+												code, _, err = reader.ReadCodeWithTaxid()
+												if err != nil {
+													if err == io.EOF {
+														break
+													}
+													checkError(errors.Wrap(err, info.Path))
+												}
 
-										<-tokensOpenFiles
+												// for _, loc = range hashLocations(code, numHashes, numSigs) {
+												for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
+													sigs[loc] |= 1 << (7 - _k)
+												}
+											}
+										}
 									}
 
-									if !lowMem {
-										_ch <- _sigs
-									}
+									r.Close()
 
-									_wg.Done()
-									<-_tokens8
-								}(_k, infos)
-							}
-
-							_wg.Wait()
-
-							if !lowMem {
-								close(_ch)
-								<-_done
+									<-tokensOpenFiles
+								}
 							}
 
 							chBatch8 <- batch8s{
@@ -1172,7 +1119,6 @@ func init() {
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files`)
 	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
-	indexCmd.Flags().BoolP("low-mem", "l", false, `use less memory in cost of more indexing time`)
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block
