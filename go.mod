@@ -12,10 +12,10 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/shenwei356/bio v0.0.0-20201213090627-18e3e643a476
-	github.com/shenwei356/breader v0.0.0-20170924140440-21f0a70fe179
+	github.com/shenwei356/breader v0.1.0
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
 	github.com/shenwei356/unikmer v0.16.1
-	github.com/shenwei356/util v0.0.0-20201214054755-2942125340cd
+	github.com/shenwei356/util v2020.12.31+incompatible
 	github.com/spf13/cobra v1.1.1
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
 	github.com/vbauerster/mpb/v5 v5.4.0

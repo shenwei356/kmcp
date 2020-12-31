@@ -67,7 +67,8 @@ Tips:
      of opened files is limited by flag -F/--max-open-files.
   2. Value of block size -b/--block-size better be multiple of 64.
   3. Use flag -m/--block-max-kmers-t1 and -M/--block-max-kmers-t2 to
-     control single index file size.
+     individually create index for input with very large number of k-mers,
+     for precise control of index file size.
   4. Use --dry-run to adjust parameters and check final number of 
      index files (#index-files) and total file size. 
      #index-files >= #cpus is recommended for better parallelization.
@@ -174,6 +175,8 @@ References:
 		if kmerThreshold8 >= kmerThresholdS {
 			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
 		}
+
+		lowMem := getFlagBool(cmd, "low-mem")
 
 		// ---------------------------------------------------------------
 		// index flags
@@ -864,24 +867,42 @@ References:
 
 							var _wg sync.WaitGroup
 
-							_ch := make(chan []byte, 8)
-							_done := make(chan int)
-							go func() {
-								var _i int
-								var _s byte
-								for _sigs := range _ch {
-									for _i, _s = range _sigs {
-										sigs[_i] |= _s
+							numTokens8 := 8
+							if lowMem {
+								numTokens8 = 1
+							}
+							_tokens8 := make(chan int, numTokens8)
+
+							var _ch chan []byte
+							var _done chan int
+							if !lowMem {
+								_ch = make(chan []byte, 8)
+								_done = make(chan int)
+								go func() {
+									var _i int
+									var _s byte
+									for _sigs := range _ch {
+										for _i, _s = range _sigs {
+											sigs[_i] |= _s
+										}
 									}
-								}
-								_done <- 1
-							}()
+
+									_done <- 1
+								}()
+							}
 
 							// every file in 8 file groups
 							for _k, infos := range _batch {
-								_sigs := make([]byte, numSigs)
 								_wg.Add(1)
+								_tokens8 <- 1
 								go func(_k int, infos []UnikFileInfo) {
+									var _sigs []byte
+									if lowMem {
+										_sigs = sigs
+									} else {
+										_sigs = make([]byte, numSigs)
+									}
+
 									for _, info := range infos {
 										tokensOpenFiles <- 1
 
@@ -966,14 +987,21 @@ References:
 										<-tokensOpenFiles
 									}
 
-									_ch <- _sigs
+									if !lowMem {
+										_ch <- _sigs
+									}
+
 									_wg.Done()
+									<-_tokens8
 								}(_k, infos)
 							}
 
 							_wg.Wait()
-							close(_ch)
-							<-_done
+
+							if !lowMem {
+								close(_ch)
+								<-_done
+							}
 
 							chBatch8 <- batch8s{
 								id:      id,
@@ -1144,6 +1172,7 @@ func init() {
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files`)
 	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
+	indexCmd.Flags().BoolP("low-mem", "l", false, `use less memory in cost of more indexing time`)
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block

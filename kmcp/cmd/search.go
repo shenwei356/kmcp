@@ -74,7 +74,7 @@ Attentions:
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		targetCov := getFlagFloat64(cmd, "target-cov")
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
-		useMmap := getFlagBool(cmd, "use-mmap")
+		useMmap := !getFlagBool(cmd, "low-mem")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -383,7 +383,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("use-mmap", "m", true, `load index files into memory to accelerate searching`)
+	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load index files into memory to accelerate searching`)
 
 	// query option
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
