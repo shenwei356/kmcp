@@ -7,11 +7,36 @@ Softwares
     - kmcp (v0.2.1)
     - [memusg](https://github.com/shenwei356/memusg), version: [91a19ab](https://github.com/shenwei356/memusg/commit/91a19abaf041c3046b91ef3a35ed28aade1e05fc)
 
-## whole sequence
+## Dataset
+
+GTDB r95
+    - gtdb_genomes_reps_r95.tar.gz(https://data.ace.uq.edu.au/public/gtdb/data/releases/release95/95.0/genomic_files_reps/gtdb_genomes_reps_r95.tar.gz)
+    - file size: 32.3 GB
+    - #files: 31,910
+
+### sequencing data
+
+PacBio
+
+- HMP mock dataset
+    - https://github.com/PacificBiosciences/DevNet/wiki/Human_Microbiome_Project_MockB_Shotgun
+
+ONT
+
+- Zymo mock community
+    - http://refhub.elsevier.com/S2589-0042(20)30408-9/sref30
+    - https://github.com/LomanLab/mockcommunity
+- HM-276D & HM-277D
+    - https://doi.org/10.1016/j.isci.2020.101223
+    - https://www.ncbi.nlm.nih.gov/bioproject/630658
+
+
+
+## Whole sequence
 
     # indexing ---------------------------------------------------------------------------------
     
-    seqs=gtdb-seqs
+    seqs=gtdb
     db=gtdb
     k=31
     threads=32

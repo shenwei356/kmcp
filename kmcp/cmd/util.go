@@ -150,9 +150,8 @@ func filepathTrimExtension(file string) (string, string) {
 	if fasta || fastq {
 		file = file[0 : len(file)-6]
 	} else {
-		fa = strings.HasSuffix(file, ".fa") || strings.HasSuffix(file, ".FA")
+		fa = strings.HasSuffix(file, ".fa") || strings.HasSuffix(file, ".FA") || strings.HasSuffix(file, ".fna") || strings.HasSuffix(file, ".FNA")
 		fq = strings.HasSuffix(file, ".fq") || strings.HasSuffix(file, ".FQ")
-
 	}
 
 	extension := filepath.Ext(file)

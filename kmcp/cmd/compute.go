@@ -626,7 +626,7 @@ func init() {
 	RootCmd.AddCommand(computeCmd)
 
 	computeCmd.Flags().StringP("in-dir", "I", "", `directory containing FASTA/Q files. directory symlinks are followed`)
-	computeCmd.Flags().StringP("file-regexp", "r", `.f[aq](st[aq])?(.gz)?$`, `regular expression for matching files in -I/--in-dir to compute, case ignored`)
+	computeCmd.Flags().StringP("file-regexp", "r", `\.(f[aq](st[aq])?|fna)(.gz)?$`, `regular expression for matching files in -I/--in-dir to compute, case ignored`)
 
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
