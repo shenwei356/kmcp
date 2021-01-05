@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -133,6 +134,9 @@ Attentions:
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
 		if mappingNames {
+			if opt.Verbose {
+				log.Infof("loading name mapping file ...")
+			}
 			var nameMappingFile string
 			nameMappingFile = nameMappingFiles[0]
 			namesMap, err = cliutil.ReadKVs(nameMappingFile, false)
@@ -219,7 +223,7 @@ Attentions:
 			log.Info("searching ...")
 		}
 
-		outfh, gw, w, err := outStream(outFile, false, opt.CompressionLevel)
+		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(outFile, ".gz"), opt.CompressionLevel)
 		checkError(err)
 		defer func() {
 			outfh.Flush()
@@ -230,7 +234,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tdb\tqKmers\tFPR\thits\ttarget\tfrag\tmKmers\tqCov\ttCov\n")
+			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tmKmers\tqCov\ttCov\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -249,11 +253,10 @@ Attentions:
 				return
 			}
 			_dbInfo = sg.DBs[result.DBId].Info
-			// query, len_query,
-			// db, num_kmers, fpr, num_matches,
-			prefix2 = fmt.Sprintf("%s\t%d\t%s\t%d\t%e\t%d",
+			// query, len_query, num_kmers, fpr, num_matches,
+			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
-				_dbInfo.Alias, result.NumKmers, result.FPR, len(result.Matches))
+				result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
@@ -273,9 +276,8 @@ Attentions:
 					}
 				}
 
-				// query, len_query,
-				// db, num_kmers, fpr,
-				// target, num_target_kmers, qcov, tcov
+				// query, len_query, num_kmers, fpr, num_matches
+				// target, fragIdx, num_matched_kmers, qcov, tcov
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
 					prefix2, target, match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
 			}
