@@ -230,7 +230,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 			// get matches from all databases
 			var queryResult *QueryResult
-			m := make(map[Name2Idx]*Match, 8)
+			var m map[Name2Idx]*Match
 			var m2 map[Name2Idx]interface{} // mark shared keys
 			// var _match Match
 			var _name string
@@ -255,7 +255,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				firstDB = i == 0
 
-				if !firstDB {
+				if firstDB {
+					m = make(map[Name2Idx]*Match, len(_queryResult.Matches))
+				} else {
 					m2 = make(map[Name2Idx]interface{}, len(_queryResult.Matches))
 				}
 
@@ -816,6 +818,10 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 		buf := make([]byte, PosPopCountBufSize)
 
+		var segLen int = 32
+		buffs2 := make([][]byte, PosPopCountBufSize)
+		var i0, e, s int
+
 		for query := range idx.InCh {
 			hashes = query.Hashes
 			nHashes = float64(len(hashes))
@@ -828,7 +834,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				if useMmap {
 					for i, _h = range hs {
 						// loc = int(_h % numSigsUint)
-						loc = int(_h & numSigsUintM1) // &Xis faster than %X when X is power of 2
+						loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						offset = int(offset0 + int64(loc*numRowBytes))
 
 						data[i] = sigs[offset : offset+numRowBytes]
@@ -836,7 +842,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				} else {
 					for i, _h = range hs {
 						// loc = int(_h % numSigsUint)
-						loc = int(_h & numSigsUintM1) // &Xis faster than %X when X is power of 2
+						loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						offset2 = offset0 + int64(loc*numRowBytes)
 
 						fh.Seek(offset2, 0)
@@ -867,13 +873,27 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 				if bufIdx == PosPopCountBufSize {
 					// transpose
-					for i = 0; i < numRowBytes; i++ { // every column in matrix
-						for j = 0; j < PosPopCountBufSize; j++ {
-							buf[j] = buffs[j][i]
+					s = segLen
+					for i0 = 0; i0 < numRowBytes; i0 += segLen { // every column in matrix
+						e = i0 + segLen
+						if e > numRowBytes {
+							e = numRowBytes
+							s = e - i0
 						}
 
-						// count
-						pospop.Count8(&counts[i], buf)
+						// shorter buffs
+						for j = 0; j < bufIdx; j++ {
+							buffs2[j] = buffs[j][i0:e]
+						}
+
+						for i = 0; i < s; i++ { // every column in matrix
+							for j = 0; j < bufIdx; j++ {
+								buf[j] = buffs2[j][i]
+							}
+
+							// count
+							pospop.Count8(&counts[i0+i], buf)
+						}
 					}
 
 					bufIdx = 0
@@ -883,13 +903,27 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			// left data in buffer
 			if bufIdx > 0 {
 				// transpose
-				for i = 0; i < numRowBytes; i++ { // every column in matrix
-					for j = 0; j < bufIdx; j++ {
-						buf[j] = buffs[j][i]
+				s = segLen
+				for i0 = 0; i0 < numRowBytes; i0 += segLen { // every column in matrix
+					e = i0 + segLen
+					if e > numRowBytes {
+						e = numRowBytes
+						s = e - i0
 					}
 
-					// count
-					pospop.Count8(&counts[i], buf[:bufIdx])
+					// shorter buffs
+					for j = 0; j < bufIdx; j++ {
+						buffs2[j] = buffs[j][i0:e]
+					}
+
+					for i = 0; i < s; i++ {
+						for j = 0; j < bufIdx; j++ {
+							buf[j] = buffs2[j][i]
+						}
+
+						// count
+						pospop.Count8(&counts[i0+i], buf[:bufIdx])
+					}
 				}
 			}
 
