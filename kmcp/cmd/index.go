@@ -282,7 +282,7 @@ References:
 		}
 		if hasInfoCache {
 			if opt.Verbose {
-				log.Infof("loading .unik file info from file: %s", fileInfoCache)
+				log.Infof("loading .unik file infos from file: %s", fileInfoCache)
 			}
 
 			// read

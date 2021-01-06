@@ -184,103 +184,150 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		nDBs := len(sg.DBs)
 		sortBy := opt.SortBy
 
-		for query := range sg.InCh {
-			wg.Add(1)
-			tokens <- 1
-			go func(query Query) {
-				query.Ch = make(chan QueryResult, len(sg.DBs))
+		if !multipleDBs {
+			handleQuerySingleDB := func(query Query) {
+				query.Ch = make(chan QueryResult, nDBs)
 
-				// send to all databases
-				for _, db := range sg.DBs {
-					db.InCh <- query
-				}
+				sg.DBs[0].InCh <- query
 
-				// get matches from all databases
-				var queryResult *QueryResult
-				m := make(map[Name2Idx]*Match, 8)
-				m2 := make(map[Name2Idx]interface{}, 8) // mark shared keys
-				// var _match Match
-				var _name string
-				var key Name2Idx
-				var j int
-				var ok bool
-				var fisrtDB bool
-				var _match0 *Match
-				var toDelete []Name2Idx
-				toDelete = make([]Name2Idx, 1024)
-				for i := 0; i < nDBs; i++ {
-					// block to read
-					_queryResult := <-query.Ch
+				_queryResult := <-query.Ch
 
-					if queryResult == nil {
-						queryResult = &_queryResult
-					}
-
-					if _queryResult.Matches == nil {
-						continue
-					}
-
-					toDelete = toDelete[:0]
-
-					fisrtDB = i == 0
-
-					for _i := range _queryResult.Matches {
-						_match := _queryResult.Matches[_i]
-						for j, _name = range _match.Target {
-							key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
-							if fisrtDB {
-								m[key] = &_match
-								continue
-							}
-
-							if _match0, ok = m[key]; ok { // shared
-								if _match.NumKmers < _match0.NumKmers { // update
-									m[key] = &_match
-								}
-								m2[key] = struct{}{} // mark shared keys
-							}
-						}
-					}
-					if fisrtDB {
-						continue
-					}
-					for key = range m {
-						if _, ok = m2[key]; !ok {
-							toDelete = append(toDelete, key)
-						}
-					}
-					for _, key = range toDelete {
-						delete(m, key)
-					}
-				}
-
-				var _match *Match
-				_matches2 := poolMatches.Get().([]Match)
-				for key, _match = range m {
-					_match.Target = []string{key.Name}
-					_match.TargetIdx = []uint32{key.Index}
-					if multipleDBs {
-						_match.TCov = 0
-					}
-					_matches2 = append(_matches2, *_match)
-
+				if _queryResult.Matches != nil {
 					switch sortBy {
 					case "qcov":
-						sorts.Quicksort(Matches(_matches2))
+						sorts.Quicksort(Matches(_queryResult.Matches))
 					case "tcov":
-						sorts.Quicksort(SortByTCov{Matches(_matches2)})
+						sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
 					case "sum":
-						sorts.Quicksort(SortBySum{Matches(_matches2)})
+						sorts.Quicksort(SortBySum{Matches(_queryResult.Matches)})
 					}
 				}
 
-				queryResult.Matches = _matches2
-				sg.OutCh <- *queryResult
+				sg.OutCh <- _queryResult
 
 				wg.Done()
 				<-tokens
-			}(query)
+			}
+
+			for query := range sg.InCh {
+				wg.Add(1)
+				tokens <- 1
+				go handleQuerySingleDB(query)
+			}
+
+			sg.done <- 1
+
+			return
 		}
+
+		handleQueryMultiDBs := func(query Query) {
+			query.Ch = make(chan QueryResult, nDBs)
+
+			// send to all databases
+			for _, db := range sg.DBs {
+				db.InCh <- query
+			}
+
+			// get matches from all databases
+			var queryResult *QueryResult
+			m := make(map[Name2Idx]*Match, 8)
+			var m2 map[Name2Idx]interface{} // mark shared keys
+			// var _match Match
+			var _name string
+			var key Name2Idx
+			var j int
+			var ok bool
+			var firstDB bool
+			var _match0 *Match
+			var toDelete []Name2Idx
+			toDelete = make([]Name2Idx, 1024)
+			for i := 0; i < nDBs; i++ {
+				// block to read
+				_queryResult := <-query.Ch
+
+				if queryResult == nil { // assign one
+					queryResult = &_queryResult
+				}
+
+				if _queryResult.Matches == nil {
+					continue
+				}
+
+				firstDB = i == 0
+
+				if !firstDB {
+					m2 = make(map[Name2Idx]interface{}, len(_queryResult.Matches))
+				}
+
+				for _i := range _queryResult.Matches {
+					_match := _queryResult.Matches[_i]
+					for j, _name = range _match.Target {
+						key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
+						if firstDB {
+							m[key] = &_match
+							continue
+						}
+
+						if _match0, ok = m[key]; ok { // shared
+							if _match.NumKmers < _match0.NumKmers { // update numkmers with smaller value
+								m[key] = &_match
+							}
+							m2[key] = struct{}{} // mark shared keys
+						}
+					}
+				}
+				if firstDB {
+					continue
+				}
+
+				// delete targets not found in previous result
+				toDelete = toDelete[:0]
+				for key = range m {
+					if _, ok = m2[key]; !ok {
+						toDelete = append(toDelete, key)
+					}
+				}
+				for _, key = range toDelete {
+					delete(m, key)
+				}
+
+				// recycle matches
+				_queryResult.Matches = _queryResult.Matches[:0]
+				poolMatches.Put(_queryResult.Matches)
+			}
+
+			_matches2 := poolMatches.Get().([]Match)
+			for key, _match := range m {
+				_match.Target = []string{key.Name}
+				_match.TargetIdx = []uint32{key.Index}
+				if multipleDBs {
+					_match.TCov = 0
+				}
+				_matches2 = append(_matches2, *_match)
+			}
+
+			switch sortBy {
+			case "qcov":
+				sorts.Quicksort(Matches(_matches2))
+			case "tcov":
+				sorts.Quicksort(SortByTCov{Matches(_matches2)})
+			case "sum":
+				sorts.Quicksort(SortBySum{Matches(_matches2)})
+			}
+
+			queryResult.Matches = _matches2
+			sg.OutCh <- *queryResult
+
+			wg.Done()
+			<-tokens
+		}
+
+		for query := range sg.InCh {
+			wg.Add(1)
+			tokens <- 1
+			go handleQueryMultiDBs(query)
+		}
+
 		sg.done <- 1
 	}()
 
@@ -418,104 +465,106 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	db.Indices = indices
 
 	go func() {
-
 		tokens := make(chan int, db.Options.Threads)
+
+		numHashes := db.Info.NumHashes
+		indices := db.Indices
+		numIndices := len(indices)
+		topN := db.Options.TopN
+		onlyTopN := topN > 0
+
+		handleQuery := func(query Query) {
+			defer func() { <-tokens }()
+
+			// compute kmers
+			// reuse []uint64 object, to reduce GC
+			kmers := poolKmers.Get().([]uint64)
+			kmers, err = db.generateKmers(query.Seq, kmers)
+			// buf := poolIdxValues.Get().([]unikmer.IdxValue)
+			// kmers, err = db.generateKmers(query.Seq, kmers, buf)
+			if err != nil {
+				checkError(err)
+			}
+			nKmers := len(kmers)
+
+			// recycle objects
+			// buf = buf[:0]
+			// poolIdxValues.Put(buf)
+
+			result := QueryResult{
+				QueryIdx: query.Idx,
+				QueryID:  query.ID,
+				QueryLen: query.Seq.Length(),
+				NumKmers: nKmers,
+				// Kmers:    kmers,
+				Matches: nil,
+			}
+
+			// sequence shorter than k, or too few k-mer sketchs.
+			if kmers == nil || nKmers < db.Options.MinMatched {
+				query.Ch <- result // still send result!
+				return
+			}
+
+			// compute hashes
+			// reuse [][]uint64 object, to reduce GC
+			hashes := poolHashes.Get().([][]uint64)
+			for _, kmer := range kmers {
+				hashes = append(hashes, hashValues(kmer, numHashes))
+			}
+
+			// recycle kmer-sketch ([]uint64) object
+			kmers = kmers[:0]
+			poolKmers.Put(kmers)
+
+			// send queries
+			// reuse chan []Match object, to reduce GC
+			chMatches := poolChanMatches.Get().(chan []Match)
+			for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+				indices[i].InCh <- IndexQuery{
+					// Kmers:  kmers,
+					Hashes: hashes,
+					Ch:     chMatches,
+				}
+			}
+
+			// get matches from all indices
+			// reuse []Match object
+			matches := poolMatches.Get().([]Match)
+			var _matches []Match
+			var _match Match
+			for i := 0; i < numIndices; i++ {
+				// block to read
+				_matches = <-chMatches
+				for _, _match = range _matches {
+					matches = append(matches, _match)
+				}
+			}
+
+			// recycle objects
+			poolChanMatches.Put(chMatches)
+
+			hashes = hashes[:0]
+			poolHashes.Put(hashes)
+
+			// filter
+			if len(matches) > 0 {
+				if onlyTopN && len(matches) > topN {
+					matches = matches[:topN]
+				}
+
+				// send result
+				result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
+				result.DBId = db.DBId
+				result.Matches = matches
+			}
+
+			query.Ch <- result
+		}
+
 		for query := range db.InCh {
 			tokens <- 1
-			go func(query Query) {
-				defer func() { <-tokens }()
-
-				numHashes := db.Info.NumHashes
-				indices := db.Indices
-				numIndices := len(indices)
-				topN := db.Options.TopN
-				onlyTopN := topN > 0
-
-				// compute kmers
-				// reuse []uint64 object, to reduce GC
-				kmers := poolKmers.Get().([]uint64)
-				kmers, err = db.generateKmers(query.Seq, kmers)
-				// buf := poolIdxValues.Get().([]unikmer.IdxValue)
-				// kmers, err = db.generateKmers(query.Seq, kmers, buf)
-				if err != nil {
-					checkError(err)
-				}
-				nKmers := len(kmers)
-
-				// recycle objects
-				// buf = buf[:0]
-				// poolIdxValues.Put(buf)
-
-				result := QueryResult{
-					QueryIdx: query.Idx,
-					QueryID:  query.ID,
-					QueryLen: query.Seq.Length(),
-					NumKmers: nKmers,
-					// Kmers:    kmers,
-					Matches: nil,
-				}
-
-				// sequence shorter than k, or too few k-mer sketchs.
-				if kmers == nil || nKmers < db.Options.MinMatched {
-					query.Ch <- result // still send result!
-					return
-				}
-
-				// compute hashes
-				// reuse [][]uint64 object, to reduce GC
-				hashes := poolHashes.Get().([][]uint64)
-				for _, kmer := range kmers {
-					hashes = append(hashes, hashValues(kmer, numHashes))
-				}
-
-				// recycle kmer-sketch ([]uint64) object
-				kmers = kmers[:0]
-				poolKmers.Put(kmers)
-
-				// send queries
-				// reuse chan []Match object, to reduce GC
-				chMatches := poolChanMatches.Get().(chan []Match)
-				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
-					indices[i].InCh <- IndexQuery{
-						// Kmers:  kmers,
-						Hashes: hashes,
-						Ch:     chMatches,
-					}
-				}
-
-				// get matches from all indices
-				// reuse []Match object
-				matches := poolMatches.Get().([]Match)
-				var _matches []Match
-				var _match Match
-				for i := 0; i < numIndices; i++ {
-					// block to read
-					_matches = <-chMatches
-					for _, _match = range _matches {
-						matches = append(matches, _match)
-					}
-				}
-
-				// recycle objects
-				poolChanMatches.Put(chMatches)
-
-				hashes = hashes[:0]
-				poolHashes.Put(hashes)
-
-				// filter
-				if len(matches) > 0 {
-					if onlyTopN && len(matches) > topN {
-						matches = matches[:topN]
-					}
-
-					// send result
-					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
-					result.DBId = db.DBId
-					result.Matches = matches
-				}
-
-				query.Ch <- result
-			}(query)
+			go handleQuery(query)
 		}
 		db.done <- 1
 	}()
