@@ -200,6 +200,7 @@ Attentions:
 			MinTargetCov: targetCov,
 
 			LoadDefaultNameMap: loadDefaultNameMap,
+			NameMap:            namesMap,
 		}
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
@@ -239,11 +240,8 @@ Attentions:
 
 		var fastxReader *fastx.Reader
 		var record *fastx.Record
-		var ok bool
 
 		var prefix2 string
-		var t, target string
-		var _dbInfo UnikIndexDBInfo
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -252,7 +250,6 @@ Attentions:
 			if len(result.Matches) == 0 && !keepUnmatched {
 				return
 			}
-			_dbInfo = sg.DBs[result.DBId].Info
 			// query, len_query, num_kmers, fpr, num_matches,
 			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
@@ -265,21 +262,10 @@ Attentions:
 			}
 
 			for _, match := range result.Matches {
-				target = match.Target[0]
-				if mappingNames { //
-					if t, ok = namesMap[target]; ok {
-						target = t
-					}
-				} else if _dbInfo.MappingNames { // name mapping of database
-					if t, ok = _dbInfo.NameMapping[target]; ok {
-						target = t
-					}
-				}
-
 				// query, len_query, num_kmers, fpr, num_matches
 				// target, fragIdx, num_matched_kmers, qcov, tcov
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, target, match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
+					prefix2, match.Target[0], match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
 			}
 
 			result.Recycle()

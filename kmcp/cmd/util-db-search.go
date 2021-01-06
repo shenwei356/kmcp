@@ -142,6 +142,7 @@ type SearchOptions struct {
 	MinTargetCov float64
 
 	LoadDefaultNameMap bool
+	NameMap            map[string]string
 }
 
 // UnikIndexDBSearchEngine search sequence on multiple database
@@ -176,6 +177,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	sg.InCh = make(chan Query, opt.Threads)
 	sg.OutCh = make(chan QueryResult, opt.Threads)
 	multipleDBs := len(dbs) > 1
+	mappingName := len(opt.NameMap) > 0
 
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
@@ -183,6 +185,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		wg := &sg.wg
 		nDBs := len(sg.DBs)
 		sortBy := opt.SortBy
+		nameMap := opt.NameMap
 
 		if !multipleDBs {
 			handleQuerySingleDB := func(query Query) {
@@ -200,6 +203,23 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
 					case "sum":
 						sorts.Quicksort(SortBySum{Matches(_queryResult.Matches)})
+					}
+				}
+
+				if mappingName {
+					var _m *Match
+					var ok bool
+					var t string
+					_dbInfo := dbs[_queryResult.DBId].Info
+					for _, _match := range _queryResult.Matches {
+						_m = &_match
+						if t, ok = nameMap[_match.Target[0]]; ok {
+							_m.Target[0] = t
+						} else if opt.LoadDefaultNameMap {
+							if t, ok = _dbInfo.NameMapping[_match.Target[0]]; ok {
+								_m.Target[0] = t
+							}
+						}
 					}
 				}
 
@@ -318,6 +338,24 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			queryResult.Matches = _matches2
+
+			if mappingName {
+				var _m *Match
+				var ok bool
+				var t string
+				_dbInfo := dbs[queryResult.DBId].Info
+				for _, _match := range queryResult.Matches {
+					_m = &_match
+					if t, ok = nameMap[_match.Target[0]]; ok {
+						_m.Target[0] = t
+					} else if opt.LoadDefaultNameMap {
+						if t, ok = _dbInfo.NameMapping[_match.Target[0]]; ok {
+							_m.Target[0] = t
+						}
+					}
+				}
+			}
+
 			sg.OutCh <- *queryResult
 
 			wg.Done()
@@ -346,12 +384,32 @@ func (sg *UnikIndexDBSearchEngine) Wait() {
 // Close closes the search engine.
 func (sg *UnikIndexDBSearchEngine) Close() error {
 	var err0 error
-	for _, db := range sg.DBs {
-		err := db.Close()
-		if err != nil && err0 == nil {
-			err0 = err
+
+	ch := make(chan error)
+	done := make(chan int)
+	go func() {
+		for err := range ch {
+			if err != nil && err0 == nil {
+				err0 = err
+			}
 		}
+		done <- 1
+	}()
+
+	var wg sync.WaitGroup
+
+	for _, db := range sg.DBs {
+		wg.Add(1)
+		go func(db *UnikIndexDB) {
+			ch <- db.Close()
+			wg.Done()
+		}(db)
 	}
+
+	wg.Wait()
+	close(ch)
+	<-done
+
 	return err0
 }
 
@@ -658,12 +716,32 @@ func (db *UnikIndexDB) Close() error {
 	<-db.done
 
 	var err0 error
-	for _, idx := range db.Indices {
-		err := idx.Close()
-		if err != nil && err0 == nil {
-			err0 = err
+
+	ch := make(chan error)
+	done := make(chan int)
+	go func() {
+		for err := range ch {
+			if err != nil && err0 == nil {
+				err0 = err
+			}
 		}
+		done <- 1
+	}()
+
+	var wg sync.WaitGroup
+
+	for _, idx := range db.Indices {
+		wg.Add(1)
+		go func(idx *UnikIndex) {
+			ch <- idx.Close()
+			wg.Done()
+		}(idx)
 	}
+
+	wg.Wait()
+	close(ch)
+	<-done
+
 	return err0
 }
 
