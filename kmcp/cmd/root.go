@@ -58,6 +58,6 @@ func init() {
 
 	RootCmd.PersistentFlags().IntP("threads", "j", defaultThreads, "number of CPUs to use")
 	// RootCmd.PersistentFlags().BoolP("verbose", "", false, "print verbose information (recommended)")
-	RootCmd.PersistentFlags().BoolP("quiet", "", false, "do not print any verbose information")
+	RootCmd.PersistentFlags().BoolP("quiet", "q", false, "do not print any verbose information")
 	RootCmd.PersistentFlags().StringP("infile-list", "i", "", "file of input files list (one file per line), if given, they are appended to files from cli arguments")
 }
