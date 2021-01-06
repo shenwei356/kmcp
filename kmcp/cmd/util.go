@@ -63,7 +63,8 @@ func getOptions(cmd *cobra.Command) *Options {
 
 	return &Options{
 		NumCPUs: threads,
-		Verbose: cliutil.GetFlagBool(cmd, "verbose"),
+		// Verbose: cliutil.GetFlagBool(cmd, "verbose"),
+		Verbose: !cliutil.GetFlagBool(cmd, "quiet"),
 
 		Compress:         true,
 		CompressionLevel: -1,

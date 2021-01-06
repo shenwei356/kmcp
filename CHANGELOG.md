@@ -2,6 +2,7 @@
 
 ## v0.2.2 - 2021-01-xx
 
+- use `--quiet` to replace `--quiet`, making printing log info default.
 - `search`: change output format, fix computing intersetion between repeats.
 - `compute`: change default file regexp for matching `.fna` files.
 
