@@ -29,3 +29,5 @@ t_*
 *cpu.pprof
 *mem.pprof
 *trace.out
+*gtdb-*
+*gtdb.*.tsv

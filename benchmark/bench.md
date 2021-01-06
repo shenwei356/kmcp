@@ -36,7 +36,7 @@ ONT
 
     # indexing ---------------------------------------------------------------------------------
     
-    seqs=gtdb
+    seqs=gtdb # directory of gtdb sequences
     db=gtdb
     k=31
     threads=32

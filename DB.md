@@ -3,6 +3,7 @@
 Dataset: [gtdb_genomes_reps_r95.tar.gz](https://data.ace.uq.edu.au/public/gtdb/data/releases/release95/95.0/genomic_files_reps/gtdb_genomes_reps_r95.tar.gz)
 
     # uncompress
+    mkdir -p gtdb
     tar -zxvf gtdb_genomes_reps_r95.tar.gz -O gtdb
     
     # rename
