@@ -677,8 +677,8 @@ func (db *UnikIndexDB) Close() error {
 // bottleneck. Column size of the matrix is fixed, therefore we must control
 // the row size to balance time of matrix transposing and popopcount.
 //
-// 128 is the best value for my machine (AMD ryzen 2700X).
-const PosPopCountBufSize = 128
+// 64 is the best value for my machine (AMD ryzen 2700X).
+const PosPopCountBufSize = 64
 
 // UnikIndex defines a unik index struct.
 type UnikIndex struct {
@@ -818,10 +818,6 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 		buf := make([]byte, PosPopCountBufSize)
 
-		var segLen int = 32
-		buffs2 := make([][]byte, PosPopCountBufSize)
-		var i0, e, s int
-
 		for query := range idx.InCh {
 			hashes = query.Hashes
 			nHashes = float64(len(hashes))
@@ -873,27 +869,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 				if bufIdx == PosPopCountBufSize {
 					// transpose
-					s = segLen
-					for i0 = 0; i0 < numRowBytes; i0 += segLen { // every column in matrix
-						e = i0 + segLen
-						if e > numRowBytes {
-							e = numRowBytes
-							s = e - i0
-						}
-
-						// shorter buffs
+					for i = 0; i < numRowBytes; i++ { // every column in matrix
 						for j = 0; j < bufIdx; j++ {
-							buffs2[j] = buffs[j][i0:e]
+							buf[j] = buffs[j][i]
 						}
 
-						for i = 0; i < s; i++ { // every column in matrix
-							for j = 0; j < bufIdx; j++ {
-								buf[j] = buffs2[j][i]
-							}
-
-							// count
-							pospop.Count8(&counts[i0+i], buf)
-						}
+						// count
+						pospop.Count8(&counts[i], buf)
 					}
 
 					bufIdx = 0
@@ -903,27 +885,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			// left data in buffer
 			if bufIdx > 0 {
 				// transpose
-				s = segLen
-				for i0 = 0; i0 < numRowBytes; i0 += segLen { // every column in matrix
-					e = i0 + segLen
-					if e > numRowBytes {
-						e = numRowBytes
-						s = e - i0
-					}
-
-					// shorter buffs
+				for i = 0; i < numRowBytes; i++ { // every column in matrix
 					for j = 0; j < bufIdx; j++ {
-						buffs2[j] = buffs[j][i0:e]
+						buf[j] = buffs[j][i]
 					}
 
-					for i = 0; i < s; i++ {
-						for j = 0; j < bufIdx; j++ {
-							buf[j] = buffs2[j][i]
-						}
-
-						// count
-						pospop.Count8(&counts[i0+i], buf[:bufIdx])
-					}
+					// count
+					pospop.Count8(&counts[i], buf[:bufIdx])
 				}
 			}
 
