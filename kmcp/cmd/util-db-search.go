@@ -702,9 +702,8 @@ type UnikIndex struct {
 	sigs    mmap.MMap // mapped sigatures
 	sigsB   []byte
 
-	_data  [][]uint8
-	buffs  [][]byte
-	buffsT [][PosPopCountBufSize]byte // cache line size 64
+	_data [][]uint8
+	buffs [][]byte
 }
 
 func (idx *UnikIndex) String() string {

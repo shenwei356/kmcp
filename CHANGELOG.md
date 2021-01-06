@@ -2,7 +2,7 @@
 
 ## v0.2.2 - 2021-01-xx
 
-- `search`: improve performance, change output format.
+- `search`: change output format, fix computing intersetion between repeats.
 - `compute`: change default file regexp for matching `.fna` files.
 
 ## v0.2.1 - 2020-12-31
