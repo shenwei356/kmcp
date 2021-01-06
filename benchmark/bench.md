@@ -61,8 +61,8 @@ ONT
     
     # 13min, 40G
     /bin/rm -rf $dbKMCPtmp $dbKMCP
-    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp --force \
-        && kmcp index -j $threads -f 0.3 -n 1 -b 512 -I $dbKMCPtmp -O $dbKMCP --force " \
+    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp --force --quiet \
+        && kmcp index -j $threads -f 0.3 -n 1 -b 512 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
 
     # 55G
@@ -77,14 +77,14 @@ ONT
         memusg -t -s "cobs query  -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" 2>$f.cobs@$db.txt.time
         
         # 10s, 54G
-        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
+        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
     done
 
 ## Scaled minhash
 
     # indexing ---------------------------------------------------------------------------------
 
-    seqs=gtdb-seqs
+    seqs=gtdb
     db=gtdb
     k=31
     threads=32
@@ -110,8 +110,8 @@ ONT
     
     # --------------- kmcp ---------------
         
-    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force \
-        && kmcp index -j $threads -f 0.3 -n 1 -b 512 -I $dbKMCPtmp -O $dbKMCP --force " \
+    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force --quiet \
+        && kmcp index -j $threads -f 0.3 -n 1 -b 512 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
     
     
@@ -122,5 +122,5 @@ ONT
         sourmash compute -q --scaled $scale -k $k $f -o $f.sig
         memusg -t -s sourmash search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt 2>$f.sourmashs@$db.txt.time
         
-        memusg -t -s kmcp search -j $threads -d $dbKMCP    $f -t $t > $f.kmcp@$db.txt 2>$f.kmcp@$db.txt.time
+        memusg -t -s kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt 2>$f.kmcp@$db.txt.time
     done
