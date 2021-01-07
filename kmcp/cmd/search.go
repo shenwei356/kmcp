@@ -268,6 +268,8 @@ Attentions:
 					prefix2, match.Target[0], match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
 			}
 
+			outfh.Flush()
+
 			result.Recycle()
 		}
 
