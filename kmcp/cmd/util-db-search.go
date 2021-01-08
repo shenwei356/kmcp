@@ -78,8 +78,9 @@ type Match struct {
 	TargetIdx []uint32
 	NumKmers  int // matched k-mers
 
-	QCov float64 // coverage of query
-	TCov float64 // coverage of target
+	QCov         float64 // |A∩B|/|A|, coverage of query. i.e., Containment Index
+	TCov         float64 // |A∩B|/|B|, coverage of target
+	JaccardIndex float64 // |A∩B|/|A∪B|, i.e., JaccardIndex
 }
 
 // Matches is list of Matches, for sorting.
@@ -107,12 +108,12 @@ func (ms SortByTCov) Less(i int, j int) bool {
 	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
-// SortBySum is used to sort matches by qcov + tcov.
-type SortBySum struct{ Matches }
+// SortByJacc is used to sort matches by jaccard index.
+type SortByJacc struct{ Matches }
 
 // Less judges if element is i is less than element in j.
-func (ms SortBySum) Less(i int, j int) bool {
-	return ms.Matches[i].QCov+ms.Matches[i].TCov > ms.Matches[j].QCov+ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+func (ms SortByJacc) Less(i int, j int) bool {
+	return ms.Matches[i].JaccardIndex > ms.Matches[j].JaccardIndex && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
@@ -201,8 +202,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						sorts.Quicksort(Matches(_queryResult.Matches))
 					case "tcov":
 						sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
-					case "sum":
-						sorts.Quicksort(SortBySum{Matches(_queryResult.Matches)})
+					case "jacc":
+						sorts.Quicksort(SortByJacc{Matches(_queryResult.Matches)})
 					}
 				}
 
@@ -333,8 +334,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				sorts.Quicksort(Matches(_matches2))
 			case "tcov":
 				sorts.Quicksort(SortByTCov{Matches(_matches2)})
-			case "sum":
-				sorts.Quicksort(SortBySum{Matches(_matches2)})
+			case "jacc":
+				sorts.Quicksort(SortByJacc{Matches(_matches2)})
 			}
 
 			queryResult.Matches = _matches2
@@ -870,6 +871,10 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buffs := idx.buffs
 
 		iLast := numRowBytes - 1
+		sizesFloat := make([]float64, len(sizes))
+		for i, s := range sizes {
+			sizesFloat[i] = float64(s)
+		}
 
 		var offset int
 		var offset2 int64
@@ -887,7 +892,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var count int
 		var ix8 int
 		var k int
-		var c, t, T float64
+		var nHashesTarget, c, t, T float64
 		var lastRound bool
 
 		counts0 := make([][8]int, numRowBytes)
@@ -993,11 +998,12 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 					c = float64(count)
 
-					t = c / nHashes
+					t = c / nHashes // Containment index
 					if t < queryCov {
 						continue
 					}
-					T = c / float64(sizes[k])
+					nHashesTarget = sizesFloat[k]
+					T = c / nHashesTarget
 					if T < targetCov {
 						continue
 					}
@@ -1008,6 +1014,8 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						NumKmers:  count,
 						QCov:      t,
 						TCov:      T,
+
+						JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
 					})
 				}
 			}

@@ -85,10 +85,10 @@ Attentions:
 		keepOrder := getFlagBool(cmd, "keep-order")
 
 		switch sortBy {
-		case "qcov", "sum", "tcov":
+		case "qcov", "jacc", "tcov":
 			break
 		default:
-			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/sum", sortBy))
+			checkError(fmt.Errorf("invalid value for flag -s/--sort-by: %s. Available: qcov/tsov/jacc", sortBy))
 		}
 
 		if queryCov < 0 || queryCov > 1 {
@@ -235,7 +235,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tmKmers\tqCov\ttCov\n")
+			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tmKmers\tqCov\ttCov\tjacc\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -263,9 +263,9 @@ Attentions:
 
 			for _, match := range result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
-				// target, fragIdx, num_matched_kmers, qcov, tcov
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, match.Target[0], match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov))
+				// target, fragIdx, num_matched_kmers, qcov, tcov, jacc
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2, match.Target[0], match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov, match.JaccardIndex))
 			}
 
 			outfh.Flush()
@@ -388,6 +388,6 @@ func init() {
 	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
-	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by qcov, tcov or sum (qcov+tcov)`)
+	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 
 }
