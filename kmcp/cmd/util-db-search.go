@@ -28,10 +28,10 @@ import (
 	"sync"
 
 	"github.com/clausecker/pospop"
-	"github.com/edsrzf/mmap-go"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
+	"github.com/shenwei356/mmap-go"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"

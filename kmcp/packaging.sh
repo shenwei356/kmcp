@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-CGO_ENABLED=0 gox -os="windows darwin linux" -arch="amd64" -tags netgo -ldflags '-w -s' -asmflags '-trimpath'
+CGO_ENABLED=0 gox -os="windows darwin linux" -arch="amd64 arm64" -tags netgo -ldflags '-w -s' -asmflags '-trimpath'
 
 dir=binaries
 mkdir -p $dir;

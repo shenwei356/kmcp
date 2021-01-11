@@ -5,7 +5,6 @@ go 1.16
 require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/clausecker/pospop v1.2.1
-	github.com/edsrzf/mmap-go v1.0.0
 	github.com/iafan/cwalk v0.0.0-20191125092548-dd7f505d2f66
 	github.com/klauspost/pgzip v1.2.5
 	github.com/mattn/go-colorable v0.1.8
@@ -15,6 +14,7 @@ require (
 	github.com/shenwei356/bio v0.0.0-20201213090627-18e3e643a476
 	github.com/shenwei356/breader v0.1.0
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
+	github.com/shenwei356/mmap-go v1.0.1
 	github.com/shenwei356/unikmer v0.16.1
 	github.com/shenwei356/util v2020.12.31+incompatible
 	github.com/spf13/cobra v1.1.1
