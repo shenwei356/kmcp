@@ -3,7 +3,12 @@
 ## v0.3.0 - 2021-01-xx
 
 - use `--quiet` to replace `--quiet`, making printing log info default.
-- `search`: change output format and add Jaccard Index, fix computing intersetion between repeats.
+- `search`: 
+  - fix computing intersetion between repeats.
+  - fix closing mmap on Windows.
+  - change output format and add Jaccard Index.  
+  - speedup by parallelizing name mapping and database closing.
+  - flush result immediately.
 - `compute`: change default file regexp for matching `.fna` files.
 
 ## v0.2.1 - 2020-12-31

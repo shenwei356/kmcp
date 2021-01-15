@@ -7,7 +7,16 @@ Softwares
     - kmcp (v0.2.1)
     - [memusg](https://github.com/shenwei356/memusg), version: [91a19ab](https://github.com/shenwei356/memusg/commit/91a19abaf041c3046b91ef3a35ed28aade1e05fc)
 
-## Dataset
+## Reference sequences
+
+Refseq
+
+    for g in archaea bacteria viral fungi protozoa; do 
+        ncbi-genome-download --formats fasta --section refseq  \
+            --assembly-levels complete,chromosome \
+            $g \
+            --parallel 10;
+    done
 
 GTDB r95
     - gtdb_genomes_reps_r95.tar.gz(https://data.ace.uq.edu.au/public/gtdb/data/releases/release95/95.0/genomic_files_reps/gtdb_genomes_reps_r95.tar.gz)

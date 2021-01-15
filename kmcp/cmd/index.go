@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cespare/xxhash"
+	"github.com/cespare/xxhash/v2"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
