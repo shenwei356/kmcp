@@ -3,7 +3,6 @@ module github.com/shenwei356/kmcp
 go 1.16
 
 require (
-	github.com/cespare/xxhash/v2 v2.1.1
 	github.com/clausecker/pospop v1.2.1
 	github.com/iafan/cwalk v0.0.0-20191125092548-dd7f505d2f66
 	github.com/klauspost/pgzip v1.2.5
@@ -19,5 +18,6 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
 	github.com/vbauerster/mpb/v5 v5.4.0
+	github.com/zeebo/xxh3 v0.10.0
 	gopkg.in/yaml.v2 v2.4.0
 )

@@ -33,7 +33,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cespare/xxhash/v2"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
@@ -44,6 +43,7 @@ import (
 	"github.com/twotwotwo/sorts/sortutil"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
+	"github.com/zeebo/xxh3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -399,7 +399,7 @@ References:
 			fileInfos0 = append(fileInfos0, info)
 			namesMap0 = make(map[string]interface{}, 1024)
 			namesMap := make(map[uint64]interface{}, nfiles)
-			namesMap[xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
+			namesMap[xxh3.HashString(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))] = struct{}{}
 			namesMap0[info.Name] = struct{}{}
 
 			// left files
@@ -414,7 +414,7 @@ References:
 					fileInfos0 = append(fileInfos0, info)
 					n += info.Kmers
 
-					nameHash = xxhash.Sum64String(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
+					nameHash = xxh3.HashString(fmt.Sprintf("%s%s%d", info.Name, sepNameIdx, info.Index))
 					if _, ok = namesMap[nameHash]; ok {
 						log.Warningf("duplicated name: %s", info.Name)
 					} else {
@@ -527,7 +527,7 @@ References:
 				if singleSet {
 					bIdx = jj
 				} else {
-					h1, h2 = baseHashes(xxhash.Sum64([]byte(info.Path)))
+					h1, h2 = baseHashes(xxh3.HashString(info.Path))
 					bIdx = int(uint64(h1+h2*uint32(rr+seed)) % numBucketsUint64) // add seed
 				}
 

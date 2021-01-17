@@ -31,7 +31,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cespare/xxhash/v2"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
@@ -41,6 +40,7 @@ import (
 	"github.com/twotwotwo/sorts/sortutil"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
+	"github.com/zeebo/xxh3"
 )
 
 var computeCmd = &cobra.Command{
@@ -349,7 +349,7 @@ Output:
 				var dir1, dir2 string
 				var fileHash uint64
 				if multiLevelFileTree {
-					fileHash = xxhash.Sum64String(baseFile)
+					fileHash = xxh3.HashString(baseFile)
 					dir1 = fmt.Sprintf("%03d", fileHash&1023)
 					dir2 = fmt.Sprintf("%03d", (fileHash>>10)&1023)
 				}
@@ -480,7 +480,7 @@ Output:
 						}
 						// write to file
 						if multiLevelFileTree {
-							fileHash = xxhash.Sum64String(baseFile)
+							fileHash = xxh3.HashString(baseFile)
 							dir3 = fmt.Sprintf("%03d", fileHash&1023)
 						}
 						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
