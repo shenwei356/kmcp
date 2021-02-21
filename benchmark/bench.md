@@ -77,6 +77,12 @@ ONT
     # 55G
     du -sh $dbKMCP > $dbKMCP.size
     
+    
+    # --------------- MA ---------------
+    time fd fa.gz gtdb | rush -k -j 10 'pigz -cd {}' | pigz -c > gtdb.fa.gz
+    mkdir gtdb.ma
+    memusg -t -s "maCMD --Create_Index gtdb.fa.gz,gtdb.ma,db"
+    
    
     # searching  ---------------------------------------------------------------------------------
 
@@ -109,7 +115,7 @@ ONT
 
     mkdir -p $dbSOURMASHtmp
     indexSourmash() {
-        ls $seqs/*.fa.gz \
+        fd fa.gz $seqs \
             | rush -j $threads -v d=$dbSOURMASHtmp -v s=$scale -v k=$k \
                 'sourmash compute -q --scaled {s} -k {k} {} -o {d}/{%}.sig'     
         sourmash index $dbSOURMASH $dbSOURMASHtmp/*.sig
@@ -129,7 +135,7 @@ ONT
     t=0.8
     for f in test/*.fa; do
         sourmash compute -q --scaled $scale -k $k $f -o $f.sig
-        memusg -t -s sourmash search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt 2>$f.sourmashs@$db.txt.time
+        memusg -t -s "sourmash search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt 2>$f.sourmash@$db.txt.time"
         
-        memusg -t -s kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt 2>$f.kmcp@$db.txt.time
+        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt 2>$f.kmcp@$db.txt.time"
     done

@@ -894,6 +894,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var k int
 		var nHashesTarget, c, t, T float64
 		var lastRound bool
+		var tmp int
 
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
@@ -952,9 +953,76 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				if bufIdx == PosPopCountBufSize {
 					// transpose
 					for i = 0; i < numRowBytes; i++ { // every column in matrix
-						for j = 0; j < bufIdx; j++ {
-							buf[j] = buffs[j][i]
-						}
+
+						// for j = 0; j < bufIdx; j++ {
+						// 	buf[j] = buffs[j][i]
+						// }
+
+						// unroll loop
+						buf[0] = buffs[0][i]
+						buf[1] = buffs[1][i]
+						buf[2] = buffs[2][i]
+						buf[3] = buffs[3][i]
+						buf[4] = buffs[4][i]
+						buf[5] = buffs[5][i]
+						buf[6] = buffs[6][i]
+						buf[7] = buffs[7][i]
+						buf[8] = buffs[8][i]
+						buf[9] = buffs[9][i]
+						buf[10] = buffs[10][i]
+						buf[11] = buffs[11][i]
+						buf[12] = buffs[12][i]
+						buf[13] = buffs[13][i]
+						buf[14] = buffs[14][i]
+						buf[15] = buffs[15][i]
+						buf[16] = buffs[16][i]
+						buf[17] = buffs[17][i]
+						buf[18] = buffs[18][i]
+						buf[19] = buffs[19][i]
+						buf[20] = buffs[20][i]
+						buf[21] = buffs[21][i]
+						buf[22] = buffs[22][i]
+						buf[23] = buffs[23][i]
+						buf[24] = buffs[24][i]
+						buf[25] = buffs[25][i]
+						buf[26] = buffs[26][i]
+						buf[27] = buffs[27][i]
+						buf[28] = buffs[28][i]
+						buf[29] = buffs[29][i]
+						buf[30] = buffs[30][i]
+						buf[31] = buffs[31][i]
+						buf[32] = buffs[32][i]
+						buf[33] = buffs[33][i]
+						buf[34] = buffs[34][i]
+						buf[35] = buffs[35][i]
+						buf[36] = buffs[36][i]
+						buf[37] = buffs[37][i]
+						buf[38] = buffs[38][i]
+						buf[39] = buffs[39][i]
+						buf[40] = buffs[40][i]
+						buf[41] = buffs[41][i]
+						buf[42] = buffs[42][i]
+						buf[43] = buffs[43][i]
+						buf[44] = buffs[44][i]
+						buf[45] = buffs[45][i]
+						buf[46] = buffs[46][i]
+						buf[47] = buffs[47][i]
+						buf[48] = buffs[48][i]
+						buf[49] = buffs[49][i]
+						buf[50] = buffs[50][i]
+						buf[51] = buffs[51][i]
+						buf[52] = buffs[52][i]
+						buf[53] = buffs[53][i]
+						buf[54] = buffs[54][i]
+						buf[55] = buffs[55][i]
+						buf[56] = buffs[56][i]
+						buf[57] = buffs[57][i]
+						buf[58] = buffs[58][i]
+						buf[59] = buffs[59][i]
+						buf[60] = buffs[60][i]
+						buf[61] = buffs[61][i]
+						buf[62] = buffs[62][i]
+						buf[63] = buffs[63][i]
 
 						// count
 						pospop.Count8(&counts[i], buf)
@@ -968,7 +1036,30 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			if bufIdx > 0 {
 				// transpose
 				for i = 0; i < numRowBytes; i++ { // every column in matrix
-					for j = 0; j < bufIdx; j++ {
+					// for j = 0; j < bufIdx; j++ {
+					// 	buf[j] = buffs[j][i]
+					// }
+
+					// unroll loop
+					tmp = bufIdx - 8
+					for j = 0; j < tmp; j++ {
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+						j++
+						buf[j] = buffs[j][i]
+					}
+					for ; j < bufIdx; j++ {
 						buf[j] = buffs[j][i]
 					}
 
