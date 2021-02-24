@@ -46,8 +46,6 @@ var searchCmd = &cobra.Command{
 Attentions:
   1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
   2. Increase value of -j/--threads for acceleratation.
-  3. Switch on -m/--use-mmap to load index files into memory to 
-     accelerate searching, memory usage is roughly equal to size of index files.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -373,7 +371,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load index files into memory to accelerate searching`)
+	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, which accelerates searching in cost of high memory occupation`)
 
 	// query option
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)

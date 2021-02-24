@@ -79,6 +79,7 @@ ONT
     
     
     # --------------- MA ---------------
+    # very very slow
     time fd fa.gz gtdb | rush -k -j 10 'pigz -cd {}' | pigz -c > gtdb.fa.gz
     mkdir gtdb.ma
     memusg -t -s "maCMD --Create_Index gtdb.fa.gz,gtdb.ma,db"
@@ -91,7 +92,7 @@ ONT
         # 8min, 51G
         memusg -t -s "cobs query  -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" 2>$f.cobs@$db.txt.time
         
-        # 10s, 54G
+        # 11s, 54G
         memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
     done
 
@@ -103,7 +104,7 @@ ONT
     db=gtdb
     k=31
     threads=32
-    scale=2000
+    scale=100
     
     dbSOURMASHtmp=gtdb-sourmash-k$k-D$scale
     dbSOURMASH=gtdb-sourmash-k$k-D$scale/_db.sbt.json
@@ -112,19 +113,23 @@ ONT
     
     
     # --------------- sourmash ---------------
-
+    
+    # 28m12s
+    # 30G
     mkdir -p $dbSOURMASHtmp
     indexSourmash() {
         fd fa.gz $seqs \
             | rush -j $threads -v d=$dbSOURMASHtmp -v s=$scale -v k=$k \
                 'sourmash compute -q --scaled {s} -k {k} {} -o {d}/{%}.sig'     
-        sourmash index $dbSOURMASH $dbSOURMASHtmp/*.sig
+        sourmash index -q $dbSOURMASH $dbSOURMASHtmp/*.sig
     }
     
-    time indexSourmash 2> $dbSOURMASH.time
+    { time indexSourmash ; } 2> $dbSOURMASH.time
     
     # --------------- kmcp ---------------
-        
+    
+    # 1m29s, 3.3G
+    # 1.7G
     memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force --quiet \
         && kmcp index -j $threads -f 0.3 -n 1 -b 512 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
@@ -133,9 +138,12 @@ ONT
     # searching  ---------------------------------------------------------------------------------
     
     t=0.8
-    for f in test/*.fa; do
-        sourmash compute -q --scaled $scale -k $k $f -o $f.sig
-        memusg -t -s "sourmash search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt 2>$f.sourmash@$db.txt.time"
+    for f in test/*.fa; do        
+        # 15s, 90M
+        memusg -t -s "sourmash compute -q --scaled $scale -k $k $f -o $f.sig; \
+            sourmash search -q --containment $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" 2>$f.sourmash@$db.txt.time
         
-        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt 2>$f.kmcp@$db.txt.time"
+        # 0.558s, 1.32G
+        # 单线程1.2s
+        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" 2>$f.kmcp.scaled@$db.txt.time
     done
