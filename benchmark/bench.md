@@ -77,14 +77,7 @@ ONT
     # 55G
     du -sh $dbKMCP > $dbKMCP.size
     
-    
-    # --------------- MA ---------------
-    # very very slow
-    time fd fa.gz gtdb | rush -k -j 10 'pigz -cd {}' | pigz -c > gtdb.fa.gz
-    mkdir gtdb.ma
-    memusg -t -s "maCMD --Create_Index gtdb.fa.gz,gtdb.ma,db"
-    
-   
+
     # searching  ---------------------------------------------------------------------------------
 
     t=0.8
@@ -144,6 +137,6 @@ ONT
             sourmash search -q --containment $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" 2>$f.sourmash@$db.txt.time
         
         # 0.558s, 1.32G
-        # 单线程1.2s
+        # single-thread 1.2s
         memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" 2>$f.kmcp.scaled@$db.txt.time
     done

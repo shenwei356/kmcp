@@ -2,7 +2,7 @@
 
 ## v0.3.0 - 2021-01-xx
 
-- use `--quiet` to replace `--quiet`, making printing log info default.
+- use `--quiet` to replace `--verbose`, making printing log info default.
 - `search`: 
   - fix computing intersetion between repeats.
   - fix closing mmap on Windows.
