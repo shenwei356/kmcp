@@ -1,4 +1,4 @@
-// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020-2021 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import (
 )
 
 // BufferSize is size of buffer
-var BufferSize = 65536 //os.Getpagesize()
+var BufferSize = 65536 // os.Getpagesize()
 
 func outStream(file string, gzipped bool, level int) (*bufio.Writer, io.WriteCloser, *os.File, error) {
 	var w *os.File

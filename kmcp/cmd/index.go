@@ -1,4 +1,4 @@
-// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020-2021 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -67,11 +67,12 @@ Tips:
      of opened files is limited by flag -F/--max-open-files.
   2. Value of block size -b/--block-size better be multiple of 64.
   3. Use flag -m/--block-max-kmers-t1 and -M/--block-max-kmers-t2 to
-     individually create index for input with very large number of k-mers,
+     separately create index for input with very large number of k-mers,
      for precise control of index file size.
   4. Use --dry-run to adjust parameters and check final number of 
      index files (#index-files) and total file size. 
-     #index-files >= #cpus is recommended for better parallelization.
+     #index-files >= #cpus is recommended for better parallelization
+     in searching.
 
 Repeated and merged bloom filter (RAMBO)
   1. It's optional with flags -R/--num-repititions and -B/--num-buckets.
@@ -87,7 +88,6 @@ References:
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
-		runtime.GOMAXPROCS(opt.NumCPUs)
 
 		timeStart := time.Now()
 		defer func() {

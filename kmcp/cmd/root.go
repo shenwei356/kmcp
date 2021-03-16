@@ -1,4 +1,4 @@
-// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020-2021 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ var RootCmd = &cobra.Command{
 	Use:   "kmcp",
 	Short: "Kmer-based Metagenomics Classification and Profilling",
 	Long: fmt.Sprintf(`
-    Program: kmcp (Kmer-based Metagenomics Classification and Profiling)
+    Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
     Version: v%s
   Documents: https://shenwei356.github.io/kmcp
 Source code: https://github.com/shenwei356/kmcp

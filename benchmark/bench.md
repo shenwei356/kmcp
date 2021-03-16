@@ -86,7 +86,7 @@ ONT
         memusg -t -s "cobs query  -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" 2>$f.cobs@$db.txt.time
         
         # 11s, 54G
-        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
+        memusg -t -s "kmcp search -j $threads -d $dbKMCP    $f -t $t -k --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
     done
 
 ## Scaled minhash

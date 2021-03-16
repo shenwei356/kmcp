@@ -1,4 +1,4 @@
-// Copyright © 2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020-2021 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import (
 	"io"
 	"io/ioutil"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -50,7 +49,6 @@ Attentions:
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
-		runtime.GOMAXPROCS(opt.NumCPUs)
 		seq.ValidateSeq = false
 
 		timeStart := time.Now()
@@ -80,7 +78,8 @@ Attentions:
 		topN := getFlagNonNegativeInt(cmd, "keep-top")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
-		keepOrder := getFlagBool(cmd, "keep-order")
+		// keepOrder := getFlagBool(cmd, "keep-order")
+		keepOrder := true
 
 		switch sortBy {
 		case "qcov", "jacc", "tcov":
@@ -383,7 +382,7 @@ func init() {
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
-	searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
+	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)

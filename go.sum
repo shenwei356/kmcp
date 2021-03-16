@@ -28,8 +28,8 @@ github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+Ce
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bketelsen/crypt v0.0.3-0.20200106085610-5cbc8cc4026c/go.mod h1:MKsuJmJgSg28kpZDP6UIiPt0e0Oz0kqKNGyRaWEPv84=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
-github.com/clausecker/pospop v1.2.1 h1:iU4/VScMb2aBMh/x+RVl/p86UgN4SIQYWy4aer0rg0I=
-github.com/clausecker/pospop v1.2.1/go.mod h1:JvGeTH7jcqNJ36H87ikezUOS6kz99qkBYvXMjP3q/+E=
+github.com/clausecker/pospop v1.2.2 h1:oh0CAZbhAkBb3Uw9dGU2vPWh7yw23EMRZ9I+rSrT0iw=
+github.com/clausecker/pospop v1.2.2/go.mod h1:JvGeTH7jcqNJ36H87ikezUOS6kz99qkBYvXMjP3q/+E=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
@@ -151,8 +151,6 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/profile v1.5.0 h1:042Buzk+NhDI+DeSAA62RwJL8VAuZUMQZUjCsRz1Mug=
-github.com/pkg/profile v1.5.0/go.mod h1:qBsxPvzyUincmltOk6iyRVxHYg4adc0OFOv72ZdLa18=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
@@ -183,11 +181,11 @@ github.com/shenwei356/mmap-go v1.0.1 h1:MssMa5e6z3Asy16h+wjF2qbvq49lFrVPiBTlRBTf
 github.com/shenwei356/mmap-go v1.0.1/go.mod h1:En5BSnSNTA4KM6R04rDhw8UCOA5NgOPeADbz1jUJDNg=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
-github.com/shenwei356/unikmer v0.17.1 h1:xASoNjWNKlTmYFy/EEFX1lw7g9+EuyQHyC3+fMq9pkY=
-github.com/shenwei356/unikmer v0.17.1/go.mod h1:S/uaqbuvrlPSbjsEwndV/Q5ANEZC3kBRUY2+87gxdiE=
+github.com/shenwei356/unikmer v0.17.2 h1:HoxZSxfEIsDRGk+xtTjC9aJxU5pBoSMZfgCH97kVQ0w=
+github.com/shenwei356/unikmer v0.17.2/go.mod h1:S/uaqbuvrlPSbjsEwndV/Q5ANEZC3kBRUY2+87gxdiE=
 github.com/shenwei356/util v0.0.0-20201214054755-2942125340cd/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
-github.com/shenwei356/util v2020.12.31+incompatible h1:CQYnsFHZ6A6OdDTnx/+xYbY4AhRFXaTG1muSvOJZGEo=
-github.com/shenwei356/util v2020.12.31+incompatible/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
+github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=
+github.com/shenwei356/util v0.3.0/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
 github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992 h1:RXEEyKj0JL3SrRIYsWIEyy4AwjHbI3I8aDGK6CA4+YI=
 github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992/go.mod h1:6EQUa6I7Zsl2GQKqcL9qGLrTzVE+oZyly+uhzovQYSk=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=

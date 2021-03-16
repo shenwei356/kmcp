@@ -1,6 +1,6 @@
 # kmcp
 
-Kmer-based Metagenomics Classification and Profiling
+K-mer-based Metagenomic Classification and Profiling
 
 ## Quick Start
 

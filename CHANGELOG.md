@@ -1,15 +1,17 @@
 # Changelog
 
-## v0.3.0 - 2021-01-xx
+## v0.3.0 - 2021-03-16
 
 - use `--quiet` to replace `--verbose`, making printing log info default.
 - `search`: 
-  - fix computing intersetion between repeats.
-  - fix closing mmap on Windows.
-  - change output format and add Jaccard Index.  
-  - speedup by parallelizing name mapping and database closing.
-  - flush result immediately.
+    - fix computing intersetion between repeats.
+    - fix closing mmap on Windows.
+    - change output format and add Jaccard Index.  
+    - speedup by parallelizing name mapping and database closing.
+    - flush result immediately.
+    - keep the output order by default
 - `compute`: change default file regexp for matching `.fna` files.
+- `autocomplete`: support bash, zsh, fish, powershell.
 
 ## v0.2.1 - 2020-12-31
 
