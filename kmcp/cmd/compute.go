@@ -70,9 +70,12 @@ Supported k-mer (sketches) types:
      3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
 
 Splitting sequences:
-  1. Sequences can be splitted into fragments (-s/--split-size)
+  1. Sequences can be splitted into fragments by fragment size 
+     (-s/--split-size) or number of fragments (-n/--spit-number)
      with overlap (-l/--split-overlap).
-  2. Both sequence IDs and fragments indices are saved for later use,
+  2. When splitting by number of fragments, all sequences in a file
+     are concatenated before splitting.
+  3. Both sequence IDs and fragments indices are saved for later use,
      in form of meta/description data in .unik files.
 
 Output:
@@ -140,15 +143,26 @@ Output:
 		// ---------------------------------------------------------------
 		// flags for splitting sequence
 
+		splitNumber0 := getFlagNonNegativeInt(cmd, "split-number")
 		splitSize0 := getFlagNonNegativeInt(cmd, "split-size")
 		splitOverlap := getFlagNonNegativeInt(cmd, "split-overlap")
-		splitSeq := splitSize0 > 0
+		splitMinRef := getFlagNonNegativeInt(cmd, "split-min-ref")
+		if splitSize0 > 0 && splitNumber0 > 0 {
+			checkError(fmt.Errorf("flag -s/--split-size and -n/--split-number are incompatible"))
+		}
+		splitSeq := splitSize0 > 0 || splitNumber0 > 0
 		if splitSeq {
-			if splitSize0 < k {
-				checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
-			}
-			if splitSize0 <= splitOverlap {
-				checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
+			if splitSize0 > 0 {
+				if splitSize0 < k {
+					checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
+				}
+				if splitSize0 <= splitOverlap {
+					checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
+				}
+			} else {
+				if splitNumber0 > 65535 {
+					checkError(fmt.Errorf(("value of flag -s/--split-number should not be greater than 65535")))
+				}
 			}
 			bySeq = true
 		}
@@ -259,9 +273,9 @@ Output:
 		ch := make(chan UnikFileInfo, opt.NumCPUs)
 		done := make(chan int)
 		go func() {
-			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tkmers\n"))
+			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tIdxNum\tkmers\n"))
 			for info := range ch {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\n", info.Path, info.Name, info.Index, info.Kmers))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.Kmers))
 			}
 			done <- 1
 		}()
@@ -339,7 +353,10 @@ Output:
 				var outFile string
 				var baseFile = filepath.Base(file)
 				var circular bool
+				var seqLen int
 				var splitSize int
+				var splitNumber int
+				splitByNumber := splitNumber0 > 0
 
 				var codes []uint64
 
@@ -364,24 +381,81 @@ Output:
 				fastxReader, err = fastx.NewDefaultReader(file)
 				checkError(errors.Wrap(err, file))
 
-				slidIdx = 0
-
-				for {
-					record, err = fastxReader.Read()
-					if err != nil {
-						if err == io.EOF {
+				var allSeqs [][]byte
+				var bigSeq []byte
+				var record1 *fastx.Record
+				if splitByNumber { // concatenate all seqs
+					allSeqs = make([][]byte, 0, 8)
+					lenSum := 0
+					first := true
+					for {
+						record, err = fastxReader.Read()
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							checkError(errors.Wrap(err, file))
 							break
 						}
-						checkError(errors.Wrap(err, file))
-						break
+						if first {
+							record1 = record
+							first = false
+						}
+						allSeqs = append(allSeqs, record.Seq.Seq)
+						lenSum += len(record.Seq.Seq)
 					}
+					if len(allSeqs) == 1 {
+						bigSeq = allSeqs[0]
+					} else {
+						bigSeq = make([]byte, lenSum)
+						i := 0
+						for _, aseq := range allSeqs {
+							copy(bigSeq[i:i+len(aseq)], aseq)
+							i += len(aseq)
+						}
+					}
+					record1.Seq.Seq = bigSeq
+					record = record1
+				}
+
+				slidIdx = 0
+
+				once := true
+				for {
+					if splitByNumber {
+						if !once {
+							break
+						}
+						once = false
+					} else {
+						record, err = fastxReader.Read()
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							checkError(errors.Wrap(err, file))
+							break
+						}
+					}
+
 					seqID = string(record.ID)
+					seqLen = len(record.Seq.Seq)
 
 					splitSize = splitSize0
-					if !splitSeq { // whole sequence
-						splitSize = len(record.Seq.Seq)
+					splitNumber = splitNumber0
+					if !splitSeq || seqLen < splitMinRef {
+						splitSize = seqLen
 						step = 1
 						greedy = false
+					} else if splitByNumber {
+						if splitNumber == 1 {
+							splitSize = seqLen
+							step = 1
+							greedy = false
+						} else {
+							splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
+							step = splitSize - splitOverlap
+						}
 					}
 
 					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
@@ -398,6 +472,10 @@ Output:
 
 						if bySeq {
 							codes = codes[:0] // reset
+						}
+
+						if len(_seq.Seq)-1 <= splitOverlap {
+							continue
 						}
 
 						if syncmer {
@@ -492,6 +570,7 @@ Output:
 							Minimizer:    minimizer,
 							MinimizerW:   minimizerW,
 							SplitSeq:     splitSeq,
+							SplitNum:     splitNumber0,
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
@@ -499,10 +578,11 @@ Output:
 							scaled, scale, meta)
 
 						ch <- UnikFileInfo{
-							Path:  outFile,
-							Name:  seqID,
-							Index: slidIdx,
-							Kmers: uint64(n),
+							Path:    outFile,
+							Name:    seqID,
+							Index:   slidIdx,
+							Indexes: uint32(splitNumber0),
+							Kmers:   uint64(n),
 						}
 
 						slidIdx++
@@ -544,6 +624,7 @@ Output:
 					Minimizer:    minimizer,
 					MinimizerW:   minimizerW,
 					SplitSeq:     splitSeq,
+					SplitNum:     splitNumber0,
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
@@ -551,10 +632,11 @@ Output:
 					scaled, scale, meta)
 
 				ch <- UnikFileInfo{
-					Path:  outFile,
-					Name:  fileprefix,
-					Index: slidIdx,
-					Kmers: uint64(n),
+					Path:    outFile,
+					Name:    fileprefix,
+					Index:   slidIdx,
+					Indexes: uint32(splitNumber0),
+					Kmers:   uint64(n),
 				}
 
 				slidIdx++
@@ -639,8 +721,10 @@ func init() {
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
 	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files (can save little space`)
 
-	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences`)
+	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/split-size`)
+	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences, incompatible with -n/--split-number`)
 	computeCmd.Flags().IntP("split-overlap", "l", 0, `fragment overlap for splitting sequences`)
+	computeCmd.Flags().IntP("split-min-ref", "m", 1000, `only splitting sequences >= M bp`)
 
 	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
 

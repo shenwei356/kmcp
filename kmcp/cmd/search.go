@@ -232,7 +232,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tmKmers\tqCov\ttCov\tjacc\n")
+			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tIdxNum\tmKmers\tqCov\ttCov\tjacc\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -253,16 +253,16 @@ Attentions:
 				result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, "", -1, 0, float64(0), float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%0.4f\t%0.4f\n",
+					prefix2, "", -1, 0, 0, float64(0), float64(0)))
 				return
 			}
 
 			for _, match := range result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
 				// target, fragIdx, num_matched_kmers, qcov, tcov, jacc
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, match.Target[0], match.TargetIdx[0], match.NumKmers, match.QCov, match.TCov, match.JaccardIndex))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2, match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.NumKmers, match.QCov, match.TCov, match.JaccardIndex))
 			}
 
 			outfh.Flush()

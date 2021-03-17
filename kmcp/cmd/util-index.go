@@ -32,10 +32,11 @@ const extIndex = ".uniki"
 
 // UnikFileInfo store basic info of .unik file.
 type UnikFileInfo struct {
-	Path  string
-	Name  string
-	Index uint32
-	Kmers uint64
+	Path    string
+	Name    string
+	Index   uint32
+	Indexes uint32
+	Kmers   uint64
 }
 
 func (i UnikFileInfo) String() string {
@@ -94,22 +95,27 @@ var fnParseUnikInfoFile = func(line string) (interface{}, bool, error) {
 	}
 
 	items := strings.Split(line, "\t")
-	if len(items) < 4 {
+	if len(items) < 5 {
 		return nil, false, nil
 	}
 	idx, err := strconv.Atoi(items[2])
 	if err != nil || idx < 0 {
 		return nil, false, err
 	}
-	kmers, err := strconv.Atoi(items[3])
+	idxNum, err := strconv.Atoi(items[3])
+	if err != nil || idx < 0 {
+		return nil, false, err
+	}
+	kmers, err := strconv.Atoi(items[4])
 	if err != nil || kmers < 0 {
 		return nil, false, err
 	}
 	return UnikFileInfo{
-		Path:  items[0],
-		Name:  items[1],
-		Index: uint32(idx),
-		Kmers: uint64(kmers),
+		Path:    items[0],
+		Name:    items[1],
+		Index:   uint32(idx),
+		Indexes: uint32(idxNum),
+		Kmers:   uint64(kmers),
 	}, true, nil
 }
 
@@ -162,10 +168,11 @@ type Meta struct {
 
 	SplitSeq     bool `json:"sp"` // split sequence
 	SplitSize    int  `json:"sp-s"`
+	SplitNum     int  `json:"sp-n"`
 	SplitOverlap int  `json:"sp-o"`
 }
 
 func (m Meta) String() string {
-	return fmt.Sprintf("seqID: %s; fragIdx: %d; syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, size: %d, overlap: %d",
-		m.SeqID, m.FragIdx, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitSize, m.SplitOverlap)
+	return fmt.Sprintf("seqID: %s; fragIdx: %d; syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, number:%d / size: %d, overlap: %d",
+		m.SeqID, m.FragIdx, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitNum, m.SplitSize, m.SplitOverlap)
 }

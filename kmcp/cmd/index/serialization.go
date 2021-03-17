@@ -29,7 +29,7 @@ import (
 )
 
 // Version is the version of index format
-const Version uint8 = 3
+const Version uint8 = 4
 
 // Magic number of index file.
 var Magic = [8]byte{'.', 'k', 'm', 'c', 'p', 'i', 'd', 'x'}

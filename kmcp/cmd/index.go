@@ -851,7 +851,8 @@ References:
 
 								for iii, info := range infos {
 									_names[iii] = info.Name
-									_indices[iii] = info.Index
+									// _indices[iii] = info.Index
+									_indices[iii] = info.Index + info.Indexes<<16 // add number of indexes
 									_size += info.Kmers
 								}
 								names = append(names, _names)

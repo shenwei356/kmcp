@@ -197,3 +197,25 @@ func roundup64(x uint64) uint64 {
 	x |= x >> 32
 	return (x | x>>64) + 1
 }
+
+func stringSplitN(s string, sep string, n int, a *[]string) {
+	if a == nil {
+		tmp := make([]string, n)
+		a = &tmp
+	}
+
+	n--
+	i := 0
+	for i < n {
+		m := strings.Index(s, sep)
+		if m < 0 {
+			break
+		}
+		(*a)[i] = s[:m]
+		s = s[m+len(sep):]
+		i++
+	}
+	(*a)[i] = s
+
+	(*a) = (*a)[:i+1]
+}
