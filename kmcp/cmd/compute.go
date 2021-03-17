@@ -401,8 +401,10 @@ Output:
 							record1 = record
 							first = false
 						}
-						allSeqs = append(allSeqs, record.Seq.Seq)
-						lenSum += len(record.Seq.Seq)
+						aseq := make([]byte, len(record.Seq.Seq))
+						copy(aseq, record.Seq.Seq)
+						allSeqs = append(allSeqs, aseq)
+						lenSum += len(aseq)
 					}
 					if len(allSeqs) == 1 {
 						bigSeq = allSeqs[0]
@@ -550,9 +552,12 @@ Output:
 						}
 
 						if splitSeq {
-							outFileBase = fmt.Sprintf("%s/%s-frag%d%s", baseFile, seqID, slidIdx, extDataFile)
+							if splitByNumber {
+								seqID, _ = filepathTrimExtension(filepath.Base(baseFile))
+							}
+							outFileBase = fmt.Sprintf("%s/%s-frag_%d%s", baseFile, seqID, slidIdx, extDataFile)
 						} else {
-							outFileBase = fmt.Sprintf("%s-id%s%s", baseFile, seqID, extDataFile)
+							outFileBase = fmt.Sprintf("%s-id_%s%s", baseFile, seqID, extDataFile)
 						}
 						// write to file
 						if multiLevelFileTree {
