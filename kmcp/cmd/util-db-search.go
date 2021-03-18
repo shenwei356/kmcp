@@ -74,9 +74,10 @@ type Name2Idx struct {
 
 // Match is the struct of matching detail.
 type Match struct {
-	Target    []string // target name
-	TargetIdx []uint32
-	NumKmers  int // matched k-mers
+	Target     []string // target name
+	TargetIdx  []uint32
+	GenomeSize []uint64
+	NumKmers   int // matched k-mers
 
 	QCov         float64 // |A∩B|/|A|, coverage of query. i.e., Containment Index
 	TCov         float64 // |A∩B|/|B|, coverage of target
@@ -812,6 +813,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	h.Canonical = reader.Canonical
 	h.NumHashes = reader.NumHashes
 	h.Names = reader.Names
+	h.GSizes = reader.GSizes
 	h.Indices = reader.Indices
 	h.Sizes = reader.Sizes
 	h.NumRowBytes = reader.NumRowBytes
@@ -851,6 +853,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	go func() {
 
 		names := idx.Header.Names
+		gsizes := idx.Header.GSizes
 		indices := idx.Header.Indices
 		numNames := len(idx.Header.Names)
 		numRowBytes := idx.Header.NumRowBytes
@@ -1100,11 +1103,12 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					}
 
 					results = append(results, Match{
-						Target:    names[k],
-						TargetIdx: indices[k],
-						NumKmers:  count,
-						QCov:      t,
-						TCov:      T,
+						Target:     names[k],
+						GenomeSize: gsizes[k],
+						TargetIdx:  indices[k],
+						NumKmers:   count,
+						QCov:       t,
+						TCov:       T,
 
 						JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
 					})

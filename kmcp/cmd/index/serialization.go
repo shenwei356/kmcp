@@ -66,6 +66,7 @@ type Header struct {
 	NumSigs   uint64
 
 	Names   [][]string // one bloom filter contains union of multiple sets
+	GSizes  [][]uint64 // genome sizes
 	Indices [][]uint32 // coresponding fragment indices of all sets.
 	Sizes   []uint64
 
@@ -102,7 +103,7 @@ type Writer struct {
 
 // NewWriter creates a Writer.
 func NewWriter(w io.Writer, k int, canonical bool, numHashes uint8, numSigs uint64,
-	names [][]string, indices [][]uint32, sizes []uint64) (*Writer, error) {
+	names [][]string, gsizes [][]uint64, indices [][]uint32, sizes []uint64) (*Writer, error) {
 	if len(names) != len(sizes) {
 		return nil, ErrNameAndSizeMismatch
 	}
@@ -118,6 +119,7 @@ func NewWriter(w io.Writer, k int, canonical bool, numHashes uint8, numSigs uint
 			NumHashes: numHashes,
 			NumSigs:   numSigs,
 			Names:     names,
+			GSizes:    gsizes,
 			Indices:   indices,
 			Sizes:     sizes,
 		},
@@ -186,6 +188,26 @@ func (writer *Writer) WriteHeader() (err error) {
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	// ----------------------------------------------------------
+	// GSizes
+
+	// 4 bytes length of GSizes groups
+	err = binary.Write(w, be, uint32(len(writer.GSizes)))
+	if err != nil {
+		return err
+	}
+
+	for _, gsizes := range writer.GSizes {
+		err = binary.Write(w, be, uint32(len(gsizes)))
+		if err != nil {
+			return err
+		}
+		err = binary.Write(w, be, gsizes)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -372,6 +394,43 @@ func (reader *Reader) readHeader() (err error) {
 	reader.Names = names
 
 	// ----------------------------------------------------------
+	// GenomeSizes
+
+	// 4 bytes length of Gsizes groups
+	_, err = io.ReadFull(r, buf[:4])
+	if err != nil {
+		return err
+	}
+	n = be.Uint32(buf[:4])
+	gsizes := make([][]uint64, n)
+
+	var _n int
+	var j int
+	var buf2 []byte
+	var k int
+
+	for i := 0; i < int(n); i++ {
+		_, err = io.ReadFull(r, buf[:4])
+		if err != nil {
+			return err
+		}
+		_n = int(be.Uint32(buf[:4]))
+		buf2 = make([]byte, _n<<3)
+		_, err = io.ReadFull(r, buf2)
+		if err != nil {
+			return err
+		}
+
+		gsizesData := make([]uint64, _n)
+		for j = 0; j < _n; j++ {
+			k = j << 3
+			gsizesData[j] = be.Uint64(buf2[k : k+8])
+		}
+		gsizes[i] = gsizesData
+	}
+	reader.GSizes = gsizes
+
+	// ----------------------------------------------------------
 	// Indices
 
 	// 4 bytes length of Indices groups
@@ -382,10 +441,6 @@ func (reader *Reader) readHeader() (err error) {
 	n = be.Uint32(buf[:4])
 	indices := make([][]uint32, n)
 
-	var _n int
-	var j int
-	var buf2 []byte
-	var k int
 	for i := 0; i < int(n); i++ {
 		_, err = io.ReadFull(r, buf[:4])
 		if err != nil {

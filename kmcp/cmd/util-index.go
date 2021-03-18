@@ -32,11 +32,12 @@ const extIndex = ".uniki"
 
 // UnikFileInfo store basic info of .unik file.
 type UnikFileInfo struct {
-	Path    string
-	Name    string
-	Index   uint32
-	Indexes uint32
-	Kmers   uint64
+	Path       string
+	Name       string
+	GenomeSize uint64
+	Index      uint32
+	Indexes    uint32
+	Kmers      uint64
 }
 
 func (i UnikFileInfo) String() string {
@@ -103,19 +104,24 @@ var fnParseUnikInfoFile = func(line string) (interface{}, bool, error) {
 		return nil, false, err
 	}
 	idxNum, err := strconv.Atoi(items[3])
-	if err != nil || idx < 0 {
+	if err != nil || idxNum < 0 {
 		return nil, false, err
 	}
-	kmers, err := strconv.Atoi(items[4])
+	gSize, err := strconv.ParseUint(items[4], 10, 64)
+	if err != nil || gSize < 0 {
+		return nil, false, err
+	}
+	kmers, err := strconv.Atoi(items[5])
 	if err != nil || kmers < 0 {
 		return nil, false, err
 	}
 	return UnikFileInfo{
-		Path:    items[0],
-		Name:    items[1],
-		Index:   uint32(idx),
-		Indexes: uint32(idxNum),
-		Kmers:   uint64(kmers),
+		Path:       items[0],
+		Name:       items[1],
+		Index:      uint32(idx),
+		Indexes:    uint32(idxNum),
+		GenomeSize: gSize,
+		Kmers:      uint64(kmers),
 	}, true, nil
 }
 
@@ -149,16 +155,17 @@ func dumpUnikFileInfos(fileInfos []UnikFileInfo, file string) {
 		w.Close()
 	}()
 
-	outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tkmers\n"))
+	outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tidxNum\tgSize\tkmers\n"))
 	for _, info := range fileInfos {
-		outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\n", info.Path, info.Name, info.Index, info.Kmers))
+		outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 	}
 }
 
 // Meta contains some meta information
 type Meta struct {
-	SeqID   string `json:"id"`  // sequence ID
-	FragIdx uint32 `json:"idx"` // sequence location index
+	SeqID      string `json:"id"`   // sequence ID
+	FragIdx    uint32 `json:"idx"`  // sequence location index
+	GenomeSize uint64 `json:"gn-s"` // genome length
 
 	Syncmer  bool `json:"sm"` // syncmer
 	SyncmerS int  `json:"sm-s"`
@@ -173,6 +180,6 @@ type Meta struct {
 }
 
 func (m Meta) String() string {
-	return fmt.Sprintf("seqID: %s; fragIdx: %d; syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, number:%d / size: %d, overlap: %d",
-		m.SeqID, m.FragIdx, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitNum, m.SplitSize, m.SplitOverlap)
+	return fmt.Sprintf("seqID: %s; fragIdx: %d; genome-len: %d, syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, number:%d / size: %d, overlap: %d",
+		m.SeqID, m.FragIdx, m.GenomeSize, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitNum, m.SplitSize, m.SplitOverlap)
 }

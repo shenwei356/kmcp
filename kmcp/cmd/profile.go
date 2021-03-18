@@ -123,12 +123,12 @@ var profileCmd = &cobra.Command{
 		}()
 
 		if mappingNames {
-			outfh.WriteString(fmt.Sprint("name\tfragsProp\tmeanReads\tsumUReads\tannotation\n"))
+			outfh.WriteString(fmt.Sprint("name\tfragsProp\tabundance\tsumUReads\tannotation\n"))
 		} else {
-			outfh.WriteString(fmt.Sprint("name\tfragsProp\tmeanReads\tsumUReads\n"))
+			outfh.WriteString(fmt.Sprint("name\tfragsProp\tabundance\tsumUReads\n"))
 		}
 
-		numFields := 11
+		numFields := 12
 		items := make([]string, numFields)
 
 		profile := make(map[uint64]*Target, 128)
@@ -211,6 +211,7 @@ var profileCmd = &cobra.Command{
 					}
 
 					t.Name = m.Target
+					t.GenomeSize = m.GSize
 					t.Match[m.FragIdx] += floatOne / floatMsSize
 					if len(ms) == 1 {
 						t.UniqMatch[m.FragIdx] += 1
@@ -248,7 +249,7 @@ var profileCmd = &cobra.Command{
 				continue
 			}
 
-			t.MeanAbundance = t.MeanAbundance / float64(len(t.Match))
+			t.MeanAbundance = t.MeanAbundance / float64(len(t.Match)) / float64(t.GenomeSize)
 
 			targets = append(targets, t)
 
@@ -296,6 +297,7 @@ type MatchResult struct {
 	Target  string
 	FragIdx int
 	IdxNum  int
+	GSize   uint64
 	MKmers  int
 	QCov    float64
 }
@@ -315,9 +317,9 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 		return m, false
 	}
 
-	m.QCov, err = strconv.ParseFloat((*items)[9], 64)
+	m.QCov, err = strconv.ParseFloat((*items)[10], 64)
 	if err != nil {
-		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[9]))
+		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[10]))
 	}
 	if m.QCov < minQcov {
 		return m, false
@@ -354,9 +356,14 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 		checkError(fmt.Errorf("failed to parse IdxNum: %s", (*items)[7]))
 	}
 
-	m.MKmers, err = strconv.Atoi((*items)[8])
+	m.GSize, err = strconv.ParseUint((*items)[8], 10, 64)
 	if err != nil {
-		checkError(fmt.Errorf("failed to parse mKmers: %s", (*items)[8]))
+		checkError(fmt.Errorf("failed to parse genomeSize: %s", (*items)[8]))
+	}
+
+	m.MKmers, err = strconv.Atoi((*items)[9])
+	if err != nil {
+		checkError(fmt.Errorf("failed to parse mKmers: %s", (*items)[9]))
 	}
 
 	return m, true
@@ -364,6 +371,8 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 
 type Target struct {
 	Name string
+
+	GenomeSize uint64
 
 	// Counting matches in all frags
 	// some reads match multiple sites in the same genome,

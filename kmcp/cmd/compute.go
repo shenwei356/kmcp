@@ -147,10 +147,13 @@ Output:
 		splitSize0 := getFlagNonNegativeInt(cmd, "split-size")
 		splitOverlap := getFlagNonNegativeInt(cmd, "split-overlap")
 		splitMinRef := getFlagNonNegativeInt(cmd, "split-min-ref")
-		if splitSize0 > 0 && splitNumber0 > 0 {
+		if splitNumber0 == 0 {
+			splitNumber0 = 1
+		}
+		if splitSize0 > 0 && splitNumber0 > 1 {
 			checkError(fmt.Errorf("flag -s/--split-size and -n/--split-number are incompatible"))
 		}
-		splitSeq := splitSize0 > 0 || splitNumber0 > 0
+		splitSeq := splitSize0 > 0 || splitNumber0 > 1
 		if splitSeq {
 			if splitSize0 > 0 {
 				if splitSize0 < k {
@@ -273,9 +276,9 @@ Output:
 		ch := make(chan UnikFileInfo, opt.NumCPUs)
 		done := make(chan int)
 		go func() {
-			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tIdxNum\tkmers\n"))
+			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tidxNum\tgenomeSize\tkmers\n"))
 			for info := range ch {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.Kmers))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 			}
 			done <- 1
 		}()
@@ -358,6 +361,8 @@ Output:
 				var splitNumber int
 				splitByNumber := splitNumber0 > 0
 
+				var genomeSize uint64
+
 				var codes []uint64
 
 				// multiple level file tree for saving files
@@ -418,6 +423,8 @@ Output:
 					}
 					record1.Seq.Seq = bigSeq
 					record = record1
+
+					genomeSize = uint64(len(record.Seq.Seq))
 				}
 
 				slidIdx = 0
@@ -438,6 +445,7 @@ Output:
 							checkError(errors.Wrap(err, file))
 							break
 						}
+						genomeSize += uint64(len(record.Seq.Seq))
 					}
 
 					seqID = string(record.ID)
@@ -567,8 +575,9 @@ Output:
 						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
 
 						meta := Meta{
-							SeqID:   seqID,
-							FragIdx: slidIdx,
+							SeqID:      seqID,
+							FragIdx:    slidIdx,
+							GenomeSize: uint64(len(record.Seq.Seq)),
 
 							Syncmer:      syncmer,
 							SyncmerS:     syncmerS,
@@ -583,11 +592,12 @@ Output:
 							scaled, scale, meta)
 
 						ch <- UnikFileInfo{
-							Path:    outFile,
-							Name:    seqID,
-							Index:   slidIdx,
-							Indexes: uint32(splitNumber0),
-							Kmers:   uint64(n),
+							Path:       outFile,
+							Name:       seqID,
+							GenomeSize: uint64(len(record.Seq.Seq)),
+							Index:      slidIdx,
+							Indexes:    uint32(splitNumber0),
+							Kmers:      uint64(n),
 						}
 
 						slidIdx++
@@ -621,8 +631,9 @@ Output:
 
 				fileprefix, _ := filepathTrimExtension(filepath.Base(file))
 				meta := Meta{
-					SeqID:   fileprefix,
-					FragIdx: slidIdx,
+					SeqID:      fileprefix,
+					FragIdx:    slidIdx,
+					GenomeSize: genomeSize,
 
 					Syncmer:      syncmer,
 					SyncmerS:     syncmerS,
@@ -637,11 +648,12 @@ Output:
 					scaled, scale, meta)
 
 				ch <- UnikFileInfo{
-					Path:    outFile,
-					Name:    fileprefix,
-					Index:   slidIdx,
-					Indexes: uint32(splitNumber0),
-					Kmers:   uint64(n),
+					Path:       outFile,
+					Name:       fileprefix,
+					GenomeSize: genomeSize,
+					Index:      slidIdx,
+					Indexes:    uint32(splitNumber0),
+					Kmers:      uint64(n),
 				}
 
 				slidIdx++

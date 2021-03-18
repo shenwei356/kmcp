@@ -733,6 +733,7 @@ References:
 					sigsBlock := make([][]byte, 0, nBatchFiles)
 
 					namesBlock := make([][]string, 0, nInfoGroups)
+					gsizesBlock := make([][]uint64, 0, nInfoGroups)
 					indicesBlock := make([][]uint32, 0, nInfoGroups)
 					sizesBlock := make([]uint64, 0, nInfoGroups)
 
@@ -747,6 +748,7 @@ References:
 							if batch2.id == id {
 								sigsBlock = append(sigsBlock, batch2.sigs)
 								namesBlock = append(namesBlock, batch2.names...)
+								gsizesBlock = append(gsizesBlock, batch2.gsizes...)
 								indicesBlock = append(indicesBlock, batch2.indices...)
 								sizesBlock = append(sizesBlock, batch2.sizes...)
 								if opt.Verbose && !dryRun {
@@ -759,6 +761,7 @@ References:
 								if _batch, ok := buf[id]; ok {
 									sigsBlock = append(sigsBlock, _batch.sigs)
 									namesBlock = append(namesBlock, _batch.names...)
+									gsizesBlock = append(gsizesBlock, _batch.gsizes...)
 									indicesBlock = append(indicesBlock, _batch.indices...)
 									sizesBlock = append(sizesBlock, _batch.sizes...)
 									if opt.Verbose && !dryRun {
@@ -783,6 +786,7 @@ References:
 
 								sigsBlock = append(sigsBlock, _batch.sigs)
 								namesBlock = append(namesBlock, _batch.names...)
+								gsizesBlock = append(gsizesBlock, _batch.gsizes...)
 								indicesBlock = append(indicesBlock, _batch.indices...)
 								sizesBlock = append(sizesBlock, _batch.sizes...)
 								if opt.Verbose && !dryRun {
@@ -840,10 +844,12 @@ References:
 							}()
 
 							names := make([][]string, 0, 8)
+							gsizes := make([][]uint64, 0, 8)
 							indices := make([][]uint32, 0, 8)
 							sizes := make([]uint64, 0, 8)
 							for _, infos := range _batch {
 								_names := make([]string, len(infos))
+								_gsizes := make([]uint64, len(infos))
 								_indices := make([]uint32, len(infos))
 								var _size uint64
 
@@ -851,11 +857,13 @@ References:
 
 								for iii, info := range infos {
 									_names[iii] = info.Name
+									_gsizes[iii] = info.GenomeSize
 									// _indices[iii] = info.Index
 									_indices[iii] = info.Index + info.Indexes<<16 // add number of indexes
 									_size += info.Kmers
 								}
 								names = append(names, _names)
+								gsizes = append(gsizes, _gsizes)
 								indices = append(indices, _indices)
 								sizes = append(sizes, uint64(_size))
 							}
@@ -955,6 +963,7 @@ References:
 								id:      id,
 								sigs:    sigs,
 								names:   names,
+								gsizes:  gsizes,
 								indices: indices,
 								sizes:   sizes,
 							}
@@ -981,7 +990,7 @@ References:
 							w.Close()
 						}()
 
-						writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, indicesBlock, sizesBlock)
+						writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, gsizesBlock, indicesBlock, sizesBlock)
 						checkError(err)
 						defer func() {
 							checkError(writer.Flush())
@@ -1128,6 +1137,7 @@ type batch8s struct {
 
 	sigs    []byte
 	names   [][]string
+	gsizes  [][]uint64
 	indices [][]uint32
 	sizes   []uint64
 }
