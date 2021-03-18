@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0 - 2021-03-xx
+
+- new command: `profile` for generating taxonomic profile from search result
+
 ## v0.3.0 - 2021-03-16
 
 - use `--quiet` to replace `--verbose`, making printing log info default.

@@ -123,9 +123,9 @@ var profileCmd = &cobra.Command{
 		}()
 
 		if mappingNames {
-			outfh.WriteString(fmt.Sprint("name\tfragsProp\tabundance\tsumUReads\tannotation\n"))
+			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\tureads\tannotation\n"))
 		} else {
-			outfh.WriteString(fmt.Sprint("name\tfragsProp\tabundance\tsumUReads\n"))
+			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\tureads\n"))
 		}
 
 		numFields := 12
@@ -154,7 +154,7 @@ var profileCmd = &cobra.Command{
 					firtLine = false
 					continue
 				}
-				// outfh.WriteString(scanner.Text() + "\n")
+
 				match, ok := parseMatchResult(scanner.Text(), numFields, &items, maxFPR, minQcov)
 				if !ok {
 					continue
@@ -177,12 +177,16 @@ var profileCmd = &cobra.Command{
 
 							t.Name = m.Target
 							t.GenomeSize = m.GSize
+
+							// for a read matching multiple regions of a reference, distribute count to multiple regions,
+							// the sum is still the one.
 							t.Match[m.FragIdx] += floatOne / floatMsSize
-							if len(ms) == 1 {
+
+							// record unique match
+							if len(matches) == 1 {
 								t.UniqMatch[m.FragIdx] += 1
 							}
 							t.FragLens[m.FragIdx] += uint64(m.QLen)
-
 						}
 					}
 
@@ -213,14 +217,20 @@ var profileCmd = &cobra.Command{
 
 					t.Name = m.Target
 					t.GenomeSize = m.GSize
+
+					// for a read matching multiple regions of a reference, distribute count to multiple regions,
+					// the sum is still the one.
 					t.Match[m.FragIdx] += floatOne / floatMsSize
-					if len(ms) == 1 {
+
+					// record unique match
+					if len(matches) == 1 {
 						t.UniqMatch[m.FragIdx] += 1
 					}
 					t.FragLens[m.FragIdx] += uint64(m.QLen)
-
 				}
 			}
+
+			matches = make(map[uint64][]MatchResult)
 
 			checkError(scanner.Err())
 			r.Close()
@@ -249,7 +259,7 @@ var profileCmd = &cobra.Command{
 				delete(profile, h)
 				continue
 			}
-			t.MeanAbundance = t.MeanAbundance / float64(len(t.Match)) / float64(t.GenomeSize)
+			t.MeanAbundance = t.MeanAbundance / float64(t.GenomeSize)
 
 			targets = append(targets, t)
 
