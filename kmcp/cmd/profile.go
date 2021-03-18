@@ -176,6 +176,7 @@ var profileCmd = &cobra.Command{
 							}
 
 							t.Name = m.Target
+							t.GenomeSize = m.GSize
 							t.Match[m.FragIdx] += floatOne / floatMsSize
 							if len(ms) == 1 {
 								t.UniqMatch[m.FragIdx] += 1
@@ -248,7 +249,6 @@ var profileCmd = &cobra.Command{
 				delete(profile, h)
 				continue
 			}
-
 			t.MeanAbundance = t.MeanAbundance / float64(len(t.Match)) / float64(t.GenomeSize)
 
 			targets = append(targets, t)
@@ -260,10 +260,10 @@ var profileCmd = &cobra.Command{
 		for _, t := range targets {
 			if mappingNames {
 				name2 = namesMap[t.Name]
-				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%0.f\t%d\t%s\n",
+				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%.6f\t%d\t%s\n",
 					t.Name, t.FragsProp, t.MeanAbundance, t.SumUniqMatch, name2))
 			} else {
-				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%0.f\t%d\n",
+				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%0.6f\t%d\n",
 					t.Name, t.FragsProp, t.MeanAbundance, t.SumUniqMatch))
 			}
 		}
@@ -280,8 +280,8 @@ func init() {
 	profileCmd.Flags().Float64P("max-qcov", "t", 0.7, `maximum query coverage of a read`)
 
 	// for ref fragments
-	profileCmd.Flags().IntP("min-reads", "r", 1000, `minimum number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 100, `minimum number of unique matched reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-reads", "r", 100, `minimum number of reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 50, `minimum number of unique matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.5, `minimum proportion of matched fragments`)
 
 	// name mapping
@@ -405,7 +405,7 @@ type Targets []*Target
 
 func (t Targets) Len() int { return len(t) }
 func (t Targets) Less(i, j int) bool {
-	return t[i].FragsProp > t[j].FragsProp && t[i].MeanAbundance > t[j].MeanAbundance
+	return t[i].MeanAbundance > t[j].MeanAbundance || t[i].FragsProp > t[j].FragsProp
 }
 func (t Targets) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
