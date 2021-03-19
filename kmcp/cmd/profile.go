@@ -123,9 +123,9 @@ var profileCmd = &cobra.Command{
 		}()
 
 		if mappingNames {
-			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\tureads\tannotation\n"))
+			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\treads\tureads\tannotation\n"))
 		} else {
-			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\tureads\n"))
+			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\treads\tureads\n"))
 		}
 
 		numFields := 12
@@ -169,7 +169,7 @@ var profileCmd = &cobra.Command{
 									Name:      m.Target,
 									Match:     make([]float64, m.IdxNum),
 									UniqMatch: make([]int, m.IdxNum),
-									FragLens:  make([]uint64, m.IdxNum),
+									QLen:      make([]uint64, m.IdxNum),
 								}
 								profile[h] = &t0
 								t = &t0
@@ -186,7 +186,7 @@ var profileCmd = &cobra.Command{
 							if len(matches) == 1 {
 								t.UniqMatch[m.FragIdx] += 1
 							}
-							t.FragLens[m.FragIdx] += uint64(m.QLen)
+							t.QLen[m.FragIdx] += uint64(m.QLen)
 						}
 					}
 
@@ -209,7 +209,7 @@ var profileCmd = &cobra.Command{
 							Name:      m.Target,
 							Match:     make([]float64, m.IdxNum),
 							UniqMatch: make([]int, m.IdxNum),
-							FragLens:  make([]uint64, m.IdxNum),
+							QLen:      make([]uint64, m.IdxNum),
 						}
 						profile[h] = &t0
 						t = &t0
@@ -226,7 +226,7 @@ var profileCmd = &cobra.Command{
 					if len(matches) == 1 {
 						t.UniqMatch[m.FragIdx] += 1
 					}
-					t.FragLens[m.FragIdx] += uint64(m.QLen)
+					t.QLen[m.FragIdx] += uint64(m.QLen)
 				}
 			}
 
@@ -239,12 +239,13 @@ var profileCmd = &cobra.Command{
 		targets := make([]*Target, 0, 128)
 		var c float64
 		var c1 int
+		var c2 uint64
 		for h, t := range profile {
 			for _, c = range t.Match {
 				if c > float64(minReads) {
 					t.FragsProp++
 				}
-				t.MeanAbundance += c
+				t.SumMatch += c
 			}
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
@@ -259,7 +260,12 @@ var profileCmd = &cobra.Command{
 				delete(profile, h)
 				continue
 			}
-			t.MeanAbundance = t.MeanAbundance / float64(t.GenomeSize)
+
+			for _, c2 = range t.QLen {
+				t.Qlens += c2
+			}
+
+			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 
 			targets = append(targets, t)
 
@@ -267,14 +273,19 @@ var profileCmd = &cobra.Command{
 		sorts.Quicksort(Targets(targets))
 
 		var name2 string
+		var totalCoverage float64
+
+		for _, t := range targets {
+			totalCoverage += t.Coverage
+		}
 		for _, t := range targets {
 			if mappingNames {
 				name2 = namesMap[t.Name]
-				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%.6f\t%d\t%s\n",
-					t.Name, t.FragsProp, t.MeanAbundance, t.SumUniqMatch, name2))
+				outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%d\t%s\n",
+					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch, name2))
 			} else {
-				outfh.WriteString(fmt.Sprintf("%s\t%.2f\t%0.6f\t%d\n",
-					t.Name, t.FragsProp, t.MeanAbundance, t.SumUniqMatch))
+				outfh.WriteString(fmt.Sprintf("%s\t%0.6f\t%.2f\t%.0f\t%d\n",
+					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch))
 			}
 		}
 	},
@@ -286,13 +297,13 @@ func init() {
 	profileCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.001, `maximum false positive rate of a read`)
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximum false positive rate of a read`)
 	profileCmd.Flags().Float64P("max-qcov", "t", 0.7, `maximum query coverage of a read`)
 
 	// for ref fragments
-	profileCmd.Flags().IntP("min-reads", "r", 100, `minimum number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 50, `minimum number of unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.5, `minimum proportion of matched fragments`)
+	profileCmd.Flags().IntP("min-reads", "r", 50, `minimum number of reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimum number of unique matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimum proportion of matched fragments`)
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
@@ -389,22 +400,24 @@ type Target struct {
 	// the count should be divided by number of sites.
 	Match []float64
 
+	// sum of read (query) length
+	QLen []uint64
+
 	// unique match
 	UniqMatch []int
 
-	// sum of read (query) length
-	FragLens []uint64
-
-	SumUniqMatch  int
-	FragsProp     float64
-	MeanAbundance float64
+	SumMatch     float64
+	SumUniqMatch int
+	FragsProp    float64
+	Coverage     float64
+	Qlens        uint64
 }
 
 func (t Target) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(t.Name)
 	for i := range t.Match {
-		// buf.WriteString(fmt.Sprintf(", %d: %.1f(%d)-%d", i, t.Match[i], t.UniqMatch[i], t.FragLens[i]))
+		// buf.WriteString(fmt.Sprintf(", %d: %.1f(%d)-%d", i, t.Match[i], t.UniqMatch[i], t.QLen[i]))
 		buf.WriteString(fmt.Sprintf(", %d: %.0f(%d)", i, t.Match[i], t.UniqMatch[i]))
 	}
 	buf.WriteString("\n")
@@ -415,7 +428,7 @@ type Targets []*Target
 
 func (t Targets) Len() int { return len(t) }
 func (t Targets) Less(i, j int) bool {
-	return t[i].MeanAbundance > t[j].MeanAbundance || t[i].FragsProp > t[j].FragsProp
+	return t[i].Coverage > t[j].Coverage || t[i].FragsProp > t[j].FragsProp
 }
 func (t Targets) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]

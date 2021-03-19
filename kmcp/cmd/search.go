@@ -232,7 +232,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqlength\tqKmers\tFPR\thits\ttarget\tfragIdx\tIdxNum\tmKmers\tgenomeSize\tqCov\ttCov\tjacc\n")
+			outfh.WriteString("query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tmKmers\tqCov\ttCov\tjacc\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -260,9 +260,9 @@ Attentions:
 
 			for _, match := range result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
-				// target, fragIdx, idxNum, genomeSize, num_matched_kmers, qcov, tcov, jacc
+				// target, fragIdx, idxNum, tlength, num_matched_kmers, qcov, tcov, jacc
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.NumKmers, match.GenomeSize[0], match.QCov, match.TCov, match.JaccardIndex))
+					prefix2, match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0], match.NumKmers, match.QCov, match.TCov, match.JaccardIndex))
 			}
 
 			outfh.Flush()
