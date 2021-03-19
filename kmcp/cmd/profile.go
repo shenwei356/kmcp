@@ -60,8 +60,11 @@ var profileCmd = &cobra.Command{
 		minQcov := getFlagNonNegativeFloat64(cmd, "max-qcov")
 
 		minReads := getFlagPositiveInt(cmd, "min-reads")
-		minUReads := getFlagPositiveInt(cmd, "min-uniq-reads")
+		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
+
+		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
+		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
 
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 
@@ -71,9 +74,15 @@ var profileCmd = &cobra.Command{
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
 		if opt.Verbose {
 			if len(files) == 1 && isStdin(files[0]) {
-				log.Info("no files given, reading from stdin")
+				// log.Info("no files given, reading from stdin")
+				checkError(fmt.Errorf("stdin not supported"))
 			} else {
 				log.Infof("%d input file(s) given", len(files))
+			}
+		}
+		for _, file := range files {
+			if isStdin(file) {
+				checkError(fmt.Errorf("stdin not supported"))
 			}
 		}
 
@@ -112,26 +121,20 @@ var profileCmd = &cobra.Command{
 			mappingNames = len(namesMap) > 0
 		}
 
-		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
-		checkError(err)
-		defer func() {
-			outfh.Flush()
-			if gw != nil {
-				gw.Close()
-			}
-			w.Close()
-		}()
-
-		if mappingNames {
-			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\treads\tureads\tannotation\n"))
-		} else {
-			outfh.WriteString(fmt.Sprint("target\tfragsProp\tabundance\treads\tureads\n"))
-		}
+		// ---------------------------------------------------------------
 
 		numFields := 12
 		items := make([]string, numFields)
 
 		profile := make(map[uint64]*Target, 128)
+
+		floatOne := float64(1)
+
+		// ---------------------------------------------------------------
+		// stage 1/3
+		if opt.Verbose {
+			log.Infof("stage 1/3")
+		}
 
 		for _, file := range files {
 			infh, r, _, err := inStream(file)
@@ -147,15 +150,16 @@ var profileCmd = &cobra.Command{
 			var hTarget, h uint64
 			var prevQuery string
 			firtLine := true
-			var floatOne, floatMsSize float64
-			floatOne = float64(1)
+			var floatMsSize float64
+			var i int
 			for scanner.Scan() {
 				if firtLine {
 					firtLine = false
 					continue
 				}
 
-				match, ok := parseMatchResult(scanner.Text(), numFields, &items, maxFPR, minQcov)
+				var match MatchResult
+				match, ok = parseMatchResult(scanner.Text(), numFields, &items, maxFPR, minQcov)
 				if !ok {
 					continue
 				}
@@ -163,30 +167,29 @@ var profileCmd = &cobra.Command{
 				if prevQuery != match.Query { // new query
 					for h, ms = range matches {
 						floatMsSize = float64(len(ms))
-						for _, m = range ms {
+						for i, m = range ms {
 							if t, ok = profile[h]; !ok {
 								t0 := Target{
-									Name:      m.Target,
-									Match:     make([]float64, m.IdxNum),
-									UniqMatch: make([]int, m.IdxNum),
-									QLen:      make([]uint64, m.IdxNum),
+									Name:       m.Target,
+									GenomeSize: m.GSize,
+									Match:      make([]float64, m.IdxNum),
+									UniqMatch:  make([]float64, m.IdxNum),
+									QLen:       make([]float64, m.IdxNum),
 								}
 								profile[h] = &t0
 								t = &t0
 							}
 
-							t.Name = m.Target
-							t.GenomeSize = m.GSize
+							if i == 0 { // count once
+								if len(matches) == 1 { // record unique match
+									t.UniqMatch[m.FragIdx]++
+								}
+								t.QLen[m.FragIdx] += float64(m.QLen)
+							}
 
 							// for a read matching multiple regions of a reference, distribute count to multiple regions,
 							// the sum is still the one.
 							t.Match[m.FragIdx] += floatOne / floatMsSize
-
-							// record unique match
-							if len(matches) == 1 {
-								t.UniqMatch[m.FragIdx] += 1
-							}
-							t.QLen[m.FragIdx] += uint64(m.QLen)
 						}
 					}
 
@@ -198,48 +201,50 @@ var profileCmd = &cobra.Command{
 					matches[hTarget] = make([]MatchResult, 0, 1)
 				}
 				matches[hTarget] = append(matches[hTarget], match)
+
 				prevQuery = match.Query
 			}
 
 			for h, ms = range matches {
 				floatMsSize = float64(len(ms))
-				for _, m = range ms {
+				for i, m = range ms {
 					if t, ok = profile[h]; !ok {
 						t0 := Target{
-							Name:      m.Target,
-							Match:     make([]float64, m.IdxNum),
-							UniqMatch: make([]int, m.IdxNum),
-							QLen:      make([]uint64, m.IdxNum),
+							Name:       m.Target,
+							GenomeSize: m.GSize,
+							Match:      make([]float64, m.IdxNum),
+							UniqMatch:  make([]float64, m.IdxNum),
+							QLen:       make([]float64, m.IdxNum),
 						}
 						profile[h] = &t0
 						t = &t0
 					}
 
-					t.Name = m.Target
-					t.GenomeSize = m.GSize
+					if i == 0 { // count once
+						if len(matches) == 1 { // record unique match
+							t.UniqMatch[m.FragIdx]++
+						}
+						t.QLen[m.FragIdx] += float64(m.QLen)
+					}
 
 					// for a read matching multiple regions of a reference, distribute count to multiple regions,
 					// the sum is still the one.
 					t.Match[m.FragIdx] += floatOne / floatMsSize
-
-					// record unique match
-					if len(matches) == 1 {
-						t.UniqMatch[m.FragIdx] += 1
-					}
-					t.QLen[m.FragIdx] += uint64(m.QLen)
 				}
 			}
-
-			matches = make(map[uint64][]MatchResult)
 
 			checkError(scanner.Err())
 			r.Close()
 		}
 
-		targets := make([]*Target, 0, 128)
+		// --------------------
+		// sum up
+
 		var c float64
-		var c1 int
-		var c2 uint64
+		var c1 float64
+		var c2 float64
+		var hs []uint64
+		hs = make([]uint64, 0, 8)
 		for h, t := range profile {
 			for _, c = range t.Match {
 				if c > float64(minReads) {
@@ -249,7 +254,7 @@ var profileCmd = &cobra.Command{
 			}
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
-				delete(profile, h)
+				hs = append(hs, h)
 				continue
 			}
 
@@ -257,7 +262,406 @@ var profileCmd = &cobra.Command{
 				t.SumUniqMatch += c1
 			}
 			if t.SumUniqMatch < minUReads {
-				delete(profile, h)
+				hs = append(hs, h)
+				continue
+			}
+
+			for _, c2 = range t.QLen {
+				t.Qlens += c2
+			}
+
+			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
+		}
+		for _, h := range hs {
+			delete(profile, h)
+		}
+
+		// ---------------------------------------------------------------
+		// stage 2/3, counting ambiguous reads/matches
+		if opt.Verbose {
+			log.Infof("stage 2/3")
+		}
+
+		// hashA -> hashB -> count
+		ambMatch := make(map[uint64]map[uint64]float64, 128)
+		// ambMatchDecision := make(map[uint64]map[uint64]uint64, 128)
+
+		for _, file := range files {
+			infh, r, _, err := inStream(file)
+			checkError(err)
+
+			scanner := bufio.NewScanner(infh)
+
+			matches := make(map[uint64][]MatchResult) // target -> match result
+			var ok bool
+			var hTarget, h, h1, h2 uint64
+			var prevQuery string
+			hs := make([]uint64, 0, 256)
+			var comb []uint64
+			firtLine := true
+			for scanner.Scan() {
+				if firtLine {
+					firtLine = false
+					continue
+				}
+
+				var match MatchResult
+				match, ok = parseMatchResult(scanner.Text(), numFields, &items, maxFPR, minQcov)
+				if !ok {
+					continue
+				}
+
+				if prevQuery != match.Query { // new query
+					if len(matches) > 1 { // skip uniq match
+						hs = hs[:0]
+						for h = range matches {
+							_, ok = profile[h]
+							if !ok { // skip low-confidence match
+								continue
+							}
+							hs = append(hs, h)
+						}
+
+						if len(hs) >= 2 {
+							for _, comb = range Combinations(hs, 2) {
+								h1, h2 = sortTowUint64s(comb[0], comb[1])
+								if _, ok = ambMatch[h1]; !ok {
+									ambMatch[h1] = make(map[uint64]float64, 128)
+								}
+								ambMatch[h1][h2]++
+							}
+						}
+					}
+					matches = make(map[uint64][]MatchResult)
+				}
+
+				hTarget = xxh3.HashString(match.Target)
+				if _, ok = matches[hTarget]; !ok {
+					matches[hTarget] = make([]MatchResult, 0, 1)
+				}
+				matches[hTarget] = append(matches[hTarget], match)
+				prevQuery = match.Query
+			}
+
+			if len(matches) > 1 {
+				hs = hs[:0]
+				for h = range matches {
+					_, ok = profile[h]
+					if !ok { // skip low-confidence match
+						continue
+					}
+					hs = append(hs, h)
+				}
+
+				if len(hs) >= 2 {
+					for _, comb = range Combinations(hs, 2) {
+						h1, h2 = sortTowUint64s(comb[0], comb[1])
+						if _, ok = ambMatch[h1]; !ok {
+							ambMatch[h1] = make(map[uint64]float64, 128)
+						}
+						ambMatch[h1][h2]++
+					}
+				}
+			}
+
+			matches = make(map[uint64][]MatchResult)
+
+			checkError(scanner.Err())
+			r.Close()
+		}
+		// ---------------------------------------------------------------
+		// stage 3/3
+		if opt.Verbose {
+			log.Infof("stage 3/3")
+		}
+
+		profile2 := make(map[uint64]*Target, 128)
+		var nReads float64
+		var nUnassignedReads float64
+
+		for _, file := range files {
+			infh, r, _, err := inStream(file)
+			checkError(err)
+
+			scanner := bufio.NewScanner(infh)
+
+			matches := make(map[uint64][]MatchResult) // target -> match result
+			var m MatchResult
+			var ms []MatchResult
+			var t *Target
+			var ok bool
+			var hTarget, h, h0, h1, h2 uint64
+			var prevQuery string
+			var floatMsSize float64
+			var i int
+			var uniqMatch bool
+			var first bool
+			var sumUReads, prop float64
+			hs := make([]uint64, 0, 256)
+			firtLine := true
+			for scanner.Scan() {
+				if firtLine {
+					firtLine = false
+					continue
+				}
+
+				var match MatchResult
+				match, ok = parseMatchResult(scanner.Text(), numFields, &items, maxFPR, minQcov)
+				if !ok {
+					continue
+				}
+
+				if prevQuery != match.Query {
+					nReads++
+					uniqMatch = false
+					if len(matches) > 1 { // multiple match
+						// skip low-confidence match
+						hs = hs[:0] // list to delete
+						for h = range matches {
+							_, ok = profile[h]
+							if ok { // skip low-confidence match
+								continue
+							}
+							hs = append(hs, h)
+						}
+						for _, h = range hs {
+							delete(matches, h)
+						}
+
+						if len(matches) > 1 {
+							hs = hs[:0] // list to delete
+							first = true
+							for h = range matches {
+								if first {
+									h0 = h // previous one
+									first = false
+									continue
+								}
+								h1, h2 = sortTowUint64s(h0, h)
+
+								// decide which to keep
+								if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+									profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
+									hs = append(hs, h)
+								} else {
+									h0 = h
+								}
+							}
+							for _, h = range hs {
+								delete(matches, h)
+							}
+
+							if len(matches) > 1 {
+								sumUReads = 0
+								for h = range matches {
+									sumUReads += profile[h].SumUniqMatch
+								}
+								for h, ms = range matches {
+									floatMsSize = float64(len(ms))
+									for i, m = range ms {
+										if t, ok = profile2[h]; !ok {
+											t0 := Target{
+												Name:       m.Target,
+												GenomeSize: m.GSize,
+												Match:      make([]float64, m.IdxNum),
+												UniqMatch:  make([]float64, m.IdxNum),
+												QLen:       make([]float64, m.IdxNum),
+											}
+											profile2[h] = &t0
+											t = &t0
+										}
+
+										prop = profile[h].SumUniqMatch / sumUReads
+
+										if i == 0 { // count once
+											t.QLen[m.FragIdx] += float64(m.QLen) * prop
+										}
+
+										t.Match[m.FragIdx] += prop / floatMsSize
+									}
+								}
+							} else { // len(matches) == 1
+								uniqMatch = true
+							}
+						} else if len(matches) == 1 {
+							uniqMatch = true
+						} else {
+							nUnassignedReads++
+						}
+					} else if len(matches) == 1 {
+						uniqMatch = true
+					}
+
+					if uniqMatch {
+						for h, ms = range matches {
+							floatMsSize = float64(len(ms))
+
+							for i, m = range ms {
+								if t, ok = profile2[h]; !ok {
+									t0 := Target{
+										Name:       m.Target,
+										GenomeSize: m.GSize,
+										Match:      make([]float64, m.IdxNum),
+										UniqMatch:  make([]float64, m.IdxNum),
+										QLen:       make([]float64, m.IdxNum),
+									}
+									profile2[h] = &t0
+									t = &t0
+								}
+
+								if i == 0 { // count once
+									t.UniqMatch[m.FragIdx] += floatOne
+									t.QLen[m.FragIdx] += float64(m.QLen)
+								}
+
+								t.Match[m.FragIdx] += floatOne / floatMsSize
+							}
+						}
+					}
+
+					matches = make(map[uint64][]MatchResult)
+				}
+
+				hTarget = xxh3.HashString(match.Target)
+				if _, ok = matches[hTarget]; !ok {
+					matches[hTarget] = make([]MatchResult, 0, 1)
+				}
+
+				matches[hTarget] = append(matches[hTarget], match)
+				prevQuery = match.Query
+			}
+
+			uniqMatch = false
+			if len(matches) > 1 { // multiple match
+				// skip low-confidence match
+				hs = hs[:0] // list to delete
+				for h = range matches {
+					_, ok = profile[h]
+					if ok { // skip low-confidence match
+						continue
+					}
+					hs = append(hs, h)
+				}
+				for _, h = range hs {
+					delete(matches, h)
+				}
+
+				if len(matches) > 1 {
+					hs = hs[:0] // list to delete
+					first = true
+					for h = range matches {
+						if first {
+							h0 = h // previous one
+							first = false
+							continue
+						}
+						h1, h2 = sortTowUint64s(h0, h)
+
+						// decide which to keep
+						if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+							profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
+							hs = append(hs, h)
+						} else {
+							h0 = h
+						}
+					}
+					for _, h = range hs {
+						delete(matches, h)
+					}
+
+					if len(matches) > 1 {
+						sumUReads = 0
+						for h = range matches {
+							sumUReads += profile[h].SumUniqMatch
+						}
+
+						for h, ms = range matches {
+							floatMsSize = float64(len(ms))
+							for i, m = range ms {
+								if t, ok = profile2[h]; !ok {
+									t0 := Target{
+										Name:       m.Target,
+										GenomeSize: m.GSize,
+										Match:      make([]float64, m.IdxNum),
+										UniqMatch:  make([]float64, m.IdxNum),
+										QLen:       make([]float64, m.IdxNum),
+									}
+									profile2[h] = &t0
+									t = &t0
+								}
+
+								prop = profile[h].SumUniqMatch / sumUReads
+								if i == 0 { // count once
+									t.QLen[m.FragIdx] += float64(m.QLen) * prop
+								}
+
+								t.Match[m.FragIdx] += prop / floatMsSize
+							}
+						}
+					} else if len(matches) == 1 {
+						uniqMatch = true
+					} else {
+						nUnassignedReads++
+					}
+				} else if len(matches) == 1 {
+					uniqMatch = true
+				}
+			} else if len(matches) == 1 {
+				uniqMatch = true
+			}
+			if uniqMatch {
+				for h, ms = range matches {
+					floatMsSize = float64(len(ms))
+
+					for i, m = range ms {
+						if t, ok = profile2[h]; !ok {
+							t0 := Target{
+								Name:       m.Target,
+								GenomeSize: m.GSize,
+								Match:      make([]float64, m.IdxNum),
+								UniqMatch:  make([]float64, m.IdxNum),
+								QLen:       make([]float64, m.IdxNum),
+							}
+							profile2[h2] = &t0
+							t = &t0
+						}
+
+						if i == 0 { // count once
+							t.UniqMatch[m.FragIdx] += floatOne
+							t.QLen[m.FragIdx] += float64(m.QLen)
+						}
+
+						t.Match[m.FragIdx] += floatOne / floatMsSize
+					}
+				}
+			}
+			matches = make(map[uint64][]MatchResult)
+
+			checkError(scanner.Err())
+			r.Close()
+		}
+
+		// --------------------
+		// sum up
+
+		targets := make([]*Target, 0, 128)
+
+		for _, t := range profile2 {
+			for _, c = range t.Match {
+				if c > float64(minReads) {
+					t.FragsProp++
+				}
+				t.SumMatch += c
+			}
+			t.FragsProp = t.FragsProp / float64(len(t.Match))
+			if t.FragsProp < minFragsProp {
+				continue
+			}
+
+			for _, c1 = range t.UniqMatch {
+				t.SumUniqMatch += c1
+			}
+			if t.SumUniqMatch < minUReads {
 				continue
 			}
 
@@ -268,8 +672,27 @@ var profileCmd = &cobra.Command{
 			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 
 			targets = append(targets, t)
-
 		}
+
+		// ---------------------------------------------------------------
+		// output
+
+		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+		checkError(err)
+		defer func() {
+			outfh.Flush()
+			if gw != nil {
+				gw.Close()
+			}
+			w.Close()
+		}()
+
+		if mappingNames {
+			outfh.WriteString(fmt.Sprint("target\tabundance\tfragsProp\treads\tureads\tannotation\n"))
+		} else {
+			outfh.WriteString(fmt.Sprint("target\tabundance\tfragsProp\treads\tureads\n"))
+		}
+
 		sorts.Quicksort(Targets(targets))
 
 		var name2 string
@@ -281,13 +704,15 @@ var profileCmd = &cobra.Command{
 		for _, t := range targets {
 			if mappingNames {
 				name2 = namesMap[t.Name]
-				outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%d\t%s\n",
+				outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%s\n",
 					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch, name2))
 			} else {
-				outfh.WriteString(fmt.Sprintf("%s\t%0.6f\t%.2f\t%.0f\t%d\n",
+				outfh.WriteString(fmt.Sprintf("%s\t%0.6f\t%.2f\t%.0f\t%.0f\n",
 					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch))
 			}
 		}
+
+		log.Infof("#reads: %.0f, #reads of profile: %0.f, proportion: %.6f%%", nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 	},
 }
 
@@ -304,6 +729,10 @@ func init() {
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimum number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimum number of unique matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimum proportion of matched fragments`)
+
+	// for the two-stage taxonomy assignment algorithm in MagaPath
+	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimum proportion of distinct reads, for determing the right reference for ambigous reads`)
+	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximum error rate of a read being matched to a wrong reference, for determing the right reference for ambigous reads`)
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
@@ -401,16 +830,16 @@ type Target struct {
 	Match []float64
 
 	// sum of read (query) length
-	QLen []uint64
+	QLen []float64
 
 	// unique match
-	UniqMatch []int
+	UniqMatch []float64
 
 	SumMatch     float64
-	SumUniqMatch int
+	SumUniqMatch float64
 	FragsProp    float64
 	Coverage     float64
-	Qlens        uint64
+	Qlens        float64
 }
 
 func (t Target) String() string {
@@ -418,7 +847,7 @@ func (t Target) String() string {
 	buf.WriteString(t.Name)
 	for i := range t.Match {
 		// buf.WriteString(fmt.Sprintf(", %d: %.1f(%d)-%d", i, t.Match[i], t.UniqMatch[i], t.QLen[i]))
-		buf.WriteString(fmt.Sprintf(", %d: %.0f(%d)", i, t.Match[i], t.UniqMatch[i]))
+		buf.WriteString(fmt.Sprintf(", %d: %.0f(%.0f)", i, t.Match[i], t.UniqMatch[i]))
 	}
 	buf.WriteString("\n")
 	return buf.String()
@@ -428,7 +857,7 @@ type Targets []*Target
 
 func (t Targets) Len() int { return len(t) }
 func (t Targets) Less(i, j int) bool {
-	return t[i].Coverage > t[j].Coverage || t[i].FragsProp > t[j].FragsProp
+	return t[i].FragsProp > t[j].FragsProp || t[i].Coverage > t[j].Coverage
 }
 func (t Targets) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]

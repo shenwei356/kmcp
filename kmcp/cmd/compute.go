@@ -729,14 +729,14 @@ func init() {
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
 	computeCmd.Flags().IntP("kmer-len", "k", 31, `k-mer length`)
-	computeCmd.Flags().BoolP("circular", "", false, `input sequence is curcular`)
+	computeCmd.Flags().BoolP("circular", "", false, `input sequence is circular`)
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
-	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files (can save little space`)
+	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space)`)
 
 	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/split-size`)
 	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences, incompatible with -n/--split-number`)
