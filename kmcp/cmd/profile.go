@@ -133,7 +133,7 @@ var profileCmd = &cobra.Command{
 		// ---------------------------------------------------------------
 		// stage 1/3
 		if opt.Verbose {
-			log.Infof("stage 1/3")
+			log.Infof("stage 1/3: basic counting for filtering out low-confidence references")
 		}
 
 		for _, file := range files {
@@ -279,7 +279,7 @@ var profileCmd = &cobra.Command{
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
 		if opt.Verbose {
-			log.Infof("stage 2/3")
+			log.Infof("stage 2/3: counting ambiguous matches for correcting matches")
 		}
 
 		// hashA -> hashB -> count
@@ -369,10 +369,11 @@ var profileCmd = &cobra.Command{
 			checkError(scanner.Err())
 			r.Close()
 		}
+
 		// ---------------------------------------------------------------
 		// stage 3/3
 		if opt.Verbose {
-			log.Infof("stage 3/3")
+			log.Infof("stage 3/3: computing profile")
 		}
 
 		profile2 := make(map[uint64]*Target, 128)

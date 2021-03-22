@@ -374,7 +374,7 @@ func init() {
 
 	// query option
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
-	searchCmd.Flags().Float64P("query-cov", "t", 0.8, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
+	searchCmd.Flags().Float64P("query-cov", "t", 0.7, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
 	// output
