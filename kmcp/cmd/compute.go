@@ -49,11 +49,12 @@ var computeCmd = &cobra.Command{
 
 Attentions:
   1. Input files can be given as list of FASTA/Q files via
-     positional arguments or a directory containing files
-     via flag -I/--in-dir. Regular expression for matching
-     sequencing file is given by -r/--file-regexp.
-  2. K-mers (sketchs) are not sorted and duplicates remained.
-  3. Sequence IDs in all input files should be unique.
+     positional arguments or a directory containing sequence files
+     via the flag -I/--in-dir. A regular expression for matching
+     sequencing file is available by the flag -r/--file-regexp.
+  2. K-mers (sketchs) are not sorted, and duplicates are kept
+     unless flag -e/--exact-number is on.
+  3. Sequence IDs in all input files should be distinct.
      Multiple sequences belonging to a same group can be mapped
      to their group name via name mapping file after indexing.
   4. By default, we compute k-mers (sketches) of every file,
@@ -71,28 +72,30 @@ Supported k-mer (sketches) types:
      3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
 
 Splitting sequences:
-  1. Sequences can be splitted into fragments by fragment size 
-     (-s/--split-size) or number of fragments (-n/--spit-number)
+  1. Sequences can be splitted into fragments by a fragment size 
+     (-s/--split-size) or number of fragments (-n/--split-number)
      with overlap (-l/--split-overlap).
   2. When splitting by number of fragments, all sequences (except for
-     these mathching any regular expression in -B/--seq-name-filter)
-     in a file are concatenated before splitting.
+     these mathching any regular expression given by -B/--seq-name-filter)
+     in a sequence file are concatenated before splitting.
   3. Both sequence IDs and fragments indices are saved for later use,
      in form of meta/description data in .unik files.
 
 Meta data:
-  1. Every outputted .unik file contains the reference name, fragment index,
-     number of fragments, and genome size of reference.
+  1. Every outputted .unik file contains the sequence ID/reference name,
+     fragment index, number of fragments, and genome size of reference.
   2. When parsing whole sequence files or splitting by number of fragments,
-     the ref name can be extracted from input file name via
+     the identifier of a reference is the basename of the input file
+     by default. It can also be extracted from the input file name via
      -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for refseq records.
 
 Output:
   1. All outputted .unik files are saved in ${outdir}, with path
-     ${outdir}/xxx/yyy/zzz/${infile}-id${seqID}.unik
+     ${outdir}/xxx/yyy/zzz/${infile}-id_${seqID}.unik
      where dirctory tree '/xxx/yyy/zzz/' is built for > 1000 output files.
-  2. For splitting sequence mode (--split-size > 0), output files are
-     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag${fragIdx}.unik
+  2. For splitting sequence mode (--split-size > 0 or --split-number > 0),
+     output files are:
+     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -57,7 +57,7 @@ var profileCmd = &cobra.Command{
 		outFile := getFlagString(cmd, "out-prefix")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
-		minQcov := getFlagNonNegativeFloat64(cmd, "max-qcov")
+		minQcov := getFlagNonNegativeFloat64(cmd, "min-qcov")
 
 		minReads := getFlagPositiveInt(cmd, "min-reads")
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -723,17 +723,17 @@ func init() {
 	profileCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximum false positive rate of a read`)
-	profileCmd.Flags().Float64P("max-qcov", "t", 0.7, `maximum query coverage of a read`)
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read`)
+	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read`)
 
 	// for ref fragments
-	profileCmd.Flags().IntP("min-reads", "r", 50, `minimum number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimum number of unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimum proportion of matched fragments`)
+	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of unique matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimal proportion of matched fragments`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
-	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimum proportion of distinct reads, for determing the right reference for ambigous reads`)
-	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximum error rate of a read being matched to a wrong reference, for determing the right reference for ambigous reads`)
+	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambigous reads`)
+	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambigous reads`)
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
@@ -755,6 +755,9 @@ type MatchResult struct {
 
 func parseMatchResult(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (MatchResult, bool) {
 	stringSplitN(line, "\t", numFields, items)
+	if len(*items) < numFields {
+		checkError(fmt.Errorf("invalid kmcp search result format"))
+	}
 
 	var m MatchResult
 
@@ -847,7 +850,6 @@ func (t Target) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(t.Name)
 	for i := range t.Match {
-		// buf.WriteString(fmt.Sprintf(", %d: %.1f(%d)-%d", i, t.Match[i], t.UniqMatch[i], t.QLen[i]))
 		buf.WriteString(fmt.Sprintf(", %d: %.0f(%.0f)", i, t.Match[i], t.UniqMatch[i]))
 	}
 	buf.WriteString("\n")
@@ -858,7 +860,7 @@ type Targets []*Target
 
 func (t Targets) Len() int { return len(t) }
 func (t Targets) Less(i, j int) bool {
-	return t[i].FragsProp > t[j].FragsProp || t[i].Coverage > t[j].Coverage
+	return t[i].Coverage > t[j].Coverage || t[i].FragsProp > t[j].FragsProp
 }
 func (t Targets) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]

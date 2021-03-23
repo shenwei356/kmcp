@@ -28,7 +28,7 @@
   
 ## v0.2.0 - 2020-12-30
 
-- Add support of RAMBO like indexing$$
+- Add support of RAMBO like indexing.
 - Limit to only one input database.
 - Change output format.
 

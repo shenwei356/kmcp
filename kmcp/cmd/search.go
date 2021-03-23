@@ -370,7 +370,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, which accelerates searching in cost of high memory occupation`)
+	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, searching would be very slow`)
 
 	// query option
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
