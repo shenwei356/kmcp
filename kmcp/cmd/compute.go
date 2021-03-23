@@ -57,9 +57,10 @@ Attentions:
      Multiple sequences belonging to a same group can be mapped
      to their group name via name mapping file after indexing.
   4. By default, we compute k-mers (sketches) of every file,
-     you can also use --by-seq to compute for every file.
-  5. It also supports splitting sequences into fragment via
-     flag -s/--split-size and -l/--split-overlap.
+     you can also use --by-seq to compute for every sequence.
+  5. Unwanted sequence like plasmid can be filtered out by
+     regular expressions via -B/--seq-name-filter.
+  6. It also supports splitting sequences into fragments.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -73,10 +74,18 @@ Splitting sequences:
   1. Sequences can be splitted into fragments by fragment size 
      (-s/--split-size) or number of fragments (-n/--spit-number)
      with overlap (-l/--split-overlap).
-  2. When splitting by number of fragments, all sequences in a file
-     are concatenated before splitting.
+  2. When splitting by number of fragments, all sequences (except for
+     these mathching any regular expression in -B/--seq-name-filter)
+     in a file are concatenated before splitting.
   3. Both sequence IDs and fragments indices are saved for later use,
      in form of meta/description data in .unik files.
+
+Meta data:
+  1. Every outputted .unik file contains the reference name, fragment index,
+     number of fragments, and genome size of reference.
+  2. When parsing whole sequence files or splitting by number of fragments,
+     the ref name can be extracted from input file name via
+     -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for refseq records.
 
 Output:
   1. All outputted .unik files are saved in ${outdir}, with path
@@ -137,8 +146,40 @@ Output:
 				reFileStr = reIgnoreCaseStr + reFileStr
 			}
 			reFile, err = regexp.Compile(reFileStr)
-			checkError(errors.Wrapf(err, "parsing regular expression for matching file: %s", reFileStr))
+			checkError(errors.Wrapf(err, "failed to parse regular expression for matching file: %s", reFileStr))
 		}
+
+		reRefNameStr := getFlagString(cmd, "ref-name-regexp")
+		var reRefName *regexp.Regexp
+		var extractRefName bool
+		if reRefNameStr != "" {
+			if !regexp.MustCompile(`\(.+\)`).MatchString(reRefNameStr) {
+				checkError(fmt.Errorf(`value of --ref-name-regexp must contains "(" and ")" to capture the ref name from file name`))
+			}
+			if !reIgnoreCase.MatchString(reRefNameStr) {
+				reRefNameStr = reIgnoreCaseStr + reRefNameStr
+			}
+
+			reRefName, err = regexp.Compile(reRefNameStr)
+			if err != nil {
+				checkError(errors.Wrapf(err, "failed to parse regular expression for matching sequence header: %s", reRefName))
+			}
+			extractRefName = true
+		}
+
+		reSeqNameStrs := getFlagStringSlice(cmd, "seq-name-filter")
+		reSeqNames := make([]*regexp.Regexp, 0, len(reSeqNameStrs))
+		for _, kw := range reSeqNameStrs {
+			if !reIgnoreCase.MatchString(reRefNameStr) {
+				kw = reIgnoreCaseStr + kw
+			}
+			re, err := regexp.Compile("(?i)" + kw)
+			if err != nil {
+				checkError(errors.Wrapf(err, "failed to parse regular expression for matching sequence header: %s", kw))
+			}
+			reSeqNames = append(reSeqNames, re)
+		}
+		filterNames := len(reSeqNames) > 0
 
 		// ---------------------------------------------------------------
 		// flags for splitting sequence
@@ -389,6 +430,9 @@ Output:
 				var allSeqs [][]byte
 				var bigSeq []byte
 				var record1 *fastx.Record
+
+				var ignoreSeq bool
+				var re *regexp.Regexp
 				if splitByNumber { // concatenate all seqs
 					allSeqs = make([][]byte, 0, 8)
 					lenSum := 0
@@ -402,6 +446,20 @@ Output:
 							checkError(errors.Wrap(err, file))
 							break
 						}
+
+						if filterNames {
+							ignoreSeq = false
+							for _, re = range reSeqNames {
+								if re.Match(record.Name) {
+									ignoreSeq = true
+									break
+								}
+							}
+							if ignoreSeq {
+								continue
+							}
+						}
+
 						if first {
 							record1 = record
 							first = false
@@ -420,6 +478,10 @@ Output:
 							copy(bigSeq[i:i+len(aseq)], aseq)
 							i += len(aseq)
 						}
+					}
+					if lenSum == 0 {
+						log.Warningf("skipping %s: no invalid sequences")
+						return
 					}
 					record1.Seq.Seq = bigSeq
 					record = record1
@@ -445,6 +507,20 @@ Output:
 							checkError(errors.Wrap(err, file))
 							break
 						}
+
+						if filterNames {
+							ignoreSeq = false
+							for _, re = range reSeqNames {
+								if re.Match(record.Name) {
+									ignoreSeq = true
+									break
+								}
+							}
+							if ignoreSeq {
+								continue
+							}
+						}
+
 						genomeSize += uint64(len(record.Seq.Seq))
 					}
 
@@ -561,7 +637,15 @@ Output:
 
 						if splitSeq {
 							if splitByNumber {
-								seqID, _ = filepathTrimExtension(filepath.Base(baseFile))
+								if extractRefName {
+									if reRefName.MatchString(baseFile) {
+										seqID = reRefName.FindAllStringSubmatch(baseFile, 1)[0][1]
+									} else {
+										seqID, _ = filepathTrimExtension(baseFile)
+									}
+								} else {
+									seqID, _ = filepathTrimExtension(baseFile)
+								}
 							}
 							outFileBase = fmt.Sprintf("%s/%s-frag_%d%s", baseFile, seqID, slidIdx, extDataFile)
 						} else {
@@ -629,7 +713,16 @@ Output:
 				// write to file
 				outFile = filepath.Join(outDir, dir1, dir2, fmt.Sprintf("%s%s", baseFile, extDataFile))
 
-				fileprefix, _ := filepathTrimExtension(filepath.Base(file))
+				var fileprefix string
+				if extractRefName {
+					if reRefName.MatchString(baseFile) {
+						fileprefix = reRefName.FindAllStringSubmatch(baseFile, 1)[0][1]
+					} else {
+						fileprefix, _ = filepathTrimExtension(baseFile)
+					}
+				} else {
+					fileprefix, _ = filepathTrimExtension(baseFile)
+				}
 				meta := Meta{
 					SeqID:      fileprefix,
 					FragIdx:    slidIdx,
@@ -745,6 +838,8 @@ func init() {
 
 	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
 
+	computeCmd.Flags().StringP("ref-name-regexp", "N", "", `regular expression (must contains "(" and ")") to extracting reference name from file name`)
+	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{}, `list of regular expressions for filter out sequences by header/name, case ignored`)
 }
 
 var reIgnoreCaseStr = "(?i)"

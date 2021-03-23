@@ -20,7 +20,6 @@ kmcp/binaries*
 doc/site/*
 
 *ssshtest
-testdata/*.unik
 t_*
 *.nextflow.log*
 *.brename_detail.txt
@@ -31,4 +30,4 @@ t_*
 *trace.out
 *gtdb-*
 *gtdb.*.tsv
-*TODO
+dev/
