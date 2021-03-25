@@ -2,7 +2,8 @@
 
 ## v0.4.0 - 2021-03-xx
 
-- new command: `profile` for generating taxonomic profile from search result
+- new command:
+    -  `profile` for generating taxonomic profile from search result
 - `compute`:
     - new flag `-B/--seq-name-filter` for filtering out unwanted sequences like plasmid.
     - new flag `-N/--ref-name-regexp` for extracting reference name from sequence file.

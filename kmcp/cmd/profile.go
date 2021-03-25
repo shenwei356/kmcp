@@ -763,6 +763,7 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 
 	var err error
 
+	// too slow
 	m.FPR, err = strconv.ParseFloat((*items)[3], 64)
 	if err != nil {
 		checkError(fmt.Errorf("failed to parse FPR: %s", (*items)[3]))
@@ -771,6 +772,7 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 		return m, false
 	}
 
+	// too slow
 	m.QCov, err = strconv.ParseFloat((*items)[10], 64)
 	if err != nil {
 		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[10]))

@@ -378,7 +378,7 @@ func init() {
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
 	// output
-	searchCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
+	searchCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)
 	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
