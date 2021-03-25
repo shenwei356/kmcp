@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -68,7 +69,7 @@ Performance Note:
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-qcov")
 
-		minReads := getFlagPositiveInt(cmd, "min-reads")
+		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
 
@@ -79,7 +80,7 @@ Performance Note:
 
 		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
 		if opt.NumCPUs > 4 {
-			log.Warningf("using a lot of threads does not always accelerate processing, the default value 4 is a fast enough")
+			log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
 			opt.NumCPUs = 4
 			runtime.GOMAXPROCS(opt.NumCPUs)
 		}
@@ -98,9 +99,13 @@ Performance Note:
 				log.Infof("%d input file(s) given", len(files))
 			}
 		}
+
+		outFileClean := filepath.Clean(outFile)
 		for _, file := range files {
 			if isStdin(file) {
 				checkError(fmt.Errorf("stdin not supported"))
+			} else if filepath.Clean(file) == outFileClean {
+				checkError(fmt.Errorf("out file should not be one of the input file"))
 			}
 		}
 
@@ -190,8 +195,8 @@ Performance Note:
 			var hTarget, h uint64
 			var prevQuery string
 			var floatMsSize float64
-			var i int
 			var match MatchResult
+			var first bool
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -206,7 +211,8 @@ Performance Note:
 					if prevQuery != match.Query { // new query
 						for h, ms = range matches {
 							floatMsSize = float64(len(ms))
-							for i, m = range ms {
+							first = true
+							for _, m = range ms {
 								if t, ok = profile[h]; !ok {
 									t0 := Target{
 										Name:       m.Target,
@@ -219,11 +225,12 @@ Performance Note:
 									t = &t0
 								}
 
-								if i == 0 { // count once
+								if first { // count once
 									if len(matches) == 1 { // record unique match
 										t.UniqMatch[m.FragIdx]++
 									}
 									t.QLen[m.FragIdx] += float64(m.QLen)
+									first = false
 								}
 
 								// for a read matching multiple regions of a reference, distribute count to multiple regions,
@@ -247,7 +254,8 @@ Performance Note:
 
 			for h, ms = range matches {
 				floatMsSize = float64(len(ms))
-				for i, m = range ms {
+				first = true
+				for _, m = range ms {
 					if t, ok = profile[h]; !ok {
 						t0 := Target{
 							Name:       m.Target,
@@ -260,11 +268,12 @@ Performance Note:
 						t = &t0
 					}
 
-					if i == 0 { // count once
+					if first { // count once
 						if len(matches) == 1 { // record unique match
 							t.UniqMatch[m.FragIdx]++
 						}
 						t.QLen[m.FragIdx] += float64(m.QLen)
+						first = false
 					}
 
 					// for a read matching multiple regions of a reference, distribute count to multiple regions,
@@ -280,20 +289,22 @@ Performance Note:
 		// --------------------
 		// sum up
 
+		log.Infof("  number of references in search result: %d", len(profile))
+
 		var c float64
 		var c1 float64
 		var c2 float64
 		var hs []uint64
-		hs = make([]uint64, 0, 8)
+		hs = make([]uint64, 0, 8) // list to delete
 		for h, t := range profile {
 			for _, c = range t.Match {
-				if c > float64(minReads) {
+				if c > minReads {
 					t.FragsProp++
 				}
 				t.SumMatch += c
 			}
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
-			if t.FragsProp < minFragsProp {
+			if t.FragsProp < minFragsProp { // low coverage
 				hs = append(hs, h)
 				continue
 			}
@@ -301,7 +312,7 @@ Performance Note:
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
-			if t.SumUniqMatch < minUReads {
+			if t.SumUniqMatch < minUReads { // no enough unique match
 				hs = append(hs, h)
 				continue
 			}
@@ -315,6 +326,7 @@ Performance Note:
 		for _, h := range hs {
 			delete(profile, h)
 		}
+		log.Infof("  number of estimated references: %d", len(profile))
 
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
@@ -690,7 +702,7 @@ Performance Note:
 
 		for _, t := range profile2 {
 			for _, c = range t.Match {
-				if c > float64(minReads) {
+				if c > minReads {
 					t.FragsProp++
 				}
 				t.SumMatch += c
@@ -754,7 +766,7 @@ Performance Note:
 			}
 		}
 
-		log.Infof("#reads: %.0f, #reads of profile: %0.f, proportion: %.6f%%", nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
+		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%", nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 	},
 }
 

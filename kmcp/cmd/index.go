@@ -112,6 +112,10 @@ References:
 
 		inDir := getFlagString(cmd, "in-dir")
 
+		if filepath.Clean(inDir) == filepath.Clean(outDir) {
+			checkError(fmt.Errorf("intput and output paths should not be the same"))
+		}
+
 		readFromDir := inDir != ""
 		if readFromDir {
 			var isDir bool

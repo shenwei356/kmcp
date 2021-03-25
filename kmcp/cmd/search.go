@@ -175,6 +175,13 @@ Attentions:
 			}
 		}
 
+		outFileClean := filepath.Clean(outFile)
+		for _, file := range files {
+			if !isStdin(file) && filepath.Clean(file) == outFileClean {
+				checkError(fmt.Errorf("out file should not be one of the input file"))
+			}
+		}
+
 		// ---------------------------------------------------------------
 		// load db
 
