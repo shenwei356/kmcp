@@ -232,7 +232,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tmKmers\tqCov\ttCov\tjacc\n")
+			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tmKmers\tqCov\ttCov\tjacc\n")
 		}
 
 		var fastxReader *fastx.Reader
