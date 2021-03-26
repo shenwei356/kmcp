@@ -222,6 +222,7 @@ func stringSplitN(s string, sep string, n int, a *[]string) {
 }
 
 // modify from https://github.com/mxschmitt/golang-combinations/blob/master/combinations.go
+// too slow for big n.
 func Combinations(set []uint64, n int) (subsets [][]uint64) {
 	length := uint(len(set))
 
@@ -250,6 +251,29 @@ func Combinations(set []uint64, n int) (subsets [][]uint64) {
 		subsets = append(subsets, subset)
 	}
 	return subsets
+}
+
+type Uint64Slice []uint64
+
+func (s Uint64Slice) Len() int           { return len(s) }
+func (s Uint64Slice) Less(i, j int) bool { return s[i] < s[j] }
+func (s Uint64Slice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// Note: set should not have duplicates
+func Combinations2(set []uint64) [][2]uint64 {
+	if len(set) < 2 {
+		return nil
+	}
+	var i, j int
+	var n = len(set)
+	var np1 = n - 1
+	comb := make([][2]uint64, 0, n*(n-1)/2)
+	for i = 0; i < np1; i++ {
+		for j = i + 1; j < n; j++ {
+			comb = append(comb, [2]uint64{set[i], set[j]})
+		}
+	}
+	return comb
 }
 
 func sortTowUint64s(a, b uint64) (uint64, uint64) {

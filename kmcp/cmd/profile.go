@@ -178,8 +178,9 @@ Performance Note:
 		// ---------------------------------------------------------------
 		// stage 1/3
 		if opt.Verbose {
-			log.Infof("stage 1/3: basic counting for filtering out low-confidence references")
+			log.Infof("stage 1/3: counting matches and unique matches for filtering out low-confidence references")
 		}
+		timeStart1 := time.Now()
 
 		for _, file := range files {
 			infh, r, _, err := inStream(file)
@@ -187,9 +188,9 @@ Performance Note:
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64][]MatchResult) // target -> match result
+			matches := make(map[uint64]*[]MatchResult) // target -> match result
 			var m MatchResult
-			var ms []MatchResult
+			var ms *[]MatchResult
 			var t *Target
 			var ok bool
 			var hTarget, h uint64
@@ -210,9 +211,9 @@ Performance Note:
 
 					if prevQuery != match.Query { // new query
 						for h, ms = range matches {
-							floatMsSize = float64(len(ms))
+							floatMsSize = float64(len(*ms))
 							first = true
-							for _, m = range ms {
+							for _, m = range *ms {
 								if t, ok = profile[h]; !ok {
 									t0 := Target{
 										Name:       m.Target,
@@ -239,23 +240,25 @@ Performance Note:
 							}
 						}
 
-						matches = make(map[uint64][]MatchResult)
+						matches = make(map[uint64]*[]MatchResult)
 					}
 
 					hTarget = xxh3.HashString(match.Target)
-					if _, ok = matches[hTarget]; !ok {
-						matches[hTarget] = make([]MatchResult, 0, 1)
+					if ms, ok = matches[hTarget]; !ok {
+						tmp := []MatchResult{match}
+						matches[hTarget] = &tmp
+					} else {
+						*ms = append(*ms, match)
 					}
-					matches[hTarget] = append(matches[hTarget], match)
 
 					prevQuery = match.Query
 				}
 			}
 
 			for h, ms = range matches {
-				floatMsSize = float64(len(ms))
+				floatMsSize = float64(len(*ms))
 				first = true
-				for _, m = range ms {
+				for _, m = range *ms {
 					if t, ok = profile[h]; !ok {
 						t0 := Target{
 							Name:       m.Target,
@@ -326,17 +329,19 @@ Performance Note:
 		for _, h := range hs {
 			delete(profile, h)
 		}
+
 		log.Infof("  number of estimated references: %d", len(profile))
+		log.Infof("  elapsed time: %s", time.Since(timeStart1))
 
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
 		if opt.Verbose {
 			log.Infof("stage 2/3: counting ambiguous matches for correcting matches")
 		}
+		timeStart1 = time.Now()
 
 		// hashA -> hashB -> count
 		ambMatch := make(map[uint64]map[uint64]float64, 128)
-		// ambMatchDecision := make(map[uint64]map[uint64]uint64, 128)
 
 		for _, file := range files {
 			infh, r, _, err := inStream(file)
@@ -344,13 +349,16 @@ Performance Note:
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64][]MatchResult) // target -> match result
+			matches := make(map[uint64]*[]MatchResult) // target -> match result
 			var ok bool
+			var ms *[]MatchResult
 			var hTarget, h, h1, h2 uint64
 			var prevQuery string
 			hs := make([]uint64, 0, 256)
-			var comb []uint64
 			var match MatchResult
+			var amb map[uint64]float64
+			var i, j int
+			var n, np1 int
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -366,31 +374,40 @@ Performance Note:
 						if len(matches) > 1 { // skip uniq match
 							hs = hs[:0]
 							for h = range matches {
-								_, ok = profile[h]
-								if !ok { // skip low-confidence match
+								if _, ok = profile[h]; !ok { // skip low-confidence match
 									continue
 								}
 								hs = append(hs, h)
 							}
 
 							if len(hs) >= 2 {
-								for _, comb = range Combinations(hs, 2) {
-									h1, h2 = sortTowUint64s(comb[0], comb[1])
-									if _, ok = ambMatch[h1]; !ok {
-										ambMatch[h1] = make(map[uint64]float64, 128)
+								sorts.Quicksort(Uint64Slice(hs))
+
+								n = len(hs)
+								np1 = len(hs) - 1
+								for i = 0; i < np1; i++ {
+									for j = i + 1; j < n; j++ {
+										h1, h2 = hs[i], hs[j]
+										if amb, ok = ambMatch[h1]; !ok {
+											ambMatch[h1] = make(map[uint64]float64, 128)
+											ambMatch[h1][h2]++
+										} else {
+											amb[h2]++
+										}
 									}
-									ambMatch[h1][h2]++
 								}
 							}
 						}
-						matches = make(map[uint64][]MatchResult)
+						matches = make(map[uint64]*[]MatchResult)
 					}
 
 					hTarget = xxh3.HashString(match.Target)
-					if _, ok = matches[hTarget]; !ok {
-						matches[hTarget] = make([]MatchResult, 0, 1)
+					if ms, ok = matches[hTarget]; !ok {
+						tmp := []MatchResult{match}
+						matches[hTarget] = &tmp
+					} else {
+						*ms = append(*ms, match)
 					}
-					matches[hTarget] = append(matches[hTarget], match)
 					prevQuery = match.Query
 				}
 			}
@@ -398,35 +415,45 @@ Performance Note:
 			if len(matches) > 1 {
 				hs = hs[:0]
 				for h = range matches {
-					_, ok = profile[h]
-					if !ok { // skip low-confidence match
+					if _, ok = profile[h]; !ok { // skip low-confidence match
 						continue
 					}
 					hs = append(hs, h)
 				}
 
 				if len(hs) >= 2 {
-					for _, comb = range Combinations(hs, 2) {
-						h1, h2 = sortTowUint64s(comb[0], comb[1])
-						if _, ok = ambMatch[h1]; !ok {
-							ambMatch[h1] = make(map[uint64]float64, 128)
+					sorts.Quicksort(Uint64Slice(hs))
+
+					n = len(hs)
+					np1 = len(hs) - 1
+					for i = 0; i < np1; i++ {
+						for j = i + 1; j < n; j++ {
+							h1, h2 = hs[i], hs[j]
+							if amb, ok = ambMatch[h1]; !ok {
+								ambMatch[h1] = make(map[uint64]float64, 128)
+								ambMatch[h1][h2]++
+							} else {
+								amb[h2]++
+							}
 						}
-						ambMatch[h1][h2]++
 					}
 				}
 			}
 
-			matches = make(map[uint64][]MatchResult)
+			matches = make(map[uint64]*[]MatchResult)
 
 			checkError(scanner.Err())
 			r.Close()
 		}
 
+		log.Infof("  elapsed time: %s", time.Since(timeStart1))
+
 		// ---------------------------------------------------------------
 		// stage 3/3
 		if opt.Verbose {
-			log.Infof("stage 3/3: computing profile")
+			log.Infof("stage 3/3: correcting matches and computing profile")
 		}
+		timeStart1 = time.Now()
 
 		profile2 := make(map[uint64]*Target, 128)
 		var nReads float64
@@ -438,15 +465,14 @@ Performance Note:
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64][]MatchResult) // target -> match result
+			matches := make(map[uint64]*[]MatchResult) // target -> match result
 			var m MatchResult
-			var ms []MatchResult
+			var ms *[]MatchResult
 			var t *Target
 			var ok bool
 			var hTarget, h, h0, h1, h2 uint64
 			var prevQuery string
 			var floatMsSize float64
-			var i int
 			var uniqMatch bool
 			var first bool
 			var sumUReads, prop float64
@@ -470,8 +496,7 @@ Performance Note:
 							// skip low-confidence match
 							hs = hs[:0] // list to delete
 							for h = range matches {
-								_, ok = profile[h]
-								if ok { // skip low-confidence match
+								if _, ok = profile[h]; ok { // skip low-confidence match
 									continue
 								}
 								hs = append(hs, h)
@@ -503,14 +528,15 @@ Performance Note:
 									delete(matches, h)
 								}
 
-								if len(matches) > 1 {
+								if len(matches) > 1 { // redistribute matches
 									sumUReads = 0
 									for h = range matches {
 										sumUReads += profile[h].SumUniqMatch
 									}
 									for h, ms = range matches {
-										floatMsSize = float64(len(ms))
-										for i, m = range ms {
+										floatMsSize = float64(len(*ms))
+										first = true
+										for _, m = range *ms {
 											if t, ok = profile2[h]; !ok {
 												t0 := Target{
 													Name:       m.Target,
@@ -525,8 +551,9 @@ Performance Note:
 
 											prop = profile[h].SumUniqMatch / sumUReads
 
-											if i == 0 { // count once
+											if first { // count once
 												t.QLen[m.FragIdx] += float64(m.QLen) * prop
+												first = false
 											}
 
 											t.Match[m.FragIdx] += prop / floatMsSize
@@ -537,7 +564,7 @@ Performance Note:
 								}
 							} else if len(matches) == 1 {
 								uniqMatch = true
-							} else {
+							} else { // 0
 								nUnassignedReads++
 							}
 						} else if len(matches) == 1 {
@@ -546,9 +573,9 @@ Performance Note:
 
 						if uniqMatch {
 							for h, ms = range matches {
-								floatMsSize = float64(len(ms))
-
-								for i, m = range ms {
+								floatMsSize = float64(len(*ms))
+								first = true
+								for _, m = range *ms {
 									if t, ok = profile2[h]; !ok {
 										t0 := Target{
 											Name:       m.Target,
@@ -561,9 +588,10 @@ Performance Note:
 										t = &t0
 									}
 
-									if i == 0 { // count once
+									if first { // count once
 										t.UniqMatch[m.FragIdx] += floatOne
 										t.QLen[m.FragIdx] += float64(m.QLen)
+										first = false
 									}
 
 									t.Match[m.FragIdx] += floatOne / floatMsSize
@@ -571,15 +599,17 @@ Performance Note:
 							}
 						}
 
-						matches = make(map[uint64][]MatchResult)
+						matches = make(map[uint64]*[]MatchResult)
 					}
 
 					hTarget = xxh3.HashString(match.Target)
-					if _, ok = matches[hTarget]; !ok {
-						matches[hTarget] = make([]MatchResult, 0, 1)
+					if ms, ok = matches[hTarget]; !ok {
+						tmp := []MatchResult{match}
+						matches[hTarget] = &tmp
+					} else {
+						*ms = append(*ms, match)
 					}
 
-					matches[hTarget] = append(matches[hTarget], match)
 					prevQuery = match.Query
 				}
 			}
@@ -590,8 +620,7 @@ Performance Note:
 				// skip low-confidence match
 				hs = hs[:0] // list to delete
 				for h = range matches {
-					_, ok = profile[h]
-					if ok { // skip low-confidence match
+					if _, ok = profile[h]; ok { // skip low-confidence match
 						continue
 					}
 					hs = append(hs, h)
@@ -623,15 +652,15 @@ Performance Note:
 						delete(matches, h)
 					}
 
-					if len(matches) > 1 {
+					if len(matches) > 1 { // redistribute matches
 						sumUReads = 0
 						for h = range matches {
 							sumUReads += profile[h].SumUniqMatch
 						}
-
 						for h, ms = range matches {
-							floatMsSize = float64(len(ms))
-							for i, m = range ms {
+							floatMsSize = float64(len(*ms))
+							first = true
+							for _, m = range *ms {
 								if t, ok = profile2[h]; !ok {
 									t0 := Target{
 										Name:       m.Target,
@@ -645,29 +674,32 @@ Performance Note:
 								}
 
 								prop = profile[h].SumUniqMatch / sumUReads
-								if i == 0 { // count once
+
+								if first { // count once
 									t.QLen[m.FragIdx] += float64(m.QLen) * prop
+									first = false
 								}
 
 								t.Match[m.FragIdx] += prop / floatMsSize
 							}
 						}
-					} else if len(matches) == 1 {
+					} else { // len(matches) == 1
 						uniqMatch = true
-					} else {
-						nUnassignedReads++
 					}
 				} else if len(matches) == 1 {
 					uniqMatch = true
+				} else { // 0
+					nUnassignedReads++
 				}
 			} else if len(matches) == 1 {
 				uniqMatch = true
 			}
+
 			if uniqMatch {
 				for h, ms = range matches {
-					floatMsSize = float64(len(ms))
-
-					for i, m = range ms {
+					floatMsSize = float64(len(*ms))
+					first = true
+					for _, m = range *ms {
 						if t, ok = profile2[h]; !ok {
 							t0 := Target{
 								Name:       m.Target,
@@ -676,20 +708,20 @@ Performance Note:
 								UniqMatch:  make([]float64, m.IdxNum),
 								QLen:       make([]float64, m.IdxNum),
 							}
-							profile2[h2] = &t0
+							profile2[h] = &t0
 							t = &t0
 						}
 
-						if i == 0 { // count once
+						if first { // count once
 							t.UniqMatch[m.FragIdx] += floatOne
 							t.QLen[m.FragIdx] += float64(m.QLen)
+							first = false
 						}
 
 						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
 				}
 			}
-			matches = make(map[uint64][]MatchResult)
 
 			checkError(scanner.Err())
 			r.Close()
@@ -727,6 +759,9 @@ Performance Note:
 
 			targets = append(targets, t)
 		}
+
+		log.Infof("  number of estimated references: %d", len(targets))
+		log.Infof("  elapsed time: %s", time.Since(timeStart1))
 
 		// ---------------------------------------------------------------
 		// output
@@ -783,7 +818,7 @@ func init() {
 
 	// for ref fragments
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of unique matched reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 5, `minimal number of unique matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimal proportion of matched fragments`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
