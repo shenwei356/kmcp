@@ -22,10 +22,10 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,6 +33,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/breader"
+	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
@@ -49,6 +50,11 @@ Performance Note:
      lines proceeded by a thread can be set by the flag --chunk-size).
   2. However using a lot of threads does not always accelerate processing,
      4 threads with chunk size 0f 500-5000 is fast enough.
+
+Profiling output format
+  1. kmcp
+  2. CAMI v0.10.0
+  3. MetaPhlAn v2
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -78,11 +84,46 @@ Performance Note:
 
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 
+		taxidMappingFiles := getFlagStringSlice(cmd, "taxid-map")
+		taxonomyDataDir := getFlagString(cmd, "taxonomy-dir")
+		if len(taxidMappingFiles) > 0 && taxonomyDataDir == "" {
+			checkError(fmt.Errorf("flag -X/--taxonomy-dir is needed when -N/--taxid-map given"))
+		}
+		if len(taxidMappingFiles) == 0 && taxonomyDataDir != "" {
+			checkError(fmt.Errorf("flag -N/--taxid-map is needed when -X/--taxonomy-dir given"))
+		}
+		separator := getFlagString(cmd, "separator")
+		if separator == "" {
+			log.Warningf("value of -s/--separator better not be empty")
+		}
+
 		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
 		if opt.NumCPUs > 4 {
 			log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
 			opt.NumCPUs = 4
 			runtime.GOMAXPROCS(opt.NumCPUs)
+		}
+
+		camiReportFile := getFlagString(cmd, "cami-report")
+		outputCamiReport := camiReportFile != ""
+		if outputCamiReport && !strings.HasSuffix(camiReportFile, ".profile") {
+			camiReportFile = camiReportFile + ".profile"
+		}
+
+		metaphlanReportFile := getFlagString(cmd, "metaphlan-report")
+		outputMetaphlanReport := metaphlanReportFile != ""
+		if outputMetaphlanReport && !strings.HasSuffix(metaphlanReportFile, ".profile") {
+			metaphlanReportFile = metaphlanReportFile + ".profile"
+		}
+
+		showRanks := getFlagStringSlice(cmd, "show-rank")
+		rankPrefixes := getFlagStringSlice(cmd, "rank-prefix")
+		if outputMetaphlanReport && len(showRanks) != len(rankPrefixes) {
+			checkError(fmt.Errorf("number of ranks to show and ther prefixes should match"))
+		}
+		rankOrder := make(map[string]int, len(showRanks))
+		for _i, _r := range showRanks {
+			rankOrder[_r] = _i
 		}
 
 		// ---------------------------------------------------------------
@@ -96,7 +137,7 @@ Performance Note:
 				// log.Info("no files given, reading from stdin")
 				checkError(fmt.Errorf("stdin not supported"))
 			} else {
-				log.Infof("%d input file(s) given", len(files))
+				log.Infof("  %d input file(s) given", len(files))
 			}
 		}
 
@@ -138,10 +179,66 @@ Performance Note:
 			}
 
 			if opt.Verbose {
-				log.Infof("%d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
+				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
 			mappingNames = len(namesMap) > 0
+		}
+
+		// ---------------------------------------------------------------
+		// taxid mapping files
+
+		mappingTaxids := len(taxidMappingFiles) != 0
+		var taxdb *unikmer.Taxonomy
+		var taxidMap map[string]uint32
+
+		if mappingTaxids {
+			if opt.Verbose {
+				log.Infof("loading TaxId mapping file ...")
+			}
+			var taxidMappingFile string
+			taxidMappingFile = taxidMappingFiles[0]
+			taxidMapStr, err := cliutil.ReadKVs(taxidMappingFile, false)
+			if err != nil {
+				checkError(errors.Wrap(err, taxidMappingFile))
+			}
+			taxidMap = make(map[string]uint32, len(taxidMapStr))
+			var taxid uint64
+			for k, s := range taxidMapStr {
+				taxid, err = strconv.ParseUint(s, 10, 32)
+				if err != nil {
+					checkError(fmt.Errorf("invalid TaxId: %s", s))
+				}
+				taxidMap[k] = uint32(taxid)
+			}
+
+			if len(taxidMappingFiles) > 1 {
+				for _, taxidMappingFile := range taxidMappingFiles[1:] {
+					_taxidMapStr, err := cliutil.ReadKVs(taxidMappingFile, false)
+					if err != nil {
+						checkError(errors.Wrap(err, taxidMappingFile))
+					}
+					for _k, _v := range _taxidMapStr {
+						taxid, err = strconv.ParseUint(_v, 10, 32)
+						if err != nil {
+							checkError(fmt.Errorf("invalid TaxId: %s", _v))
+						}
+						taxidMap[_k] = uint32(taxid)
+					}
+				}
+			}
+
+			if opt.Verbose {
+				log.Infof("  %d pairs of TaxId mapping values from %d file(s) loaded", len(taxidMap), len(taxidMappingFiles))
+			}
+
+			mappingTaxids = len(taxidMap) > 0
+
+			if mappingTaxids {
+				taxdb = loadTaxonomy(opt, taxonomyDataDir)
+			} else {
+				checkError(fmt.Errorf("no valid TaxIds found in TaxId mapping file: %s", strings.Join(taxidMappingFiles, ", ")))
+			}
 		}
 
 		// ---------------------------------------------------------------
@@ -762,6 +859,8 @@ Performance Note:
 
 		log.Infof("  number of estimated references: %d", len(targets))
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
+		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
+			nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 
 		// ---------------------------------------------------------------
 		// output
@@ -776,32 +875,111 @@ Performance Note:
 			w.Close()
 		}()
 
-		if mappingNames {
-			outfh.WriteString(fmt.Sprint("target\tabundance\tfragsProp\treads\tureads\tannotation\n"))
-		} else {
-			outfh.WriteString(fmt.Sprint("target\tabundance\tfragsProp\treads\tureads\n"))
-		}
-
 		sorts.Quicksort(Targets(targets))
 
-		var name2 string
-		var totalCoverage float64
+		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
 
+		var totalCoverage float64
 		for _, t := range targets {
 			totalCoverage += t.Coverage
 		}
+
+		var taxid uint32
+		var ok bool
+
+		showRanksMap := make(map[string]interface{}, 128)
+		for _, _rank := range showRanks {
+			showRanksMap[_rank] = struct{}{}
+		}
+
+		rankPrefixesMap := make(map[string]string, len(rankPrefixes))
+		for _i, _r := range showRanks {
+			rankPrefixesMap[_r] = rankPrefixes[_i]
+		}
+
 		for _, t := range targets {
 			if mappingNames {
-				name2 = namesMap[t.Name]
-				outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%s\n",
-					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch, name2))
-			} else {
-				outfh.WriteString(fmt.Sprintf("%s\t%0.6f\t%.2f\t%.0f\t%.0f\n",
-					t.Name, t.Coverage/totalCoverage*100, t.FragsProp, t.SumMatch, t.SumUniqMatch))
+				t.RefName = namesMap[t.Name]
+			}
+
+			if mappingTaxids {
+				if taxid, ok = taxidMap[t.Name]; !ok {
+					log.Warningf("%s is not mapped to any TaxId", t.Name)
+				} else {
+					t.AddTaxonomy(taxdb, showRanksMap, taxid)
+				}
+			}
+
+			t.Percentage = t.Coverage / totalCoverage * 100
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%s\t%d\t%s\t%s\t%s\t%s\n",
+				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch,
+				t.RefName,
+				taxid, t.Rank, t.TaxonName,
+				strings.Join(t.LineageNames, separator),
+				strings.Join(t.LineageTaxids, separator)))
+		}
+
+		// metaphylan2 format
+
+		var profile3 map[uint32]*ProfileNode
+		var nodes []*ProfileNode
+
+		if outputCamiReport || outputMetaphlanReport {
+			profile3 = generateProfile(taxdb, targets)
+
+			nodes = make([]*ProfileNode, 0, len(profile3))
+			for _, node := range profile3 {
+				nodes = append(nodes, node)
+			}
+
+			sort.Slice(nodes, func(i, j int) bool {
+				if rankOrder[nodes[i].Rank] < rankOrder[nodes[j].Rank] {
+					return true
+				}
+
+				if rankOrder[nodes[i].Rank] == rankOrder[nodes[j].Rank] {
+					return nodes[i].Percentage > nodes[j].Percentage
+				}
+
+				return false
+			})
+		}
+
+		if outputMetaphlanReport {
+			outfh2, gw2, w2, err := outStream(metaphlanReportFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfh2.Flush()
+				if gw2 != nil {
+					gw2.Close()
+				}
+				w2.Close()
+			}()
+			outfh2.WriteString("#SampleID\tKMCP\n")
+			var lineage string
+			filterByRank := len(showRanksMap) > 0
+			for _, node := range nodes {
+				if filterByRank {
+					if _, ok = showRanksMap[taxdb.Rank(node.Taxid)]; !ok {
+						continue
+					}
+					names := make([]string, 0, 8)
+					for i, taxid := range node.LineageTaxids {
+						if _, ok = showRanksMap[taxdb.Rank(taxid)]; ok {
+							names = append(names, rankPrefixesMap[taxdb.Rank(taxid)]+node.LineageNames[i])
+						}
+					}
+					lineage = strings.Join(names, "|")
+				} else {
+					lineage = strings.Join(node.LineageNames, "|")
+				}
+
+				outfh2.WriteString(fmt.Sprintf("%s\t%f\n", lineage, node.Percentage))
 			}
 		}
 
-		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%", nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
+		// cami format
+
 	},
 }
 
@@ -826,134 +1004,16 @@ func init() {
 	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambigous reads`)
 
 	// name mapping
-	profileCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
-}
+	profileCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)
 
-type MatchResult struct {
-	Query   string
-	QLen    int
-	QKmers  int
-	FPR     float64
-	Hits    int
-	Target  string
-	FragIdx int
-	IdxNum  int
-	GSize   uint64
-	MKmers  int
-	QCov    float64
-}
+	// taxonomy
+	profileCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
+	profileCmd.Flags().StringP("taxonomy-dir", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
+	profileCmd.Flags().StringP("separator", "s", ";", `separator of TaxIds and taxonomy names`)
+	profileCmd.Flags().StringSliceP("show-rank", "", []string{"superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"}, "only show TaxIds and names of these ranks")
+	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
 
-func parseMatchResult(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (MatchResult, bool) {
-	stringSplitN(line, "\t", numFields, items)
-	if len(*items) < numFields {
-		checkError(fmt.Errorf("invalid kmcp search result format"))
-	}
-
-	var m MatchResult
-
-	var err error
-
-	// too slow
-	m.FPR, err = strconv.ParseFloat((*items)[3], 64)
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse FPR: %s", (*items)[3]))
-	}
-	if m.FPR > maxPFR {
-		return m, false
-	}
-
-	// too slow
-	m.QCov, err = strconv.ParseFloat((*items)[10], 64)
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[10]))
-	}
-	if m.QCov < minQcov {
-		return m, false
-	}
-
-	// -----------
-
-	m.Query = (*items)[0]
-
-	m.QLen, err = strconv.Atoi((*items)[1])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse qLen: %s", (*items)[1]))
-	}
-
-	m.QKmers, err = strconv.Atoi((*items)[2])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse qKmers: %s", (*items)[2]))
-	}
-
-	m.Hits, err = strconv.Atoi((*items)[4])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse hits: %s", (*items)[4]))
-	}
-
-	m.Target = (*items)[5]
-
-	m.FragIdx, err = strconv.Atoi((*items)[6])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse fragIdx: %s", (*items)[6]))
-	}
-
-	m.IdxNum, err = strconv.Atoi((*items)[7])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse IdxNum: %s", (*items)[7]))
-	}
-
-	m.GSize, err = strconv.ParseUint((*items)[8], 10, 64)
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse genomeSize: %s", (*items)[8]))
-	}
-
-	m.MKmers, err = strconv.Atoi((*items)[9])
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse mKmers: %s", (*items)[9]))
-	}
-
-	return m, true
-}
-
-type Target struct {
-	Name string
-
-	GenomeSize uint64
-
-	// Counting matches in all frags
-	// some reads match multiple sites in the same genome,
-	// the count should be divided by number of sites.
-	Match []float64
-
-	// sum of read (query) length
-	QLen []float64
-
-	// unique match
-	UniqMatch []float64
-
-	SumMatch     float64
-	SumUniqMatch float64
-	FragsProp    float64
-	Coverage     float64
-	Qlens        float64
-}
-
-func (t Target) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(t.Name)
-	for i := range t.Match {
-		buf.WriteString(fmt.Sprintf(", %d: %.0f(%.0f)", i, t.Match[i], t.UniqMatch[i]))
-	}
-	buf.WriteString("\n")
-	return buf.String()
-}
-
-type Targets []*Target
-
-func (t Targets) Len() int { return len(t) }
-func (t Targets) Less(i, j int) bool {
-	return t[i].Coverage > t[j].Coverage || t[i].FragsProp > t[j].FragsProp
-}
-func (t Targets) Swap(i, j int) {
-	t[i], t[j] = t[j], t[i]
+	// other output formats
+	profileCmd.Flags().StringP("metaphlan-report", "", "", `save extra metaphlan-like format`)
+	profileCmd.Flags().StringP("cami-report", "", "", `save extra CAMI format`)
 }

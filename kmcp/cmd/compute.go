@@ -267,20 +267,20 @@ Output:
 				checkError(errors.Wrapf(err, "walking dir: %s", inDir))
 			}
 			if len(files) == 0 {
-				log.Warningf("no files matching regular expression: %s", reFileStr)
+				log.Warningf("  no files matching regular expression: %s", reFileStr)
 			}
 		} else {
 			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
 			if opt.Verbose {
 				if len(files) == 1 && isStdin(files[0]) {
-					log.Info("no files given, reading from stdin")
+					log.Info("  no files given, reading from stdin")
 				}
 			}
 		}
 		if len(files) < 1 {
 			checkError(fmt.Errorf("FASTA/Q files needed"))
 		} else if opt.Verbose {
-			log.Infof("%d input file(s) given", len(files))
+			log.Infof("  %d input file(s) given", len(files))
 		}
 
 		// ---------------------------------------------------------------
@@ -289,19 +289,19 @@ Output:
 		if opt.Verbose {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
-			log.Infof("k: %d", k)
-			log.Infof("circular genome: %v", circular0)
+			log.Infof("  k: %d", k)
+			log.Infof("  circular genome: %v", circular0)
 			if splitSeq {
-				log.Infof("split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
+				log.Infof("  split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
 			}
 			if minimizer {
-				log.Infof("minimizer window: %d", minimizerW)
+				log.Infof("  minimizer window: %d", minimizerW)
 			}
 			if syncmer {
-				log.Infof("bounded syncmer size: %d", syncmerS)
+				log.Infof("  bounded syncmer size: %d", syncmerS)
 			}
 			if scaled {
-				log.Infof("down-sampling scale: %d", scale)
+				log.Infof("  down-sampling scale: %d", scale)
 			}
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()

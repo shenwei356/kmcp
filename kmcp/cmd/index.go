@@ -298,7 +298,7 @@ References:
 
 			nfiles = len(fileInfos0)
 			if opt.Verbose {
-				log.Infof("%d cached file infos loaded", nfiles)
+				log.Infof("  %d cached file infos loaded", nfiles)
 			}
 
 			if len(fileInfos0) == 0 {
@@ -333,18 +333,18 @@ References:
 				files, err = getFileListFromDir(inDir, reFile, opt.NumCPUs)
 				checkError(errors.Wrapf(err, "err on walking dir: %s", inDir))
 				if len(files) == 0 {
-					log.Warningf("no files matching patttern: %s", reFileStr)
+					log.Warningf("  no files matching patttern: %s", reFileStr)
 				}
 			} else {
 				files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
 				if opt.Verbose {
 					if len(files) == 1 && isStdin(files[0]) {
-						log.Info("no files given, reading from stdin")
+						log.Info("  no files given, reading from stdin")
 					}
 				}
 			}
 			if opt.Verbose {
-				log.Infof("%d input file(s) given", len(files))
+				log.Infof("  %d input file(s) given", len(files))
 			}
 			nfiles = len(files)
 
@@ -464,7 +464,7 @@ References:
 			}
 
 			if opt.Verbose {
-				log.Infof("finished checking %d .unik files", nfiles)
+				log.Infof("  finished checking %d .unik files", nfiles)
 			}
 		}
 
@@ -481,23 +481,23 @@ References:
 		if opt.Verbose {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
-			log.Infof("number of hashes: %d", numHashes)
-			log.Infof("false positive rate: %f", fpr)
+			log.Infof("  number of hashes: %d", numHashes)
+			log.Infof("  false positive rate: %f", fpr)
 
 			if meta0.Minimizer {
-				log.Infof("minimizer window: %d", meta0.MinimizerW)
+				log.Infof("  minimizer window: %d", meta0.MinimizerW)
 			}
 			if meta0.Syncmer {
-				log.Infof("bounded syncmer size: %d", meta0.SyncmerS)
+				log.Infof("  bounded syncmer size: %d", meta0.SyncmerS)
 			}
 			if meta0.SplitSeq {
-				log.Infof("split seqequence size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
+				log.Infof("  split seqequence size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
 			}
 			if scaled {
-				log.Infof("down-sampling scale: %d", scale)
+				log.Infof("  down-sampling scale: %d", scale)
 			}
-			log.Infof("block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
-			log.Infof("block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
+			log.Infof("  block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
+			log.Infof("  block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
 			log.Infof("building index ...")
@@ -571,9 +571,9 @@ References:
 			if opt.Verbose {
 				log.Info()
 				if singleRepeat {
-					log.Infof("block size: %d", sBlock)
+					log.Infof("  block size: %d", sBlock)
 				} else {
-					log.Infof("[Repeat %d/%d] block size: %d", rr+1, numRepeats, sBlock)
+					log.Infof("  [Repeat %d/%d] block size: %d", rr+1, numRepeats, sBlock)
 				}
 			}
 
@@ -817,10 +817,10 @@ References:
 
 					if opt.Verbose && dryRun {
 						if singleRepeat {
-							log.Infof("%s #files: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
+							log.Infof("  %s #files: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
 								prefix, len(batch), maxElements, numSigs, bytesize.ByteSize(eFileSize))
 						} else {
-							log.Infof("%s #buckets: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
+							log.Infof("  %s #buckets: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
 								prefix, len(batch), maxElements, numSigs, bytesize.ByteSize(eFileSize))
 						}
 					}

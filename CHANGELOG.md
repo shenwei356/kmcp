@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.0 - 2021-03-xx
+## v0.4.0 - 2021-04-xx
 
 - new command:
     -  `profile` for generating taxonomic profile from search result

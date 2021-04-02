@@ -67,7 +67,7 @@ Attentions:
 		if dbDir == "" {
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		targetCov := getFlagFloat64(cmd, "target-cov")
 		minCount := getFlagNonNegativeInt(cmd, "min-count")
@@ -154,7 +154,7 @@ Attentions:
 			}
 
 			if opt.Verbose {
-				log.Infof("%d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
+				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
 			mappingNames = len(namesMap) > 0
@@ -169,9 +169,9 @@ Attentions:
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
 		if opt.Verbose {
 			if len(files) == 1 && isStdin(files[0]) {
-				log.Info("no files given, reading from stdin")
+				log.Info("  no files given, reading from stdin")
 			} else {
-				log.Infof("%d input file(s) given", len(files))
+				log.Infof("  %d input file(s) given", len(files))
 			}
 		}
 
@@ -220,9 +220,9 @@ Attentions:
 			log.Infof("database loaded")
 			log.Info()
 			log.Infof("-------------------- [important parameters] --------------------")
-			log.Infof("minimum  matched k-mers: %d", minCount)
-			log.Infof("minimum  query coverage: %f", queryCov)
-			log.Infof("minimum target coverage: %f", targetCov)
+			log.Infof("  minimum  matched k-mers: %d", minCount)
+			log.Infof("  minimum  query coverage: %f", queryCov)
+			log.Infof("  minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Info()
 			log.Info("searching ...")
