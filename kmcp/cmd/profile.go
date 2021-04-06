@@ -877,8 +877,6 @@ Profiling output format
 
 		sorts.Quicksort(Targets(targets))
 
-		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
-
 		var totalCoverage float64
 		for _, t := range targets {
 			totalCoverage += t.Coverage
@@ -887,6 +885,7 @@ Profiling output format
 		var taxid uint32
 		var ok bool
 
+		// for limit ranks to show
 		showRanksMap := make(map[string]interface{}, 128)
 		for _, _rank := range showRanks {
 			showRanksMap[_rank] = struct{}{}
@@ -896,6 +895,8 @@ Profiling output format
 		for _i, _r := range showRanks {
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
+
+		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
 
 		for _, t := range targets {
 			if mappingNames {
@@ -911,6 +912,7 @@ Profiling output format
 			}
 
 			t.Percentage = t.Coverage / totalCoverage * 100
+
 			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%s\t%d\t%s\t%s\t%s\t%s\n",
 				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch,
 				t.RefName,
@@ -919,7 +921,8 @@ Profiling output format
 				strings.Join(t.LineageTaxids, separator)))
 		}
 
-		// metaphylan2 format
+		// ---------------------------------------------------------------
+		// more output
 
 		var profile3 map[uint32]*ProfileNode
 		var nodes []*ProfileNode
@@ -945,6 +948,8 @@ Profiling output format
 			})
 		}
 
+		// metaphlan format
+
 		if outputMetaphlanReport {
 			outfh2, gw2, w2, err := outStream(metaphlanReportFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
 			checkError(err)
@@ -955,30 +960,86 @@ Profiling output format
 				}
 				w2.Close()
 			}()
+
 			outfh2.WriteString("#SampleID\tKMCP\n")
-			var lineage string
+
+			var lineageNames string
 			filterByRank := len(showRanksMap) > 0
+			names := make([]string, 0, 8)
 			for _, node := range nodes {
 				if filterByRank {
 					if _, ok = showRanksMap[taxdb.Rank(node.Taxid)]; !ok {
 						continue
 					}
-					names := make([]string, 0, 8)
+
+					names = names[:0]
 					for i, taxid := range node.LineageTaxids {
 						if _, ok = showRanksMap[taxdb.Rank(taxid)]; ok {
 							names = append(names, rankPrefixesMap[taxdb.Rank(taxid)]+node.LineageNames[i])
 						}
 					}
-					lineage = strings.Join(names, "|")
+					lineageNames = strings.Join(names, "|")
 				} else {
-					lineage = strings.Join(node.LineageNames, "|")
+					lineageNames = strings.Join(node.LineageNames, "|")
 				}
 
-				outfh2.WriteString(fmt.Sprintf("%s\t%f\n", lineage, node.Percentage))
+				outfh2.WriteString(fmt.Sprintf("%s\t%.6f\n", lineageNames, node.Percentage))
 			}
 		}
 
 		// cami format
+		// https://github.com/bioboxes/rfc/blob/master/data-format/profiling.mkd
+
+		if outputCamiReport {
+			outfh3, gw3, w3, err := outStream(camiReportFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfh3.Flush()
+				if gw3 != nil {
+					gw3.Close()
+				}
+				w3.Close()
+			}()
+
+			outfh3.WriteString("@SampleID:\n")
+			outfh3.WriteString("@Version:0.10.0\n")
+			outfh3.WriteString("@Ranks:superkingdom|phylum|class|order|family|genus|species|strain\n")
+			outfh3.WriteString("@TaxonomyID:ncbi-taxonomy\n")
+			outfh3.WriteString("@@TAXID\tRANK\tTAXPATH\tTAXPATHSN\tPERCENTAGE\n")
+
+			var lineageTaxids, lineageNames string
+			filterByRank := len(showRanksMap) > 0
+			names := make([]string, 0, 8)
+			taxids := make([]string, 0, 8)
+			for _, node := range nodes {
+				if filterByRank {
+					if _, ok = showRanksMap[taxdb.Rank(node.Taxid)]; !ok {
+						continue
+					}
+
+					names = names[:0]
+					taxids = taxids[:0]
+					for i, taxid := range node.LineageTaxids {
+						if _, ok = showRanksMap[taxdb.Rank(taxid)]; ok {
+							taxids = append(taxids, strconv.Itoa(int(taxid)))
+							names = append(names, node.LineageNames[i])
+						}
+					}
+					lineageTaxids = strings.Join(taxids, "|")
+					lineageNames = strings.Join(names, "|")
+				} else {
+					taxids = taxids[:0]
+					for _, taxid := range node.LineageTaxids {
+						taxids = append(taxids, strconv.Itoa(int(taxid)))
+					}
+					lineageTaxids = strings.Join(taxids, "|")
+					lineageNames = strings.Join(node.LineageNames, "|")
+				}
+
+				outfh3.WriteString(fmt.Sprintf("%d\t%s\t%s\t%s\t%.6f\n",
+					node.Taxid, node.Rank, lineageTaxids, lineageNames, node.Percentage))
+			}
+		}
 
 	},
 }
@@ -1014,6 +1075,6 @@ func init() {
 	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
 
 	// other output formats
-	profileCmd.Flags().StringP("metaphlan-report", "", "", `save extra metaphlan-like format`)
-	profileCmd.Flags().StringP("cami-report", "", "", `save extra CAMI format`)
+	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
+	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
 }
