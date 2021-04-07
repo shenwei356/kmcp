@@ -75,7 +75,9 @@ Attentions:
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
-		topN := getFlagNonNegativeInt(cmd, "keep-top")
+		// topN := getFlagNonNegativeInt(cmd, "keep-top")
+		topN := 0
+		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
 		// keepOrder := getFlagBool(cmd, "keep-order")
@@ -196,8 +198,9 @@ Attentions:
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 
-			TopN:   topN,
-			SortBy: sortBy,
+			TopN:       topN,
+			TopNScores: topNScore,
+			SortBy:     sortBy,
 
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
@@ -222,6 +225,7 @@ Attentions:
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Infof("  minimum  matched k-mers: %d", minCount)
 			log.Infof("  minimum  query coverage: %f", queryCov)
+			log.Infof("  minimum target coverage: %f", targetCov)
 			log.Infof("  minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Info()
@@ -390,7 +394,8 @@ func init() {
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
-	searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
+	// searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
+	searchCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 

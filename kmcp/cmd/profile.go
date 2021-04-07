@@ -53,8 +53,8 @@ Performance Note:
 
 Profiling output format
   1. kmcp
-  2. CAMI v0.10.0
-  3. MetaPhlAn v2
+  2. CAMI         (-M/--metaphlan-report)
+  3. MetaPhlAn v2 (-C/--cami-report)
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -74,6 +74,7 @@ Profiling output format
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-qcov")
+		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
 
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -296,6 +297,12 @@ Profiling output format
 			var match MatchResult
 			var first bool
 
+			onlyTopNScore := topNScore > 0
+			var nScore int
+			var pScore float64
+			pScore = 1024
+			var processThisMatch bool
+
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
 			var data interface{}
@@ -338,6 +345,24 @@ Profiling output format
 						}
 
 						matches = make(map[uint64]*[]MatchResult)
+						pScore = 1024
+						nScore = 0
+						processThisMatch = true
+					}
+
+					if onlyTopNScore {
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+							}
+							pScore = match.QCov
+						}
+					}
+
+					if !processThisMatch {
+						prevQuery = match.Query
+						continue
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -457,6 +482,12 @@ Profiling output format
 			var i, j int
 			var n, np1 int
 
+			onlyTopNScore := topNScore > 0
+			var nScore int
+			var pScore float64
+			pScore = 1024
+			var processThisMatch bool
+
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
 			var data interface{}
@@ -495,7 +526,26 @@ Profiling output format
 								}
 							}
 						}
+
 						matches = make(map[uint64]*[]MatchResult)
+						pScore = 1024
+						nScore = 0
+						processThisMatch = true
+					}
+
+					if onlyTopNScore {
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+							}
+							pScore = match.QCov
+						}
+					}
+
+					if !processThisMatch {
+						prevQuery = match.Query
+						continue
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -505,6 +555,7 @@ Profiling output format
 					} else {
 						*ms = append(*ms, match)
 					}
+
 					prevQuery = match.Query
 				}
 			}
@@ -575,6 +626,12 @@ Profiling output format
 			var sumUReads, prop float64
 			hs := make([]uint64, 0, 256)
 			var match MatchResult
+
+			onlyTopNScore := topNScore > 0
+			var nScore int
+			var pScore float64
+			pScore = 1024
+			var processThisMatch bool
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -697,6 +754,24 @@ Profiling output format
 						}
 
 						matches = make(map[uint64]*[]MatchResult)
+						pScore = 1024
+						nScore = 0
+						processThisMatch = true
+					}
+
+					if onlyTopNScore {
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+							}
+							pScore = match.QCov
+						}
+					}
+
+					if !processThisMatch {
+						prevQuery = match.Query
+						continue
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -896,7 +971,7 @@ Profiling output format
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
+		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
 
 		for _, t := range targets {
 			if mappingNames {
@@ -913,8 +988,8 @@ Profiling output format
 
 			t.Percentage = t.Coverage / totalCoverage * 100
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%s\t%d\t%s\t%s\t%s\t%s\n",
-				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch,
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch, t.GenomeSize,
 				t.RefName,
 				taxid, t.Rank, t.TaxonName,
 				strings.Join(t.LineageNames, separator),
@@ -1054,6 +1129,7 @@ func init() {
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read`)
 	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read`)
+	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
 
 	// for ref fragments
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)

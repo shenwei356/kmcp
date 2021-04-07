@@ -348,6 +348,10 @@ References:
 			}
 			nfiles = len(files)
 
+			if nfiles == 0 {
+				return
+			}
+
 			// ---------------------------------------------------------------
 			// check unik files and read k-mers numbers
 

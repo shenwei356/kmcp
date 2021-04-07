@@ -137,6 +137,7 @@ type SearchOptions struct {
 
 	KeepUnmatched bool
 	TopN          int
+	TopNScores    int
 	SortBy        string
 
 	MinMatched   int
@@ -189,6 +190,11 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		sortBy := opt.SortBy
 		nameMap := opt.NameMap
 
+		topN := opt.TopN
+		onlyTopN := topN > 0
+		topNScore := opt.TopNScores
+		onlyTopNScore := topNScore > 0
+
 		if !multipleDBs {
 			handleQuerySingleDB := func(query Query) {
 				query.Ch = make(chan QueryResult, nDBs)
@@ -206,9 +212,45 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					case "jacc":
 						sorts.Quicksort(SortByJacc{Matches(_queryResult.Matches)})
 					}
+
+					// filter by scores
+					if onlyTopNScore {
+						var n, i int
+						var score, pScore float64
+						pScore = 1024
+						var m Match
+						for i, m = range _queryResult.Matches {
+							switch sortBy {
+							case "qcov":
+								score = m.QCov
+							case "tcov":
+								score = m.TCov
+							case "jacc":
+								score = m.JaccardIndex
+							}
+
+							if score < pScore {
+								n++
+								if n > topNScore {
+									break
+								}
+
+								pScore = score
+							}
+
+						}
+						_queryResult.Matches = _queryResult.Matches[:i+1]
+					}
 				}
 
-				if mappingName {
+				if onlyTopN && len(_queryResult.Matches) > topN {
+					_queryResult.Matches = _queryResult.Matches[:topN]
+				}
+
+				// top n
+				if onlyTopNScore {
+
+				} else if mappingName {
 					var _m *Match
 					var ok bool
 					var t string
@@ -532,8 +574,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		numHashes := db.Info.NumHashes
 		indices := db.Indices
 		numIndices := len(indices)
-		topN := db.Options.TopN
-		onlyTopN := topN > 0
 
 		handleQuery := func(query Query) {
 			defer func() { <-tokens }()
@@ -611,10 +651,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 			// filter
 			if len(matches) > 0 {
-				if onlyTopN && len(matches) > topN {
-					matches = matches[:topN]
-				}
-
 				// send result
 				result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
 				result.DBId = db.DBId
