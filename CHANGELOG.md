@@ -1,14 +1,15 @@
 # Changelog
 
-## v0.4.0 - 2021-04-xx
+## v0.4.0 - 2021-04-08
 
 - new command:
-    -  `profile` for generating taxonomic profile from search result
+    - `profile` for generating taxonomic profile from search result
 - `compute`:
     - new flag `-B/--seq-name-filter` for filtering out unwanted sequences like plasmid.
     - new flag `-N/--ref-name-regexp` for extracting reference name from sequence file.
 - `search`:
     - change default threshold value
+    - new flag `-n/--keep-top-scores` for keeping matches with the top N score.
 
 ## v0.3.0 - 2021-03-16
 

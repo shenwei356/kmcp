@@ -11,10 +11,10 @@ K-mer-based Metagenomic Classification and Profiling
     time kmcp index -I genomes.m16/ -O genomes.m16.db --force
     
     # search    
-    time kmcp search -d genomes.m16.db/ -t 0.9 test.fa.gz -o result.tsv
+    time kmcp search -d genomes.m16.db/ -t 0.7 test.fa.gz -o search.tsv
 
     # profile
-    time kmcp profile result.tsv -T taxid_mapping.tsv -X taxdata-dir \
-        -o result.tsv.kmcp.profile \
-        --metaphlan-report result.tsv.m.profile \
-        --cami-report result.tsv.c.profile
+    time kmcp profile search.tsv -T taxid_mapping.tsv -X taxdata-dir \
+        -o search.tsv.k.profile \
+        --metaphlan-report search.tsv.m.profile \
+        --cami-report search.tsv.c.profile
