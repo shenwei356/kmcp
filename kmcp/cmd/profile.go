@@ -286,7 +286,7 @@ Profiling output format
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64]*[]MatchResult) // target -> match result
+			var matches map[uint64]*[]MatchResult // target -> match result
 			var m MatchResult
 			var ms *[]MatchResult
 			var t *Target
@@ -300,8 +300,10 @@ Profiling output format
 			onlyTopNScore := topNScore > 0
 			var nScore int
 			var pScore float64
-			pScore = 1024
 			var processThisMatch bool
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -358,11 +360,10 @@ Profiling output format
 							}
 							pScore = match.QCov
 						}
-					}
-
-					if !processThisMatch {
-						prevQuery = match.Query
-						continue
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -471,7 +472,7 @@ Profiling output format
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64]*[]MatchResult) // target -> match result
+			var matches map[uint64]*[]MatchResult // target -> match result
 			var ok bool
 			var ms *[]MatchResult
 			var hTarget, h, h1, h2 uint64
@@ -485,8 +486,10 @@ Profiling output format
 			onlyTopNScore := topNScore > 0
 			var nScore int
 			var pScore float64
-			pScore = 1024
 			var processThisMatch bool
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -541,11 +544,10 @@ Profiling output format
 							}
 							pScore = match.QCov
 						}
-					}
-
-					if !processThisMatch {
-						prevQuery = match.Query
-						continue
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -613,7 +615,7 @@ Profiling output format
 
 			scanner := bufio.NewScanner(infh)
 
-			matches := make(map[uint64]*[]MatchResult) // target -> match result
+			var matches map[uint64]*[]MatchResult // target -> match result
 			var m MatchResult
 			var ms *[]MatchResult
 			var t *Target
@@ -630,8 +632,10 @@ Profiling output format
 			onlyTopNScore := topNScore > 0
 			var nScore int
 			var pScore float64
-			pScore = 1024
 			var processThisMatch bool
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -767,11 +771,10 @@ Profiling output format
 							}
 							pScore = match.QCov
 						}
-					}
-
-					if !processThisMatch {
-						prevQuery = match.Query
-						continue
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					hTarget = xxh3.HashString(match.Target)
