@@ -203,14 +203,14 @@ Output:
 		}
 		splitSeq := splitSize0 > 0 || splitNumber0 > 1
 		if splitSeq {
-			if splitSize0 > 0 {
+			if splitSize0 > 0 { // split by size
 				if splitSize0 < k {
 					checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
 				}
 				if splitSize0 <= splitOverlap {
 					checkError(fmt.Errorf("value of flag -s/--split-size should > value of -l/--split-overlap"))
 				}
-			} else {
+			} else { // split by number
 				if splitNumber0 > 65535 {
 					checkError(fmt.Errorf(("value of flag -s/--split-number should not be greater than 65535")))
 				}
@@ -289,15 +289,32 @@ Output:
 		if opt.Verbose {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
-			log.Infof("  k: %d", k)
-			log.Infof("  circular genome: %v", circular0)
+
+			log.Info("input and output:")
+			log.Infof("  input directory: %s", inDir)
+			log.Infof("    regular expression of input files: %s", reFileStr)
+			log.Infof("    *regular expression for extracting reference name from file name: %s", reRefNameStr)
+			log.Infof("    *regular expressions for filtering out sequences: %s", reSeqNameStrs)
+			log.Infof("  output directory: %s", outDir)
+			log.Info()
+
+			log.Infof("sequences splitting: %v", splitSeq)
 			if splitSeq {
 				if splitNumber0 > 1 {
-					log.Infof("  split parts: %d, overlap: %d", splitNumber0, splitOverlap)
+					log.Infof("  split parts: %d, overlap: %d bp", splitNumber0, splitOverlap)
 				} else {
-					log.Infof("  split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
+					log.Infof("  split sequence size: %d bp, overlap: %d bp", splitSize0, splitOverlap)
 				}
 			}
+			log.Info()
+
+			log.Info("k-mer (sketches) computing:")
+
+			if !splitSeq && bySeq {
+				log.Infof("  computing k-mers (sketches) for every sequence: %v", bySeq)
+			}
+			log.Infof("  k: %d", k)
+			log.Infof("  circular genome: %v", circular0)
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
 			}
@@ -307,6 +324,9 @@ Output:
 			if scaled {
 				log.Infof("  down-sampling scale: %d", scale)
 			}
+			log.Infof("  saving exact number of k-mers: %v", exactNumber)
+			log.Info()
+
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
 			log.Infof("computing ...")
@@ -346,7 +366,7 @@ Output:
 			bar = pbs.AddBar(int64(len(files)),
 				mpb.BarStyle("[=>-]<+"),
 				mpb.PrependDecorators(
-					decor.Name("processing file: ", decor.WC{W: len("processing file: "), C: decor.DidentRight}),
+					decor.Name("processed files: ", decor.WC{W: len("processed files: "), C: decor.DidentRight}),
 					decor.Name("", decor.WCSyncSpaceR),
 					decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
 				),
@@ -411,7 +431,7 @@ Output:
 				var seqLen int
 				var splitSize int
 				var splitNumber int
-				splitByNumber := splitNumber0 > 0
+				splitByNumber := splitNumber0 > 1
 
 				var genomeSize uint64
 
@@ -667,6 +687,7 @@ Output:
 							fileHash = xxh3.HashString(baseFile)
 							dir3 = fmt.Sprintf("%03d", fileHash&1023)
 						}
+
 						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
 
 						meta := Meta{

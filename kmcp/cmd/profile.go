@@ -47,7 +47,7 @@ var profileCmd = &cobra.Command{
 
 Performance Note:
   1. This command parses searching result in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size).
+     lines proceeded by a thread can be set by the flag --chunk-size.
   2. However using a lot of threads does not always accelerate processing,
      4 threads with chunk size 0f 500-5000 is fast enough.
 

@@ -272,7 +272,7 @@ Attentions:
 			if opt.Verbose {
 				matched++
 
-				if total&10230 == 0 {
+				if total&8191 == 0 {
 					speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
 					fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
 				}

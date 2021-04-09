@@ -4,6 +4,9 @@
 
 - `search`:
     - show real-time processing speed.
+- `compute`:
+    - fix bug of `--by-seq`.
+    - more log.
 
 ## v0.4.0 - 2021-04-08
 
