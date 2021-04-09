@@ -292,7 +292,11 @@ Output:
 			log.Infof("  k: %d", k)
 			log.Infof("  circular genome: %v", circular0)
 			if splitSeq {
-				log.Infof("  split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
+				if splitNumber0 > 1 {
+					log.Infof("  split parts: %d, overlap: %d", splitNumber0, splitOverlap)
+				} else {
+					log.Infof("  split seqequence size: %d, overlap: %d", splitSize0, splitOverlap)
+				}
 			}
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
@@ -838,7 +842,7 @@ func init() {
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
 	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space)`)
 
-	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/split-size`)
+	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/--split-size`)
 	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences, incompatible with -n/--split-number`)
 	computeCmd.Flags().IntP("split-overlap", "l", 0, `fragment overlap for splitting sequences`)
 	computeCmd.Flags().IntP("split-min-ref", "m", 1000, `only splitting sequences >= M bp`)

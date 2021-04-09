@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -232,6 +233,8 @@ Attentions:
 			log.Info("searching ...")
 		}
 
+		timeStart1 := time.Now()
+
 		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(outFile, ".gz"), opt.CompressionLevel)
 		checkError(err)
 		defer func() {
@@ -254,10 +257,27 @@ Attentions:
 		// ---------------------------------------------------------------
 		// receive result and output
 
+		var total, matched uint64
+		var speed float64 // k reads/second
+
 		output := func(result QueryResult) {
+			if opt.Verbose {
+				total++
+			}
+
 			if len(result.Matches) == 0 && !keepUnmatched {
 				return
 			}
+
+			if opt.Verbose {
+				matched++
+
+				if total&10230 == 0 {
+					speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
+					fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
+				}
+			}
+
 			// query, len_query, num_kmers, fpr, num_matches,
 			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
@@ -370,6 +390,12 @@ Attentions:
 
 		checkError(sg.Close()) // cleanup
 		if opt.Verbose {
+			fmt.Fprintf(os.Stderr, "\n")
+
+			speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
+			log.Infof("")
+			log.Infof("processed queries: %d, speed: %.2f million queries per minute\n", total, speed)
+			log.Infof("%.4f%% (%d/%d) queries matched", float64(matched)/float64(total)*100, matched, total)
 			log.Infof("done searching")
 		}
 
