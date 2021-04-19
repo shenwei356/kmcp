@@ -83,6 +83,7 @@ Attentions:
 		sortBy := getFlagString(cmd, "sort-by")
 		// keepOrder := getFlagBool(cmd, "keep-order")
 		keepOrder := true
+		wholeFile := getFlagBool(cmd, "query-whole-file")
 
 		switch sortBy {
 		case "qcov", "jacc", "tcov":
@@ -360,6 +361,42 @@ Attentions:
 			}
 			fastxReader, err = fastx.NewDefaultReader(file)
 			checkError(errors.Wrap(err, file))
+
+			if wholeFile {
+				var recordID []byte
+				var sequence *seq.Seq
+				first := true
+				for {
+					record, err = fastxReader.Read()
+					if err != nil {
+						if err == io.EOF {
+							break
+						}
+						errors.Wrap(err, file)
+						break
+					}
+
+					if first {
+						recordID = make([]byte, len(record.ID))
+						copy(recordID, record.ID)
+						sequence = record.Seq.Clone2()
+						first = false
+					} else {
+						sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
+					}
+				}
+
+				sg.InCh <- Query{
+					Idx: id,
+					ID:  recordID,
+					Seq: sequence,
+				}
+
+				id++
+
+				continue
+			}
+
 			for {
 				record, err = fastxReader.Read()
 				if err != nil {
@@ -410,6 +447,7 @@ func init() {
 	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, searching would be very slow`)
 
 	// query option
+	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use whole file as query`)
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
 	searchCmd.Flags().Float64P("query-cov", "t", 0.7, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)

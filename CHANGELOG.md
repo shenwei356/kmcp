@@ -4,6 +4,7 @@
 
 - `search`:
     - show real-time processing speed.
+    - new flag `-g/--query-whole-file`.
 - `compute`:
     - fix bug of `--by-seq`.
     - more log.
