@@ -5,6 +5,7 @@
 - `search`:
     - show real-time processing speed.
     - new flag `-g/--query-whole-file`.
+    - new flag `-u/--kmer-dedup-threshold`.
 - `compute`:
     - fix bug of `--by-seq`.
     - more log.

@@ -23,6 +23,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"sync"
@@ -36,6 +37,7 @@ import (
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/twotwotwo/sorts"
+	"github.com/twotwotwo/sorts/sortutil"
 )
 
 // ---------------------------------------------------------------
@@ -134,6 +136,8 @@ type IndexQuery struct {
 type SearchOptions struct {
 	UseMMap bool
 	Threads int
+
+	DeduplicateThreshold int // deduplicate k-mers only number of kmers > this threshold
 
 	KeepUnmatched bool
 	TopN          int
@@ -614,6 +618,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			kmers, err = db.generateKmers(query.Seq, kmers)
 			// buf := poolIdxValues.Get().([]unikmer.IdxValue)
 			// kmers, err = db.generateKmers(query.Seq, kmers, buf)
+			// kmers, err := db.generateKmers(query.Seq)
 			if err != nil {
 				checkError(err)
 			}
@@ -638,10 +643,42 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				return
 			}
 
+			if nKmers > opt.DeduplicateThreshold {
+				// map is slower than sorting
+
+				// m := make(map[uint64]interface{}, nKmers)
+				// i := 0
+				// var ok bool
+				// for _, v := range kmers {
+				// 	if _, ok = m[v]; !ok {
+				// 		m[v] = struct{}{}
+				// 		kmers[i] = v
+				// 		i++
+				// 	}
+				// }
+				// kmers = kmers[:i]
+
+				sortutil.Uint64s(kmers)
+				_kmers := poolKmers.Get().([]uint64)
+				var p uint64 = math.MaxUint64
+				i := 0
+				for _, v := range kmers {
+					if p != v {
+						_kmers = append(_kmers, v)
+						i++
+						p = v
+					}
+				}
+				kmers = kmers[:0]
+				poolKmers.Put(kmers)
+				kmers = _kmers
+			}
+
 			// compute hashes
 			// reuse [][]uint64 object, to reduce GC
 			hashes := poolHashes.Get().([][]uint64)
 			for _, kmer := range kmers {
+				// for kmer := range kmers {
 				hashes = append(hashes, hashValues(kmer, numHashes))
 			}
 
@@ -702,6 +739,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint64, error) {
 	// func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64, buf []unikmer.IdxValue) ([]uint64, error) {
+	// func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) (map[uint64]interface{}, error) {
+	// kmers := make(map[uint64]interface{}, 128)
 	scaled := db.Info.Scaled
 	scale := db.Info.Scale
 	maxHash := ^uint64(0)
@@ -742,6 +781,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
+			// kmers[code] = struct{}{}
 		}
 	} else if db.Info.Minimizer {
 		for {
@@ -753,6 +793,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
+			// kmers[code] = struct{}{}
 		}
 	} else {
 		for {
@@ -764,6 +805,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
+			// kmers[code] = struct{}{}
 		}
 	}
 	return kmers, nil
@@ -1205,15 +1247,15 @@ func (idx *UnikIndex) Close() error {
 }
 
 var poolKmers = &sync.Pool{New: func() interface{} {
-	return make([]uint64, 0, 8)
+	return make([]uint64, 0, 256)
 }}
 
 var poolHashes = &sync.Pool{New: func() interface{} {
-	return make([][]uint64, 0, 8)
+	return make([][]uint64, 0, 256)
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
-	return make([]Match, 0, 1)
+	return make([]Match, 0, 8)
 }}
 
 var poolChanMatch = &sync.Pool{New: func() interface{} {

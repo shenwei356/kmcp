@@ -44,8 +44,11 @@ var searchCmd = &cobra.Command{
 	Long: `Search sequence from database
 
 Attentions:
-  1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
-  2. Increase value of -j/--threads for acceleratation.
+  1. A long query sequences may contain duplicated k-mers, which are
+     not removed for short sequences by default. You may modify the
+     value of -u/--kmer-dedup-threshold to remove duplicates.
+  2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+  3. Increase value of -j/--threads for acceleratation.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -84,6 +87,7 @@ Attentions:
 		// keepOrder := getFlagBool(cmd, "keep-order")
 		keepOrder := true
 		wholeFile := getFlagBool(cmd, "query-whole-file")
+		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
 
 		switch sortBy {
 		case "qcov", "jacc", "tcov":
@@ -199,6 +203,8 @@ Attentions:
 		searchOpt := SearchOptions{
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
+
+			DeduplicateThreshold: deduplicateThreshold,
 
 			TopN:       topN,
 			TopNScores: topNScore,
@@ -446,6 +452,7 @@ func init() {
 	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, searching would be very slow`)
 
 	// query option
+	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
 	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use whole file as query`)
 	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
 	searchCmd.Flags().Float64P("query-cov", "t", 0.7, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
