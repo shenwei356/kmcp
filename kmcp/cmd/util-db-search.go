@@ -247,10 +247,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					_queryResult.Matches = _queryResult.Matches[:topN]
 				}
 
-				// top n
-				if onlyTopNScore {
-
-				} else if mappingName {
+				if mappingName {
 					var _m *Match
 					var ok bool
 					var t string
@@ -382,6 +379,39 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			queryResult.Matches = _matches2
+
+			// filter by scores
+			if onlyTopNScore {
+				var n, i int
+				var score, pScore float64
+				pScore = 1024
+				var m Match
+				for i, m = range queryResult.Matches {
+					switch sortBy {
+					case "qcov":
+						score = m.QCov
+					case "tcov":
+						score = m.TCov
+					case "jacc":
+						score = m.JaccardIndex
+					}
+
+					if score < pScore {
+						n++
+						if n > topNScore {
+							break
+						}
+
+						pScore = score
+					}
+
+				}
+				queryResult.Matches = queryResult.Matches[:i+1]
+			}
+
+			if onlyTopN && len(queryResult.Matches) > topN {
+				queryResult.Matches = queryResult.Matches[:topN]
+			}
 
 			if mappingName {
 				var _m *Match

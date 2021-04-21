@@ -385,7 +385,6 @@ Attentions:
 						sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
 					}
 				}
-
 				sg.InCh <- Query{
 					Idx: id,
 					ID:  recordID,
