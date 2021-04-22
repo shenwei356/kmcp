@@ -291,8 +291,8 @@ Attentions:
 				result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, "", -1, 0, 0, float64(0), float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\n",
+					prefix2, "", -1, 0, 0, 0, 0, float64(0), float64(0)))
 				return
 			}
 

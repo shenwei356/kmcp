@@ -674,6 +674,11 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				kmers = _kmers
 			}
 
+			// update nKmers
+			nKmers = len(kmers)
+
+			result.NumKmers = nKmers
+
 			// compute hashes
 			// reuse [][]uint64 object, to reduce GC
 			hashes := poolHashes.Get().([][]uint64)
