@@ -139,6 +139,9 @@ type SearchOptions struct {
 
 	DeduplicateThreshold int // deduplicate k-mers only number of kmers > this threshold
 
+	Translated bool
+	Frames     int // translate frames
+
 	KeepUnmatched bool
 	TopN          int
 	TopNScores    int
@@ -756,8 +759,47 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 	var err error
 	var iter *unikmer.Iterator
 	var sketch *unikmer.Sketch
+	var sketchProt *unikmer.ProteinMinimizerSketch
+	var flagContinue bool
+	var frame int
 	var code uint64
 	var ok bool
+
+	if db.Info.Protein {
+		if db.Options.Translated {
+			sequence.Alphabet = seq.Protein
+		}
+		flagContinue = false
+		for _, frame = range transFrames[db.Options.Frames] {
+			sketchProt, err = unikmer.NewProteinMinimizerSketch(
+				sequence, db.Header.K, db.Info.CodonTable, frame, int(db.Info.MinimizerW))
+			if err != nil {
+				if err == unikmer.ErrShortSeq {
+					flagContinue = true
+					break
+				} else {
+					return nil, err
+				}
+			}
+
+			for {
+				code, ok = sketchProt.Next()
+				if !ok {
+					break
+				}
+				if scaled && code > maxHash {
+					continue
+				}
+				kmers = append(kmers, code)
+			}
+
+			if flagContinue {
+				continue
+			}
+		}
+
+		return kmers, nil
+	}
 
 	// using ntHash
 	if db.Info.Syncmer {

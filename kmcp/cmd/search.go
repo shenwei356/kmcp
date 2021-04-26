@@ -89,6 +89,13 @@ Attentions:
 		wholeFile := getFlagBool(cmd, "query-whole-file")
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
 
+		translated := getFlagBool(cmd, "translated")
+		frames := getFlagInt(cmd, "trans-frames")
+
+		if frames < 1 || frames > 6 || transFrames[frames] == nil {
+			checkError(fmt.Errorf(`invalid translation frame: %d, availble values: 1, 3, and 6 for all six frames`, frames))
+		}
+
 		switch sortBy {
 		case "qcov", "jacc", "tcov":
 			break
@@ -205,6 +212,9 @@ Attentions:
 			Threads: opt.NumCPUs,
 
 			DeduplicateThreshold: deduplicateThreshold,
+
+			Frames:     frames,
+			Translated: translated,
 
 			TopN:       topN,
 			TopNScores: topNScore,
@@ -469,4 +479,6 @@ func init() {
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 
+	searchCmd.Flags().BoolP("translated", "z", false, `inputs are translated protein sequences`)
+	searchCmd.Flags().IntP("trans-frames", "F", 1, `translation frames, availble values: 1, 3, and 6 for all six frames`)
 }

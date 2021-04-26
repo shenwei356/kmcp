@@ -50,6 +50,10 @@ type UnikIndexDBInfo struct {
 	Hashed       bool   `yaml:"hashed"`
 	Canonical    bool   `yaml:"canonical"`
 
+	Protein    bool `yaml:"protein"`      // protein
+	CodonTable int  `yaml:"codon-table"`  // codon table
+	Frames     int  `yaml:"trans-frames"` // translation frames
+
 	Scaled     bool   `yaml:"scaled"`
 	Scale      uint32 `yaml:"scale"`
 	Minimizer  bool   `yaml:"minimizer"`
@@ -154,6 +158,9 @@ func (i UnikIndexDBInfo) CompatibleWith(j UnikIndexDBInfo) bool {
 		i.K == j.K &&
 		i.Hashed == j.Hashed &&
 		i.Canonical == j.Canonical &&
+		i.Protein == j.Protein &&
+		i.CodonTable == j.CodonTable &&
+		i.Frames == j.Frames &&
 		i.Scale == j.Scale &&
 		i.Scaled == j.Scaled &&
 		i.Minimizer == j.Minimizer &&

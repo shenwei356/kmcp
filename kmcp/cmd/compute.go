@@ -246,6 +246,24 @@ Output:
 		}
 
 		// ---------------------------------------------------------------
+		// flags for translation
+		translated := getFlagBool(cmd, "translated")
+		translate := getFlagBool(cmd, "translate")
+		frames := getFlagInt(cmd, "trans-frames")
+		codonTable := getFlagInt(cmd, "codon-table")
+
+		if frames < 1 || frames > 6 || transFrames[frames] == nil {
+			checkError(fmt.Errorf(`invalid translation frame: %d, availble values: 1, 3, and 6 for all six frames`, frames))
+		}
+		if translated {
+			translate = true
+			frames = 1
+		}
+		if translate && minimizerW == 0 {
+			minimizerW = 1
+		}
+
+		// ---------------------------------------------------------------
 		// out dir
 
 		outputDir := outDir != ""
@@ -315,6 +333,13 @@ Output:
 			}
 			log.Infof("  k: %d", k)
 			log.Infof("  circular genome: %v", circular0)
+
+			if translated {
+				log.Infof("  translated protein sequence: %d", translated)
+			} else if translate {
+				log.Infof("  translate to protein sequence: %v, codon table: %d, frames: %d", translate, codonTable, frames)
+			}
+
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
 			}
@@ -415,8 +440,13 @@ Output:
 				var fastxReader *fastx.Reader
 				var ok bool
 				var code uint64
+
 				var iter *unikmer.Iterator
 				var sketch *unikmer.Sketch
+				var sketchProt *unikmer.ProteinMinimizerSketch
+				var frame int
+				var flagContinue bool
+
 				var n int
 
 				var slider func() (*seq.Seq, bool)
@@ -595,54 +625,89 @@ Output:
 							continue
 						}
 
-						if syncmer {
-							sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
-						} else if minimizer {
-							sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
-						} else {
-							iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
-						}
-						if err != nil {
-							if err == unikmer.ErrShortSeq {
-								continue
-							} else {
-								checkError(errors.Wrapf(err, "seq: %s", record.Name))
+						if translate {
+							if translated {
+								_seq.Alphabet = seq.Protein
 							}
-						}
+							flagContinue = false
+							for _, frame = range transFrames[frames] {
+								sketchProt, err = unikmer.NewProteinMinimizerSketch(_seq, k, codonTable, frame, minimizerW)
+								if err != nil {
+									if err == unikmer.ErrShortSeq {
+										flagContinue = true
+										break
+									} else {
+										checkError(errors.Wrapf(err, "seq: %s", record.Name))
+									}
+								}
 
-						if syncmer {
-							for {
-								code, ok = sketch.NextSyncmer()
-								if !ok {
-									break
+								for {
+									code, ok = sketchProt.Next()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
 								}
-								if scaled && code > maxHash {
-									continue
-								}
-								codes = append(codes, code)
 							}
-						} else if minimizer {
-							for {
-								code, ok = sketch.NextMinimizer()
-								if !ok {
-									break
-								}
-								if scaled && code > maxHash {
-									continue
-								}
-								codes = append(codes, code)
+							if flagContinue {
+								continue
 							}
+
 						} else {
-							for {
-								code, ok = iter.NextHash()
-								if !ok {
-									break
-								}
-								if scaled && code > maxHash {
-									continue
-								}
-								codes = append(codes, code)
+							if syncmer {
+								sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
+							} else if minimizer {
+								sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
+							} else {
+								iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
 							}
+
+							if err != nil {
+								if err == unikmer.ErrShortSeq {
+									continue
+								} else {
+									checkError(errors.Wrapf(err, "seq: %s", record.Name))
+								}
+							}
+
+							if syncmer {
+								for {
+									code, ok = sketch.NextSyncmer()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
+								}
+							} else if minimizer {
+								for {
+									code, ok = sketch.NextMinimizer()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
+								}
+							} else {
+								for {
+									code, ok = iter.NextHash()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
+								}
+							}
+
 						}
 
 						if !bySeq {
@@ -694,6 +759,10 @@ Output:
 							SeqID:      seqID,
 							FragIdx:    slidIdx,
 							GenomeSize: uint64(len(record.Seq.Seq)),
+
+							Protein:    translate,
+							CodonTable: codonTable,
+							Frames:     frames,
 
 							Syncmer:      syncmer,
 							SyncmerS:     syncmerS,
@@ -759,6 +828,10 @@ Output:
 					SeqID:      fileprefix,
 					FragIdx:    slidIdx,
 					GenomeSize: genomeSize,
+
+					Protein:    translate,
+					CodonTable: codonTable,
+					Frames:     frames,
 
 					Syncmer:      syncmer,
 					SyncmerS:     syncmerS,
@@ -856,6 +929,11 @@ func init() {
 	computeCmd.Flags().IntP("kmer-len", "k", 31, `k-mer length`)
 	computeCmd.Flags().BoolP("circular", "", false, `input sequence is circular`)
 
+	computeCmd.Flags().BoolP("translated", "z", false, `inputs are translated protein sequences`)
+	computeCmd.Flags().BoolP("translate", "t", false, `translate DNA to protein sequences`)
+	computeCmd.Flags().IntP("trans-frames", "F", 6, `translation frames, availble values: 1, 3, and 6 for all six frames`)
+	computeCmd.Flags().IntP("codon-table", "T", 1, `codon table`)
+
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
@@ -878,3 +956,13 @@ var reIgnoreCaseStr = "(?i)"
 var reIgnoreCase = regexp.MustCompile(`\(\?i\)`)
 
 var fileUnikInfos = "_info.txt"
+
+var transFrames [][]int = [][]int{
+	nil,
+	{1},
+	nil,
+	{1, 2, 3},
+	nil,
+	nil,
+	{1, 2, 3, -1, -2, -3},
+}

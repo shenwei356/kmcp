@@ -1052,6 +1052,9 @@ References:
 			dbInfo.NumNames = len(fileInfoGroups)
 			dbInfo.NumHashes = numHashes
 			dbInfo.Canonical = canonical
+			dbInfo.Protein = meta0.Protein
+			dbInfo.CodonTable = meta0.CodonTable
+			dbInfo.Frames = meta0.Frames
 			dbInfo.Scaled = scaled
 			dbInfo.Scale = scale
 			dbInfo.Minimizer = meta0.Minimizer
