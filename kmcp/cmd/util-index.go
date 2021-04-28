@@ -167,6 +167,8 @@ type Meta struct {
 	FragIdx    uint32 `json:"idx"`  // sequence location index
 	GenomeSize uint64 `json:"gn-s"` // genome length
 
+	Ks []int `json:"ks"` // ks
+
 	Syncmer  bool `json:"sm"` // syncmer
 	SyncmerS int  `json:"sm-s"`
 

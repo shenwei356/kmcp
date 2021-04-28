@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
@@ -47,6 +48,7 @@ type UnikIndexDBInfo struct {
 	IndexVersion uint8  `yaml:"unikiVersion"`
 	Alias        string `yaml:"alias"`
 	K            int    `yaml:"k"`
+	Ks           []int  `yaml:"ks"`
 	Hashed       bool   `yaml:"hashed"`
 	Canonical    bool   `yaml:"canonical"`
 
@@ -74,8 +76,14 @@ type UnikIndexDBInfo struct {
 }
 
 func (i UnikIndexDBInfo) String() string {
-	return fmt.Sprintf("kmcp database (v%d): %s, k: %d, hashed: %v, canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #%d-mers: %d",
-		i.Version, i.Alias, i.K, i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.K, i.Kmers)
+	var ks []int
+	if len(i.Ks) > 0 {
+		ks = i.Ks
+	} else {
+		ks = []int{i.K}
+	}
+	return fmt.Sprintf("kmcp database (v%d): %s, k: %s, hashed: %v, canonical: %v, #hashes: %d, fpr:%f, #blocksize: %d, #blocks: %d, #k-mers: %d",
+		i.Version, i.Alias, strings.Join(IntSlice2StringSlice(ks), ", "), i.Hashed, i.Canonical, i.NumHashes, i.FPR, i.BlockSize, len(i.Files), i.Kmers)
 }
 
 // NewUnikIndexDBInfo creates UnikIndexDBInfo from index files, but you have to manually assign other values.
@@ -110,6 +118,9 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 
 	p, _ := filepath.Abs(file)
 	info.path = filepath.Dir(p)
+	if len(info.Ks) == 0 {
+		info.Ks = []int{info.K}
+	}
 
 	return info, nil
 }
@@ -151,7 +162,7 @@ func (i UnikIndexDBInfo) WriteTo(file string) (int, error) {
 func (i UnikIndexDBInfo) CompatibleWith(j UnikIndexDBInfo) bool {
 	if i.Version == j.Version &&
 		i.IndexVersion == j.IndexVersion &&
-		i.K == j.K &&
+		len(i.Ks) == len(j.Ks) &&
 		i.Hashed == j.Hashed &&
 		i.Canonical == j.Canonical &&
 		i.Scale == j.Scale &&
@@ -160,6 +171,12 @@ func (i UnikIndexDBInfo) CompatibleWith(j UnikIndexDBInfo) bool {
 		i.MinimizerW == j.MinimizerW &&
 		i.Syncmer == j.Syncmer &&
 		i.SyncmerS == j.SyncmerS {
+
+		for _i := range i.Ks {
+			if i.Ks[_i] != j.Ks[_i] {
+				return false
+			}
+		}
 		return true
 	}
 

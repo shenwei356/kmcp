@@ -50,6 +50,9 @@ Attentions:
   2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
   3. Increase value of -j/--threads for acceleratation.
 
+Special attentions:
+  1. The values of tCov and jacc only apply for single length of k-mer.
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -253,7 +256,7 @@ Attentions:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tmKmers\tqCov\ttCov\tjacc\n")
+			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\n")
 		}
 
 		var fastxReader *fastx.Reader
@@ -291,16 +294,22 @@ Attentions:
 				result.NumKmers, result.FPR, len(result.Matches))
 
 			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\n",
-					prefix2, "", -1, 0, 0, 0, 0, float64(0), float64(0)))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2,
+					"", -1, 0, 0,
+					0, 0,
+					float64(0), float64(0), float64(0)))
 				return
 			}
 
 			for _, match := range result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
 				// target, fragIdx, idxNum, tlength, num_matched_kmers, qcov, tcov, jacc
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
-					prefix2, match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0], match.NumKmers, match.QCov, match.TCov, match.JaccardIndex))
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\n",
+					prefix2,
+					match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
+					result.K, match.NumKmers,
+					match.QCov, match.TCov, match.JaccardIndex))
 			}
 
 			outfh.Flush()
