@@ -1,14 +1,16 @@
 # Changelog
 
-## v0.4.1 - 2021-04
+## v0.5.0 - 2021-04
 
+- `compute`:
+    - support multiple sizes of k-mer
+    - fix bug of `--by-seq`.
+    - more log.
 - `search`:
     - show real-time processing speed.
     - new flag `-g/--query-whole-file`.
     - new flag `-u/--kmer-dedup-threshold`.
-- `compute`:
-    - fix bug of `--by-seq`.
-    - more log.
+
 
 ## v0.4.0 - 2021-04-08
 

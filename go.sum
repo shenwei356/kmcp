@@ -152,8 +152,6 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/profile v1.5.0 h1:042Buzk+NhDI+DeSAA62RwJL8VAuZUMQZUjCsRz1Mug=
-github.com/pkg/profile v1.5.0/go.mod h1:qBsxPvzyUincmltOk6iyRVxHYg4adc0OFOv72ZdLa18=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
@@ -183,8 +181,8 @@ github.com/shenwei356/mmap-go v1.0.1 h1:MssMa5e6z3Asy16h+wjF2qbvq49lFrVPiBTlRBTf
 github.com/shenwei356/mmap-go v1.0.1/go.mod h1:En5BSnSNTA4KM6R04rDhw8UCOA5NgOPeADbz1jUJDNg=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
-github.com/shenwei356/unikmer v0.17.4 h1:cbr8tReIDXJcXN3SPTqrzRxmVMoaZYqhTK11BGyDhtg=
-github.com/shenwei356/unikmer v0.17.4/go.mod h1:IZiwLp3fycSkuo74mbrhc3KBdNAjUz33mIOTAv4y9O0=
+github.com/shenwei356/unikmer v0.18.0 h1:vSFLX2QTSH2XDMv5jslcBYQB2LGHtWlTm8QL/UyAiPE=
+github.com/shenwei356/unikmer v0.18.0/go.mod h1:/Kjeai4IcrE8C7GFPK2X0Y8xeGMQ9tGMOia+h2KuyDg=
 github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=
 github.com/shenwei356/util v0.3.0/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
 github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992 h1:RXEEyKj0JL3SrRIYsWIEyy4AwjHbI3I8aDGK6CA4+YI=
@@ -218,6 +216,8 @@ github.com/vbauerster/mpb/v5 v5.4.0/go.mod h1:fi4wVo7BVQ22QcvFObm+VwliQXlV1eBT8J
 github.com/will-rowe/nthash v0.3.0 h1:yN+Il98GRWyp7HdaiEbsE7KC4ySEKtPatm+SLZ5uQBk=
 github.com/will-rowe/nthash v0.3.0/go.mod h1:5ezweuK0J5j+/7lih/RkrSmnxI3hoaPpQiVWJ7rd960=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
+github.com/zeebo/wyhash v0.0.1 h1:VEByEMek3iHhV65CgG3SRAWVtg/6TcmbEKj5jPOKDrc=
+github.com/zeebo/wyhash v0.0.1/go.mod h1:Ti+OwfNtM5AZiYAL0kOPIfliqDP5c0VtOnnMAqzuuZk=
 github.com/zeebo/xxh3 v0.10.0 h1:1+2Mov9zfxTNUeoDG9k9i13VfxTR0p1JQu8L0vikxB0=
 github.com/zeebo/xxh3 v0.10.0/go.mod h1:AQY73TOrhF3jNsdiM9zZOb8MThrYbZONHj7ryDBaLpg=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=

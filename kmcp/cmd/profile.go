@@ -75,6 +75,7 @@ Profiling output format
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-qcov")
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
+		keepFullMatch := getFlagBool(cmd, "keep-full-match")
 
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -364,6 +365,11 @@ Profiling output format
 							prevQuery = match.Query
 							continue
 						}
+						if keepFullMatch && match.QCov == 1 {
+							processThisMatch = false
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					hTarget = xxh3.HashString(match.Target)
@@ -545,6 +551,11 @@ Profiling output format
 							pScore = match.QCov
 						}
 						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+						if keepFullMatch && match.QCov == 1 {
+							processThisMatch = false
 							prevQuery = match.Query
 							continue
 						}
@@ -772,6 +783,11 @@ Profiling output format
 							pScore = match.QCov
 						}
 						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+						if keepFullMatch && match.QCov == 1 {
+							processThisMatch = false
 							prevQuery = match.Query
 							continue
 						}
@@ -1133,11 +1149,12 @@ func init() {
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read`)
 	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read`)
 	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
+	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if have`)
 
 	// for ref fragments
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 5, `minimal number of unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.3, `minimal proportion of matched fragments`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.5, `minimal proportion of matched fragments`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
 	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambigous reads`)

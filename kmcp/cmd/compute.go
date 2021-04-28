@@ -596,7 +596,6 @@ Output:
 					if bySeq {
 						slidIdx = 0
 					}
-
 					for {
 						_seq, _ok = slider()
 						if !_ok {
@@ -746,6 +745,11 @@ Output:
 				}
 
 				n = len(codes)
+
+				if n == 0 {
+					log.Warningf("skipping %s: no invalid sequences", file)
+					return
+				}
 
 				if exactNumber {
 					// compute exact number of unique k-mers
