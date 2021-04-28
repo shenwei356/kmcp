@@ -38,6 +38,7 @@ type MatchResult struct {
 	FragIdx int
 	IdxNum  int
 	GSize   uint64
+	K       int
 	MKmers  int
 	QCov    float64
 }
@@ -62,9 +63,9 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 	}
 
 	// too slow
-	m.QCov, err = strconv.ParseFloat((*items)[10], 64)
+	m.QCov, err = strconv.ParseFloat((*items)[11], 64)
 	if err != nil {
-		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[10]))
+		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[11]))
 	}
 	if m.QCov < minQcov {
 		return m, false
@@ -106,9 +107,14 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 		checkError(fmt.Errorf("failed to parse genomeSize: %s", (*items)[8]))
 	}
 
-	m.MKmers, err = strconv.Atoi((*items)[9])
+	m.K, err = strconv.Atoi((*items)[9])
 	if err != nil {
-		checkError(fmt.Errorf("failed to parse mKmers: %s", (*items)[9]))
+		checkError(fmt.Errorf("failed to parse K: %s", (*items)[9]))
+	}
+
+	m.MKmers, err = strconv.Atoi((*items)[10])
+	if err != nil {
+		checkError(fmt.Errorf("failed to parse mKmers: %s", (*items)[10]))
 	}
 
 	return m, true

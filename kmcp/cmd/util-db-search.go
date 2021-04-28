@@ -62,6 +62,7 @@ type QueryResult struct {
 
 	FPR float64 // fpr, p is related to database
 
+	K        int
 	NumKmers int // number of k-mers
 	// Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
 
@@ -548,7 +549,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
-		info.K == idx1.Header.K &&
+		info.Ks[len(info.Ks)-1] == idx1.Header.K &&
 		info.Canonical == idx1.Header.Canonical &&
 		info.NumHashes == int(idx1.Header.NumHashes) {
 	} else {
@@ -608,128 +609,137 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		numHashes := db.Info.NumHashes
 		indices := db.Indices
 		numIndices := len(indices)
+		ks := db.Info.Ks
+		sortutil.Ints(ks)
+		// sort ks in descent order
+		for i, j := 0, len(ks)-1; i < j; i, j = i+1, j-1 {
+			ks[i], ks[j] = ks[j], ks[i]
+		}
 
 		handleQuery := func(query Query) {
 			defer func() { <-tokens }()
 
-			// compute kmers
-			// reuse []uint64 object, to reduce GC
-			kmers := poolKmers.Get().([]uint64)
-			kmers, err = db.generateKmers(query.Seq, kmers)
-			// buf := poolIdxValues.Get().([]unikmer.IdxValue)
-			// kmers, err = db.generateKmers(query.Seq, kmers, buf)
-			// kmers, err := db.generateKmers(query.Seq)
-			if err != nil {
-				checkError(err)
-			}
-			nKmers := len(kmers)
-
-			// recycle objects
-			// buf = buf[:0]
-			// poolIdxValues.Put(buf)
-
-			result := QueryResult{
-				QueryIdx: query.Idx,
-				QueryID:  query.ID,
-				QueryLen: query.Seq.Length(),
-				NumKmers: nKmers,
-				// Kmers:    kmers,
-				Matches: nil,
-			}
-
-			// sequence shorter than k, or too few k-mer sketchs.
-			if kmers == nil || nKmers < db.Options.MinMatched {
-				query.Ch <- result // still send result!
-				return
-			}
-
-			if nKmers > opt.DeduplicateThreshold {
-				// map is slower than sorting
-
-				// m := make(map[uint64]interface{}, nKmers)
-				// i := 0
-				// var ok bool
-				// for _, v := range kmers {
-				// 	if _, ok = m[v]; !ok {
-				// 		m[v] = struct{}{}
-				// 		kmers[i] = v
-				// 		i++
-				// 	}
-				// }
-				// kmers = kmers[:i]
-
-				sortutil.Uint64s(kmers)
-				_kmers := poolKmers.Get().([]uint64)
-				var p uint64 = math.MaxUint64
-				i := 0
-				for _, v := range kmers {
-					if p != v {
-						_kmers = append(_kmers, v)
-						i++
-						p = v
-					}
+			for _ik, k := range ks {
+				// compute kmers
+				// reuse []uint64 object, to reduce GC
+				kmers := poolKmers.Get().([]uint64)
+				kmers, err = db.generateKmers(query.Seq, k, kmers)
+				if err != nil {
+					checkError(err)
 				}
+				nKmers := len(kmers)
+
+				result := QueryResult{
+					QueryIdx: query.Idx,
+					QueryID:  query.ID,
+					QueryLen: query.Seq.Length(),
+					K:        k,
+					NumKmers: nKmers,
+					// Kmers:    kmers,
+					Matches: nil,
+				}
+
+				// sequence shorter than k, or too few k-mer sketchs.
+				if kmers == nil || nKmers < db.Options.MinMatched {
+					query.Ch <- result // still send result!
+					return
+				}
+
+				if nKmers > opt.DeduplicateThreshold {
+					// map is slower than sorting
+
+					// m := make(map[uint64]interface{}, nKmers)
+					// i := 0
+					// var ok bool
+					// for _, v := range kmers {
+					// 	if _, ok = m[v]; !ok {
+					// 		m[v] = struct{}{}
+					// 		kmers[i] = v
+					// 		i++
+					// 	}
+					// }
+					// kmers = kmers[:i]
+
+					sortutil.Uint64s(kmers)
+					_kmers := poolKmers.Get().([]uint64)
+					var p uint64 = math.MaxUint64
+					i := 0
+					for _, v := range kmers {
+						if p != v {
+							_kmers = append(_kmers, v)
+							i++
+							p = v
+						}
+					}
+					kmers = kmers[:0]
+					poolKmers.Put(kmers)
+					kmers = _kmers
+				}
+
+				// update nKmers
+				nKmers = len(kmers)
+
+				result.NumKmers = nKmers
+
+				// compute hashes
+				// reuse [][]uint64 object, to reduce GC
+				hashes := poolHashes.Get().([][]uint64)
+				for _, kmer := range kmers {
+					// for kmer := range kmers {
+					hashes = append(hashes, hashValues(kmer, numHashes))
+				}
+
+				// recycle kmer-sketch ([]uint64) object
 				kmers = kmers[:0]
 				poolKmers.Put(kmers)
-				kmers = _kmers
-			}
 
-			// update nKmers
-			nKmers = len(kmers)
+				// send queries
+				// reuse chan []Match object, to reduce GC
+				chMatches := poolChanMatches.Get().(chan []Match)
+				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+					indices[i].InCh <- IndexQuery{
+						// Kmers:  kmers,
+						Hashes: hashes,
+						Ch:     chMatches,
+					}
+				}
 
-			result.NumKmers = nKmers
+				// get matches from all indices
+				// reuse []Match object
+				matches := poolMatches.Get().([]Match)
+				var _matches []Match
+				var _match Match
+				for i := 0; i < numIndices; i++ {
+					// block to read
+					_matches = <-chMatches
+					for _, _match = range _matches {
+						matches = append(matches, _match)
+					}
+				}
 
-			// compute hashes
-			// reuse [][]uint64 object, to reduce GC
-			hashes := poolHashes.Get().([][]uint64)
-			for _, kmer := range kmers {
-				// for kmer := range kmers {
-				hashes = append(hashes, hashValues(kmer, numHashes))
-			}
+				// recycle objects
+				poolChanMatches.Put(chMatches)
 
-			// recycle kmer-sketch ([]uint64) object
-			kmers = kmers[:0]
-			poolKmers.Put(kmers)
+				hashes = hashes[:0]
+				poolHashes.Put(hashes)
 
-			// send queries
-			// reuse chan []Match object, to reduce GC
-			chMatches := poolChanMatches.Get().(chan []Match)
-			for i := numIndices - 1; i >= 0; i-- { // start from bigger files
-				indices[i].InCh <- IndexQuery{
-					// Kmers:  kmers,
-					Hashes: hashes,
-					Ch:     chMatches,
+				// found
+				if len(matches) > 0 {
+					// send result
+					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
+					result.DBId = db.DBId
+					result.Matches = matches
+
+					query.Ch <- result
+					return
+				}
+
+				// not found, try smaller k
+				if _ik == len(ks)-1 { // already the smallest k, give up
+					query.Ch <- result
+					return
 				}
 			}
-
-			// get matches from all indices
-			// reuse []Match object
-			matches := poolMatches.Get().([]Match)
-			var _matches []Match
-			var _match Match
-			for i := 0; i < numIndices; i++ {
-				// block to read
-				_matches = <-chMatches
-				for _, _match = range _matches {
-					matches = append(matches, _match)
-				}
-			}
-
-			// recycle objects
-			poolChanMatches.Put(chMatches)
-
-			hashes = hashes[:0]
-			poolHashes.Put(hashes)
-
-			// filter
-			if len(matches) > 0 {
-				// send result
-				result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
-				result.DBId = db.DBId
-				result.Matches = matches
-			}
-
-			query.Ch <- result
 		}
 
 		for query := range db.InCh {
@@ -742,10 +752,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	return db, nil
 }
 
-func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint64, error) {
-	// func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64, buf []unikmer.IdxValue) ([]uint64, error) {
-	// func (db *UnikIndexDB) generateKmers(sequence *seq.Seq) (map[uint64]interface{}, error) {
-	// kmers := make(map[uint64]interface{}, 128)
+func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers []uint64) ([]uint64, error) {
 	scaled := db.Info.Scaled
 	scale := db.Info.Scale
 	maxHash := ^uint64(0)
@@ -761,13 +768,11 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 
 	// using ntHash
 	if db.Info.Syncmer {
-		sketch, err = unikmer.NewSyncmerSketch(sequence, db.Header.K, int(db.Info.SyncmerS), false)
-		// sketch, err = unikmer.NewSyncmerSketchWithBuffer(sequence, db.Header.K, int(db.Info.SyncmerS), false, buf)
+		sketch, err = unikmer.NewSyncmerSketch(sequence, k, int(db.Info.SyncmerS), false)
 	} else if db.Info.Minimizer {
-		sketch, err = unikmer.NewMinimizerSketch(sequence, db.Header.K, int(db.Info.MinimizerW), false)
-		// sketch, err = unikmer.NewMinimizerSketchWithBuffer(sequence, db.Header.K, int(db.Info.MinimizerW), false, buf)
+		sketch, err = unikmer.NewMinimizerSketch(sequence, k, int(db.Info.MinimizerW), false)
 	} else {
-		iter, err = unikmer.NewHashIterator(sequence, db.Header.K, db.Header.Canonical, false)
+		iter, err = unikmer.NewHashIterator(sequence, k, db.Header.Canonical, false)
 	}
 	if err != nil {
 		if err == unikmer.ErrShortSeq {
@@ -786,7 +791,6 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
-			// kmers[code] = struct{}{}
 		}
 	} else if db.Info.Minimizer {
 		for {
@@ -798,7 +802,6 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
-			// kmers[code] = struct{}{}
 		}
 	} else {
 		for {
@@ -810,7 +813,6 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, kmers []uint64) ([]uint6
 				continue
 			}
 			kmers = append(kmers, code)
-			// kmers[code] = struct{}{}
 		}
 	}
 	return kmers, nil

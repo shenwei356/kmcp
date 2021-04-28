@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -52,7 +53,8 @@ Attentions:
      positional arguments or a directory containing sequence files
      via the flag -I/--in-dir. A regular expression for matching
      sequencing file is available by the flag -r/--file-regexp.
-  2. K-mers (sketchs) are not sorted, and duplicates are kept
+  2. Multiple sizes of k-mers are supported.
+     K-mers (sketchs) are not sorted, and duplicates are kept
      unless flag -e/--exact-number is on.
   3. Sequence IDs in all input files should be distinct.
      Multiple sequences belonging to a same group can be mapped
@@ -113,7 +115,18 @@ Output:
 		// ---------------------------------------------------------------
 		// basic flags
 
-		k := getFlagPositiveInt(cmd, "kmer-len")
+		ks := getFlagIntSlice(cmd, "kmer")
+		if len(ks) == 0 {
+			checkError(fmt.Errorf("flag -k/--kmer needed"))
+		}
+		for _, k := range ks {
+			if k < 1 {
+				checkError(fmt.Errorf("invalid k: %d", k))
+			}
+		}
+		sortutil.Ints(ks)
+		kMax := ks[len(ks)-1]
+
 		circular0 := getFlagBool(cmd, "circular")
 
 		outDir := getFlagString(cmd, "out-dir")
@@ -204,7 +217,7 @@ Output:
 		splitSeq := splitSize0 > 0 || splitNumber0 > 1
 		if splitSeq {
 			if splitSize0 > 0 { // split by size
-				if splitSize0 < k {
+				if splitSize0 < kMax {
 					checkError(fmt.Errorf("value of flag -s/--split-size should >= k"))
 				}
 				if splitSize0 <= splitOverlap {
@@ -313,7 +326,9 @@ Output:
 			if !splitSeq && bySeq {
 				log.Infof("  computing k-mers (sketches) for every sequence: %v", bySeq)
 			}
-			log.Infof("  k: %d", k)
+
+			log.Infof("  k-mer size(s): %s", strings.Join(IntSlice2StringSlice(ks), ", "))
+
 			log.Infof("  circular genome: %v", circular0)
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
@@ -410,6 +425,7 @@ Output:
 					}
 				}()
 
+				var k int
 				var err error
 				var record *fastx.Record
 				var fastxReader *fastx.Reader
@@ -595,53 +611,55 @@ Output:
 							continue
 						}
 
-						if syncmer {
-							sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
-						} else if minimizer {
-							sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
-						} else {
-							iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
-						}
-						if err != nil {
-							if err == unikmer.ErrShortSeq {
-								continue
+						for _, k = range ks {
+							if syncmer {
+								sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
+							} else if minimizer {
+								sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
 							} else {
-								checkError(errors.Wrapf(err, "seq: %s", record.Name))
+								iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
 							}
-						}
+							if err != nil {
+								if err == unikmer.ErrShortSeq {
+									continue
+								} else {
+									checkError(errors.Wrapf(err, "seq: %s", record.Name))
+								}
+							}
 
-						if syncmer {
-							for {
-								code, ok = sketch.NextSyncmer()
-								if !ok {
-									break
+							if syncmer {
+								for {
+									code, ok = sketch.NextSyncmer()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
 								}
-								if scaled && code > maxHash {
-									continue
+							} else if minimizer {
+								for {
+									code, ok = sketch.NextMinimizer()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
 								}
-								codes = append(codes, code)
-							}
-						} else if minimizer {
-							for {
-								code, ok = sketch.NextMinimizer()
-								if !ok {
-									break
+							} else {
+								for {
+									code, ok = iter.NextHash()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									codes = append(codes, code)
 								}
-								if scaled && code > maxHash {
-									continue
-								}
-								codes = append(codes, code)
-							}
-						} else {
-							for {
-								code, ok = iter.NextHash()
-								if !ok {
-									break
-								}
-								if scaled && code > maxHash {
-									continue
-								}
-								codes = append(codes, code)
 							}
 						}
 
@@ -695,6 +713,8 @@ Output:
 							FragIdx:    slidIdx,
 							GenomeSize: uint64(len(record.Seq.Seq)),
 
+							Ks: ks,
+
 							Syncmer:      syncmer,
 							SyncmerS:     syncmerS,
 							Minimizer:    minimizer,
@@ -704,7 +724,7 @@ Output:
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
-						writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+						writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 							scaled, scale, meta)
 
 						ch <- UnikFileInfo{
@@ -760,6 +780,8 @@ Output:
 					FragIdx:    slidIdx,
 					GenomeSize: genomeSize,
 
+					Ks: ks,
+
 					Syncmer:      syncmer,
 					SyncmerS:     syncmerS,
 					Minimizer:    minimizer,
@@ -769,7 +791,7 @@ Output:
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
-				writeKmers(k, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+				writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 					scaled, scale, meta)
 
 				ch <- UnikFileInfo{
@@ -853,7 +875,7 @@ func init() {
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
-	computeCmd.Flags().IntP("kmer-len", "k", 31, `k-mer length`)
+	computeCmd.Flags().IntSliceP("kmer", "k", []int{31}, `k-mer size(s)`)
 	computeCmd.Flags().BoolP("circular", "", false, `input sequence is circular`)
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)

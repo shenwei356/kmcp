@@ -244,7 +244,7 @@ Profiling output format
 
 		// ---------------------------------------------------------------
 
-		numFields := 12
+		numFields := 13
 
 		profile := make(map[uint64]*Target, 128)
 

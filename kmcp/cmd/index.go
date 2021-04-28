@@ -30,6 +30,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -219,6 +220,7 @@ References:
 		var InfoCacheOK bool
 
 		var k int = -1
+		var ks []int
 		var hashed bool
 		var canonical bool
 		var scaled bool
@@ -250,7 +252,11 @@ References:
 
 			if first {
 				reader0 = reader
-				k = reader.K
+
+				ks = meta.Ks
+				sortutil.Ints(ks)
+				k = ks[len(ks)-1]
+
 				hashed = reader.IsHashed()
 				if !hashed {
 					checkError(fmt.Errorf(`flag 'hashed' is supposed to be true, are the files created by 'kmcp compute'? %s`, file))
@@ -488,6 +494,7 @@ References:
 			log.Infof("  number of hashes: %d", numHashes)
 			log.Infof("  false positive rate: %f", fpr)
 
+			log.Infof("  k-mer size(s): %s", strings.Join(IntSlice2StringSlice(meta0.Ks), ", "))
 			if meta0.Minimizer {
 				log.Infof("  minimizer window: %d", meta0.MinimizerW)
 			}
@@ -1044,7 +1051,7 @@ References:
 			sortutil.Strings(indexFiles)
 			dbInfo := NewUnikIndexDBInfo(indexFiles)
 			dbInfo.Alias = alias
-			dbInfo.K = k
+			dbInfo.Ks = ks
 			dbInfo.Hashed = hashed
 			dbInfo.Kmers = n
 			dbInfo.FPR = fpr

@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/iafan/cwalk"
@@ -281,4 +282,32 @@ func sortTowUint64s(a, b uint64) (uint64, uint64) {
 		return a, b
 	}
 	return b, a
+}
+
+func minInt(a int, vals ...int) int {
+	min := a
+	for _, v := range vals {
+		if v < min {
+			min = v
+		}
+	}
+	return min
+}
+
+func maxInt(a int, vals ...int) int {
+	min := a
+	for _, v := range vals {
+		if v > min {
+			min = v
+		}
+	}
+	return min
+}
+
+func IntSlice2StringSlice(vals []int) []string {
+	s := make([]string, len(vals))
+	for i, v := range vals {
+		s[i] = strconv.Itoa(v)
+	}
+	return s
 }

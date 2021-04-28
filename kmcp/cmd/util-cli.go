@@ -56,6 +56,12 @@ func getFlagInt(cmd *cobra.Command, flag string) int {
 	return value
 }
 
+func getFlagIntSlice(cmd *cobra.Command, flag string) []int {
+	value, err := cmd.Flags().GetIntSlice(flag)
+	checkError(err)
+	return value
+}
+
 func getFlagUint8(cmd *cobra.Command, flag string) uint8 {
 	value, err := cmd.Flags().GetUint8(flag)
 	checkError(err)
