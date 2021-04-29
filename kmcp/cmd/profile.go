@@ -80,6 +80,10 @@ Profiling output format
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
+		minQcovUreads := getFlagNonNegativeFloat64(cmd, "min-qcov-ureads")
+		if minQcovUreads < minQcov {
+			minQcovUreads = minQcov
+		}
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
@@ -334,7 +338,7 @@ Profiling output format
 								}
 
 								if first { // count once
-									if len(matches) == 1 { // record unique match
+									if len(matches) == 1 && m.QCov >= minQcovUreads {
 										t.UniqMatch[m.FragIdx]++
 									}
 									t.QLen[m.FragIdx] += float64(m.QLen)
@@ -401,7 +405,7 @@ Profiling output format
 					}
 
 					if first { // count once
-						if len(matches) == 1 { // record unique match
+						if len(matches) == 1 && m.QCov >= minQcovUreads {
 							t.UniqMatch[m.FragIdx]++
 						}
 						t.QLen[m.FragIdx] += float64(m.QLen)
@@ -758,7 +762,11 @@ Profiling output format
 									}
 
 									if first { // count once
-										t.UniqMatch[m.FragIdx] += floatOne
+										if len(matches) == 1 && m.QCov >= minQcovUreads {
+											t.UniqMatch[m.FragIdx]++
+										}
+										// t.UniqMatch[m.FragIdx] += floatOne
+
 										t.QLen[m.FragIdx] += float64(m.QLen)
 										first = false
 									}
@@ -904,7 +912,10 @@ Profiling output format
 						}
 
 						if first { // count once
-							t.UniqMatch[m.FragIdx] += floatOne
+							if len(matches) == 1 && m.QCov >= minQcovUreads {
+								t.UniqMatch[m.FragIdx]++
+							}
+							// t.UniqMatch[m.FragIdx] += floatOne
 							t.QLen[m.FragIdx] += float64(m.QLen)
 							first = false
 						}
@@ -1155,6 +1166,7 @@ func init() {
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 5, `minimal number of unique matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.5, `minimal proportion of matched fragments`)
+	profileCmd.Flags().Float64P("min-qcov-ureads", "U", 0, `minimal query coverage for unique reads, it's equal to -t/--min-qcov if smaller than it`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
 	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambigous reads`)
