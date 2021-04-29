@@ -51,6 +51,7 @@ p, fpr of single bloom filter.
 k, theshold of query coverage.
 l, number of k-mers.
 
+import math
 fpr = lambda p,k,l: math.exp(-l * (k - p) * (k - p) / 2 / (1 - p))
 
 fpr(0.3, 0.8, 60)

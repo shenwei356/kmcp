@@ -528,6 +528,7 @@ Output:
 					}
 					if lenSum == 0 {
 						log.Warningf("skipping %s: no invalid sequences", file)
+						log.Info()
 						return
 					}
 					record1.Seq.Seq = bigSeq
@@ -748,6 +749,7 @@ Output:
 
 				if n == 0 {
 					log.Warningf("skipping %s: no invalid sequences", file)
+					log.Info()
 					return
 				}
 

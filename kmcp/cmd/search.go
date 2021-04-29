@@ -231,7 +231,7 @@ Special attentions:
 			}
 		}
 		if opt.Verbose {
-			log.Infof("database loaded")
+			log.Infof("database loaded: %s", dbDir)
 			log.Info()
 			log.Infof("-------------------- [important parameters] --------------------")
 			log.Infof("  minimum  matched k-mers: %d", minCount)

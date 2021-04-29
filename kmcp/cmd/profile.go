@@ -1146,10 +1146,10 @@ func init() {
 	profileCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read`)
-	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read`)
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
+	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
-	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if have`)
+	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if there are`)
 
 	// for ref fragments
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
