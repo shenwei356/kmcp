@@ -881,7 +881,7 @@ func init() {
 	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
 	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 
-	computeCmd.Flags().IntSliceP("kmer", "k", []int{31}, `k-mer size(s)`)
+	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, `k-mer size(s)`)
 	computeCmd.Flags().BoolP("circular", "", false, `input sequence is circular`)
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)

@@ -1164,8 +1164,8 @@ func init() {
 
 	// for ref fragments
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 5, `minimal number of unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.5, `minimal proportion of matched fragments`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of unique matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched fragments`)
 	profileCmd.Flags().Float64P("min-qcov-ureads", "U", 0, `minimal query coverage for unique reads, it's equal to -t/--min-qcov if smaller than it`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
