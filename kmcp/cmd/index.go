@@ -1071,6 +1071,7 @@ Taxonomy data:
 			dbInfo.SyncmerS = uint32(meta0.SyncmerS)
 			dbInfo.SplitSeq = meta0.SplitSeq
 			dbInfo.SplitSize = meta0.SplitSize
+			dbInfo.SplitNum = meta0.SplitNum
 			dbInfo.SplitOverlap = meta0.SplitOverlap
 
 			if !dryRun {

@@ -1050,17 +1050,30 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				// AND
 				var and []byte // must creat a new local variable
 				if moreThanOneHash {
-					and = make([]byte, numRowBytes) // create new slice to avoid edit original data source
-					copy(and, data[0])
+					and = buffs[bufIdx]
+					copy(and, data[0]) // overwrite old count
 					for _, row = range data[1:] {
-						for i, b = range row {
+						i = 0
+						for len(row) >= 4 { // unroll loop
+							and[i] &= row[0]
+							i++
+							and[i] &= row[1]
+							i++
+							and[i] &= row[2]
+							i++
+							and[i] &= row[3]
+							i++
+							row = row[4:]
+						}
+						for _, b = range row {
 							and[i] &= b
+							i++
 						}
 					}
 				} else if useMmap { // just point to the orginial data (mmaped)
 					and = data[0]
 				} else { // ！useMmap, where io.ReadFull(fh, data[i])
-					and = make([]byte, numRowBytes) // create new slice because we don't want data in buffs point to the same data[0]
+					and = buffs[bufIdx]
 					copy(and, data[0])
 				}
 
