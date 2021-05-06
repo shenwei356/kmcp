@@ -18,6 +18,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
 	github.com/vbauerster/mpb/v5 v5.4.0
+	github.com/zeebo/wyhash v0.0.1
 	github.com/zeebo/xxh3 v0.10.0
 	gopkg.in/yaml.v2 v2.4.0
 )

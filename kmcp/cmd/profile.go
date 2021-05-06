@@ -23,6 +23,8 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -37,7 +39,7 @@ import (
 	"github.com/shenwei356/util/cliutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
-	"github.com/zeebo/xxh3"
+	"github.com/zeebo/wyhash"
 )
 
 var profileCmd = &cobra.Command{
@@ -66,7 +68,8 @@ Accuracy notes:
   *. -F/--keep-full-match is not recommended, which reduce sensitivity.
   *. a smaller -t/--min-qcov increase sensitivity in cost of high false
      positive rate (-f/--max-fpr) of a query matching.
-  *. a bigger -U/--min-qcov-ureads increase specificity.
+  *. a bigger -U/--min-qcov-ureads increase specificity while it may
+     decrease sensitivity.
   *. -u/--min-uniq-reads is crutial for deciding the existence of
      a reference genome.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
@@ -144,6 +147,16 @@ Profiling output formats:
 			log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
 			opt.NumCPUs = 4
 			runtime.GOMAXPROCS(opt.NumCPUs)
+		}
+
+		sampleID := getFlagString(cmd, "sample-id")
+		binningFile := getFlagString(cmd, "binning-result")
+		outputBinningResult := binningFile != ""
+		if outputBinningResult && !strings.HasSuffix(binningFile, ".binning") {
+			binningFile = binningFile + ".binning"
+		}
+		if outputBinningResult && (len(taxidMappingFiles) == 0 || taxonomyDataDir == "") {
+			checkError(fmt.Errorf("flag -T/--taxid-map and -T/--taxid-map needed when -B/--binning-result given"))
 		}
 
 		camiReportFile := getFlagString(cmd, "cami-report")
@@ -412,7 +425,7 @@ Profiling output formats:
 						}
 					}
 
-					hTarget = xxh3.HashString(match.Target)
+					hTarget = wyhash.HashString(match.Target, 1)
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
 						matches[hTarget] = &tmp
@@ -541,6 +554,7 @@ Profiling output formats:
 			checkError(err)
 			var data interface{}
 
+			matches = make(map[uint64]*[]MatchResult)
 			for chunk := range reader.Ch {
 				checkError(chunk.Err)
 
@@ -601,7 +615,7 @@ Profiling output formats:
 						}
 					}
 
-					hTarget = xxh3.HashString(match.Target)
+					hTarget = wyhash.HashString(match.Target, 1)
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
 						matches[hTarget] = &tmp
@@ -613,7 +627,7 @@ Profiling output formats:
 				}
 			}
 
-			if len(matches) > 1 {
+			if len(matches) > 0 {
 				hs = hs[:0]
 				for h = range matches {
 					if _, ok = profile[h]; !ok { // skip low-confidence match
@@ -656,6 +670,28 @@ Profiling output formats:
 		}
 		timeStart1 = time.Now()
 
+		var outfhB *bufio.Writer
+		var gwB io.WriteCloser
+		var wB *os.File
+		var nB uint64
+		if outputBinningResult {
+			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfhB.Flush()
+				if gwB != nil {
+					gwB.Close()
+				}
+				wB.Close()
+			}()
+
+			outfhB.WriteString("# This is the bioboxes.org binning output format at\n")
+			outfhB.WriteString("# https://github.com/bioboxes/rfc/tree/master/data-format\n")
+			outfhB.WriteString("@Version:0.10.0\n")
+			outfhB.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
+			outfhB.WriteString("@@SEQUENCEID	TAXID\n")
+		}
+
 		profile2 := make(map[uint64]*Target, 128)
 		var nReads float64
 		var nUnassignedReads float64
@@ -678,6 +714,7 @@ Profiling output formats:
 			var first bool
 			var sumUReads, prop float64
 			hs := make([]uint64, 0, 256)
+			hss := make([]uint64, 0, 256) // for sort hs
 			var match MatchResult
 
 			onlyTopNScore := topNScore > 0
@@ -688,10 +725,14 @@ Profiling output formats:
 			nScore = 0
 			processThisMatch = true
 
+			taxids := make([]uint32, 0, 128)
+			var taxid1, taxid2 uint32
+
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
 			var data interface{}
 
+			matches = make(map[uint64]*[]MatchResult)
 			for chunk := range reader.Ch {
 				checkError(chunk.Err)
 
@@ -717,13 +758,22 @@ Profiling output formats:
 							if len(matches) > 1 {
 								hs = hs[:0] // list to delete
 								first = true
+
+								hss = hss[:0]
 								for h = range matches {
+									hss = append(hss, h)
+								}
+								sort.Slice(hss, func(i, j int) bool {
+									return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+								})
+
+								for _, h = range hss {
 									if first {
 										h0 = h // previous one
 										first = false
 										continue
 									}
-									h1, h2 = sortTowUint64s(h0, h)
+									h1, h2 = sortTwoUint64s(h0, h)
 
 									// decide which to keep
 									if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
@@ -738,10 +788,28 @@ Profiling output formats:
 								}
 
 								if len(matches) > 1 { // redistribute matches
-									sumUReads = 0
-									for h = range matches {
-										sumUReads += profile[h].SumUniqMatch
+									if outputBinningResult {
+										taxids = taxids[:0]
 									}
+
+									sumUReads = 0
+									for h, ms = range matches {
+										sumUReads += profile[h].SumUniqMatch
+
+										if outputBinningResult {
+											taxids = append(taxids, taxidMap[(*ms)[0].Target])
+										}
+									}
+
+									if outputBinningResult {
+										taxid1 = taxids[0]
+										for _, taxid2 = range taxids[1:] {
+											taxid1 = taxdb.LCA(taxid1, taxid2)
+										}
+										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+										nB++
+									}
+
 									for h, ms = range matches {
 										floatMsSize = float64(len(*ms))
 										first = true
@@ -781,6 +849,7 @@ Profiling output formats:
 						}
 
 						if uniqMatch {
+
 							for h, ms = range matches {
 								floatMsSize = float64(len(*ms))
 								first = true
@@ -805,6 +874,11 @@ Profiling output formats:
 
 										t.QLen[m.FragIdx] += float64(m.QLen)
 										first = false
+
+										if outputBinningResult {
+											outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
+											nB++
+										}
 									}
 
 									t.Match[m.FragIdx] += floatOne / floatMsSize
@@ -837,7 +911,7 @@ Profiling output formats:
 						}
 					}
 
-					hTarget = xxh3.HashString(match.Target)
+					hTarget = wyhash.HashString(match.Target, 1)
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
 						matches[hTarget] = &tmp
@@ -867,13 +941,22 @@ Profiling output formats:
 				if len(matches) > 1 {
 					hs = hs[:0] // list to delete
 					first = true
+
+					hss = hss[:0]
 					for h = range matches {
+						hss = append(hss, h)
+					}
+					sort.Slice(hss, func(i, j int) bool {
+						return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+					})
+
+					for _, h = range hss {
 						if first {
 							h0 = h // previous one
 							first = false
 							continue
 						}
-						h1, h2 = sortTowUint64s(h0, h)
+						h1, h2 = sortTwoUint64s(h0, h)
 
 						// decide which to keep
 						if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
@@ -888,10 +971,28 @@ Profiling output formats:
 					}
 
 					if len(matches) > 1 { // redistribute matches
+						if outputBinningResult {
+							taxids = taxids[:0]
+						}
+
 						sumUReads = 0
 						for h = range matches {
 							sumUReads += profile[h].SumUniqMatch
+
+							if outputBinningResult {
+								taxids = append(taxids, taxidMap[(*matches[h])[0].Target])
+							}
 						}
+
+						if outputBinningResult {
+							taxid1 = taxids[0]
+							for _, taxid2 = range taxids[1:] {
+								taxid1 = taxdb.LCA(taxid1, taxid2)
+							}
+							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+							nB++
+						}
+
 						for h, ms = range matches {
 							floatMsSize = float64(len(*ms))
 							first = true
@@ -954,6 +1055,11 @@ Profiling output formats:
 							// t.UniqMatch[m.FragIdx] += floatOne
 							t.QLen[m.FragIdx] += float64(m.QLen)
 							first = false
+
+							if outputBinningResult {
+								outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
+								nB++
+							}
 						}
 
 						t.Match[m.FragIdx] += floatOne / floatMsSize
@@ -1000,6 +1106,7 @@ Profiling output formats:
 
 		log.Infof("  number of estimated references: %d", len(targets))
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
+		log.Infof("%d binning results are save to %s", nB, binningFile)
 		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
 			nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 
@@ -1102,7 +1209,7 @@ Profiling output formats:
 				w2.Close()
 			}()
 
-			outfh2.WriteString("#SampleID\tKMCP\n")
+			outfh2.WriteString(fmt.Sprintf("#SampleID\t%s\n", sampleID))
 
 			var lineageNames string
 			filterByRank := len(showRanksMap) > 0
@@ -1142,7 +1249,7 @@ Profiling output formats:
 				w3.Close()
 			}()
 
-			outfh3.WriteString("@SampleID:\n")
+			outfh3.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
 			outfh3.WriteString("@Version:0.10.0\n")
 			outfh3.WriteString("@Ranks:superkingdom|phylum|class|order|family|genus|species|strain\n")
 			outfh3.WriteString("@TaxonomyID:ncbi-taxonomy\n")
@@ -1219,6 +1326,9 @@ func init() {
 	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
 
 	// other output formats
+	profileCmd.Flags().StringP("sample-id", "", "", `sample ID in result file`)
 	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
 	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
+	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
+
 }

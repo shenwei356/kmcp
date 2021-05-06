@@ -277,7 +277,7 @@ func Combinations2(set []uint64) [][2]uint64 {
 	return comb
 }
 
-func sortTowUint64s(a, b uint64) (uint64, uint64) {
+func sortTwoUint64s(a, b uint64) (uint64, uint64) {
 	if a < b {
 		return a, b
 	}
