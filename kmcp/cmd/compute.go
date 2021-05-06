@@ -63,7 +63,9 @@ Attentions:
      you can also use --by-seq to compute for every sequence.
   5. Unwanted sequence like plasmid can be filtered out by
      regular expressions via -B/--seq-name-filter.
-  6. It also supports splitting sequences into fragments.
+  6. It also supports splitting sequences into fragments, this
+     could increase the specificity in profiling result in cost
+     of searching speed.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -889,7 +891,7 @@ func init() {
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
 	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
-	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space)`)
+	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space`)
 
 	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/--split-size`)
 	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences, incompatible with -n/--split-number`)
@@ -898,8 +900,8 @@ func init() {
 
 	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
 
-	computeCmd.Flags().StringP("ref-name-regexp", "N", "", `regular expression (must contains "(" and ")") to extracting reference name from file name`)
-	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{}, `list of regular expressions for filter out sequences by header/name, case ignored`)
+	computeCmd.Flags().StringP("ref-name-regexp", "N", "", `regular expression (must contains "(" and ")") for extracting reference name from file name`)
+	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{}, `list of regular expressions for filtering out sequences by header/name, case ignored`)
 }
 
 var reIgnoreCaseStr = "(?i)"

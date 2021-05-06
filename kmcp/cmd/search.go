@@ -40,8 +40,8 @@ import (
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "Search sequence from database",
-	Long: `Search sequence from database
+	Short: "Search sequence against a database",
+	Long: `Search sequence against a database
 
 Attentions:
   1. A long query sequences may contain duplicated k-mers, which are
@@ -458,7 +458,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, searching would be very slow`)
+	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, the searching would be very slow`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
@@ -474,7 +474,7 @@ func init() {
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	// searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
-	searchCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
+	searchCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 

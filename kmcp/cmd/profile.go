@@ -42,16 +42,47 @@ import (
 
 var profileCmd = &cobra.Command{
 	Use:   "profile",
-	Short: "Generate taxonomic profile from search result",
-	Long: `Generate taxonomic profile from search result
+	Short: "Generate taxonomic profile from search results",
+	Long: `Generate taxonomic profile from search results
 
-Performance Note:
-  1. This command parses searching result in parallel, and the number of
+Methods:
+  1. We use the two-stage taxonomy assignment algorithm in MegaPath
+     to reduce the false positive of ambiguous matches.
+  2. Muti-aligned queries are proportionally assigned to references
+     with the strategy in Metalign.
+  3. Reference genomes can be splitted into fragments when computing
+     k-mers (sketches), which could help to increase the specificity
+     via a threshold, i.e., the minimal proportion of matched fragments
+     (-p/--min-frags-prop).
+  4. Input files are parsed 3 times, therefore STDIN is not supported.
+
+Reference:
+  1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
+  2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
+
+Accuracy notes:
+  *. -n/--keep-top-scores could increase the speed but have little help
+     for accuracy.
+  *. -F/--keep-full-match is not recommended, which reduce sensitivity.
+  *. a smaller -t/--min-qcov increase sensitivity in cost of high false
+     positive rate (-f/--max-fpr) of a query matching.
+  *. a bigger -U/--min-qcov-ureads increase specificity.
+  *. -u/--min-uniq-reads is crutial for deciding the existence of
+     a reference genome.
+  *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
+     the right reference for ambigous reads.
+
+Taxonomy data:
+  1. Mapping references IDs to TaxIds: -T/--taxid-map
+  2. NCBI taxonomy dump files: -X/--taxonomy-dir
+
+Performance note:
+  1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --chunk-size.
-  2. However using a lot of threads does not always accelerate processing,
-     4 threads with chunk size 0f 500-5000 is fast enough.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
 
-Profiling output format
+Profiling output formats:
   1. kmcp
   2. CAMI         (-M/--metaphlan-report)
   3. MetaPhlAn v2 (-C/--cami-report)
@@ -92,12 +123,17 @@ Profiling output format
 
 		taxidMappingFiles := getFlagStringSlice(cmd, "taxid-map")
 		taxonomyDataDir := getFlagString(cmd, "taxonomy-dir")
+
 		if len(taxidMappingFiles) > 0 && taxonomyDataDir == "" {
-			checkError(fmt.Errorf("flag -X/--taxonomy-dir is needed when -N/--taxid-map given"))
+			checkError(fmt.Errorf("flag -X/--taxonomy-dir is needed when -T/--taxid-map given"))
 		}
 		if len(taxidMappingFiles) == 0 && taxonomyDataDir != "" {
-			checkError(fmt.Errorf("flag -N/--taxid-map is needed when -X/--taxonomy-dir given"))
+			checkError(fmt.Errorf("flag -T/--taxid-map is needed when -X/--taxonomy-dir given"))
 		}
+		if len(taxidMappingFiles) == 0 || taxonomyDataDir == "" {
+			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are recommended to add taxonomy information")
+		}
+
 		separator := getFlagString(cmd, "separator")
 		if separator == "" {
 			log.Warningf("value of -s/--separator better not be empty")
@@ -1159,7 +1195,7 @@ func init() {
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
 	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read in search result`)
-	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score, 0 for all`)
+	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if there are`)
 
 	// for ref fragments
@@ -1169,8 +1205,8 @@ func init() {
 	profileCmd.Flags().Float64P("min-qcov-ureads", "U", 0, `minimal query coverage for unique reads, it's equal to -t/--min-qcov if smaller than it`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
-	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambigous reads`)
-	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambigous reads`)
+	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads`)
+	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads`)
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)

@@ -87,6 +87,10 @@ References:
   1. COBS: https://arxiv.org/abs/1905.09624
   2. RAMBO: https://arxiv.org/abs/1910.02611
 
+Taxonomy data:
+  1. No taxonomy data are included in the database.
+  2. Taxonomy information are only needed in "profile" command.
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
