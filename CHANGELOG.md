@@ -1,17 +1,19 @@
 # Changelog
 
-## v0.5.0 - 2021-04
+## v0.5.0 - 2021-05
 
 - `compute`:
-    - support multiple sizes of k-mer
+    - support multiple sizes of k-mer.
     - fix bug of `--by-seq`.
     - more log.
 - `search`:
     - show real-time processing speed.
     - new flag `-g/--query-whole-file`.
     - new flag `-u/--kmer-dedup-threshold`.
-
-
+    - increase speed for database with mulitple hashes. 
+- `profile`:
+    - new flag `-B/--binning-result` for output reads binning result.
+    
 ## v0.4.0 - 2021-04-08
 
 - new command:
