@@ -1051,6 +1051,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				var and []byte // must creat a new local variable
 				if moreThanOneHash {
 					and = buffs[bufIdx]
+
 					copy(and, data[0]) // overwrite old count
 					for _, row = range data[1:] {
 						i = 0
@@ -1072,13 +1073,16 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					}
 				} else if useMmap { // just point to the orginial data (mmaped)
 					and = data[0]
+
+					buffs[bufIdx] = and
 				} else { // ！useMmap, where io.ReadFull(fh, data[i])
 					and = buffs[bufIdx]
 					copy(and, data[0])
+
+					buffs[bufIdx] = and
 				}
 
 				// add to buffer for counting
-				buffs[bufIdx] = and
 				bufIdx++
 
 				if bufIdx == PosPopCountBufSize {
