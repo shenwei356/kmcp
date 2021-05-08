@@ -67,7 +67,7 @@ Accuracy notes:
      for accuracy.
   *. -F/--keep-full-match is not recommended, which reduce sensitivity.
   *. a smaller -t/--min-qcov increase sensitivity in cost of high false
-     positive rate (-f/--max-fpr) of a query matching.
+     positive rate (-f/--max-fpr) of a query.
   *. a bigger -U/--min-qcov-ureads increase specificity while it may
      decrease sensitivity.
   *. -u/--min-uniq-reads is crutial for deciding the existence of
@@ -79,7 +79,7 @@ Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
   2. NCBI taxonomy dump files: -X/--taxonomy-dir
 
-Performance note:
+Performance notes:
   1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --chunk-size.
   2. However using a lot of threads does not always accelerate

@@ -48,10 +48,11 @@ Attentions:
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
   2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
-  3. Increase value of -j/--threads for acceleratation.
+  3. Increase value of -j/--threads for acceleratation, but values larger
+     than number of index files (.uniki) won't bring extra speedup.
 
 Special attentions:
-  1. The values of tCov and jacc only apply for single length of k-mer.
+  1. The values of tCov and jacc only apply for single size of k-mer.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

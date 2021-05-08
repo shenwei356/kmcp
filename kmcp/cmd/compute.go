@@ -52,28 +52,26 @@ Attentions:
   1. Input files can be given as list of FASTA/Q files via
      positional arguments or a directory containing sequence files
      via the flag -I/--in-dir. A regular expression for matching
-     sequencing file is available by the flag -r/--file-regexp.
+     sequencing files is available by the flag -r/--file-regexp.
   2. Multiple sizes of k-mers are supported.
      K-mers (sketchs) are not sorted, and duplicates are kept
-     unless flag -e/--exact-number is on.
-  3. Sequence IDs in all input files should be distinct.
-     Multiple sequences belonging to a same group can be mapped
-     to their group name via name mapping file after indexing.
-  4. By default, we compute k-mers (sketches) of every file,
-     you can also use --by-seq to compute for every sequence.
-  5. Unwanted sequence like plasmid can be filtered out by
+     unless the flag -e/--exact-number is on.
+  3. By default, we compute k-mers (sketches) of every file,
+     you can also use --by-seq to compute for every sequence,
+     where sequence IDs in all input files better be distinct.
+  4. Unwanted sequence like plasmid can be filtered out by
      regular expressions via -B/--seq-name-filter.
-  6. It also supports splitting sequences into fragments, this
+  5. It also supports splitting sequences into fragments, this
      could increase the specificity in profiling result in cost
      of searching speed.
 
 Supported k-mer (sketches) types:
   1. K-mer:
-     1. ntHash of k-mer (-k)
+     1). ntHash of k-mer (-k)
   2. K-mer sketchs (all using ntHash):
-     1. Scaled MinHash (-k -D)
-     2. Minimizer      (-k -W), optionally scaling/down-sampling (-D)
-     3. Syncmer        (-k -S), optionally scaling/down-sampling (-D)
+     1). Scaled MinHash (-k -D)
+     2). Minimizer      (-k -W), optionally scaling/down-sampling (-D)
+     3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
 
 Splitting sequences:
   1. Sequences can be splitted into fragments by a fragment size 
