@@ -63,8 +63,7 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. -n/--keep-top-scores could increase the speed but have little help
-     for accuracy.
+  *. -n/--keep-top-scores could increase the speed.
   *. -F/--keep-full-match is not recommended, which reduce sensitivity.
   *. a smaller -t/--min-qcov increase sensitivity in cost of high false
      positive rate (-f/--max-fpr) of a query.
@@ -1106,7 +1105,9 @@ Profiling output formats:
 
 		log.Infof("  number of estimated references: %d", len(targets))
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
-		log.Infof("%d binning results are save to %s", nB, binningFile)
+		if outputBinningResult {
+			log.Infof("%d binning results are save to %s", nB, binningFile)
+		}
 		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
 			nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 

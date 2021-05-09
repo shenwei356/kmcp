@@ -51,6 +51,10 @@ Attentions:
   3. Increase value of -j/--threads for acceleratation, but values larger
      than number of index files (.uniki) won't bring extra speedup.
 
+Notes:
+  *. both "search" and "profile" have the flag -n/--keep-top-scores,
+     here it do not effect the speed.
+
 Special attentions:
   1. The values of tCov and jacc only apply for single size of k-mer.
 
