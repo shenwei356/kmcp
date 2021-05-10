@@ -51,9 +51,10 @@ Attentions:
   3. Increase value of -j/--threads for acceleratation, but values larger
      than number of index files (.uniki) won't bring extra speedup.
 
-Notes:
-  *. both "search" and "profile" have the flag -n/--keep-top-scores,
-     here it do not effect the speed.
+Shared flags between "search" and "profile":
+  1. -t/--min-query-cov.
+  2. -n/--keep-top-scores, here it can reduce the output size, while
+     it does not effect the speed.
 
 Special attentions:
   1. The values of tCov and jacc only apply for single size of k-mer.
@@ -80,9 +81,9 @@ Special attentions:
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
 		outFile := getFlagString(cmd, "out-file")
-		queryCov := getFlagFloat64(cmd, "query-cov")
-		targetCov := getFlagFloat64(cmd, "target-cov")
-		minCount := getFlagNonNegativeInt(cmd, "min-count")
+		queryCov := getFlagFloat64(cmd, "min-query-cov")
+		targetCov := getFlagFloat64(cmd, "min-target-cov")
+		minCount := getFlagNonNegativeInt(cmd, "min-kmers")
 		useMmap := !getFlagBool(cmd, "low-mem")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")
@@ -468,9 +469,9 @@ func init() {
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
 	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use whole file as query`)
-	searchCmd.Flags().IntP("min-count", "c", 3, `minimal number of matched k-mers (sketch)`)
-	searchCmd.Flags().Float64P("query-cov", "t", 0.7, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
-	searchCmd.Flags().Float64P("target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
+	searchCmd.Flags().IntP("min-kmers", "c", 3, `minimal number of matched k-mers (sketch)`)
+	searchCmd.Flags().Float64P("min-query-cov", "t", 0.7, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
+	searchCmd.Flags().Float64P("min-target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
 	// output
 	searchCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)

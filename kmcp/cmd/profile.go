@@ -63,16 +63,17 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. -n/--keep-top-scores could increase the speed.
-  *. -F/--keep-full-match is not recommended, which reduce sensitivity.
   *. a smaller -t/--min-qcov increase sensitivity in cost of high false
      positive rate (-f/--max-fpr) of a query.
+  *. -n/--keep-top-scores could increase the speed, while too small value
+     could decrease the sensitivity.
   *. a bigger -U/--min-qcov-ureads increase specificity while it may
      decrease sensitivity.
   *. -u/--min-uniq-reads is crutial for deciding the existence of
      a reference genome.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
+  *. -F/--keep-full-match is not recommended, which decreases sensitivity.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -106,7 +107,7 @@ Profiling output formats:
 		outFile := getFlagString(cmd, "out-prefix")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
-		minQcov := getFlagNonNegativeFloat64(cmd, "min-qcov")
+		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
 		keepFullMatch := getFlagBool(cmd, "keep-full-match")
 
@@ -1302,7 +1303,7 @@ func init() {
 
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
-	profileCmd.Flags().Float64P("min-qcov", "t", 0.7, `minimal query coverage of a read in search result`)
+	profileCmd.Flags().Float64P("min-query-cov", "t", 0.7, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if there are`)
 
@@ -1322,12 +1323,12 @@ func init() {
 	// taxonomy
 	profileCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
 	profileCmd.Flags().StringP("taxonomy-dir", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
-	profileCmd.Flags().StringP("separator", "s", ";", `separator of TaxIds and taxonomy names`)
+	profileCmd.Flags().StringP("separator", "S", ";", `separator of TaxIds and taxonomy names`)
 	profileCmd.Flags().StringSliceP("show-rank", "", []string{"superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"}, "only show TaxIds and names of these ranks")
 	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
 
 	// other output formats
-	profileCmd.Flags().StringP("sample-id", "", "", `sample ID in result file`)
+	profileCmd.Flags().StringP("sample-id", "s", "", `sample ID in result file`)
 	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
 	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
 	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
