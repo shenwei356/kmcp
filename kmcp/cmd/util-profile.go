@@ -136,11 +136,16 @@ type Target struct {
 	// unique match
 	UniqMatch []float64
 
-	SumMatch     float64
-	SumUniqMatch float64
-	FragsProp    float64
-	Coverage     float64
-	Qlens        float64
+	// unique match with high confidence
+	UniqMatchHic []float64
+
+	SumMatch        float64
+	SumUniqMatch    float64
+	SumUniqMatchHic float64
+
+	FragsProp float64
+	Coverage  float64
+	Qlens     float64
 
 	//
 	RefName string

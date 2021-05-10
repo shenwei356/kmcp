@@ -67,8 +67,6 @@ Accuracy notes:
      positive rate (-f/--max-fpr) of a query.
   *. -n/--keep-top-scores could increase the speed, while too small value
      could decrease the sensitivity.
-  *. a bigger -U/--min-qcov-ureads increase specificity while it may
-     decrease sensitivity.
   *. -u/--min-uniq-reads is crutial for deciding the existence of
      a reference genome.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
@@ -114,10 +112,16 @@ Profiling output formats:
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
-		minQcovUreads := getFlagNonNegativeFloat64(cmd, "min-qcov-ureads")
-		if minQcovUreads < minQcov {
-			minQcovUreads = minQcov
+
+		minHicUreads := float64(getFlagPositiveInt(cmd, "min-uniq-hic-reads"))
+		if minHicUreads > minUReads {
+			minUReads = minHicUreads
 		}
+		hicUreadsMinQcov := getFlagNonNegativeFloat64(cmd, "ureads-hic-min-qcov")
+		if hicUreadsMinQcov < minQcov {
+			hicUreadsMinQcov = minQcov
+		}
+		HicUreadsMinProp := getFlagNonNegativeFloat64(cmd, "ureads-hic-min-prop")
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
@@ -376,19 +380,23 @@ Profiling output formats:
 							for _, m = range *ms {
 								if t, ok = profile[h]; !ok {
 									t0 := Target{
-										Name:       m.Target,
-										GenomeSize: m.GSize,
-										Match:      make([]float64, m.IdxNum),
-										UniqMatch:  make([]float64, m.IdxNum),
-										QLen:       make([]float64, m.IdxNum),
+										Name:         m.Target,
+										GenomeSize:   m.GSize,
+										Match:        make([]float64, m.IdxNum),
+										UniqMatch:    make([]float64, m.IdxNum),
+										UniqMatchHic: make([]float64, m.IdxNum),
+										QLen:         make([]float64, m.IdxNum),
 									}
 									profile[h] = &t0
 									t = &t0
 								}
 
 								if first { // count once
-									if len(matches) == 1 && m.QCov >= minQcovUreads {
+									if len(matches) == 1 {
 										t.UniqMatch[m.FragIdx]++
+										if m.QCov >= hicUreadsMinQcov {
+											t.UniqMatchHic[m.FragIdx]++
+										}
 									}
 									t.QLen[m.FragIdx] += float64(m.QLen)
 									first = false
@@ -443,19 +451,23 @@ Profiling output formats:
 				for _, m = range *ms {
 					if t, ok = profile[h]; !ok {
 						t0 := Target{
-							Name:       m.Target,
-							GenomeSize: m.GSize,
-							Match:      make([]float64, m.IdxNum),
-							UniqMatch:  make([]float64, m.IdxNum),
-							QLen:       make([]float64, m.IdxNum),
+							Name:         m.Target,
+							GenomeSize:   m.GSize,
+							Match:        make([]float64, m.IdxNum),
+							UniqMatch:    make([]float64, m.IdxNum),
+							UniqMatchHic: make([]float64, m.IdxNum),
+							QLen:         make([]float64, m.IdxNum),
 						}
 						profile[h] = &t0
 						t = &t0
 					}
 
 					if first { // count once
-						if len(matches) == 1 && m.QCov >= minQcovUreads {
+						if len(matches) == 1 {
 							t.UniqMatch[m.FragIdx]++
+							if m.QCov >= hicUreadsMinQcov {
+								t.UniqMatchHic[m.FragIdx]++
+							}
 						}
 						t.QLen[m.FragIdx] += float64(m.QLen)
 						first = false
@@ -497,7 +509,22 @@ Profiling output formats:
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
+
+			for _, c1 = range t.UniqMatchHic {
+				t.SumUniqMatchHic += c1
+			}
+
+			if t.SumUniqMatchHic < minHicUreads {
+				hs = append(hs, h)
+				continue
+			}
+
 			if t.SumUniqMatch < minUReads { // no enough unique match
+				hs = append(hs, h)
+				continue
+			}
+
+			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
 				hs = append(hs, h)
 				continue
 			}
@@ -816,11 +843,12 @@ Profiling output formats:
 										for _, m = range *ms {
 											if t, ok = profile2[h]; !ok {
 												t0 := Target{
-													Name:       m.Target,
-													GenomeSize: m.GSize,
-													Match:      make([]float64, m.IdxNum),
-													UniqMatch:  make([]float64, m.IdxNum),
-													QLen:       make([]float64, m.IdxNum),
+													Name:         m.Target,
+													GenomeSize:   m.GSize,
+													Match:        make([]float64, m.IdxNum),
+													UniqMatch:    make([]float64, m.IdxNum),
+													UniqMatchHic: make([]float64, m.IdxNum),
+													QLen:         make([]float64, m.IdxNum),
 												}
 												profile2[h] = &t0
 												t = &t0
@@ -856,19 +884,23 @@ Profiling output formats:
 								for _, m = range *ms {
 									if t, ok = profile2[h]; !ok {
 										t0 := Target{
-											Name:       m.Target,
-											GenomeSize: m.GSize,
-											Match:      make([]float64, m.IdxNum),
-											UniqMatch:  make([]float64, m.IdxNum),
-											QLen:       make([]float64, m.IdxNum),
+											Name:         m.Target,
+											GenomeSize:   m.GSize,
+											Match:        make([]float64, m.IdxNum),
+											UniqMatch:    make([]float64, m.IdxNum),
+											UniqMatchHic: make([]float64, m.IdxNum),
+											QLen:         make([]float64, m.IdxNum),
 										}
 										profile2[h] = &t0
 										t = &t0
 									}
 
 									if first { // count once
-										if len(matches) == 1 && m.QCov >= minQcovUreads {
+										if len(matches) == 1 {
 											t.UniqMatch[m.FragIdx]++
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx]++
+											}
 										}
 										// t.UniqMatch[m.FragIdx] += floatOne
 
@@ -999,11 +1031,12 @@ Profiling output formats:
 							for _, m = range *ms {
 								if t, ok = profile2[h]; !ok {
 									t0 := Target{
-										Name:       m.Target,
-										GenomeSize: m.GSize,
-										Match:      make([]float64, m.IdxNum),
-										UniqMatch:  make([]float64, m.IdxNum),
-										QLen:       make([]float64, m.IdxNum),
+										Name:         m.Target,
+										GenomeSize:   m.GSize,
+										Match:        make([]float64, m.IdxNum),
+										UniqMatch:    make([]float64, m.IdxNum),
+										UniqMatchHic: make([]float64, m.IdxNum),
+										QLen:         make([]float64, m.IdxNum),
 									}
 									profile2[h] = &t0
 									t = &t0
@@ -1038,19 +1071,23 @@ Profiling output formats:
 					for _, m = range *ms {
 						if t, ok = profile2[h]; !ok {
 							t0 := Target{
-								Name:       m.Target,
-								GenomeSize: m.GSize,
-								Match:      make([]float64, m.IdxNum),
-								UniqMatch:  make([]float64, m.IdxNum),
-								QLen:       make([]float64, m.IdxNum),
+								Name:         m.Target,
+								GenomeSize:   m.GSize,
+								Match:        make([]float64, m.IdxNum),
+								UniqMatch:    make([]float64, m.IdxNum),
+								UniqMatchHic: make([]float64, m.IdxNum),
+								QLen:         make([]float64, m.IdxNum),
 							}
 							profile2[h] = &t0
 							t = &t0
 						}
 
 						if first { // count once
-							if len(matches) == 1 && m.QCov >= minQcovUreads {
+							if len(matches) == 1 {
 								t.UniqMatch[m.FragIdx]++
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx]++
+								}
 							}
 							// t.UniqMatch[m.FragIdx] += floatOne
 							t.QLen[m.FragIdx] += float64(m.QLen)
@@ -1311,7 +1348,10 @@ func init() {
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of unique matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched fragments`)
-	profileCmd.Flags().Float64P("min-qcov-ureads", "U", 0, `minimal query coverage for unique reads, it's equal to -t/--min-qcov if smaller than it`)
+
+	profileCmd.Flags().IntP("min-uniq-hic-reads", "U", 10, `minimal number of high-confident unique matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("ureads-hic-min-qcov", "H", 0.8, `minimal query coverage of high-confident unique reads`)
+	profileCmd.Flags().Float64P("ureads-hic-min-prop", "P", 0.1, `minimal proportion of high-confident unique reads`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
 	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads`)
