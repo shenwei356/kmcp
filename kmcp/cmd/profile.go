@@ -63,15 +63,20 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. a smaller -t/--min-qcov increase sensitivity in cost of high false
+  *. Smaller -t/--min-qcov increase sensitivity in cost of high false
      positive rate (-f/--max-fpr) of a query.
+  *. And we require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence to decrease
+     the false positive.
+     *. -U/--min-hic-ureads,      minimal number, >= 1
+     *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
+     *. -P/--min-hic-ureads-prop, minimal proportion, higher values
+        increase precision in cost of sensitivity.
   *. -n/--keep-top-scores could increase the speed, while too small value
      could decrease the sensitivity.
-  *. -u/--min-uniq-reads is crutial for deciding the existence of
-     a reference genome.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
-  *. -F/--keep-full-match is not recommended, which decreases sensitivity.
+  *. -F/--keep-full-match is not recommended, which decreases sensitivity.  
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -117,12 +122,11 @@ Profiling output formats:
 		if minHicUreads > minUReads {
 			minUReads = minHicUreads
 		}
-		hicUreadsMinQcov := getFlagNonNegativeFloat64(cmd, "min-hic-ureads-qcov")
+		hicUreadsMinQcov := getFlagPositiveFloat64(cmd, "min-hic-ureads-qcov")
 		if hicUreadsMinQcov < minQcov {
 			hicUreadsMinQcov = minQcov
 		}
-		HicUreadsMinProp := getFlagNonNegativeFloat64(cmd, "min-hic-ureads-prop")
-		handleHicUreads := HicUreadsMinProp > 0 || hicUreadsMinQcov > 0
+		HicUreadsMinProp := getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
@@ -398,7 +402,7 @@ Profiling output formats:
 								if first { // count once
 									if len(matches) == 1 {
 										t.UniqMatch[m.FragIdx]++
-										if handleHicUreads && m.QCov >= hicUreadsMinQcov {
+										if m.QCov >= hicUreadsMinQcov {
 											t.UniqMatchHic[m.FragIdx]++
 										}
 									}
@@ -482,7 +486,7 @@ Profiling output formats:
 					if first { // count once
 						if len(matches) == 1 {
 							t.UniqMatch[m.FragIdx]++
-							if handleHicUreads && m.QCov >= hicUreadsMinQcov {
+							if m.QCov >= hicUreadsMinQcov {
 								t.UniqMatchHic[m.FragIdx]++
 							}
 						}
@@ -532,20 +536,18 @@ Profiling output formats:
 				continue
 			}
 
-			if handleHicUreads {
-				for _, c1 = range t.UniqMatchHic {
-					t.SumUniqMatchHic += c1
-				}
+			for _, c1 = range t.UniqMatchHic {
+				t.SumUniqMatchHic += c1
+			}
 
-				if t.SumUniqMatchHic < minHicUreads {
-					hs = append(hs, h)
-					continue
-				}
+			if t.SumUniqMatchHic < minHicUreads {
+				hs = append(hs, h)
+				continue
+			}
 
-				if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
-					hs = append(hs, h)
-					continue
-				}
+			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+				hs = append(hs, h)
+				continue
 			}
 
 			for _, c2 = range t.QLen {
@@ -912,7 +914,7 @@ Profiling output formats:
 									if first { // count once
 										if len(matches) == 1 {
 											t.UniqMatch[m.FragIdx]++
-											if handleHicUreads && m.QCov >= hicUreadsMinQcov {
+											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
 											}
 										}
@@ -1091,7 +1093,7 @@ Profiling output formats:
 						if first { // count once
 							if len(matches) == 1 {
 								t.UniqMatch[m.FragIdx]++
-								if handleHicUreads && m.QCov >= hicUreadsMinQcov {
+								if m.QCov >= hicUreadsMinQcov {
 									t.UniqMatchHic[m.FragIdx]++
 								}
 							}
@@ -1351,7 +1353,7 @@ func init() {
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 1, `minimal number of uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments`)
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
