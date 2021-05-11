@@ -113,15 +113,16 @@ Profiling output formats:
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
 
-		minHicUreads := float64(getFlagPositiveInt(cmd, "min-uniq-hic-reads"))
+		minHicUreads := float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
 		if minHicUreads > minUReads {
 			minUReads = minHicUreads
 		}
-		hicUreadsMinQcov := getFlagNonNegativeFloat64(cmd, "ureads-hic-min-qcov")
+		hicUreadsMinQcov := getFlagNonNegativeFloat64(cmd, "min-hic-ureads-qcov")
 		if hicUreadsMinQcov < minQcov {
 			hicUreadsMinQcov = minQcov
 		}
-		HicUreadsMinProp := getFlagNonNegativeFloat64(cmd, "ureads-hic-min-prop")
+		HicUreadsMinProp := getFlagNonNegativeFloat64(cmd, "min-hic-ureads-prop")
+		handleHicUreads := HicUreadsMinProp > 0
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
@@ -331,6 +332,8 @@ Profiling output formats:
 			return match, true, nil
 		}
 
+		var nReads float64
+
 		// ---------------------------------------------------------------
 		// stage 1/3
 		if opt.Verbose {
@@ -374,6 +377,7 @@ Profiling output formats:
 					match = data.(MatchResult)
 
 					if prevQuery != match.Query { // new query
+						nReads++
 						for h, ms = range matches {
 							floatMsSize = float64(len(*ms))
 							first = true
@@ -394,7 +398,7 @@ Profiling output formats:
 								if first { // count once
 									if len(matches) == 1 {
 										t.UniqMatch[m.FragIdx]++
-										if m.QCov >= hicUreadsMinQcov {
+										if handleHicUreads && m.QCov >= hicUreadsMinQcov {
 											t.UniqMatchHic[m.FragIdx]++
 										}
 									}
@@ -412,24 +416,35 @@ Profiling output formats:
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
-					}
-
-					if onlyTopNScore {
-						if match.QCov < pScore { // match with a smaller score
-							nScore++
-							if nScore > topNScore {
-								processThisMatch = false
-							}
-							pScore = match.QCov
-						}
+					} else if keepFullMatch {
 						if !processThisMatch {
 							prevQuery = match.Query
 							continue
 						}
-						if keepFullMatch && match.QCov == 1 {
+
+						if pScore == 1 && match.QCov < 1 {
 							processThisMatch = false
+
 							prevQuery = match.Query
 							continue
+						}
+					}
+
+					if onlyTopNScore {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+							pScore = match.QCov
 						}
 					}
 
@@ -442,9 +457,11 @@ Profiling output formats:
 					}
 
 					prevQuery = match.Query
+					pScore = match.QCov
 				}
 			}
 
+			nReads++
 			for h, ms = range matches {
 				floatMsSize = float64(len(*ms))
 				first = true
@@ -465,7 +482,7 @@ Profiling output formats:
 					if first { // count once
 						if len(matches) == 1 {
 							t.UniqMatch[m.FragIdx]++
-							if m.QCov >= hicUreadsMinQcov {
+							if handleHicUreads && m.QCov >= hicUreadsMinQcov {
 								t.UniqMatchHic[m.FragIdx]++
 							}
 						}
@@ -492,7 +509,7 @@ Profiling output formats:
 		var c1 float64
 		var c2 float64
 		var hs []uint64
-		hs = make([]uint64, 0, 8) // list to delete
+		hs = make([]uint64, 0, 1024) // list to delete
 		for h, t := range profile {
 			for _, c = range t.Match {
 				if c > minReads {
@@ -510,6 +527,11 @@ Profiling output formats:
 				t.SumUniqMatch += c1
 			}
 
+			if t.SumUniqMatch < minUReads { // no enough unique match
+				hs = append(hs, h)
+				continue
+			}
+
 			for _, c1 = range t.UniqMatchHic {
 				t.SumUniqMatchHic += c1
 			}
@@ -519,12 +541,7 @@ Profiling output formats:
 				continue
 			}
 
-			if t.SumUniqMatch < minUReads { // no enough unique match
-				hs = append(hs, h)
-				continue
-			}
-
-			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+			if handleHicUreads && t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
 				hs = append(hs, h)
 				continue
 			}
@@ -535,6 +552,7 @@ Profiling output formats:
 
 			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 		}
+
 		for _, h := range hs {
 			delete(profile, h)
 		}
@@ -588,30 +606,30 @@ Profiling output formats:
 				for _, data = range chunk.Data {
 					match = data.(MatchResult)
 
+					hTarget = wyhash.HashString(match.Target, 1)
+					if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
+						continue
+					}
+
 					if prevQuery != match.Query { // new query
 						if len(matches) > 1 { // skip uniq match
 							hs = hs[:0]
 							for h = range matches {
-								if _, ok = profile[h]; !ok { // skip low-confidence match
-									continue
-								}
 								hs = append(hs, h)
 							}
 
-							if len(hs) >= 2 {
-								sorts.Quicksort(Uint64Slice(hs))
+							sorts.Quicksort(Uint64Slice(hs))
 
-								n = len(hs)
-								np1 = len(hs) - 1
-								for i = 0; i < np1; i++ {
-									for j = i + 1; j < n; j++ {
-										h1, h2 = hs[i], hs[j]
-										if amb, ok = ambMatch[h1]; !ok {
-											ambMatch[h1] = make(map[uint64]float64, 128)
-											ambMatch[h1][h2]++
-										} else {
-											amb[h2]++
-										}
+							n = len(hs)
+							np1 = len(hs) - 1
+							for i = 0; i < np1; i++ {
+								for j = i + 1; j < n; j++ {
+									h1, h2 = hs[i], hs[j]
+									if amb, ok = ambMatch[h1]; !ok {
+										ambMatch[h1] = make(map[uint64]float64, 128)
+										ambMatch[h1][h2]++
+									} else {
+										amb[h2]++
 									}
 								}
 							}
@@ -621,28 +639,38 @@ Profiling output formats:
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
-					}
-
-					if onlyTopNScore {
-						if match.QCov < pScore { // match with a smaller score
-							nScore++
-							if nScore > topNScore {
-								processThisMatch = false
-							}
-							pScore = match.QCov
-						}
+					} else if keepFullMatch {
 						if !processThisMatch {
 							prevQuery = match.Query
 							continue
 						}
-						if keepFullMatch && match.QCov == 1 {
+
+						if pScore == 1 && match.QCov < 1 {
 							processThisMatch = false
+
 							prevQuery = match.Query
 							continue
 						}
 					}
 
-					hTarget = wyhash.HashString(match.Target, 1)
+					if onlyTopNScore {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+							pScore = match.QCov
+						}
+					}
+
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
 						matches[hTarget] = &tmp
@@ -651,32 +679,28 @@ Profiling output formats:
 					}
 
 					prevQuery = match.Query
+					pScore = match.QCov
 				}
 			}
 
-			if len(matches) > 0 {
+			if len(matches) > 1 {
 				hs = hs[:0]
 				for h = range matches {
-					if _, ok = profile[h]; !ok { // skip low-confidence match
-						continue
-					}
 					hs = append(hs, h)
 				}
 
-				if len(hs) >= 2 {
-					sorts.Quicksort(Uint64Slice(hs))
+				sorts.Quicksort(Uint64Slice(hs))
 
-					n = len(hs)
-					np1 = len(hs) - 1
-					for i = 0; i < np1; i++ {
-						for j = i + 1; j < n; j++ {
-							h1, h2 = hs[i], hs[j]
-							if amb, ok = ambMatch[h1]; !ok {
-								ambMatch[h1] = make(map[uint64]float64, 128)
-								ambMatch[h1][h2]++
-							} else {
-								amb[h2]++
-							}
+				n = len(hs)
+				np1 = len(hs) - 1
+				for i = 0; i < np1; i++ {
+					for j = i + 1; j < n; j++ {
+						h1, h2 = hs[i], hs[j]
+						if amb, ok = ambMatch[h1]; !ok {
+							ambMatch[h1] = make(map[uint64]float64, 128)
+							ambMatch[h1][h2]++
+						} else {
+							amb[h2]++
 						}
 					}
 				}
@@ -720,7 +744,7 @@ Profiling output formats:
 		}
 
 		profile2 := make(map[uint64]*Target, 128)
-		var nReads float64
+
 		var nUnassignedReads float64
 
 		for _, file := range files {
@@ -766,114 +790,102 @@ Profiling output formats:
 				for _, data = range chunk.Data {
 					match = data.(MatchResult)
 
+					hTarget = wyhash.HashString(match.Target, 1)
+					if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
+						continue
+					}
+
 					if prevQuery != match.Query {
-						nReads++
 						uniqMatch = false
-						if len(matches) > 1 { // multiple match
-							// skip low-confidence match
+						if len(matches) > 1 {
 							hs = hs[:0] // list to delete
+							first = true
+
+							hss = hss[:0]
 							for h = range matches {
-								if _, ok = profile[h]; ok { // skip low-confidence match
+								hss = append(hss, h)
+							}
+							sort.Slice(hss, func(i, j int) bool {
+								return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+							})
+
+							for _, h = range hss {
+								if first {
+									h0 = h // previous one
+									first = false
 									continue
 								}
-								hs = append(hs, h)
+								h1, h2 = sortTwoUint64s(h0, h)
+
+								// decide which to keep
+								if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+									profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
+									hs = append(hs, h)
+								} else {
+									h0 = h
+								}
 							}
 							for _, h = range hs {
 								delete(matches, h)
 							}
 
-							if len(matches) > 1 {
-								hs = hs[:0] // list to delete
-								first = true
-
-								hss = hss[:0]
-								for h = range matches {
-									hss = append(hss, h)
-								}
-								sort.Slice(hss, func(i, j int) bool {
-									return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
-								})
-
-								for _, h = range hss {
-									if first {
-										h0 = h // previous one
-										first = false
-										continue
-									}
-									h1, h2 = sortTwoUint64s(h0, h)
-
-									// decide which to keep
-									if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-										profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
-										hs = append(hs, h)
-									} else {
-										h0 = h
-									}
-								}
-								for _, h = range hs {
-									delete(matches, h)
+							if len(matches) > 1 { // redistribute matches
+								if outputBinningResult {
+									taxids = taxids[:0]
 								}
 
-								if len(matches) > 1 { // redistribute matches
-									if outputBinningResult {
-										taxids = taxids[:0]
-									}
-
-									sumUReads = 0
-									for h, ms = range matches {
-										sumUReads += profile[h].SumUniqMatch
-
-										if outputBinningResult {
-											taxids = append(taxids, taxidMap[(*ms)[0].Target])
-										}
-									}
+								sumUReads = 0
+								for h, ms = range matches {
+									sumUReads += profile[h].SumUniqMatch
 
 									if outputBinningResult {
-										taxid1 = taxids[0]
-										for _, taxid2 = range taxids[1:] {
-											taxid1 = taxdb.LCA(taxid1, taxid2)
-										}
-										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-										nB++
+										taxids = append(taxids, taxidMap[(*ms)[0].Target])
 									}
-
-									for h, ms = range matches {
-										floatMsSize = float64(len(*ms))
-										first = true
-										for _, m = range *ms {
-											if t, ok = profile2[h]; !ok {
-												t0 := Target{
-													Name:         m.Target,
-													GenomeSize:   m.GSize,
-													Match:        make([]float64, m.IdxNum),
-													UniqMatch:    make([]float64, m.IdxNum),
-													UniqMatchHic: make([]float64, m.IdxNum),
-													QLen:         make([]float64, m.IdxNum),
-												}
-												profile2[h] = &t0
-												t = &t0
-											}
-
-											prop = profile[h].SumUniqMatch / sumUReads
-
-											if first { // count once
-												t.QLen[m.FragIdx] += float64(m.QLen) * prop
-												first = false
-											}
-
-											t.Match[m.FragIdx] += prop / floatMsSize
-										}
-									}
-								} else { // len(matches) == 1
-									uniqMatch = true
 								}
-							} else if len(matches) == 1 {
+
+								if outputBinningResult {
+									taxid1 = taxids[0]
+									for _, taxid2 = range taxids[1:] {
+										taxid1 = taxdb.LCA(taxid1, taxid2)
+									}
+									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+									nB++
+								}
+
+								for h, ms = range matches {
+									floatMsSize = float64(len(*ms))
+									first = true
+									for _, m = range *ms {
+										if t, ok = profile2[h]; !ok {
+											t0 := Target{
+												Name:         m.Target,
+												GenomeSize:   m.GSize,
+												Match:        make([]float64, m.IdxNum),
+												UniqMatch:    make([]float64, m.IdxNum),
+												UniqMatchHic: make([]float64, m.IdxNum),
+												QLen:         make([]float64, m.IdxNum),
+											}
+											profile2[h] = &t0
+											t = &t0
+										}
+
+										prop = profile[h].SumUniqMatch / sumUReads
+
+										if first { // count once
+											t.QLen[m.FragIdx] += float64(m.QLen) * prop
+											first = false
+										}
+
+										t.Match[m.FragIdx] += prop / floatMsSize
+									}
+								}
+							} else { // len(matches) == 1
 								uniqMatch = true
-							} else { // 0
-								nUnassignedReads++
 							}
 						} else if len(matches) == 1 {
 							uniqMatch = true
+						} else {
+							nUnassignedReads++
 						}
 
 						if uniqMatch {
@@ -898,12 +910,10 @@ Profiling output formats:
 									if first { // count once
 										if len(matches) == 1 {
 											t.UniqMatch[m.FragIdx]++
-											if m.QCov >= hicUreadsMinQcov {
+											if handleHicUreads && m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
 											}
 										}
-										// t.UniqMatch[m.FragIdx] += floatOne
-
 										t.QLen[m.FragIdx] += float64(m.QLen)
 										first = false
 
@@ -922,28 +932,38 @@ Profiling output formats:
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
-					}
-
-					if onlyTopNScore {
-						if match.QCov < pScore { // match with a smaller score
-							nScore++
-							if nScore > topNScore {
-								processThisMatch = false
-							}
-							pScore = match.QCov
-						}
+					} else if keepFullMatch {
 						if !processThisMatch {
 							prevQuery = match.Query
 							continue
 						}
-						if keepFullMatch && match.QCov == 1 {
+
+						if pScore == 1 && match.QCov < 1 {
 							processThisMatch = false
+
 							prevQuery = match.Query
 							continue
 						}
 					}
 
-					hTarget = wyhash.HashString(match.Target, 1)
+					if onlyTopNScore {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+							pScore = match.QCov
+						}
+					}
+
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
 						matches[hTarget] = &tmp
@@ -952,116 +972,100 @@ Profiling output formats:
 					}
 
 					prevQuery = match.Query
+					pScore = match.QCov
 				}
 			}
 
-			nReads++
 			uniqMatch = false
-			if len(matches) > 1 { // multiple match
-				// skip low-confidence match
+			if len(matches) > 1 {
 				hs = hs[:0] // list to delete
+				first = true
+
+				hss = hss[:0]
 				for h = range matches {
-					if _, ok = profile[h]; ok { // skip low-confidence match
+					hss = append(hss, h)
+				}
+				sort.Slice(hss, func(i, j int) bool {
+					return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+				})
+
+				for _, h = range hss {
+					if first {
+						h0 = h // previous one
+						first = false
 						continue
 					}
-					hs = append(hs, h)
+					h1, h2 = sortTwoUint64s(h0, h)
+
+					// decide which to keep
+					if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+						profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
+						hs = append(hs, h)
+					} else {
+						h0 = h
+					}
 				}
 				for _, h = range hs {
 					delete(matches, h)
 				}
 
-				if len(matches) > 1 {
-					hs = hs[:0] // list to delete
-					first = true
-
-					hss = hss[:0]
-					for h = range matches {
-						hss = append(hss, h)
-					}
-					sort.Slice(hss, func(i, j int) bool {
-						return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
-					})
-
-					for _, h = range hss {
-						if first {
-							h0 = h // previous one
-							first = false
-							continue
-						}
-						h1, h2 = sortTwoUint64s(h0, h)
-
-						// decide which to keep
-						if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-							profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
-							hs = append(hs, h)
-						} else {
-							h0 = h
-						}
-					}
-					for _, h = range hs {
-						delete(matches, h)
+				if len(matches) > 1 { // redistribute matches
+					if outputBinningResult {
+						taxids = taxids[:0]
 					}
 
-					if len(matches) > 1 { // redistribute matches
-						if outputBinningResult {
-							taxids = taxids[:0]
-						}
-
-						sumUReads = 0
-						for h = range matches {
-							sumUReads += profile[h].SumUniqMatch
-
-							if outputBinningResult {
-								taxids = append(taxids, taxidMap[(*matches[h])[0].Target])
-							}
-						}
+					sumUReads = 0
+					for h, ms = range matches {
+						sumUReads += profile[h].SumUniqMatch
 
 						if outputBinningResult {
-							taxid1 = taxids[0]
-							for _, taxid2 = range taxids[1:] {
-								taxid1 = taxdb.LCA(taxid1, taxid2)
-							}
-							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-							nB++
+							taxids = append(taxids, taxidMap[(*ms)[0].Target])
 						}
-
-						for h, ms = range matches {
-							floatMsSize = float64(len(*ms))
-							first = true
-							for _, m = range *ms {
-								if t, ok = profile2[h]; !ok {
-									t0 := Target{
-										Name:         m.Target,
-										GenomeSize:   m.GSize,
-										Match:        make([]float64, m.IdxNum),
-										UniqMatch:    make([]float64, m.IdxNum),
-										UniqMatchHic: make([]float64, m.IdxNum),
-										QLen:         make([]float64, m.IdxNum),
-									}
-									profile2[h] = &t0
-									t = &t0
-								}
-
-								prop = profile[h].SumUniqMatch / sumUReads
-
-								if first { // count once
-									t.QLen[m.FragIdx] += float64(m.QLen) * prop
-									first = false
-								}
-
-								t.Match[m.FragIdx] += prop / floatMsSize
-							}
-						}
-					} else { // len(matches) == 1
-						uniqMatch = true
 					}
-				} else if len(matches) == 1 {
+
+					if outputBinningResult {
+						taxid1 = taxids[0]
+						for _, taxid2 = range taxids[1:] {
+							taxid1 = taxdb.LCA(taxid1, taxid2)
+						}
+						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+						nB++
+					}
+
+					for h, ms = range matches {
+						floatMsSize = float64(len(*ms))
+						first = true
+						for _, m = range *ms {
+							if t, ok = profile2[h]; !ok {
+								t0 := Target{
+									Name:         m.Target,
+									GenomeSize:   m.GSize,
+									Match:        make([]float64, m.IdxNum),
+									UniqMatch:    make([]float64, m.IdxNum),
+									UniqMatchHic: make([]float64, m.IdxNum),
+									QLen:         make([]float64, m.IdxNum),
+								}
+								profile2[h] = &t0
+								t = &t0
+							}
+
+							prop = profile[h].SumUniqMatch / sumUReads
+
+							if first { // count once
+								t.QLen[m.FragIdx] += float64(m.QLen) * prop
+								first = false
+							}
+
+							t.Match[m.FragIdx] += prop / floatMsSize
+						}
+					}
+				} else { // len(matches) == 1
 					uniqMatch = true
-				} else { // 0
-					nUnassignedReads++
 				}
 			} else if len(matches) == 1 {
 				uniqMatch = true
+			} else {
+				nUnassignedReads++
 			}
 
 			if uniqMatch {
@@ -1085,11 +1089,10 @@ Profiling output formats:
 						if first { // count once
 							if len(matches) == 1 {
 								t.UniqMatch[m.FragIdx]++
-								if m.QCov >= hicUreadsMinQcov {
+								if handleHicUreads && m.QCov >= hicUreadsMinQcov {
 									t.UniqMatchHic[m.FragIdx]++
 								}
 							}
-							// t.UniqMatch[m.FragIdx] += floatOne
 							t.QLen[m.FragIdx] += float64(m.QLen)
 							first = false
 
@@ -1340,18 +1343,18 @@ func init() {
 
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
-	profileCmd.Flags().Float64P("min-query-cov", "t", 0.7, `minimal query coverage of a read in search result`)
-	profileCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
-	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches if there are`)
+	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
+	profileCmd.Flags().IntP("keep-top-scores", "n", 10, `keep matches with the top N score for a query, 0 for all`)
+	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches (qcov == 1) if there are`)
 
-	// for ref fragments
+	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched fragments`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched reference fragments`)
 
-	profileCmd.Flags().IntP("min-uniq-hic-reads", "U", 10, `minimal number of high-confident unique matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("ureads-hic-min-qcov", "H", 0.8, `minimal query coverage of high-confident unique reads`)
-	profileCmd.Flags().Float64P("ureads-hic-min-prop", "P", 0.1, `minimal proportion of high-confident unique reads`)
+	profileCmd.Flags().IntP("min-hic-ureads", "U", 10, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.8, `minimal query coverage of high-confidence uniquely matched reads`)
+	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
 	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads`)
