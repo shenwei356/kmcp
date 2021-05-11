@@ -122,7 +122,7 @@ Profiling output formats:
 			hicUreadsMinQcov = minQcov
 		}
 		HicUreadsMinProp := getFlagNonNegativeFloat64(cmd, "min-hic-ureads-prop")
-		handleHicUreads := HicUreadsMinProp > 0
+		handleHicUreads := HicUreadsMinProp > 0 || hicUreadsMinQcov > 0
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
@@ -532,18 +532,20 @@ Profiling output formats:
 				continue
 			}
 
-			for _, c1 = range t.UniqMatchHic {
-				t.SumUniqMatchHic += c1
-			}
+			if handleHicUreads {
+				for _, c1 = range t.UniqMatchHic {
+					t.SumUniqMatchHic += c1
+				}
 
-			if t.SumUniqMatchHic < minHicUreads {
-				hs = append(hs, h)
-				continue
-			}
+				if t.SumUniqMatchHic < minHicUreads {
+					hs = append(hs, h)
+					continue
+				}
 
-			if handleHicUreads && t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
-				hs = append(hs, h)
-				continue
+				if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+					hs = append(hs, h)
+					continue
+				}
 			}
 
 			for _, c2 = range t.QLen {
@@ -1349,10 +1351,10 @@ func init() {
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched reference fragments`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 1, `minimal number of uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments`)
 
-	profileCmd.Flags().IntP("min-hic-ureads", "U", 10, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.8, `minimal query coverage of high-confidence uniquely matched reads`)
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 
