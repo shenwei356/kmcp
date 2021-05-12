@@ -480,7 +480,7 @@ func init() {
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	// searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
-	searchCmd.Flags().IntP("keep-top-scores", "n", 10, `keep matches with the top N score for a query, 0 for all`)
+	searchCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 

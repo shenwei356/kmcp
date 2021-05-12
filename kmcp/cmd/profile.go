@@ -530,7 +530,6 @@ Profiling output formats:
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
-
 			if t.SumUniqMatch < minUReads { // no enough unique match
 				hs = append(hs, h)
 				continue
@@ -1139,6 +1138,17 @@ Profiling output formats:
 				continue
 			}
 
+			for _, c1 = range t.UniqMatchHic {
+				t.SumUniqMatchHic += c1
+			}
+			if t.SumUniqMatchHic < minHicUreads {
+				continue
+			}
+
+			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+				continue
+			}
+
 			for _, c2 = range t.QLen {
 				t.Qlens += c2
 			}
@@ -1190,7 +1200,7 @@ Profiling output formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
+		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
 
 		for _, t := range targets {
 			if mappingNames {
@@ -1207,8 +1217,8 @@ Profiling output formats:
 
 			t.Percentage = t.Coverage / totalCoverage * 100
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch, t.GenomeSize,
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
 				taxid, t.Rank, t.TaxonName,
 				strings.Join(t.LineageNames, separator),
@@ -1348,7 +1358,7 @@ func init() {
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
-	profileCmd.Flags().IntP("keep-top-scores", "n", 10, `keep matches with the top N score for a query, 0 for all`)
+	profileCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches (qcov == 1) if there are`)
 
 	// for matches against a reference
