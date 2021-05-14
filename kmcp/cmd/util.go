@@ -32,7 +32,6 @@ import (
 
 	"github.com/iafan/cwalk"
 	"github.com/pkg/errors"
-	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
@@ -45,12 +44,14 @@ type Options struct {
 	NumCPUs int
 	Verbose bool
 
+	LogFile string
+
 	Compress         bool
 	CompressionLevel int
 }
 
 func getOptions(cmd *cobra.Command) *Options {
-	threads := cliutil.GetFlagNonNegativeInt(cmd, "threads")
+	threads := getFlagNonNegativeInt(cmd, "threads")
 	if threads == 0 {
 		threads = runtime.NumCPU()
 	}
@@ -60,8 +61,10 @@ func getOptions(cmd *cobra.Command) *Options {
 
 	return &Options{
 		NumCPUs: threads,
-		// Verbose: cliutil.GetFlagBool(cmd, "verbose"),
-		Verbose: !cliutil.GetFlagBool(cmd, "quiet"),
+		// Verbose: getFlagBool(cmd, "verbose"),
+		Verbose: !getFlagBool(cmd, "quiet"),
+
+		LogFile: getFlagString(cmd, "log"),
 
 		Compress:         true,
 		CompressionLevel: -1,

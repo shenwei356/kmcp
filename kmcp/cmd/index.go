@@ -102,11 +102,19 @@ Taxonomy data:
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
 
+		var fhLog *os.File
+		if opt.LogFile != "" {
+			fhLog = addLog(opt.LogFile)
+		}
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
+				log.Info()
+			}
+			if opt.LogFile != "" {
+				fhLog.Close()
 			}
 		}()
 

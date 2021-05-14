@@ -1,4 +1,4 @@
-// Copyright © 2018-2020 Wei Shen <shenwei356@gmail.com>
+// Copyright © 2020-2021 Wei Shen <shenwei356@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,22 +18,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
 import (
-	"github.com/shenwei356/kmcp/kmcp/cmd"
+	"fmt"
+	"io"
+	"os"
+	"runtime"
+
+	"github.com/mattn/go-colorable"
+	"github.com/shenwei356/go-logging"
 )
 
-func main() {
-	// go tool pprof -http=:8080 cpu.pprof
-	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+var logFormat = logging.MustStringFormatter(
+	`%{time:15:04:05.000} %{color}[%{level:.4s}]%{color:reset} %{message}`,
+)
 
-	// go tool trace -http=:8080 trace.out
-	// defer profile.Start(profile.TraceProfile, profile.ProfilePath(".")).Stop()
+var backendFormatter logging.Backend
 
-	// go tool pprof -http=:8080 mem.pprof
-	// defer profile.Start(profile.MemProfile, profile.MemProfileRate(1), profile.ProfilePath(".")).Stop()
-	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+func init() {
+	var stderr io.Writer = os.Stderr
+	if runtime.GOOS == "windows" {
+		stderr = colorable.NewColorableStderr()
+	}
+	backend := logging.NewLogBackend(stderr, "", 0)
+	backendFormatter = logging.NewBackendFormatter(backend, logFormat)
 
-	cmd.Execute()
+	logging.SetBackend(backendFormatter)
+}
+
+func addLog(file string) *os.File {
+	w, err := os.Create(file)
+	if err != nil {
+		checkError(fmt.Errorf("failed to write log file %s: %s", file, err))
+	}
+
+	var logFormat2 = logging.MustStringFormatter(
+		`%{time:15:04:05.000} [%{level:.4s}] %{message}`,
+	)
+	backend := logging.NewLogBackend(w, "", 0)
+	backendFormatter2 := logging.NewBackendFormatter(backend, logFormat2)
+
+	logging.SetBackend(backendFormatter, backendFormatter2)
+
+	return w
 }

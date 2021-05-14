@@ -76,7 +76,7 @@ Accuracy notes:
      could decrease the sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
-  *. -F/--keep-full-match is not recommended, which decreases sensitivity.  
+  *. --keep-full-match is not recommended, which decreases sensitivity.  
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -97,11 +97,19 @@ Profiling output formats:
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
 
+		var fhLog *os.File
+		if opt.LogFile != "" {
+			fhLog = addLog(opt.LogFile)
+		}
 		timeStart := time.Now()
 		defer func() {
 			if opt.Verbose {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
+				log.Info()
+			}
+			if opt.LogFile != "" {
+				fhLog.Close()
 			}
 		}()
 
@@ -130,6 +138,16 @@ Profiling output formats:
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
+
+		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
+		if lowAbcPct >= 100 {
+			checkError(fmt.Errorf("the value of -F/--filter-low-pct (%v) should be in range of [0, 100)", lowAbcPct))
+		} else if lowAbcPct > 10 {
+			log.Warningf("the value of -F/--filter-low-pct (%v) may be too big", lowAbcPct)
+		}
+		fileterLowAbc := lowAbcPct > 0
+
+		// -----
 
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 
@@ -346,6 +364,10 @@ Profiling output formats:
 		timeStart1 := time.Now()
 
 		for _, file := range files {
+			if opt.Verbose {
+				log.Infof("  parsing file: %s", file)
+			}
+
 			infh, r, _, err := inStream(file)
 			checkError(err)
 
@@ -574,6 +596,10 @@ Profiling output formats:
 		ambMatch := make(map[uint64]map[uint64]float64, 128)
 
 		for _, file := range files {
+			if opt.Verbose {
+				log.Infof("  parsing file: %s", file)
+			}
+
 			infh, r, _, err := inStream(file)
 			checkError(err)
 
@@ -751,6 +777,10 @@ Profiling output formats:
 		var nUnassignedReads float64
 
 		for _, file := range files {
+			if opt.Verbose {
+				log.Infof("  parsing file: %s", file)
+			}
+
 			infh, r, _, err := inStream(file)
 			checkError(err)
 
@@ -1186,6 +1216,48 @@ Profiling output formats:
 			totalCoverage += t.Coverage
 		}
 
+		for _, t := range targets {
+			t.Percentage = t.Coverage / totalCoverage * 100
+		}
+
+		if fileterLowAbc && len(targets) > 1 {
+			if opt.Verbose {
+				log.Infof("filtering out predictions with the smallest relative abundances summing up %v%%", lowAbcPct)
+			}
+			var accPct float64
+			var t *Target
+			var i, n int
+
+			for i = len(targets) - 1; i >= 0; i-- { // reverse order
+				t = targets[i]
+				accPct += t.Percentage
+
+				if accPct > lowAbcPct {
+					break
+				}
+				n++
+			}
+
+			if n > 0 {
+				if opt.Verbose {
+					log.Infof("  %d targets being filtered out", n)
+				}
+				targets = targets[:len(targets)-n]
+
+				totalCoverage = 0
+				for _, t := range targets {
+					totalCoverage += t.Coverage
+				}
+
+				for _, t := range targets {
+					t.Percentage = t.Coverage / totalCoverage * 100
+				}
+			} else if opt.Verbose {
+				log.Infof("no targets being filtered out", n)
+			}
+
+		}
+
 		var taxid uint32
 		var ok bool
 
@@ -1214,8 +1286,6 @@ Profiling output formats:
 					t.AddTaxonomy(taxdb, showRanksMap, taxid)
 				}
 			}
-
-			t.Percentage = t.Coverage / totalCoverage * 100
 
 			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
 				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
@@ -1359,7 +1429,7 @@ func init() {
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
-	profileCmd.Flags().BoolP("keep-full-match", "F", false, `only keep the full matches (qcov == 1) if there are`)
+	profileCmd.Flags().BoolP("keep-full-match", "", false, `only keep the full matches (qcov == 1) if there are`)
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
@@ -1389,5 +1459,7 @@ func init() {
 	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
 	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
 	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
+
+	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. The value should be in range of [0,100)`)
 
 }
