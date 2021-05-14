@@ -28,12 +28,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/shenwei356/go-logging"
 	"github.com/shenwei356/util/stringutil"
 	"github.com/spf13/cobra"
 )
-
-var log = logging.MustGetLogger("kmcp")
 
 func checkError(err error) {
 	if err != nil {

@@ -30,6 +30,8 @@ import (
 	"github.com/shenwei356/go-logging"
 )
 
+var log *logging.Logger
+
 var logFormat = logging.MustStringFormatter(
 	`%{time:15:04:05.000} %{color}[%{level:.4s}]%{color:reset} %{message}`,
 )
@@ -45,6 +47,8 @@ func init() {
 	backendFormatter = logging.NewBackendFormatter(backend, logFormat)
 
 	logging.SetBackend(backendFormatter)
+
+	log = logging.MustGetLogger("kmcp")
 }
 
 func addLog(file string) *os.File {
@@ -60,6 +64,8 @@ func addLog(file string) *os.File {
 	backendFormatter2 := logging.NewBackendFormatter(backend, logFormat2)
 
 	logging.SetBackend(backendFormatter, backendFormatter2)
+
+	log = logging.MustGetLogger("kmcp")
 
 	return w
 }
