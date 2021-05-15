@@ -30,4 +30,4 @@ t_*
 *trace.out
 *gtdb-*
 *gtdb.*.tsv
-dev/
+dev
