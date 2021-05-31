@@ -161,6 +161,9 @@ type Target struct {
 	CompleteLineageTaxids []uint32
 
 	Percentage float64
+
+	Scores []float64
+	Score  float64
 }
 
 func (t *Target) AddTaxonomy(taxdb *unikmer.Taxonomy, showRanksMap map[string]interface{}, taxid uint32) {

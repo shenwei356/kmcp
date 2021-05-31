@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -897,6 +898,7 @@ Profiling output formats:
 												UniqMatch:    make([]float64, m.IdxNum),
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
+												Scores:       make([]float64, m.IdxNum),
 											}
 											profile2[h] = &t0
 											t = &t0
@@ -906,10 +908,12 @@ Profiling output formats:
 
 										if first { // count once
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
+											t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 											first = false
 										}
 
 										t.Match[m.FragIdx] += prop / floatMsSize
+
 									}
 								}
 							} else { // len(matches) == 1
@@ -935,6 +939,7 @@ Profiling output formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
+											Scores:       make([]float64, m.IdxNum),
 										}
 										profile2[h] = &t0
 										t = &t0
@@ -948,6 +953,8 @@ Profiling output formats:
 											}
 										}
 										t.QLen[m.FragIdx] += float64(m.QLen)
+										prop = 1
+										t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 										first = false
 
 										if outputBinningResult {
@@ -1077,6 +1084,7 @@ Profiling output formats:
 									UniqMatch:    make([]float64, m.IdxNum),
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
+									Scores:       make([]float64, m.IdxNum),
 								}
 								profile2[h] = &t0
 								t = &t0
@@ -1086,6 +1094,7 @@ Profiling output formats:
 
 							if first { // count once
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
+								t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 								first = false
 							}
 
@@ -1114,6 +1123,7 @@ Profiling output formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
+								Scores:       make([]float64, m.IdxNum),
 							}
 							profile2[h] = &t0
 							t = &t0
@@ -1127,6 +1137,8 @@ Profiling output formats:
 								}
 							}
 							t.QLen[m.FragIdx] += float64(m.QLen)
+							prop = 1
+							t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 							first = false
 
 							if outputBinningResult {
@@ -1182,6 +1194,11 @@ Profiling output formats:
 			for _, c2 = range t.QLen {
 				t.Qlens += c2
 			}
+
+			for _, c2 = range t.Scores {
+				t.Score += c2
+			}
+			t.Score /= t.SumMatch
 
 			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 
@@ -1272,7 +1289,7 @@ Profiling output formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString(fmt.Sprint("ref\tpercentage\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
+		outfh.WriteString(fmt.Sprint("ref\tpercentage\tscore\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
 
 		for _, t := range targets {
 			if mappingNames {
@@ -1287,8 +1304,9 @@ Profiling output formats:
 				}
 			}
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-				t.Name, t.Percentage, t.FragsProp, t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+				t.Name, t.Percentage, t.Score,
+				t.FragsProp, t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
 				taxid, t.Rank, t.TaxonName,
 				strings.Join(t.LineageNames, separator),
