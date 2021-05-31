@@ -12,6 +12,7 @@
     - new flag `-u/--kmer-dedup-threshold`.
     - increase speed for database with mulitple hashes. 
 - `profile`:
+    - better decision of existence of a reference
     - new flag `-B/--binning-result` for output reads binning result.
     
 ## v0.4.0 - 2021-04-08

@@ -393,6 +393,10 @@ Profiling output formats:
 			nScore = 0
 			processThisMatch = true
 
+			taxids := make([]uint32, 0, 128)
+			var taxid1, taxid2 uint32
+			var theSameSpecies bool
+
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
 			var data interface{}
@@ -405,37 +409,53 @@ Profiling output formats:
 
 					if prevQuery != match.Query { // new query
 						nReads++
-						for h, ms = range matches {
-							floatMsSize = float64(len(*ms))
-							first = true
-							for _, m = range *ms {
-								if t, ok = profile[h]; !ok {
-									t0 := Target{
-										Name:         m.Target,
-										GenomeSize:   m.GSize,
-										Match:        make([]float64, m.IdxNum),
-										UniqMatch:    make([]float64, m.IdxNum),
-										UniqMatchHic: make([]float64, m.IdxNum),
-										QLen:         make([]float64, m.IdxNum),
-									}
-									profile[h] = &t0
-									t = &t0
-								}
 
-								if first { // count once
-									if len(matches) == 1 {
-										t.UniqMatch[m.FragIdx]++
-										if m.QCov >= hicUreadsMinQcov {
-											t.UniqMatchHic[m.FragIdx]++
+						if len(matches) > 0 {
+							taxids = taxids[:0]
+							for h, ms = range matches {
+								taxids = append(taxids, taxidMap[(*ms)[0].Target])
+							}
+							theSameSpecies = false
+							taxid1 = taxids[0]
+							for _, taxid2 = range taxids[1:] {
+								taxid1 = taxdb.LCA(taxid1, taxid2)
+							}
+							if taxdb.Rank(taxid1) == "species" {
+								theSameSpecies = true
+							}
+
+							for h, ms = range matches {
+								floatMsSize = float64(len(*ms))
+								first = true
+								for _, m = range *ms {
+									if t, ok = profile[h]; !ok {
+										t0 := Target{
+											Name:         m.Target,
+											GenomeSize:   m.GSize,
+											Match:        make([]float64, m.IdxNum),
+											UniqMatch:    make([]float64, m.IdxNum),
+											UniqMatchHic: make([]float64, m.IdxNum),
+											QLen:         make([]float64, m.IdxNum),
 										}
+										profile[h] = &t0
+										t = &t0
 									}
-									t.QLen[m.FragIdx] += float64(m.QLen)
-									first = false
-								}
 
-								// for a read matching multiple regions of a reference, distribute count to multiple regions,
-								// the sum is still the one.
-								t.Match[m.FragIdx] += floatOne / floatMsSize
+									if first { // count once
+										if len(matches) == 1 || theSameSpecies {
+											t.UniqMatch[m.FragIdx]++
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx]++
+											}
+										}
+										t.QLen[m.FragIdx] += float64(m.QLen)
+										first = false
+									}
+
+									// for a read matching multiple regions of a reference, distribute count to multiple regions,
+									// the sum is still the one.
+									t.Match[m.FragIdx] += floatOne / floatMsSize
+								}
 							}
 						}
 
@@ -489,6 +509,20 @@ Profiling output formats:
 			}
 
 			nReads++
+
+			taxids = taxids[:0]
+			for h, ms = range matches {
+				taxids = append(taxids, taxidMap[(*ms)[0].Target])
+			}
+			theSameSpecies = false
+			taxid1 = taxids[0]
+			for _, taxid2 = range taxids[1:] {
+				taxid1 = taxdb.LCA(taxid1, taxid2)
+			}
+			if taxdb.Rank(taxid1) == "species" {
+				theSameSpecies = true
+			}
+
 			for h, ms = range matches {
 				floatMsSize = float64(len(*ms))
 				first = true
@@ -507,7 +541,7 @@ Profiling output formats:
 					}
 
 					if first { // count once
-						if len(matches) == 1 {
+						if len(matches) == 1 || theSameSpecies {
 							t.UniqMatch[m.FragIdx]++
 							if m.QCov >= hicUreadsMinQcov {
 								t.UniqMatchHic[m.FragIdx]++
@@ -812,6 +846,7 @@ Profiling output formats:
 
 			taxids := make([]uint32, 0, 128)
 			var taxid1, taxid2 uint32
+			var theSameSpecies bool
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -864,24 +899,25 @@ Profiling output formats:
 							}
 
 							if len(matches) > 1 { // redistribute matches
-								if outputBinningResult {
-									taxids = taxids[:0]
-								}
-
 								sumUReads = 0
+								taxids = taxids[:0]
 								for h, ms = range matches {
 									sumUReads += profile[h].SumUniqMatch
 
-									if outputBinningResult {
-										taxids = append(taxids, taxidMap[(*ms)[0].Target])
-									}
+									taxids = append(taxids, taxidMap[(*ms)[0].Target])
+								}
+
+								// LCA
+								theSameSpecies = false
+								taxid1 = taxids[0]
+								for _, taxid2 = range taxids[1:] {
+									taxid1 = taxdb.LCA(taxid1, taxid2)
+								}
+								if taxdb.Rank(taxid1) == "species" {
+									theSameSpecies = true
 								}
 
 								if outputBinningResult {
-									taxid1 = taxids[0]
-									for _, taxid2 = range taxids[1:] {
-										taxid1 = taxdb.LCA(taxid1, taxid2)
-									}
 									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
 									nB++
 								}
@@ -907,6 +943,13 @@ Profiling output formats:
 										prop = profile[h].SumUniqMatch / sumUReads
 
 										if first { // count once
+											if theSameSpecies {
+												t.UniqMatch[m.FragIdx]++
+												if m.QCov >= hicUreadsMinQcov {
+													t.UniqMatchHic[m.FragIdx]++
+												}
+											}
+
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
 											t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 											first = false
@@ -952,6 +995,7 @@ Profiling output formats:
 												t.UniqMatchHic[m.FragIdx]++
 											}
 										}
+
 										t.QLen[m.FragIdx] += float64(m.QLen)
 										prop = 1
 										t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
@@ -1050,24 +1094,25 @@ Profiling output formats:
 				}
 
 				if len(matches) > 1 { // redistribute matches
-					if outputBinningResult {
-						taxids = taxids[:0]
-					}
-
 					sumUReads = 0
+					taxids = taxids[:0]
 					for h, ms = range matches {
 						sumUReads += profile[h].SumUniqMatch
 
-						if outputBinningResult {
-							taxids = append(taxids, taxidMap[(*ms)[0].Target])
-						}
+						taxids = append(taxids, taxidMap[(*ms)[0].Target])
+					}
+
+					// LCA
+					theSameSpecies = false
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+					if taxdb.Rank(taxid1) == "species" {
+						theSameSpecies = true
 					}
 
 					if outputBinningResult {
-						taxid1 = taxids[0]
-						for _, taxid2 = range taxids[1:] {
-							taxid1 = taxdb.LCA(taxid1, taxid2)
-						}
 						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
 						nB++
 					}
@@ -1093,6 +1138,13 @@ Profiling output formats:
 							prop = profile[h].SumUniqMatch / sumUReads
 
 							if first { // count once
+								if theSameSpecies {
+									t.UniqMatch[m.FragIdx]++
+									if m.QCov >= hicUreadsMinQcov {
+										t.UniqMatchHic[m.FragIdx]++
+									}
+								}
+
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
 								t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 								first = false
@@ -1136,6 +1188,7 @@ Profiling output formats:
 									t.UniqMatchHic[m.FragIdx]++
 								}
 							}
+
 							t.QLen[m.FragIdx] += float64(m.QLen)
 							prop = 1
 							t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
