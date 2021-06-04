@@ -209,13 +209,15 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				_queryResult := <-query.Ch
 
 				if _queryResult.Matches != nil {
-					switch sortBy {
-					case "qcov":
-						sorts.Quicksort(Matches(_queryResult.Matches))
-					case "tcov":
-						sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
-					case "jacc":
-						sorts.Quicksort(SortByJacc{Matches(_queryResult.Matches)})
+					if len(_queryResult.Matches) > 1 {
+						switch sortBy {
+						case "qcov":
+							sorts.Quicksort(Matches(_queryResult.Matches))
+						case "tcov":
+							sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
+						case "jacc":
+							sorts.Quicksort(SortByJacc{Matches(_queryResult.Matches)})
+						}
 					}
 
 					// filter by scores
@@ -374,13 +376,15 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				_matches2 = append(_matches2, *_match)
 			}
 
-			switch sortBy {
-			case "qcov":
-				sorts.Quicksort(Matches(_matches2))
-			case "tcov":
-				sorts.Quicksort(SortByTCov{Matches(_matches2)})
-			case "jacc":
-				sorts.Quicksort(SortByJacc{Matches(_matches2)})
+			if len(_matches2) > 1 {
+				switch sortBy {
+				case "qcov":
+					sorts.Quicksort(Matches(_matches2))
+				case "tcov":
+					sorts.Quicksort(SortByTCov{Matches(_matches2)})
+				case "jacc":
+					sorts.Quicksort(SortByJacc{Matches(_matches2)})
+				}
 			}
 
 			queryResult.Matches = _matches2
