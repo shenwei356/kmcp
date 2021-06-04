@@ -247,12 +247,12 @@ Special attentions:
 		if opt.Verbose {
 			log.Infof("database loaded: %s", dbDir)
 			log.Info()
-			log.Infof("-------------------- [important parameters] --------------------")
+			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("  minimum  matched k-mers: %d", minCount)
 			log.Infof("  minimum  query coverage: %f", queryCov)
 			log.Infof("  minimum target coverage: %f", targetCov)
 			log.Infof("  minimum target coverage: %f", targetCov)
-			log.Infof("-------------------- [important parameters] --------------------")
+			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
 			log.Info("searching ...")
 		}
@@ -472,7 +472,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, the searching would be very slow`)
+	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, the searching would be very very slow`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)

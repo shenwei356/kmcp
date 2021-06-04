@@ -165,6 +165,8 @@ Profiling output formats:
 			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are recommended to add taxonomy information")
 		}
 
+		mappingTaxids := len(taxidMappingFiles) != 0
+
 		separator := getFlagString(cmd, "separator")
 		if separator == "" {
 			log.Warningf("value of -s/--separator better not be empty")
@@ -197,6 +199,10 @@ Profiling output formats:
 		outputMetaphlanReport := metaphlanReportFile != ""
 		if outputMetaphlanReport && !strings.HasSuffix(metaphlanReportFile, ".profile") {
 			metaphlanReportFile = metaphlanReportFile + ".profile"
+		}
+
+		if (outputBinningResult || outputCamiReport || outputMetaphlanReport) && !mappingTaxids {
+			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are needed to output CAMI/MetaPhlan/binning report")
 		}
 
 		showRanks := getFlagStringSlice(cmd, "show-rank")
@@ -271,7 +277,6 @@ Profiling output formats:
 		// ---------------------------------------------------------------
 		// taxid mapping files
 
-		mappingTaxids := len(taxidMappingFiles) != 0
 		var taxdb *unikmer.Taxonomy
 		var taxidMap map[string]uint32
 
@@ -324,6 +329,57 @@ Profiling output formats:
 			}
 		}
 
+		if opt.Verbose {
+			log.Info()
+			log.Infof("-------------------- [main parameters] --------------------")
+
+			log.Infof("match filtration: ")
+			log.Infof("  maximal false positive rate: %f", maxFPR)
+			log.Infof("  minimal query coverage: %4f", minQcov)
+			log.Infof("  keep matches with the top N score: N=%d", topNScore)
+			log.Infof("  only keep the full matches: %v", keepFullMatch)
+			log.Info()
+
+			log.Infof("deciding the existence of a reference:")
+			log.Infof("  minimal number of reads: %.0f", minReads)
+			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
+			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
+			log.Info()
+
+			log.Infof("  minimal number of high-confidence uniquely matched reads: %.0f", minHicUreads)
+			log.Infof("  minimal query coverage of high-confidence uniquely matched reads: %f", hicUreadsMinQcov)
+			log.Infof("  minimal proportion of high-confidence uniquely matched reads: %f", HicUreadsMinProp)
+			log.Info()
+
+			if mappingTaxids {
+				log.Infof("taxonomy data:")
+				log.Infof("  taxdump directory: %s", taxonomyDataDir)
+				log.Infof("  mapping reference IDs to TaxIds: %s", taxidMappingFiles)
+				log.Info()
+			}
+
+			log.Infof("reporting:")
+			if mappingNames {
+				log.Infof("  mapping reference IDs to names: %s", nameMappingFiles)
+			}
+			if fileterLowAbc {
+				log.Infof("  filter out predictions with the smallest relative abundances summing up %d%%", lowAbcPct)
+			}
+			log.Infof("  default format: %s", outFile)
+			if outputCamiReport {
+				log.Infof("  CAMI format: %s", camiReportFile)
+			}
+			if outputMetaphlanReport {
+				log.Infof("  MetaPhlan format: %s", metaphlanReportFile)
+			}
+			if outputBinningResult {
+				log.Infof("  Binning result: %s", binningFile)
+			}
+
+			log.Infof("-------------------- [main parameters] --------------------")
+			log.Info()
+
+		}
 		// ---------------------------------------------------------------
 
 		numFields := 13
@@ -411,17 +467,19 @@ Profiling output formats:
 						nReads++
 
 						if len(matches) > 0 {
-							taxids = taxids[:0]
-							for h, ms = range matches {
-								taxids = append(taxids, taxidMap[(*ms)[0].Target])
-							}
-							theSameSpecies = false
-							taxid1 = taxids[0]
-							for _, taxid2 = range taxids[1:] {
-								taxid1 = taxdb.LCA(taxid1, taxid2)
-							}
-							if taxdb.Rank(taxid1) == "species" {
-								theSameSpecies = true
+							if mappingTaxids {
+								taxids = taxids[:0]
+								for h, ms = range matches {
+									taxids = append(taxids, taxidMap[(*ms)[0].Target])
+								}
+								theSameSpecies = false
+								taxid1 = taxids[0]
+								for _, taxid2 = range taxids[1:] {
+									taxid1 = taxdb.LCA(taxid1, taxid2)
+								}
+								if taxdb.Rank(taxid1) == "species" {
+									theSameSpecies = true
+								}
 							}
 
 							for h, ms = range matches {
@@ -510,17 +568,19 @@ Profiling output formats:
 
 			nReads++
 
-			taxids = taxids[:0]
-			for h, ms = range matches {
-				taxids = append(taxids, taxidMap[(*ms)[0].Target])
-			}
-			theSameSpecies = false
-			taxid1 = taxids[0]
-			for _, taxid2 = range taxids[1:] {
-				taxid1 = taxdb.LCA(taxid1, taxid2)
-			}
-			if taxdb.Rank(taxid1) == "species" {
-				theSameSpecies = true
+			if mappingTaxids {
+				taxids = taxids[:0]
+				for h, ms = range matches {
+					taxids = append(taxids, taxidMap[(*ms)[0].Target])
+				}
+				theSameSpecies = false
+				taxid1 = taxids[0]
+				for _, taxid2 = range taxids[1:] {
+					taxid1 = taxdb.LCA(taxid1, taxid2)
+				}
+				if taxdb.Rank(taxid1) == "species" {
+					theSameSpecies = true
+				}
 			}
 
 			for h, ms = range matches {
@@ -619,6 +679,7 @@ Profiling output formats:
 
 		log.Infof("  number of estimated references: %d", len(profile))
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
+		log.Info()
 
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
@@ -777,6 +838,7 @@ Profiling output formats:
 		}
 
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
+		log.Info()
 
 		// ---------------------------------------------------------------
 		// stage 3/3
@@ -1263,6 +1325,7 @@ Profiling output formats:
 		if outputBinningResult {
 			log.Infof("%d binning results are save to %s", nB, binningFile)
 		}
+		log.Info()
 		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
 			nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 
