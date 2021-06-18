@@ -89,6 +89,7 @@ Special attentions:
 			checkError(fmt.Errorf("flag -d/--db-dir needed"))
 		}
 		outFile := getFlagString(cmd, "out-file")
+		minLen := getFlagNonNegativeInt(cmd, "min-query-len")
 		queryCov := getFlagFloat64(cmd, "min-query-cov")
 		targetCov := getFlagFloat64(cmd, "min-target-cov")
 		minCount := getFlagNonNegativeInt(cmd, "min-kmers")
@@ -227,6 +228,7 @@ Special attentions:
 			TopNScores: topNScore,
 			SortBy:     sortBy,
 
+			MinQLen:      minLen,
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
@@ -248,6 +250,7 @@ Special attentions:
 			log.Infof("database loaded: %s", dbDir)
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
+			log.Infof("  minimum    query length: %d", minLen)
 			log.Infof("  minimum  matched k-mers: %d", minCount)
 			log.Infof("  minimum  query coverage: %f", queryCov)
 			log.Infof("  minimum target coverage: %f", targetCov)
@@ -472,12 +475,13 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "m", false, `do not load all index files into memory, the searching would be very very slow`)
+	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory, the searching would be very very slow`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
 	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use whole file as query`)
 	searchCmd.Flags().IntP("min-kmers", "c", 10, `minimal number of matched k-mers (sketches)`)
+	searchCmd.Flags().IntP("min-query-len", "m", 50, `minimal query length`)
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 

@@ -145,6 +145,7 @@ type SearchOptions struct {
 	TopNScores    int
 	SortBy        string
 
+	MinQLen      int
 	MinMatched   int
 	MinQueryCov  float64
 	MinTargetCov float64
@@ -615,6 +616,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		numIndices := len(indices)
 		ks := db.Info.Ks
 		sortutil.Ints(ks)
+		minLen := db.Options.MinQLen
 		// sort ks in descent order
 		for i, j := 0, len(ks)-1; i < j; i, j = i+1, j-1 {
 			ks[i], ks[j] = ks[j], ks[i]
@@ -624,6 +626,19 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			defer func() { <-tokens }()
 
 			for _ik, k := range ks {
+				if len(query.Seq.Seq) < minLen { // skip short query
+					query.Ch <- QueryResult{
+						QueryIdx: query.Idx,
+						QueryID:  query.ID,
+						QueryLen: query.Seq.Length(),
+						K:        k,
+						NumKmers: 0,
+						// Kmers:    kmers,
+						Matches: nil,
+					} // still send result!
+					return
+				}
+
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
 				kmers := poolKmers.Get().([]uint64)
