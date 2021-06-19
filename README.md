@@ -4,17 +4,17 @@ K-mer-based Metagenomic Classification and Profiling
 
 ## Quick Start
 
-    # compute minimizer sketch
-    time kmcp compute -I genomes/ -O genomes.m16 -k 21 -W 16 --force
+    # compute k-mers
+    kmcp compute -I genomes/ -O genomes-k21 -k 21 --force
 
     # index sketch
-    time kmcp index -I genomes.m16/ -O genomes.m16.db --force
+    kmcp index -I genomes-k21/ -O genomes-k21.kmcp --force
     
     # search    
-    time kmcp search -d genomes.m16.db/ -t 0.7 test.fa.gz -o search.tsv.gz
+    kmcp search -d genomes-k21.kmcp/ -t 0.7 test.fa.gz -o search.tsv.gz
 
     # profile
-    time kmcp profile search.tsv.gz -T taxid_mapping.tsv -X taxdata-dir \
+    kmcp profile search.tsv.gz -T taxid_mapping.tsv -X taxdump \
         -o search.tsv.k.profile \
         --metaphlan-report search.tsv.m.profile \
         --cami-report search.tsv.c.profile

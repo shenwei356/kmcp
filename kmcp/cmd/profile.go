@@ -51,7 +51,7 @@ var profileCmd = &cobra.Command{
 Methods:
   1. We use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
-  2. Muti-aligned queries are proportionally assigned to references
+  2. Multi-aligned queries are proportionally assigned to references
      with the strategy in Metalign.
   3. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
@@ -64,7 +64,7 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. Smaller -t/--min-qcov increase sensitivity in cost of high false
+  *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
      positive rate (-f/--max-fpr) of a query.
   *. And we require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence to decrease
@@ -81,7 +81,7 @@ Accuracy notes:
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
-  2. NCBI taxonomy dump files: -X/--taxonomy-dir
+  2. NCBI taxonomy dump files: -X/--taxdump
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
@@ -153,7 +153,7 @@ Profiling output formats:
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 
 		taxidMappingFiles := getFlagStringSlice(cmd, "taxid-map")
-		taxonomyDataDir := getFlagString(cmd, "taxonomy-dir")
+		taxonomyDataDir := getFlagString(cmd, "taxdump")
 
 		if len(taxidMappingFiles) > 0 && taxonomyDataDir == "" {
 			checkError(fmt.Errorf("flag -X/--taxonomy-dir is needed when -T/--taxid-map given"))
@@ -1583,7 +1583,7 @@ func init() {
 
 	// taxonomy
 	profileCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
-	profileCmd.Flags().StringP("taxonomy-dir", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
+	profileCmd.Flags().StringP("taxdump", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
 	profileCmd.Flags().StringP("separator", "S", ";", `separator of TaxIds and taxonomy names`)
 	profileCmd.Flags().StringSliceP("show-rank", "", []string{"superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"}, "only show TaxIds and names of these ranks")
 	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
