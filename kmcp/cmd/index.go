@@ -67,6 +67,7 @@ Tips:
      #threads * #threads files are simultaneously opened, and max number
      of opened files is limited by the flag -F/--max-open-files.
   2. Value of block size -b/--block-size better be multiple of 64.
+     The default values is:  (#unikFiles/#threads + 7) / 8 * 8
  *3. Use --dry-run to adjust parameters and check final number of 
      index files (#index-files) and the total file size. 
      #index-files >= #cpus is recommended for better parallelization
@@ -587,7 +588,7 @@ Taxonomy data:
 			nFiles := len(fileInfoGroups)
 			var sBlock int
 			if sBlock00 <= 0 { // block size from command line
-				sBlock = (int(float64(nFiles)/float64(runtime.NumCPU())) + 7) / 8 * 8
+				sBlock = (int(float64(nFiles)/float64(opt.NumCPUs)) + 7) / 8 * 8
 			} else {
 				sBlock = sBlock00
 			}
@@ -1154,7 +1155,7 @@ func init() {
 
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter`)
 	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes of bloom filters`)
-	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#cpu, 8)`)
+	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)`)
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 

@@ -6,6 +6,8 @@
     - support multiple sizes of k-mer.
     - fix bug of `--by-seq`.
     - more log.
+- `index`:
+    - default block size is computed by `-j/--threads` instead of number of CPUs.
 - `search`:
     - show real-time processing speed.
     - new flag `-g/--query-whole-file`.
