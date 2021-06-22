@@ -215,6 +215,13 @@ Profiling output formats:
 			rankOrder[_r] = _i
 		}
 
+		normAbund := getFlagString(cmd, "norm-abund")
+		switch normAbund {
+		case "mean", "min", "max":
+		default:
+			checkError(fmt.Errorf("invalid value of -m/--norm-abund: %s. available: mean, min, max", normAbund))
+		}
+
 		// ---------------------------------------------------------------
 
 		if opt.Verbose {
@@ -1306,16 +1313,41 @@ Profiling output formats:
 				continue
 			}
 
-			for _, c2 = range t.QLen {
-				t.Qlens += c2
+			switch normAbund {
+			case "mean":
+				t.Qlens = 0
+				for _, c2 = range t.QLen {
+					t.Qlens += c2
+				}
+				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
+			case "min":
+				t.Qlens = math.MaxFloat64
+				for _, c2 = range t.QLen {
+					if c2 == 0 {
+						continue
+					}
+					if c2 < t.Qlens {
+						t.Qlens = c2
+					}
+				}
+				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize) * float64(len(t.QLen))
+			case "max":
+				t.Qlens = 0
+				for _, c2 = range t.QLen {
+					if c2 == 0 {
+						continue
+					}
+					if c2 > t.Qlens {
+						t.Qlens = c2
+					}
+				}
+				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize) * float64(len(t.QLen))
 			}
 
 			for _, c2 = range t.Scores {
 				t.Score += c2
 			}
 			t.Score /= t.SumMatch
-
-			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 
 			targets = append(targets, t)
 		}
@@ -1595,5 +1627,8 @@ func init() {
 	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
 
 	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. The value should be in range of [0,100)`)
+
+	// abundance
+	profileCmd.Flags().StringP("norm-abund", "m", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
 }
