@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.0 - 2021-06
+## v0.5.0 - 2021-06-24
 
 - `compute`:
     - support multiple sizes of k-mer.
@@ -12,10 +12,12 @@
     - show real-time processing speed.
     - new flag `-g/--query-whole-file`.
     - new flag `-u/--kmer-dedup-threshold`.
+    - new flag `-m/--min-query-len`.
     - increase speed for database with mulitple hashes. 
 - `profile`:
     - better decision of the existence of a reference.
     - new flag `-B/--binning-result` for output reads binning result.
+    - new flag `-m/--norm-abund`.
     
 ## v0.4.0 - 2021-04-08
 
