@@ -255,8 +255,7 @@ Profiling output formats:
 			if opt.Verbose {
 				log.Infof("loading name mapping file ...")
 			}
-			var nameMappingFile string
-			nameMappingFile = nameMappingFiles[0]
+			nameMappingFile := nameMappingFiles[0]
 			namesMap, err = cliutil.ReadKVs(nameMappingFile, false)
 			if err != nil {
 				checkError(errors.Wrap(err, nameMappingFile))
@@ -291,8 +290,7 @@ Profiling output formats:
 			if opt.Verbose {
 				log.Infof("loading TaxId mapping file ...")
 			}
-			var taxidMappingFile string
-			taxidMappingFile = taxidMappingFiles[0]
+			taxidMappingFile := taxidMappingFiles[0]
 			taxidMapStr, err := cliutil.ReadKVs(taxidMappingFile, false)
 			if err != nil {
 				checkError(errors.Wrap(err, taxidMappingFile))
@@ -838,7 +836,7 @@ Profiling output formats:
 				}
 			}
 
-			matches = make(map[uint64]*[]MatchResult)
+			// matches = make(map[uint64]*[]MatchResult)
 
 			checkError(scanner.Err())
 			r.Close()
@@ -1437,7 +1435,7 @@ Profiling output formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString(fmt.Sprint("ref\tpercentage\tscore\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n"))
+		outfh.WriteString("ref\tpercentage\tscore\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {

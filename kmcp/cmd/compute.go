@@ -371,7 +371,7 @@ Output:
 		ch := make(chan UnikFileInfo, opt.NumCPUs)
 		done := make(chan int)
 		go func() {
-			outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tidxNum\tgenomeSize\tkmers\n"))
+			outfh.WriteString("#path\tname\tfragIdx\tidxNum\tgenomeSize\tkmers\n")
 			for info := range ch {
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 			}

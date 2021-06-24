@@ -160,8 +160,7 @@ Special attentions:
 			if opt.Verbose {
 				log.Infof("loading name mapping file ...")
 			}
-			var nameMappingFile string
-			nameMappingFile = nameMappingFiles[0]
+			nameMappingFile := nameMappingFiles[0]
 			namesMap, err = cliutil.ReadKVs(nameMappingFile, false)
 			if err != nil {
 				checkError(errors.Wrap(err, nameMappingFile))
@@ -183,7 +182,7 @@ Special attentions:
 				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
-			mappingNames = len(namesMap) > 0
+			// mappingNames = len(namesMap) > 0
 		}
 
 		// ---------------------------------------------------------------
@@ -306,6 +305,9 @@ Special attentions:
 			}
 
 			// query, len_query, num_kmers, fpr, num_matches,
+			// prefix2 = fmt.Sprintf("%d\t%s\t%d\t%d\t%e\t%d",
+			// 	result.QueryIdx, result.QueryID, result.QueryLen,
+			// 	result.NumKmers, result.FPR, len(result.Matches))
 			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
 				result.NumKmers, result.FPR, len(result.Matches))

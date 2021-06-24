@@ -66,6 +66,7 @@ func baseHashes(hash uint64) (uint32, uint32) {
 	return uint32(hash >> 32), uint32(hash)
 }
 
+// not used.
 // return locations in bitset for a hash
 func hashLocations(hash uint64, numHashes int, numSigs uint64) []int {
 	if numHashes < 1 {

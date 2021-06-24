@@ -205,8 +205,10 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			handleQuerySingleDB := func(query Query) {
 				query.Ch = make(chan QueryResult, nDBs)
 
+				// send to DB
 				sg.DBs[0].InCh <- query
 
+				// wait and receive result from it
 				_queryResult := <-query.Ch
 
 				if _queryResult.Matches != nil {
@@ -506,7 +508,7 @@ type UnikIndexDB struct {
 
 	InCh chan Query
 
-	wg0        sync.WaitGroup
+	// wg0        sync.WaitGroup
 	stop, done chan int
 
 	Info   UnikIndexDBInfo
@@ -549,7 +551,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
-	// first idx
+	// the first idx
 	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
@@ -727,13 +729,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// reuse []Match object
 				matches := poolMatches.Get().([]Match)
 				var _matches []Match
-				var _match Match
 				for i := 0; i < numIndices; i++ {
 					// block to read
 					_matches = <-chMatches
-					for _, _match = range _matches {
-						matches = append(matches, _match)
-					}
+					matches = append(matches, _matches...)
 				}
 
 				// recycle objects
@@ -1301,12 +1300,13 @@ var poolMatches = &sync.Pool{New: func() interface{} {
 	return make([]Match, 0, 8)
 }}
 
+// not used
 var poolChanMatch = &sync.Pool{New: func() interface{} {
 	return make(chan Match, 8)
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
-	return make(chan []Match, 8)
+	return make(chan []Match, 128)
 }}
 
 // Recycle put pooled objects back.
@@ -1315,10 +1315,12 @@ func (r QueryResult) Recycle() {
 	poolMatches.Put(r.Matches)
 }
 
+// not used
 var poolIdxValues = &sync.Pool{New: func() interface{} {
 	return make([]unikmer.IdxValue, 0, 128)
 }}
 
+// not used
 var poolBytes = &sync.Pool{New: func() interface{} {
 	return make([]byte, 0, 10<<20)
 }}

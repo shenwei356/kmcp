@@ -108,7 +108,7 @@ var fnParseUnikInfoFile = func(line string) (interface{}, bool, error) {
 		return nil, false, err
 	}
 	gSize, err := strconv.ParseUint(items[4], 10, 64)
-	if err != nil || gSize < 0 {
+	if err != nil {
 		return nil, false, err
 	}
 	kmers, err := strconv.Atoi(items[5])
@@ -155,7 +155,7 @@ func dumpUnikFileInfos(fileInfos []UnikFileInfo, file string) {
 		w.Close()
 	}()
 
-	outfh.WriteString(fmt.Sprintf("#path\tname\tfragIdx\tidxNum\tgSize\tkmers\n"))
+	outfh.WriteString("#path\tname\tfragIdx\tidxNum\tgSize\tkmers\n")
 	for _, info := range fileInfos {
 		outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 	}

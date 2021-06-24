@@ -297,7 +297,7 @@ Taxonomy data:
 				}
 			}
 
-			if reader.Number < 0 {
+			if reader.Number == 0 {
 				checkError(fmt.Errorf("binary file not sorted or no k-mers number found: %s", file))
 			}
 
@@ -763,8 +763,7 @@ Taxonomy data:
 					}
 
 					nInfoGroups := len(batch)
-					var nBatchFiles int
-					nBatchFiles = int((nInfoGroups + 7) / 8)
+					nBatchFiles := int((nInfoGroups + 7) / 8)
 
 					sigsBlock := make([][]byte, 0, nBatchFiles)
 

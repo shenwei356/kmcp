@@ -70,9 +70,9 @@ var infoCmd = &cobra.Command{
 		}()
 
 		if all {
-			outfh.WriteString(fmt.Sprintf("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\tnames\tindices\n"))
+			outfh.WriteString("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\tnames\tindices\n")
 		} else {
-			outfh.WriteString(fmt.Sprintf("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\n"))
+			outfh.WriteString("file\tk\tcanonical\tnum-hashes\tnum-sigs\tnum-names\n")
 		}
 		for _, file := range files {
 			infh, r, _, err := inStream(file)

@@ -51,7 +51,7 @@ var versionCmd = &cobra.Command{
 
 		resp, err := http.Get(fmt.Sprintf("https://github.com/shenwei356/%s/releases/latest", app))
 		if err != nil {
-			checkError(fmt.Errorf("Network error"))
+			checkError(fmt.Errorf("network error"))
 		}
 		items := strings.Split(resp.Request.URL.String(), "/")
 		version := ""

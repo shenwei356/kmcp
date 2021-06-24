@@ -55,6 +55,7 @@ func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file st
 
 }
 
+// not used
 func readKmers(file string) ([]uint64, error) {
 	infh, r, _, err := inStream(file)
 	if err != nil {
