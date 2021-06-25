@@ -1015,12 +1015,12 @@ Profiling output formats:
 										prop = profile[h].SumUniqMatch / sumUReads
 
 										if first { // count once
-											if theSameSpecies {
-												t.UniqMatch[m.FragIdx]++
-												if m.QCov >= hicUreadsMinQcov {
-													t.UniqMatchHic[m.FragIdx]++
-												}
-											}
+											// if theSameSpecies {
+											// 	t.UniqMatch[m.FragIdx]++
+											// 	if m.QCov >= hicUreadsMinQcov {
+											// 		t.UniqMatchHic[m.FragIdx]++
+											// 	}
+											// }
 
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
 											t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
@@ -1028,6 +1028,13 @@ Profiling output formats:
 										}
 
 										t.Match[m.FragIdx] += prop / floatMsSize
+
+										if theSameSpecies {
+											t.UniqMatch[m.FragIdx] += prop / floatMsSize
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+											}
+										}
 
 									}
 								}
@@ -1215,12 +1222,12 @@ Profiling output formats:
 							prop = profile[h].SumUniqMatch / sumUReads
 
 							if first { // count once
-								if theSameSpecies {
-									t.UniqMatch[m.FragIdx]++
-									if m.QCov >= hicUreadsMinQcov {
-										t.UniqMatchHic[m.FragIdx]++
-									}
-								}
+								// if theSameSpecies {
+								// 	t.UniqMatch[m.FragIdx]++
+								// 	if m.QCov >= hicUreadsMinQcov {
+								// 		t.UniqMatchHic[m.FragIdx]++
+								// 	}
+								// }
 
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
 								t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
@@ -1228,6 +1235,13 @@ Profiling output formats:
 							}
 
 							t.Match[m.FragIdx] += prop / floatMsSize
+
+							if theSameSpecies {
+								t.UniqMatch[m.FragIdx] += prop / floatMsSize
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+								}
+							}
 						}
 					}
 				} else { // len(matches) == 1

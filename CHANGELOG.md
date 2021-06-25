@@ -3,8 +3,8 @@
 ## v0.6.0 - 2021-07-
 
 - `profile`:
-    - fix a bug when no taxid mapping data given.
-
+    - fix a nil pointer bug when no taxid mapping data given.
+    - fix number of ureads.
 ## v0.5.0 - 2021-06-24
 
 - `compute`:
