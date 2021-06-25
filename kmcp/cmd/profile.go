@@ -967,26 +967,31 @@ Profiling output formats:
 
 							if len(matches) > 1 { // redistribute matches
 								sumUReads = 0
+
 								taxids = taxids[:0]
 								for h, ms = range matches {
 									sumUReads += profile[h].SumUniqMatch
 
-									taxids = append(taxids, taxidMap[(*ms)[0].Target])
+									if mappingTaxids {
+										taxids = append(taxids, taxidMap[(*ms)[0].Target])
+									}
 								}
 
-								// LCA
-								theSameSpecies = false
-								taxid1 = taxids[0]
-								for _, taxid2 = range taxids[1:] {
-									taxid1 = taxdb.LCA(taxid1, taxid2)
-								}
-								if taxdb.Rank(taxid1) == "species" {
-									theSameSpecies = true
-								}
+								if mappingTaxids {
+									// LCA
+									theSameSpecies = false
+									taxid1 = taxids[0]
+									for _, taxid2 = range taxids[1:] {
+										taxid1 = taxdb.LCA(taxid1, taxid2)
+									}
+									if taxdb.Rank(taxid1) == "species" {
+										theSameSpecies = true
+									}
 
-								if outputBinningResult {
-									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-									nB++
+									if outputBinningResult {
+										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+										nB++
+									}
 								}
 
 								for h, ms = range matches {
@@ -1162,26 +1167,31 @@ Profiling output formats:
 
 				if len(matches) > 1 { // redistribute matches
 					sumUReads = 0
+
 					taxids = taxids[:0]
 					for h, ms = range matches {
 						sumUReads += profile[h].SumUniqMatch
 
-						taxids = append(taxids, taxidMap[(*ms)[0].Target])
+						if mappingTaxids {
+							taxids = append(taxids, taxidMap[(*ms)[0].Target])
+						}
 					}
 
-					// LCA
-					theSameSpecies = false
-					taxid1 = taxids[0]
-					for _, taxid2 = range taxids[1:] {
-						taxid1 = taxdb.LCA(taxid1, taxid2)
-					}
-					if taxdb.Rank(taxid1) == "species" {
-						theSameSpecies = true
-					}
+					if mappingTaxids {
+						// LCA
+						theSameSpecies = false
+						taxid1 = taxids[0]
+						for _, taxid2 = range taxids[1:] {
+							taxid1 = taxdb.LCA(taxid1, taxid2)
+						}
+						if taxdb.Rank(taxid1) == "species" {
+							theSameSpecies = true
+						}
 
-					if outputBinningResult {
-						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-						nB++
+						if outputBinningResult {
+							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+							nB++
+						}
 					}
 
 					for h, ms = range matches {
