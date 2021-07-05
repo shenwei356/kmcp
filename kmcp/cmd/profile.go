@@ -430,11 +430,6 @@ Profiling output formats:
 				log.Infof("  parsing file: %s", file)
 			}
 
-			infh, r, _, err := inStream(file)
-			checkError(err)
-
-			scanner := bufio.NewScanner(infh)
-
 			var matches map[uint64]*[]MatchResult // target -> match result
 			var m MatchResult
 			var ms *[]MatchResult
@@ -621,9 +616,6 @@ Profiling output formats:
 					t.Match[m.FragIdx] += floatOne / floatMsSize
 				}
 			}
-
-			checkError(scanner.Err())
-			r.Close()
 		}
 
 		// --------------------
@@ -700,11 +692,6 @@ Profiling output formats:
 			if opt.Verbose {
 				log.Infof("  parsing file: %s", file)
 			}
-
-			infh, r, _, err := inStream(file)
-			checkError(err)
-
-			scanner := bufio.NewScanner(infh)
 
 			var matches map[uint64]*[]MatchResult // target -> match result
 			var ok bool
@@ -837,9 +824,6 @@ Profiling output formats:
 			}
 
 			// matches = make(map[uint64]*[]MatchResult)
-
-			checkError(scanner.Err())
-			r.Close()
 		}
 
 		log.Infof("  elapsed time: %s", time.Since(timeStart1))
@@ -882,11 +866,6 @@ Profiling output formats:
 			if opt.Verbose {
 				log.Infof("  parsing file: %s", file)
 			}
-
-			infh, r, _, err := inStream(file)
-			checkError(err)
-
-			scanner := bufio.NewScanner(infh)
 
 			var matches map[uint64]*[]MatchResult // target -> match result
 			var m MatchResult
@@ -1015,13 +994,6 @@ Profiling output formats:
 										prop = profile[h].SumUniqMatch / sumUReads
 
 										if first { // count once
-											// if theSameSpecies {
-											// 	t.UniqMatch[m.FragIdx]++
-											// 	if m.QCov >= hicUreadsMinQcov {
-											// 		t.UniqMatchHic[m.FragIdx]++
-											// 	}
-											// }
-
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
 											t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 											first = false
@@ -1035,7 +1007,6 @@ Profiling output formats:
 												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
 											}
 										}
-
 									}
 								}
 							} else { // len(matches) == 1
@@ -1222,13 +1193,6 @@ Profiling output formats:
 							prop = profile[h].SumUniqMatch / sumUReads
 
 							if first { // count once
-								// if theSameSpecies {
-								// 	t.UniqMatch[m.FragIdx]++
-								// 	if m.QCov >= hicUreadsMinQcov {
-								// 		t.UniqMatchHic[m.FragIdx]++
-								// 	}
-								// }
-
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
 								t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 								first = false
@@ -1296,8 +1260,6 @@ Profiling output formats:
 				}
 			}
 
-			checkError(scanner.Err())
-			r.Close()
 		}
 
 		// --------------------
