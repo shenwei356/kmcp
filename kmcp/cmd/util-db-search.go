@@ -168,6 +168,10 @@ type UnikIndexDBSearchEngine struct {
 	OutCh chan QueryResult
 }
 
+func tokenNum(v int) int {
+	return int(float64(v) * 10)
+}
+
 // NewUnikIndexDBSearchEngine returns a search engine based on multiple engines
 func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikIndexDBSearchEngine, error) {
 	dbs := make([]*UnikIndexDB, 0, len(dbPaths))
@@ -183,14 +187,14 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 	sg := &UnikIndexDBSearchEngine{Options: opt, DBs: dbs, DBNames: names}
 	sg.done = make(chan int)
-	sg.InCh = make(chan Query, opt.Threads)
-	sg.OutCh = make(chan QueryResult, opt.Threads)
+	sg.InCh = make(chan Query, tokenNum(opt.Threads))
+	sg.OutCh = make(chan QueryResult, tokenNum(opt.Threads))
 	multipleDBs := len(dbs) > 1
 	mappingName := len(opt.NameMap) > 0
 
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
-		tokens := make(chan int, sg.Options.Threads)
+		tokens := make(chan int, tokenNum(sg.Options.Threads))
 		wg := &sg.wg
 		nDBs := len(sg.DBs)
 		sortBy := opt.SortBy
@@ -567,7 +571,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	db := &UnikIndexDB{Options: opt, Info: info, Header: idx1.Header, path: path}
 
-	db.InCh = make(chan Query, opt.Threads)
+	db.InCh = make(chan Query, tokenNum(opt.Threads))
 
 	db.DBId = dbID
 
@@ -611,7 +615,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	db.Indices = indices
 
 	go func() {
-		tokens := make(chan int, db.Options.Threads)
+		tokens := make(chan int, tokenNum(db.Options.Threads))
 
 		numHashes := db.Info.NumHashes
 		indices := db.Indices
@@ -914,9 +918,6 @@ type UnikIndex struct {
 	useMmap bool
 	sigs    mmap.MMap // mapped sigatures
 	sigsB   []byte
-
-	_data [][]uint8
-	buffs [][]byte
 }
 
 func (idx *UnikIndex) String() string {
@@ -956,7 +957,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	idx.useMmap = opt.UseMMap
 
 	idx.done = make(chan int)
-	idx.InCh = make(chan IndexQuery, opt.Threads)
+	idx.InCh = make(chan IndexQuery, tokenNum(opt.Threads))
 
 	if idx.useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
@@ -965,26 +966,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		}
 		idx.sigsB = []byte(idx.sigs)
 	}
-	idx._data = make([][]uint8, reader.NumHashes)
-	for i := 0; i < int(reader.NumHashes); i++ {
-		idx._data[i] = make([]byte, reader.NumRowBytes)
-	}
-
-	// byte matrix for counting
-	buffs := make([][]byte, PosPopCountBufSize)
-	for i := 0; i < PosPopCountBufSize; i++ {
-		buffs[i] = make([]byte, reader.NumRowBytes)
-	}
-
-	idx.buffs = buffs
 
 	idx.moreThanOneHash = reader.NumHashes > 1
 
 	// -------------------------------------------------------
 
 	// receive query and execute
-	go func() {
-
+	fn := func() {
 		names := idx.Header.Names
 		gsizes := idx.Header.GSizes
 		indices := idx.Header.Indices
@@ -999,12 +987,22 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		sigs := idx.sigsB
 		// useMmap := idx.useMmap
 		useMmap := opt.UseMMap
-		data := idx._data
 		moreThanOneHash := idx.moreThanOneHash
 		queryCov := idx.Options.MinQueryCov
 		targetCov := idx.Options.MinTargetCov
 		minMatched := idx.Options.MinMatched
-		buffs := idx.buffs
+
+		// bit matrix
+		data := make([][]byte, reader.NumHashes)
+		for i := 0; i < int(reader.NumHashes); i++ {
+			data[i] = make([]byte, numRowBytes)
+		}
+
+		// byte matrix for counting
+		buffs := make([][]byte, PosPopCountBufSize)
+		for i := 0; i < PosPopCountBufSize; i++ {
+			buffs[i] = make([]byte, numRowBytes)
+		}
 
 		iLast := numRowBytes - 1
 		sizesFloat := make([]float64, len(sizes))
@@ -1098,14 +1096,15 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						}
 					}
 				} else if useMmap { // just point to the orginial data (mmaped)
-					and = data[0]
-
-					buffs[bufIdx] = and
+					// and = data[0]
+					// buffs[bufIdx] = and
+					buffs[bufIdx] = data[0]
 				} else { // ！useMmap, where io.ReadFull(fh, data[i])
-					and = buffs[bufIdx]
-					copy(and, data[0])
+					// and = buffs[bufIdx]
+					// copy(and, data[0])
 
-					buffs[bufIdx] = and
+					// buffs[bufIdx] = and
+					copy(buffs[bufIdx], data[0])
 				}
 
 				// add to buffer for counting
@@ -1277,7 +1276,15 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		}
 
 		idx.done <- 1
-	}()
+	}
+
+	// start two goroutines
+	go fn()
+
+	if opt.UseMMap {
+		go fn()
+	}
+
 	return idx, nil
 }
 
@@ -1285,6 +1292,10 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 func (idx *UnikIndex) Close() error {
 	close(idx.InCh) // close InCh
 	<-idx.done      // confirm stopped
+	// another one
+	if idx.useMmap {
+		<-idx.done
+	}
 
 	if idx.useMmap {
 		err := idx.sigs.Unmap()
@@ -1314,7 +1325,7 @@ var poolChanMatch = &sync.Pool{New: func() interface{} {
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
-	return make(chan []Match, 128)
+	return make(chan []Match, 256)
 }}
 
 // Recycle put pooled objects back.
