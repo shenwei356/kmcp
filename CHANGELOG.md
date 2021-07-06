@@ -3,7 +3,9 @@
 ## v0.6.0 - 2021-07-
 
 - new command:
-    - `merge`: 
+    - `merge`: merge search results from multiple databases.
+- `search`:
+    - 1.1-1.9X speedup.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.
     - fix number of ureads.
