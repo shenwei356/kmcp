@@ -1073,7 +1073,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					copy(and, data[0]) // overwrite old count
 					for _, row = range data[1:] {
 						i = 0
-						for len(row) >= 4 { // unroll loop
+						for len(row) >= 8 { // unroll loop
 							and[i] &= row[0]
 							i++
 							and[i] &= row[1]
@@ -1082,7 +1082,15 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 							i++
 							and[i] &= row[3]
 							i++
-							row = row[4:]
+							and[i] &= row[4]
+							i++
+							and[i] &= row[5]
+							i++
+							and[i] &= row[6]
+							i++
+							and[i] &= row[7]
+							i++
+							row = row[8:]
 						}
 						for _, b = range row {
 							and[i] &= b
