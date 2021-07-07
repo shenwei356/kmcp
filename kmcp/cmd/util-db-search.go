@@ -1064,10 +1064,11 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				}
 
 				// AND
-				var and []byte // must creat a new local variable
+				var and []byte // must create a new local variable
 				if moreThanOneHash {
 					and = buffs[bufIdx]
 
+					// TODO: optimize with assembly code
 					copy(and, data[0]) // overwrite old count
 					for _, row = range data[1:] {
 						i = 0
