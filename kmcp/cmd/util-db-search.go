@@ -29,6 +29,7 @@ import (
 	"sync"
 
 	"github.com/clausecker/pospop"
+	"github.com/grailbio/base/simd"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
@@ -1016,7 +1017,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		var i, j int
 		var hs []uint64
 		var row []byte
-		var b byte
+		// var b byte
 		var _h uint64
 		var hashes [][]uint64
 		var nHashes float64
@@ -1068,33 +1069,38 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				if moreThanOneHash {
 					and = buffs[bufIdx]
 
-					// TODO: optimize with assembly code
 					copy(and, data[0]) // overwrite old count
+
+					// TODO: optimize with assembly code
+					//
+					// for _, row = range data[1:] {
+					// 	i = 0
+					// 	for len(row) >= 8 { // unroll loop
+					// 		and[i] &= row[0]
+					// 		i++
+					// 		and[i] &= row[1]
+					// 		i++
+					// 		and[i] &= row[2]
+					// 		i++
+					// 		and[i] &= row[3]
+					// 		i++
+					// 		and[i] &= row[4]
+					// 		i++
+					// 		and[i] &= row[5]
+					// 		i++
+					// 		and[i] &= row[6]
+					// 		i++
+					// 		and[i] &= row[7]
+					// 		i++
+					// 		row = row[8:]
+					// 	}
+					// 	for _, b = range row {
+					// 		and[i] &= b
+					// 		i++
+					// 	}
+					// }
 					for _, row = range data[1:] {
-						i = 0
-						for len(row) >= 8 { // unroll loop
-							and[i] &= row[0]
-							i++
-							and[i] &= row[1]
-							i++
-							and[i] &= row[2]
-							i++
-							and[i] &= row[3]
-							i++
-							and[i] &= row[4]
-							i++
-							and[i] &= row[5]
-							i++
-							and[i] &= row[6]
-							i++
-							and[i] &= row[7]
-							i++
-							row = row[8:]
-						}
-						for _, b = range row {
-							and[i] &= b
-							i++
-						}
+						simd.AndUnsafeInplace(and, row)
 					}
 				} else if useMmap { // just point to the orginial data (mmaped)
 					// and = data[0]
