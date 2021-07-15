@@ -55,7 +55,6 @@ github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548/go.mod h1:e6NPNENfs
 github.com/cznic/sortutil v0.0.0-20181122101858-f5f958428db8 h1:LpMLYGyy67BoAFGda1NeOBQwqlv7nUXpm+rIVHGxZZ4=
 github.com/cznic/sortutil v0.0.0-20181122101858-f5f958428db8/go.mod h1:q2w6Bg5jeox1B+QkJ6Wp/+Vn0G/bo3f1uY7Fn3vivIQ=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-sip13 v0.0.0-20181026042036-e10d5fee7954/go.mod h1:vAd38F8PWV+bWy6jNmig1y/TA+kYO4g3RSRF0IAv0no=
@@ -113,7 +112,6 @@ github.com/grailbio/base v0.0.1/go.mod h1:wVM2Cq2/HT0rt6WYGQhXJ3CCLkNnGjeAAOPHCZ
 github.com/grailbio/base v0.0.10 h1:FL7DEolplFFhvxNn9T6WQejBRZOcQWb92SBTHcPLX74=
 github.com/grailbio/base v0.0.10/go.mod h1:lzK85oI6emqHxO2Cy+xzPzEAC/GcbfH3dqGgZCD3dA4=
 github.com/grailbio/testutil v0.0.1/go.mod h1:j7teGaXqRY1n6m7oM8oy954lxL37Myt7nEJZlif3nMA=
-github.com/grailbio/testutil v0.0.3 h1:Um0OOTtYVvyxwQbO48K3t6lNmLPY4sL3Vn6Sw0srNy8=
 github.com/grailbio/testutil v0.0.3/go.mod h1:f9+y7xMXeXwyNcdV5cmo6GzRiitSOubMmqcqEON7NQQ=
 github.com/grailbio/v23/factories/grail v0.0.0-20190904050408-8a555d238e9a/go.mod h1:2g5HI42KHw+BDBdjLP3zs+WvTHlDK3RoE8crjCl26y4=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
@@ -243,6 +241,8 @@ github.com/shenwei356/mmap-go v1.0.1 h1:MssMa5e6z3Asy16h+wjF2qbvq49lFrVPiBTlRBTf
 github.com/shenwei356/mmap-go v1.0.1/go.mod h1:En5BSnSNTA4KM6R04rDhw8UCOA5NgOPeADbz1jUJDNg=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
+github.com/shenwei356/pand v0.0.4 h1:N6f1hiGl1JR8enXdnHUr4iDL1fUr/Pb8w+YlqvqZfpg=
+github.com/shenwei356/pand v0.0.4/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
 github.com/shenwei356/unikmer v0.18.0 h1:vSFLX2QTSH2XDMv5jslcBYQB2LGHtWlTm8QL/UyAiPE=
 github.com/shenwei356/unikmer v0.18.0/go.mod h1:/Kjeai4IcrE8C7GFPK2X0Y8xeGMQ9tGMOia+h2KuyDg=
 github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=

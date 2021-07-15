@@ -29,11 +29,11 @@ import (
 	"sync"
 
 	"github.com/clausecker/pospop"
-	"github.com/grailbio/base/simd"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/mmap-go"
+	"github.com/shenwei356/pand"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
@@ -989,6 +989,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		// useMmap := idx.useMmap
 		useMmap := opt.UseMMap
 		moreThanOneHash := idx.moreThanOneHash
+		moreThanTwoHashes := idx.reader.NumHashes > 2
 		queryCov := idx.Options.MinQueryCov
 		targetCov := idx.Options.MinTargetCov
 		minMatched := idx.Options.MinMatched
@@ -1069,38 +1070,14 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				if moreThanOneHash {
 					and = buffs[bufIdx]
 
-					copy(and, data[0]) // overwrite old count
+					// first two rows
+					pand.AndUnsafe(and, data[0], data[1])
 
-					// TODO: optimize with assembly code
-					//
-					// for _, row = range data[1:] {
-					// 	i = 0
-					// 	for len(row) >= 8 { // unroll loop
-					// 		and[i] &= row[0]
-					// 		i++
-					// 		and[i] &= row[1]
-					// 		i++
-					// 		and[i] &= row[2]
-					// 		i++
-					// 		and[i] &= row[3]
-					// 		i++
-					// 		and[i] &= row[4]
-					// 		i++
-					// 		and[i] &= row[5]
-					// 		i++
-					// 		and[i] &= row[6]
-					// 		i++
-					// 		and[i] &= row[7]
-					// 		i++
-					// 		row = row[8:]
-					// 	}
-					// 	for _, b = range row {
-					// 		and[i] &= b
-					// 		i++
-					// 	}
-					// }
-					for _, row = range data[1:] {
-						simd.AndUnsafeInplace(and, row)
+					// more rows
+					if moreThanTwoHashes {
+						for _, row = range data[2:] {
+							pand.AndUnsafeInplace(and, row)
+						}
 					}
 				} else if useMmap { // just point to the orginial data (mmaped)
 					// and = data[0]

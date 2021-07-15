@@ -33,3 +33,9 @@ t_*
 dev
 ass2name.tsv
 ass2taxid.tsv
+delnodes.dmp
+merged.dmp
+names.dmp
+nodes.dmp
+*.kmcp
+data

@@ -148,6 +148,17 @@ Profiling output formats:
 		}
 		fileterLowAbc := lowAbcPct > 0
 
+		level := strings.ToLower(getFlagString(cmd, "level"))
+		var levelSpecies bool
+		switch level {
+		case "species":
+			levelSpecies = true
+		case "strain":
+			levelSpecies = false
+		default:
+			checkError(fmt.Errorf("invalid value for --level, available values: species, strain"))
+		}
+
 		// -----
 
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
@@ -472,13 +483,16 @@ Profiling output formats:
 								for h, ms = range matches {
 									taxids = append(taxids, taxidMap[(*ms)[0].Target])
 								}
-								theSameSpecies = false
-								taxid1 = taxids[0]
-								for _, taxid2 = range taxids[1:] {
-									taxid1 = taxdb.LCA(taxid1, taxid2)
-								}
-								if taxdb.Rank(taxid1) == "species" {
-									theSameSpecies = true
+
+								if levelSpecies {
+									theSameSpecies = false
+									taxid1 = taxids[0]
+									for _, taxid2 = range taxids[1:] {
+										taxid1 = taxdb.LCA(taxid1, taxid2)
+									}
+									if taxdb.Rank(taxid1) == "species" {
+										theSameSpecies = true
+									}
 								}
 							}
 
@@ -500,7 +514,7 @@ Profiling output formats:
 									}
 
 									if first { // count once
-										if len(matches) == 1 || theSameSpecies {
+										if len(matches) == 1 || (levelSpecies && theSameSpecies) {
 											t.UniqMatch[m.FragIdx]++
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
@@ -573,13 +587,16 @@ Profiling output formats:
 				for h, ms = range matches {
 					taxids = append(taxids, taxidMap[(*ms)[0].Target])
 				}
-				theSameSpecies = false
-				taxid1 = taxids[0]
-				for _, taxid2 = range taxids[1:] {
-					taxid1 = taxdb.LCA(taxid1, taxid2)
-				}
-				if taxdb.Rank(taxid1) == "species" {
-					theSameSpecies = true
+
+				if levelSpecies {
+					theSameSpecies = false
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+					if taxdb.Rank(taxid1) == "species" {
+						theSameSpecies = true
+					}
 				}
 			}
 
@@ -601,7 +618,7 @@ Profiling output formats:
 					}
 
 					if first { // count once
-						if len(matches) == 1 || theSameSpecies {
+						if len(matches) == 1 || (levelSpecies && theSameSpecies) {
 							t.UniqMatch[m.FragIdx]++
 							if m.QCov >= hicUreadsMinQcov {
 								t.UniqMatchHic[m.FragIdx]++
@@ -963,7 +980,8 @@ Profiling output formats:
 									for _, taxid2 = range taxids[1:] {
 										taxid1 = taxdb.LCA(taxid1, taxid2)
 									}
-									if taxdb.Rank(taxid1) == "species" {
+
+									if levelSpecies && taxdb.Rank(taxid1) == "species" {
 										theSameSpecies = true
 									}
 
@@ -1001,7 +1019,7 @@ Profiling output formats:
 
 										t.Match[m.FragIdx] += prop / floatMsSize
 
-										if theSameSpecies {
+										if levelSpecies && theSameSpecies {
 											t.UniqMatch[m.FragIdx] += prop / floatMsSize
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
@@ -1162,7 +1180,8 @@ Profiling output formats:
 						for _, taxid2 = range taxids[1:] {
 							taxid1 = taxdb.LCA(taxid1, taxid2)
 						}
-						if taxdb.Rank(taxid1) == "species" {
+
+						if levelSpecies && taxdb.Rank(taxid1) == "species" {
 							theSameSpecies = true
 						}
 
@@ -1200,7 +1219,7 @@ Profiling output formats:
 
 							t.Match[m.FragIdx] += prop / floatMsSize
 
-							if theSameSpecies {
+							if levelSpecies && theSameSpecies {
 								t.UniqMatch[m.FragIdx] += prop / floatMsSize
 								if m.QCov >= hicUreadsMinQcov {
 									t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
@@ -1615,4 +1634,5 @@ func init() {
 	// abundance
 	profileCmd.Flags().StringP("norm-abund", "m", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
+	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
 }
