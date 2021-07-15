@@ -64,6 +64,8 @@ type UnikIndexDBInfo struct {
 	SplitNum     int  `yaml:"split-num"`
 	SplitOverlap int  `yaml:"split-overlap"`
 
+	CompactSize bool `yaml:"compact-size"`
+
 	NumHashes int      `yaml:"hashes"`
 	FPR       float64  `yaml:"fpr"`
 	NumNames  int      `yaml:"numNameGroups"`

@@ -29,7 +29,7 @@ import (
 )
 
 // Version is the version of index format
-const Version uint8 = 4
+const Version uint8 = 5
 
 // Magic number of index file.
 var Magic = [8]byte{'.', 'k', 'm', 'c', 'p', 'i', 'd', 'x'}
@@ -57,16 +57,24 @@ var ErrNameAndIndexMismatch = errors.New("kmcp: size of names and indices unequa
 
 var be = binary.BigEndian
 
+const (
+	CANONICAL = 1 << iota
+	COMPACT
+)
+
 // Header contains metadata
 type Header struct {
 	Version   uint8 // uint8
 	K         int   // uint8
-	Canonical bool  // uint8
+	flag      uint8 //uint8
+	Canonical bool
+	Compact   bool
 	NumHashes uint8 // uint8
 	NumSigs   uint64
 
 	Names   [][]string // one bloom filter contains union of multiple sets
 	GSizes  [][]uint64 // genome sizes
+	Kmers   [][]uint64 // kmer numbers
 	Indices [][]uint32 // coresponding fragment indices of all sets.
 	Sizes   []uint64
 
@@ -102,8 +110,8 @@ type Writer struct {
 }
 
 // NewWriter creates a Writer.
-func NewWriter(w io.Writer, k int, canonical bool, numHashes uint8, numSigs uint64,
-	names [][]string, gsizes [][]uint64, indices [][]uint32, sizes []uint64) (*Writer, error) {
+func NewWriter(w io.Writer, k int, canonical bool, compact bool, numHashes uint8, numSigs uint64,
+	names [][]string, gsizes [][]uint64, kmers [][]uint64, indices [][]uint32, sizes []uint64) (*Writer, error) {
 	if len(names) != len(sizes) {
 		return nil, ErrNameAndSizeMismatch
 	}
@@ -116,16 +124,25 @@ func NewWriter(w io.Writer, k int, canonical bool, numHashes uint8, numSigs uint
 			Version:   Version,
 			K:         k,
 			Canonical: canonical,
+			Compact:   compact,
 			NumHashes: numHashes,
 			NumSigs:   numSigs,
 			Names:     names,
 			GSizes:    gsizes,
+			Kmers:     kmers,
 			Indices:   indices,
 			Sizes:     sizes,
 		},
 		w: w,
 	}
 	writer.NumRowBytes = int((len(names) + 7) / 8)
+	writer.flag = 0
+	if canonical {
+		writer.flag |= CANONICAL
+	}
+	if compact {
+		writer.flag |= COMPACT
+	}
 
 	return writer, nil
 }
@@ -144,11 +161,8 @@ func (writer *Writer) WriteHeader() (err error) {
 	}
 
 	// 4 bytes meta info
-	var canonical uint8
-	if writer.Canonical {
-		canonical = 1
-	}
-	err = binary.Write(w, be, [4]uint8{writer.Version, uint8(writer.K), canonical, writer.NumHashes})
+
+	err = binary.Write(w, be, [4]uint8{writer.Version, uint8(writer.K), writer.flag, writer.NumHashes})
 	if err != nil {
 		return err
 	}
@@ -206,6 +220,26 @@ func (writer *Writer) WriteHeader() (err error) {
 			return err
 		}
 		err = binary.Write(w, be, gsizes)
+		if err != nil {
+			return err
+		}
+	}
+
+	// ----------------------------------------------------------
+	// Kmers
+
+	// 4 bytes length of Kmers groups
+	err = binary.Write(w, be, uint32(len(writer.Kmers)))
+	if err != nil {
+		return err
+	}
+
+	for _, kmers := range writer.Kmers {
+		err = binary.Write(w, be, uint32(len(kmers)))
+		if err != nil {
+			return err
+		}
+		err = binary.Write(w, be, kmers)
 		if err != nil {
 			return err
 		}
@@ -349,9 +383,14 @@ func (reader *Reader) readHeader() (err error) {
 	}
 	reader.Version = buf[0]
 	reader.K = int(buf[1])
-	if buf[2] > 0 {
+
+	if buf[2]&CANONICAL > 0 {
 		reader.Canonical = true
 	}
+	if buf[2]&COMPACT > 0 {
+		reader.Compact = true
+	}
+
 	reader.NumHashes = buf[3]
 
 	// 8 bytes signature size
@@ -429,6 +468,38 @@ func (reader *Reader) readHeader() (err error) {
 		gsizes[i] = gsizesData
 	}
 	reader.GSizes = gsizes
+
+	// ----------------------------------------------------------
+	// Kmers
+
+	// 4 bytes length of Kmers groups
+	_, err = io.ReadFull(r, buf[:4])
+	if err != nil {
+		return err
+	}
+	n = be.Uint32(buf[:4])
+	kmers := make([][]uint64, n)
+
+	for i := 0; i < int(n); i++ {
+		_, err = io.ReadFull(r, buf[:4])
+		if err != nil {
+			return err
+		}
+		_n = int(be.Uint32(buf[:4]))
+		buf2 = make([]byte, _n<<3)
+		_, err = io.ReadFull(r, buf2)
+		if err != nil {
+			return err
+		}
+
+		kmersData := make([]uint64, _n)
+		for j = 0; j < _n; j++ {
+			k = j << 3
+			kmersData[j] = be.Uint64(buf2[k : k+8])
+		}
+		kmers[i] = kmersData
+	}
+	reader.Kmers = kmers
 
 	// ----------------------------------------------------------
 	// Indices

@@ -946,6 +946,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	h.Version = reader.Version
 	h.K = reader.K
 	h.Canonical = reader.Canonical
+	h.Compact = reader.Compact
 	h.NumHashes = reader.NumHashes
 	h.Names = reader.Names
 	h.GSizes = reader.GSizes
@@ -993,6 +994,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		queryCov := idx.Options.MinQueryCov
 		targetCov := idx.Options.MinTargetCov
 		minMatched := idx.Options.MinMatched
+		compactSize := idx.Header.Compact
 
 		// bit matrix
 		data := make([][]byte, reader.NumHashes)
@@ -1047,21 +1049,42 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 
 			for _, hs = range hashes {
 				if useMmap {
-					for i, _h = range hs {
-						// loc = int(_h % numSigsUint)
-						loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-						offset = int(offset0 + int64(loc*numRowBytes))
+					if compactSize {
+						for i, _h = range hs {
+							loc = int(_h % numSigsUint)
+							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset = int(offset0 + int64(loc*numRowBytes))
 
-						data[i] = sigs[offset : offset+numRowBytes]
+							data[i] = sigs[offset : offset+numRowBytes]
+						}
+					} else {
+						for i, _h = range hs {
+							// loc = int(_h % numSigsUint)
+							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset = int(offset0 + int64(loc*numRowBytes))
+
+							data[i] = sigs[offset : offset+numRowBytes]
+						}
 					}
 				} else {
-					for i, _h = range hs {
-						// loc = int(_h % numSigsUint)
-						loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-						offset2 = offset0 + int64(loc*numRowBytes)
+					if compactSize {
+						for i, _h = range hs {
+							loc = int(_h % numSigsUint)
+							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset2 = offset0 + int64(loc*numRowBytes)
 
-						fh.Seek(offset2, 0)
-						io.ReadFull(fh, data[i])
+							fh.Seek(offset2, 0)
+							io.ReadFull(fh, data[i])
+						}
+					} else {
+						for i, _h = range hs {
+							// loc = int(_h % numSigsUint)
+							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset2 = offset0 + int64(loc*numRowBytes)
+
+							fh.Seek(offset2, 0)
+							io.ReadFull(fh, data[i])
+						}
 					}
 				}
 

@@ -173,6 +173,7 @@ Taxonomy data:
 		if numHashes > 255 {
 			checkError(fmt.Errorf("value of -n/--num-hash too big: %d", numHashes))
 		}
+		faster := getFlagBool(cmd, "faster")
 
 		maxOpenFiles := getFlagPositiveInt(cmd, "max-open-files")
 
@@ -769,6 +770,7 @@ Taxonomy data:
 
 					namesBlock := make([][]string, 0, nInfoGroups)
 					gsizesBlock := make([][]uint64, 0, nInfoGroups)
+					kmersBlock := make([][]uint64, 0, nInfoGroups)
 					indicesBlock := make([][]uint32, 0, nInfoGroups)
 					sizesBlock := make([]uint64, 0, nInfoGroups)
 
@@ -784,6 +786,7 @@ Taxonomy data:
 								sigsBlock = append(sigsBlock, batch2.sigs)
 								namesBlock = append(namesBlock, batch2.names...)
 								gsizesBlock = append(gsizesBlock, batch2.gsizes...)
+								kmersBlock = append(kmersBlock, batch2.kmers...)
 								indicesBlock = append(indicesBlock, batch2.indices...)
 								sizesBlock = append(sizesBlock, batch2.sizes...)
 								if opt.Verbose && !dryRun {
@@ -797,6 +800,7 @@ Taxonomy data:
 									sigsBlock = append(sigsBlock, _batch.sigs)
 									namesBlock = append(namesBlock, _batch.names...)
 									gsizesBlock = append(gsizesBlock, _batch.gsizes...)
+									kmersBlock = append(kmersBlock, _batch.kmers...)
 									indicesBlock = append(indicesBlock, _batch.indices...)
 									sizesBlock = append(sizesBlock, _batch.sizes...)
 									if opt.Verbose && !dryRun {
@@ -822,6 +826,7 @@ Taxonomy data:
 								sigsBlock = append(sigsBlock, _batch.sigs)
 								namesBlock = append(namesBlock, _batch.names...)
 								gsizesBlock = append(gsizesBlock, _batch.gsizes...)
+								kmersBlock = append(kmersBlock, _batch.kmers...)
 								indicesBlock = append(indicesBlock, _batch.indices...)
 								sizesBlock = append(sizesBlock, _batch.sizes...)
 								if opt.Verbose && !dryRun {
@@ -834,6 +839,10 @@ Taxonomy data:
 					}()
 
 					numSigs := CalcSignatureSize(uint64(maxElements), numHashes, fpr)
+					if faster {
+						numSigs = roundup64(numSigs)
+					}
+
 					var eFileSize float64
 					eFileSize = 24
 					for _, infos := range batch {
@@ -880,11 +889,13 @@ Taxonomy data:
 
 							names := make([][]string, 0, 8)
 							gsizes := make([][]uint64, 0, 8)
+							kmers := make([][]uint64, 0, 8)
 							indices := make([][]uint32, 0, 8)
 							sizes := make([]uint64, 0, 8)
 							for _, infos := range _batch {
 								_names := make([]string, len(infos))
 								_gsizes := make([]uint64, len(infos))
+								_kmers := make([]uint64, len(infos))
 								_indices := make([]uint32, len(infos))
 								var _size uint64
 
@@ -893,12 +904,14 @@ Taxonomy data:
 								for iii, info := range infos {
 									_names[iii] = info.Name
 									_gsizes[iii] = info.GenomeSize
+									_kmers[iii] = info.Kmers
 									// _indices[iii] = info.Index
 									_indices[iii] = info.Index + info.Indexes<<16 // add number of indexes
 									_size += info.Kmers
 								}
 								names = append(names, _names)
 								gsizes = append(gsizes, _gsizes)
+								kmers = append(kmers, _kmers)
 								indices = append(indices, _indices)
 								sizes = append(sizes, uint64(_size))
 							}
@@ -928,61 +941,125 @@ Taxonomy data:
 
 									if reader.IsHashed() {
 										if singleHash {
-											for {
-												code, _, err = reader.ReadCodeWithTaxid()
-												if err != nil {
-													if err == io.EOF {
-														break
+											if faster {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
 													}
-													checkError(errors.Wrap(err, info.Path))
-												}
 
-												// sigs[code%numSigs] |= 1 << (7 - _k)
-												sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+													// sigs[code%numSigs] |= 1 << (7 - _k)
+													sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													sigs[code%numSigs] |= 1 << (7 - _k)
+													// sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
 											}
 										} else {
-											for {
-												code, _, err = reader.ReadCodeWithTaxid()
-												if err != nil {
-													if err == io.EOF {
-														break
+											if faster {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
 													}
-													checkError(errors.Wrap(err, info.Path))
-												}
 
-												// for _, loc = range hashLocations(code, numHashes, numSigs) {
-												for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
-													sigs[loc] |= 1 << (7 - _k)
+													// for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
+														sigs[loc] |= 1 << (7 - _k)
+													}
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													for _, loc = range hashLocations(code, numHashes, numSigs) {
+														// for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
+														sigs[loc] |= 1 << (7 - _k)
+													}
 												}
 											}
 										}
 									} else {
 										if singleHash {
-											for {
-												code, _, err = reader.ReadCodeWithTaxid()
-												if err != nil {
-													if err == io.EOF {
-														break
+											if faster {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
 													}
-													checkError(errors.Wrap(err, info.Path))
-												}
 
-												// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
-												sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+													// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+													sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+													// sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
+												}
 											}
 										} else {
-											for {
-												code, _, err = reader.ReadCodeWithTaxid()
-												if err != nil {
-													if err == io.EOF {
-														break
+											if faster {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
 													}
-													checkError(errors.Wrap(err, info.Path))
-												}
 
-												// for _, loc = range hashLocations(code, numHashes, numSigs) {
-												for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
-													sigs[loc] |= 1 << (7 - _k)
+													// for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
+														sigs[loc] |= 1 << (7 - _k)
+													}
+												}
+											} else {
+												for {
+													code, _, err = reader.ReadCodeWithTaxid()
+													if err != nil {
+														if err == io.EOF {
+															break
+														}
+														checkError(errors.Wrap(err, info.Path))
+													}
+
+													for _, loc = range hashLocations(code, numHashes, numSigs) {
+														// for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
+														sigs[loc] |= 1 << (7 - _k)
+													}
 												}
 											}
 										}
@@ -999,6 +1076,7 @@ Taxonomy data:
 								sigs:    sigs,
 								names:   names,
 								gsizes:  gsizes,
+								kmers:   kmers,
 								indices: indices,
 								sizes:   sizes,
 							}
@@ -1025,7 +1103,7 @@ Taxonomy data:
 							w.Close()
 						}()
 
-						writer, err := index.NewWriter(outfh, k, canonical, uint8(numHashes), numSigs, namesBlock, gsizesBlock, indicesBlock, sizesBlock)
+						writer, err := index.NewWriter(outfh, k, canonical, !faster, uint8(numHashes), numSigs, namesBlock, gsizesBlock, kmersBlock, indicesBlock, sizesBlock)
 						checkError(err)
 						defer func() {
 							checkError(writer.Flush())
@@ -1076,6 +1154,7 @@ Taxonomy data:
 			dbInfo.FPR = fpr
 			dbInfo.BlockSize = sBlock0
 			dbInfo.NumNames = len(fileInfoGroups)
+			dbInfo.CompactSize = !faster
 			dbInfo.NumHashes = numHashes
 			dbInfo.Canonical = canonical
 			dbInfo.Scaled = scaled
@@ -1157,6 +1236,7 @@ func init() {
 	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)`)
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
+	indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
 
 	indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)
 	indexCmd.Flags().IntP("num-buckets", "B", 0, `[RAMBO] number of buckets per repitition, 0 for one set per bucket`)
@@ -1174,6 +1254,7 @@ type batch8s struct {
 	sigs    []byte
 	names   [][]string
 	gsizes  [][]uint64
+	kmers   [][]uint64
 	indices [][]uint32
 	sizes   []uint64
 }

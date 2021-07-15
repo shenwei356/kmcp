@@ -25,7 +25,7 @@ import (
 )
 
 // CalcSignatureSize is from https://github.com/bingmann/cobs/blob/master/cobs/util/calc_signature_size.cpp .
-// but we roundup to 2^n.
+// but we can optionally roundup to 2^n.
 /*
 def roundup(x):
     x -= 1
@@ -43,7 +43,8 @@ roundup(f(300000, 1, 0.25))
 */
 func CalcSignatureSize(numElements uint64, numHashes int, falsePositiveRate float64) uint64 {
 	ratio := float64(-numHashes) / (math.Log(1 - math.Pow(falsePositiveRate, 1/float64(numHashes))))
-	return roundup64(uint64(math.Ceil(float64(numElements) * ratio)))
+	// return roundup64(uint64(math.Ceil(float64(numElements) * ratio)))
+	return uint64(math.Ceil(float64(numElements) * ratio))
 }
 
 /*
@@ -66,7 +67,6 @@ func baseHashes(hash uint64) (uint32, uint32) {
 	return uint32(hash >> 32), uint32(hash)
 }
 
-// not used.
 // return locations in bitset for a hash
 func hashLocations(hash uint64, numHashes int, numSigs uint64) []int {
 	if numHashes < 1 {

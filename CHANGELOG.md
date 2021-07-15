@@ -5,7 +5,7 @@
 - new command:
     - `merge`: merge search results from multiple databases.
 - `search`:
-    - 1.1-1.9X speedup.
+    - 1.1-2.1X speedup, specially for database with two or more hash functions.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.
     - fix number of ureads.
