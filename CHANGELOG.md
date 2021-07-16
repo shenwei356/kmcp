@@ -4,6 +4,9 @@
 
 - new command:
     - `merge`: merge search results from multiple databases.
+- `index`:
+    - **new database format**.
+    - making rounduping sizes of indexes optional.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.
 - `profile`:

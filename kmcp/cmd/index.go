@@ -770,7 +770,7 @@ Taxonomy data:
 
 					namesBlock := make([][]string, 0, nInfoGroups)
 					gsizesBlock := make([][]uint64, 0, nInfoGroups)
-					kmersBlock := make([][]uint64, 0, nInfoGroups)
+					// kmersBlock := make([][]uint64, 0, nInfoGroups)
 					indicesBlock := make([][]uint32, 0, nInfoGroups)
 					sizesBlock := make([]uint64, 0, nInfoGroups)
 
@@ -786,7 +786,7 @@ Taxonomy data:
 								sigsBlock = append(sigsBlock, batch2.sigs)
 								namesBlock = append(namesBlock, batch2.names...)
 								gsizesBlock = append(gsizesBlock, batch2.gsizes...)
-								kmersBlock = append(kmersBlock, batch2.kmers...)
+								// kmersBlock = append(kmersBlock, batch2.kmers...)
 								indicesBlock = append(indicesBlock, batch2.indices...)
 								sizesBlock = append(sizesBlock, batch2.sizes...)
 								if opt.Verbose && !dryRun {
@@ -800,7 +800,7 @@ Taxonomy data:
 									sigsBlock = append(sigsBlock, _batch.sigs)
 									namesBlock = append(namesBlock, _batch.names...)
 									gsizesBlock = append(gsizesBlock, _batch.gsizes...)
-									kmersBlock = append(kmersBlock, _batch.kmers...)
+									// kmersBlock = append(kmersBlock, _batch.kmers...)
 									indicesBlock = append(indicesBlock, _batch.indices...)
 									sizesBlock = append(sizesBlock, _batch.sizes...)
 									if opt.Verbose && !dryRun {
@@ -826,7 +826,7 @@ Taxonomy data:
 								sigsBlock = append(sigsBlock, _batch.sigs)
 								namesBlock = append(namesBlock, _batch.names...)
 								gsizesBlock = append(gsizesBlock, _batch.gsizes...)
-								kmersBlock = append(kmersBlock, _batch.kmers...)
+								// kmersBlock = append(kmersBlock, _batch.kmers...)
 								indicesBlock = append(indicesBlock, _batch.indices...)
 								sizesBlock = append(sizesBlock, _batch.sizes...)
 								if opt.Verbose && !dryRun {
@@ -889,13 +889,13 @@ Taxonomy data:
 
 							names := make([][]string, 0, 8)
 							gsizes := make([][]uint64, 0, 8)
-							kmers := make([][]uint64, 0, 8)
+							// kmers := make([][]uint64, 0, 8)
 							indices := make([][]uint32, 0, 8)
 							sizes := make([]uint64, 0, 8)
 							for _, infos := range _batch {
 								_names := make([]string, len(infos))
 								_gsizes := make([]uint64, len(infos))
-								_kmers := make([]uint64, len(infos))
+								// _kmers := make([]uint64, len(infos))
 								_indices := make([]uint32, len(infos))
 								var _size uint64
 
@@ -904,14 +904,14 @@ Taxonomy data:
 								for iii, info := range infos {
 									_names[iii] = info.Name
 									_gsizes[iii] = info.GenomeSize
-									_kmers[iii] = info.Kmers
+									// _kmers[iii] = info.Kmers
 									// _indices[iii] = info.Index
 									_indices[iii] = info.Index + info.Indexes<<16 // add number of indexes
 									_size += info.Kmers
 								}
 								names = append(names, _names)
 								gsizes = append(gsizes, _gsizes)
-								kmers = append(kmers, _kmers)
+								// kmers = append(kmers, _kmers)
 								indices = append(indices, _indices)
 								sizes = append(sizes, uint64(_size))
 							}
@@ -1072,11 +1072,11 @@ Taxonomy data:
 							}
 
 							chBatch8 <- batch8s{
-								id:      id,
-								sigs:    sigs,
-								names:   names,
-								gsizes:  gsizes,
-								kmers:   kmers,
+								id:     id,
+								sigs:   sigs,
+								names:  names,
+								gsizes: gsizes,
+								// kmers:   kmers,
 								indices: indices,
 								sizes:   sizes,
 							}
@@ -1103,7 +1103,8 @@ Taxonomy data:
 							w.Close()
 						}()
 
-						writer, err := index.NewWriter(outfh, k, canonical, !faster, uint8(numHashes), numSigs, namesBlock, gsizesBlock, kmersBlock, indicesBlock, sizesBlock)
+						// writer, err := index.NewWriter(outfh, k, canonical, !faster, uint8(numHashes), numSigs, namesBlock, gsizesBlock, kmersBlock, indicesBlock, sizesBlock)
+						writer, err := index.NewWriter(outfh, k, canonical, !faster, uint8(numHashes), numSigs, namesBlock, gsizesBlock, indicesBlock, sizesBlock)
 						checkError(err)
 						defer func() {
 							checkError(writer.Flush())
@@ -1251,10 +1252,10 @@ func init() {
 type batch8s struct {
 	id int
 
-	sigs    []byte
-	names   [][]string
-	gsizes  [][]uint64
-	kmers   [][]uint64
+	sigs   []byte
+	names  [][]string
+	gsizes [][]uint64
+	// kmers   [][]uint64
 	indices [][]uint32
 	sizes   []uint64
 }
