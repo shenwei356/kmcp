@@ -173,7 +173,8 @@ Taxonomy data:
 		if numHashes > 255 {
 			checkError(fmt.Errorf("value of -n/--num-hash too big: %d", numHashes))
 		}
-		faster := getFlagBool(cmd, "faster")
+		// faster := getFlagBool(cmd, "faster")
+		faster := false
 
 		maxOpenFiles := getFlagPositiveInt(cmd, "max-open-files")
 
@@ -1237,7 +1238,7 @@ func init() {
 	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)`)
 	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
 	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
-	indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
+	// indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
 
 	indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)
 	indexCmd.Flags().IntP("num-buckets", "B", 0, `[RAMBO] number of buckets per repitition, 0 for one set per bucket`)

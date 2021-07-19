@@ -5,7 +5,7 @@
 - new command:
     - `merge`: merge search results from multiple databases.
 - `index`:
-    - making rounduping sizes of indexes optional. The searching speed is not
+    - do not roundup sizes of indexes. The searching speed is not
       affected and even faster due to optimization of `search` command.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.

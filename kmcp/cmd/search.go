@@ -481,7 +481,7 @@ func init() {
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
-	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use whole file as query`)
+	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as query`)
 	searchCmd.Flags().IntP("min-kmers", "c", 10, `minimal number of matched k-mers (sketches)`)
 	searchCmd.Flags().IntP("min-query-len", "m", 70, `minimal query length`)
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
