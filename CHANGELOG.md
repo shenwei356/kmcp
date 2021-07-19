@@ -5,13 +5,14 @@
 - new command:
     - `merge`: merge search results from multiple databases.
 - `index`:
-    - **new database format**.
-    - making rounduping sizes of indexes optional.
+    - making rounduping sizes of indexes optional. The searching speed is not
+      affected and even faster due to optimization of `search` command.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.
     - fix number of ureads.
+    - new flag `-m/--keep-main-matches` and `--max-score-gap`
 
 ## v0.5.0 - 2021-06-24
 

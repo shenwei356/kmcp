@@ -78,6 +78,8 @@ Accuracy notes:
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
   *. --keep-full-match is not recommended, which decreases sensitivity.  
+  *. -m/--keep-main-match is recommened, which increase specificity and 
+     slightly increase sensitivity.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -122,6 +124,8 @@ Profiling output formats:
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
 		keepFullMatch := getFlagBool(cmd, "keep-full-match")
+		keepMainMatch := getFlagBool(cmd, "keep-main-match")
+		maxScoreGap := getFlagFloat64(cmd, "max-score-gap")
 
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -567,6 +571,20 @@ Profiling output formats:
 						}
 					}
 
+					if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
+					}
+
 					hTarget = wyhash.HashString(match.Target, 1)
 					if ms, ok = matches[hTarget]; !ok {
 						tmp := []MatchResult{match}
@@ -802,6 +820,20 @@ Profiling output formats:
 								continue
 							}
 							pScore = match.QCov
+						}
+					}
+
+					if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
 						}
 					}
 
@@ -1113,6 +1145,20 @@ Profiling output formats:
 								continue
 							}
 							pScore = match.QCov
+						}
+					}
+
+					if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
 						}
 					}
 
@@ -1599,6 +1645,8 @@ func init() {
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-full-match", "", false, `only keep the full matches (qcov == 1) if there are`)
+	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased scores (> --max-score-gap)`)
+	profileCmd.Flags().Float64P("max-score-gap", "", 0.1, `max score gap between adjacent matches`)
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
@@ -1632,7 +1680,7 @@ func init() {
 	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. The value should be in range of [0,100)`)
 
 	// abundance
-	profileCmd.Flags().StringP("norm-abund", "m", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
+	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
 }
