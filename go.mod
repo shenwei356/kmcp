@@ -3,14 +3,13 @@ module github.com/shenwei356/kmcp
 go 1.16
 
 require (
-	github.com/clausecker/pospop v1.2.2
+	github.com/clausecker/pospop v0.0.0-20200819135010-677120eb417c
 	github.com/grailbio/base v0.0.10 // indirect
 	github.com/iafan/cwalk v0.0.0-20191125092548-dd7f505d2f66
 	github.com/klauspost/pgzip v1.2.5
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/pkg/profile v1.6.0
 	github.com/shenwei356/bio v0.1.1
 	github.com/shenwei356/breader v0.2.0
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
