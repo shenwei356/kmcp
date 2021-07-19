@@ -241,8 +241,8 @@ github.com/shenwei356/mmap-go v1.0.1 h1:MssMa5e6z3Asy16h+wjF2qbvq49lFrVPiBTlRBTf
 github.com/shenwei356/mmap-go v1.0.1/go.mod h1:En5BSnSNTA4KM6R04rDhw8UCOA5NgOPeADbz1jUJDNg=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
-github.com/shenwei356/pand v0.0.4 h1:N6f1hiGl1JR8enXdnHUr4iDL1fUr/Pb8w+YlqvqZfpg=
-github.com/shenwei356/pand v0.0.4/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
+github.com/shenwei356/pand v0.0.5 h1:TvafWrPusBkshVuL1DETJzCsVoAI7e3S3Y645W0bgcc=
+github.com/shenwei356/pand v0.0.5/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
 github.com/shenwei356/unikmer v0.18.0 h1:vSFLX2QTSH2XDMv5jslcBYQB2LGHtWlTm8QL/UyAiPE=
 github.com/shenwei356/unikmer v0.18.0/go.mod h1:/Kjeai4IcrE8C7GFPK2X0Y8xeGMQ9tGMOia+h2KuyDg=
 github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=
