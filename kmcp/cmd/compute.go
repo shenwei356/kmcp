@@ -60,7 +60,7 @@ Attentions:
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files better be distinct.
   4. Unwanted sequence like plasmid can be filtered out by
-     regular expressions via -B/--seq-name-filter.
+     the name via regular expressions (-B/--seq-name-filter).
   5. It also supports splitting sequences into fragments, this
      could increase the specificity in profiling result in cost
      of searching speed.

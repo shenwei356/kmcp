@@ -53,11 +53,12 @@ Methods:
      to reduce the false positive of ambiguous matches.
   2. Multi-aligned queries are proportionally assigned to references
      with the strategy in Metalign.
-  3. Reference genomes can be splitted into fragments when computing
+  4. More strategies are adopted to increase accuracy.
+  5. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
      (-p/--min-frags-prop).
-  4. Input files are parsed 3 times, therefore STDIN is not supported.
+  6. Input files are parsed 3 times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
@@ -78,7 +79,7 @@ Accuracy notes:
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
   *. --keep-full-match is not recommended, which decreases sensitivity.  
-  *. -m/--keep-main-match is recommened, which increase specificity and 
+  *. -m/--keep-main-match is recommened, which increases specificity and 
      slightly increase sensitivity.
 
 Taxonomy data:
@@ -358,6 +359,7 @@ Profiling output formats:
 			log.Infof("  minimal query coverage: %4f", minQcov)
 			log.Infof("  keep matches with the top N score: N=%d", topNScore)
 			log.Infof("  only keep the full matches: %v", keepFullMatch)
+			log.Infof("  only keep main matches: %v, maximal score gap: %f", keepMainMatch, maxScoreGap)
 			log.Info()
 
 			log.Infof("deciding the existence of a reference:")
