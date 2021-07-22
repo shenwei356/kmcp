@@ -190,7 +190,9 @@ Profiling output formats:
 
 		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
 		if opt.NumCPUs > 4 {
-			log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
+			if opt.Verbose {
+				log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
+			}
 			opt.NumCPUs = 4
 			runtime.GOMAXPROCS(opt.NumCPUs)
 		}
@@ -658,7 +660,9 @@ Profiling output formats:
 		// --------------------
 		// sum up
 
-		log.Infof("  number of references in search result: %d", len(profile))
+		if opt.Verbose {
+			log.Infof("  number of references in search result: %d", len(profile))
+		}
 
 		var c float64
 		var c1 float64
@@ -711,9 +715,11 @@ Profiling output formats:
 			delete(profile, h)
 		}
 
-		log.Infof("  number of estimated references: %d", len(profile))
-		log.Infof("  elapsed time: %s", time.Since(timeStart1))
-		log.Info()
+		if opt.Verbose {
+			log.Infof("  number of estimated references: %d", len(profile))
+			log.Infof("  elapsed time: %s", time.Since(timeStart1))
+			log.Info()
+		}
 
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
@@ -877,8 +883,10 @@ Profiling output formats:
 			// matches = make(map[uint64]*[]MatchResult)
 		}
 
-		log.Infof("  elapsed time: %s", time.Since(timeStart1))
-		log.Info()
+		if opt.Verbose {
+			log.Infof("  elapsed time: %s", time.Since(timeStart1))
+			log.Info()
+		}
 
 		// ---------------------------------------------------------------
 		// stage 3/3
@@ -1403,15 +1411,16 @@ Profiling output formats:
 			targets = append(targets, t)
 		}
 
-		log.Infof("  number of estimated references: %d", len(targets))
-		log.Infof("  elapsed time: %s", time.Since(timeStart1))
-		if outputBinningResult {
-			log.Infof("%d binning results are save to %s", nB, binningFile)
+		if opt.Verbose {
+			log.Infof("  number of estimated references: %d", len(targets))
+			log.Infof("  elapsed time: %s", time.Since(timeStart1))
+			if outputBinningResult {
+				log.Infof("%d binning results are save to %s", nB, binningFile)
+			}
+			log.Info()
+			log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
+				nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 		}
-		log.Info()
-		log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
-			nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
-
 		// ---------------------------------------------------------------
 		// output
 
@@ -1653,7 +1662,7 @@ func init() {
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched reference fragments`)
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.8, `minimal query coverage of high-confidence uniquely matched reads`)

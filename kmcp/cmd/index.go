@@ -69,9 +69,7 @@ Tips:
   2. Value of block size -b/--block-size better be multiple of 64.
      The default values is:  (#unikFiles/#threads + 7) / 8 * 8
  *3. Use --dry-run to adjust parameters and check final number of 
-     index files (#index-files) and the total file size. 
-     #index-files >= #cpus is recommended for better parallelization
-     in searching.
+     index files (#index-files) and the total file size.
 
 Database sizes and searching accuracy:
   0. Use --dry-run before starting creating database.
