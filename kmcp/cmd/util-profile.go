@@ -139,11 +139,11 @@ type Target struct {
 	// unique match with high confidence
 	UniqMatchHic []float64
 
-	SumMatch        float64
+	SumMatch        float64 // depth
 	SumUniqMatch    float64
 	SumUniqMatchHic float64
 
-	FragsProp float64
+	FragsProp float64 // coverage
 	Coverage  float64
 	Qlens     float64
 
