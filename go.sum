@@ -208,8 +208,6 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/profile v1.6.0 h1:hUDfIISABYI59DyeB3OTay/HxSRwTQ8rB/H83k6r5dM=
-github.com/pkg/profile v1.6.0/go.mod h1:qBsxPvzyUincmltOk6iyRVxHYg4adc0OFOv72ZdLa18=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=
@@ -245,8 +243,8 @@ github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr7
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
 github.com/shenwei356/pand v0.0.5 h1:TvafWrPusBkshVuL1DETJzCsVoAI7e3S3Y645W0bgcc=
 github.com/shenwei356/pand v0.0.5/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
-github.com/shenwei356/unikmer v0.18.0 h1:vSFLX2QTSH2XDMv5jslcBYQB2LGHtWlTm8QL/UyAiPE=
-github.com/shenwei356/unikmer v0.18.0/go.mod h1:/Kjeai4IcrE8C7GFPK2X0Y8xeGMQ9tGMOia+h2KuyDg=
+github.com/shenwei356/unikmer v0.18.3 h1:RvPRqTz20QHkhjx4EKLZXSOAJNOXW3+HJOoK0pL56ew=
+github.com/shenwei356/unikmer v0.18.3/go.mod h1:/Kjeai4IcrE8C7GFPK2X0Y8xeGMQ9tGMOia+h2KuyDg=
 github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=
 github.com/shenwei356/util v0.3.0/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
 github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992 h1:RXEEyKj0JL3SrRIYsWIEyy4AwjHbI3I8aDGK6CA4+YI=

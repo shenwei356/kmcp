@@ -70,17 +70,16 @@ Accuracy notes:
   *. And we require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence to decrease
      the false positive.
+     E.g., H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
      *. -U/--min-hic-ureads,      minimal number, >= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
-  *. -n/--keep-top-scores could increase the speed, while too small value
+  *. -n/--keep-top-qcovs could increase the speed, while too small value
      could decrease the sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
-  *. --keep-full-match is not recommended, which decreases sensitivity.  
-  *. -m/--keep-main-match is recommened, which increases specificity and 
-     slightly increase sensitivity.
+  *. --keep-perfect-match is not recommended, which decreases sensitivity.  
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -123,10 +122,10 @@ Profiling output formats:
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
-		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
-		keepFullMatch := getFlagBool(cmd, "keep-full-match")
+		topNScore := getFlagNonNegativeInt(cmd, "keep-top-qcovs")
+		keepFullMatch := getFlagBool(cmd, "keep-perfect-match")
 		keepMainMatch := getFlagBool(cmd, "keep-main-match")
-		maxScoreGap := getFlagFloat64(cmd, "max-score-gap")
+		maxScoreGap := getFlagFloat64(cmd, "max-qov-gap")
 
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -365,7 +364,7 @@ Profiling output formats:
 			log.Info()
 
 			log.Infof("deciding the existence of a reference:")
-			log.Infof("  minimal number of reads: %.0f", minReads)
+			log.Infof("  minimal number of reads per refence fragment: %.0f", minReads)
 			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
 			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
 			log.Info()
@@ -498,7 +497,7 @@ Profiling output formats:
 									for _, taxid2 = range taxids[1:] {
 										taxid1 = taxdb.LCA(taxid1, taxid2)
 									}
-									if taxdb.Rank(taxid1) == "species" {
+									if taxdb.AtOrBelowRank(taxid1, "species") {
 										theSameSpecies = true
 									}
 								}
@@ -616,7 +615,7 @@ Profiling output formats:
 					for _, taxid2 = range taxids[1:] {
 						taxid1 = taxdb.LCA(taxid1, taxid2)
 					}
-					if taxdb.Rank(taxid1) == "species" {
+					if taxdb.AtOrBelowRank(taxid1, "species") {
 						theSameSpecies = true
 					}
 				}
@@ -1023,7 +1022,7 @@ Profiling output formats:
 										taxid1 = taxdb.LCA(taxid1, taxid2)
 									}
 
-									if levelSpecies && taxdb.Rank(taxid1) == "species" {
+									if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
 										theSameSpecies = true
 									}
 
@@ -1237,7 +1236,7 @@ Profiling output formats:
 							taxid1 = taxdb.LCA(taxid1, taxid2)
 						}
 
-						if levelSpecies && taxdb.Rank(taxid1) == "species" {
+						if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
 							theSameSpecies = true
 						}
 
@@ -1654,17 +1653,17 @@ func init() {
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
-	profileCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
-	profileCmd.Flags().BoolP("keep-full-match", "", false, `only keep the full matches (qcov == 1) if there are`)
-	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased scores (> --max-score-gap)`)
-	profileCmd.Flags().Float64P("max-score-gap", "", 0.1, `max score gap between adjacent matches`)
+	profileCmd.Flags().IntP("keep-top-qcovs", "n", 5, `keep matches with the top N qcovs for a query, 0 for all`)
+	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
+	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qov-gap)`)
+	profileCmd.Flags().Float64P("max-qov-gap", "", 0.2, `max qcov gap between adjacent matches`)
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.7, `minimal proportion of matched reference fragments`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments`)
 
-	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference`)
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.8, `minimal query coverage of high-confidence uniquely matched reads`)
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 
