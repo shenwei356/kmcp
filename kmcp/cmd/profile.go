@@ -125,7 +125,7 @@ Profiling output formats:
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-qcovs")
 		keepFullMatch := getFlagBool(cmd, "keep-perfect-match")
 		keepMainMatch := getFlagBool(cmd, "keep-main-match")
-		maxScoreGap := getFlagFloat64(cmd, "max-qov-gap")
+		maxScoreGap := getFlagFloat64(cmd, "max-qcov-gap")
 
 		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
@@ -142,11 +142,17 @@ Profiling output formats:
 		HicUreadsMinProp := getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
+		if minDReadsProp > 1 {
+			checkError(fmt.Errorf("the value of -D/--min-dreads-prop (%f) should be in range of (0, 1]", minDReadsProp))
+		}
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
+		if minDReadsProp >= 1 {
+			checkError(fmt.Errorf("the value of -R/--max-mismatch-err (%f) should be in range of (0, 1)", minDReadsProp))
+		}
 
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
 		if lowAbcPct >= 100 {
-			checkError(fmt.Errorf("the value of -F/--filter-low-pct (%v) should be in range of [0, 100)", lowAbcPct))
+			checkError(fmt.Errorf("the value of -F/--filter-low-pct (%f) should be in range of [0, 100)", lowAbcPct))
 		} else if lowAbcPct > 10 {
 			log.Warningf("the value of -F/--filter-low-pct (%v) may be too big", lowAbcPct)
 		}
@@ -181,6 +187,9 @@ Profiling output formats:
 		}
 
 		mappingTaxids := len(taxidMappingFiles) != 0
+		if levelSpecies && !mappingTaxids {
+			checkError(fmt.Errorf("-T/--taxid-map needed for --level species"))
+		}
 
 		separator := getFlagString(cmd, "separator")
 		if separator == "" {
@@ -484,29 +493,27 @@ Profiling output formats:
 					if prevQuery != match.Query { // new query
 						nReads++
 
-						if len(matches) > 0 {
-							if mappingTaxids {
+						if len(matches) > 0 { // not the first query
+							if levelSpecies {
 								taxids = taxids[:0]
 								for h, ms = range matches {
 									taxids = append(taxids, taxidMap[(*ms)[0].Target])
 								}
 
-								if levelSpecies {
-									theSameSpecies = false
-									taxid1 = taxids[0]
-									for _, taxid2 = range taxids[1:] {
-										taxid1 = taxdb.LCA(taxid1, taxid2)
-									}
-									if taxdb.AtOrBelowRank(taxid1, "species") {
-										theSameSpecies = true
-									}
+								theSameSpecies = false
+								taxid1 = taxids[0]
+								for _, taxid2 = range taxids[1:] {
+									taxid1 = taxdb.LCA(taxid1, taxid2)
+								}
+								if taxdb.AtOrBelowRank(taxid1, "species") {
+									theSameSpecies = true
 								}
 							}
 
 							for h, ms = range matches {
 								floatMsSize = float64(len(*ms))
 								first = true
-								for _, m = range *ms {
+								for _, m = range *ms { // multiple matches in different fragments
 									if t, ok = profile[h]; !ok {
 										t0 := Target{
 											Name:         m.Target,
@@ -521,7 +528,7 @@ Profiling output formats:
 									}
 
 									if first { // count once
-										if len(matches) == 1 || (levelSpecies && theSameSpecies) {
+										if len(matches) == 1 || theSameSpecies {
 											t.UniqMatch[m.FragIdx]++
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
@@ -542,13 +549,25 @@ Profiling output formats:
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
-					} else if keepFullMatch {
+					} else if keepFullMatch { // not the first match
 						if !processThisMatch {
 							prevQuery = match.Query
 							continue
 						}
 
 						if pScore == 1 && match.QCov < 1 {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
+					} else if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
 							processThisMatch = false
 
 							prevQuery = match.Query
@@ -570,21 +589,6 @@ Profiling output formats:
 								prevQuery = match.Query
 								continue
 							}
-							pScore = match.QCov
-						}
-					}
-
-					if keepMainMatch && pScore <= 1 {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
-
-						if pScore-match.QCov > maxScoreGap {
-							processThisMatch = false
-
-							prevQuery = match.Query
-							continue
 						}
 					}
 
@@ -603,21 +607,19 @@ Profiling output formats:
 
 			nReads++
 
-			if mappingTaxids {
+			if levelSpecies {
 				taxids = taxids[:0]
 				for h, ms = range matches {
 					taxids = append(taxids, taxidMap[(*ms)[0].Target])
 				}
 
-				if levelSpecies {
-					theSameSpecies = false
-					taxid1 = taxids[0]
-					for _, taxid2 = range taxids[1:] {
-						taxid1 = taxdb.LCA(taxid1, taxid2)
-					}
-					if taxdb.AtOrBelowRank(taxid1, "species") {
-						theSameSpecies = true
-					}
+				theSameSpecies = false
+				taxid1 = taxids[0]
+				for _, taxid2 = range taxids[1:] {
+					taxid1 = taxdb.LCA(taxid1, taxid2)
+				}
+				if taxdb.AtOrBelowRank(taxid1, "species") {
+					theSameSpecies = true
 				}
 			}
 
@@ -639,7 +641,7 @@ Profiling output formats:
 					}
 
 					if first { // count once
-						if len(matches) == 1 || (levelSpecies && theSameSpecies) {
+						if len(matches) == 1 || theSameSpecies {
 							t.UniqMatch[m.FragIdx]++
 							if m.QCov >= hicUreadsMinQcov {
 								t.UniqMatchHic[m.FragIdx]++
@@ -692,12 +694,10 @@ Profiling output formats:
 			for _, c1 = range t.UniqMatchHic {
 				t.SumUniqMatchHic += c1
 			}
-
-			if t.SumUniqMatchHic < minHicUreads {
+			if t.SumUniqMatchHic < minHicUreads { // no enough high-confidence unique match
 				hs = append(hs, h)
 				continue
 			}
-
 			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
 				hs = append(hs, h)
 				continue
@@ -706,7 +706,6 @@ Profiling output formats:
 			for _, c2 = range t.QLen {
 				t.Qlens += c2
 			}
-
 			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 		}
 
@@ -786,7 +785,7 @@ Profiling output formats:
 									h1, h2 = hs[i], hs[j]
 									if amb, ok = ambMatch[h1]; !ok {
 										ambMatch[h1] = make(map[uint64]float64, 128)
-										ambMatch[h1][h2]++
+										ambMatch[h1][h2]++ // count of cooccurence
 									} else {
 										amb[h2]++
 									}
@@ -810,6 +809,18 @@ Profiling output formats:
 							prevQuery = match.Query
 							continue
 						}
+					} else if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					if onlyTopNScore {
@@ -826,21 +837,6 @@ Profiling output formats:
 								prevQuery = match.Query
 								continue
 							}
-							pScore = match.QCov
-						}
-					}
-
-					if keepMainMatch && pScore <= 1 {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
-
-						if pScore-match.QCov > maxScoreGap {
-							processThisMatch = false
-
-							prevQuery = match.Query
-							continue
 						}
 					}
 
@@ -930,14 +926,15 @@ Profiling output formats:
 			var ms *[]MatchResult
 			var t *Target
 			var ok bool
-			var hTarget, h, h0, h1, h2 uint64
+			var hTarget, h, h1, h2 uint64
 			var prevQuery string
 			var floatMsSize float64
 			var uniqMatch bool
 			var first bool
 			var sumUReads, prop float64
-			hs := make([]uint64, 0, 256)
-			hss := make([]uint64, 0, 256) // for sort hs
+			hss := make([]uint64, 0, 256) // for sorting hash value of reference
+			hsm := make([]bool, 0, 256)   // marking hash values to delete
+			var n, np1, i, j int
 			var match MatchResult
 
 			onlyTopNScore := topNScore > 0
@@ -971,35 +968,46 @@ Profiling output formats:
 					if prevQuery != match.Query {
 						uniqMatch = false
 						if len(matches) > 1 {
-							hs = hs[:0] // list to delete
-							first = true
-
 							hss = hss[:0]
+							hsm = hsm[:0]
 							for h = range matches {
 								hss = append(hss, h)
+								hsm = append(hsm, false)
 							}
 							sort.Slice(hss, func(i, j int) bool {
 								return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
 							})
 
-							for _, h = range hss {
-								if first {
-									h0 = h // previous one
-									first = false
+							n = len(hss)
+							np1 = len(hss) - 1
+							for i = 0; i < np1; i++ {
+								if hsm[i] { // deleted
 									continue
 								}
-								h1, h2 = sortTwoUint64s(h0, h)
+								for j = i + 1; j < n; j++ {
+									if hsm[j] { // deleted
+										continue
+									}
 
-								// decide which to keep
-								if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-									profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
-									hs = append(hs, h)
-								} else {
-									h0 = h
+									h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+
+									if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+										profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+										// remove hss[j]
+										hsm[j] = true
+										// fmt.Println(matches[hss[i]], matches[hss[j]])
+									} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+										profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+										// remove hss[i]
+										hsm[i] = true
+										// fmt.Println(matches[hss[j]], matches[hss[i]])
+									}
 								}
 							}
-							for _, h = range hs {
-								delete(matches, h)
+							for i, h = range hss {
+								if hsm[i] {
+									delete(matches, h)
+								}
 							}
 
 							if len(matches) > 1 { // redistribute matches
@@ -1137,6 +1145,18 @@ Profiling output formats:
 							prevQuery = match.Query
 							continue
 						}
+					} else if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
 					}
 
 					if onlyTopNScore {
@@ -1153,21 +1173,6 @@ Profiling output formats:
 								prevQuery = match.Query
 								continue
 							}
-							pScore = match.QCov
-						}
-					}
-
-					if keepMainMatch && pScore <= 1 {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
-
-						if pScore-match.QCov > maxScoreGap {
-							processThisMatch = false
-
-							prevQuery = match.Query
-							continue
 						}
 					}
 
@@ -1185,35 +1190,44 @@ Profiling output formats:
 
 			uniqMatch = false
 			if len(matches) > 1 {
-				hs = hs[:0] // list to delete
-				first = true
-
 				hss = hss[:0]
+				hsm = hsm[:0]
 				for h = range matches {
 					hss = append(hss, h)
+					hsm = append(hsm, false)
 				}
 				sort.Slice(hss, func(i, j int) bool {
 					return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
 				})
 
-				for _, h = range hss {
-					if first {
-						h0 = h // previous one
-						first = false
+				n = len(hss)
+				np1 = len(hss) - 1
+				for i = 0; i < np1; i++ {
+					if hsm[i] { // deleted
 						continue
 					}
-					h1, h2 = sortTwoUint64s(h0, h)
+					for j = i + 1; j < n; j++ {
+						if hsm[j] { // deleted
+							continue
+						}
 
-					// decide which to keep
-					if profile[h0].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-						profile[h].SumUniqMatch < profile[h0].SumUniqMatch*maxMismatchErr {
-						hs = append(hs, h)
-					} else {
-						h0 = h
+						h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+
+						if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+							profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+							// remove hss[j]
+							hsm[j] = true
+						} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+							profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+							// remove hss[i]
+							hsm[i] = true
+						}
 					}
 				}
-				for _, h = range hs {
-					delete(matches, h)
+				for i, h = range hss {
+					if hsm[i] {
+						delete(matches, h)
+					}
 				}
 
 				if len(matches) > 1 { // redistribute matches
@@ -1655,8 +1669,8 @@ func init() {
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-qcovs", "n", 5, `keep matches with the top N qcovs for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
-	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qov-gap)`)
-	profileCmd.Flags().Float64P("max-qov-gap", "", 0.2, `max qcov gap between adjacent matches`)
+	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)`)
+	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.2, `max qcov gap between adjacent matches`)
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
@@ -1668,8 +1682,8 @@ func init() {
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
-	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads`)
-	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads`)
+	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1)`)
+	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1)`)
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)
@@ -1687,7 +1701,7 @@ func init() {
 	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
 	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
 
-	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. The value should be in range of [0,100)`)
+	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)`)
 
 	// abundance
 	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
