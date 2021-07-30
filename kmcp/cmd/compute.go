@@ -99,6 +99,10 @@ Output:
      output files are:
      ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
 
+Tips:
+  1. Decrease value of -j/--threads for data in HDD drives to reduce I/O
+     pressure.
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)

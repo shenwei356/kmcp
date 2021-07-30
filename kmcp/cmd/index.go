@@ -71,16 +71,17 @@ Tips:
  *3. Use --dry-run to adjust parameters and check final number of 
      index files (#index-files) and the total file size.
 
-Database sizes and searching accuracy:
+Database size and searching accuracy:
   0. Use --dry-run before starting creating database.
   1. -f/--false-positive-rate: the default value 0.3 is enough for a
      query with tens of matched k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of database.
   2. -n/--num-hash: large values could reduce the database size,
      in cost of slower searching speed. Values <=4 is recommended.
-  3. Use flag -m/--block-max-kmers-t1 and -M/--block-max-kmers-t2 to
-     separately create index for inputs with huge number of k-mers,
-     for precise control of database size.
+  3. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
+     and -1/--block-size1-kmers-t to separately create index for
+     inputs with huge number of k-mers, for precise control of
+     database size.
 
 Repeated and merged bloom filter (RAMBO)
   1. It's optional with flags -R/--num-repititions and -B/--num-buckets.
@@ -179,30 +180,53 @@ Taxonomy data:
 
 		maxOpenFiles := getFlagPositiveInt(cmd, "max-open-files")
 
-		// block-max-kmers-t1
-		kmerThreshold8Str := getFlagString(cmd, "block-max-kmers-t1")
+		// block-sizeX-kmers-t
+		kmerThresholdXStr := getFlagString(cmd, "block-sizeX-kmers-t")
+		kmerThresholdXFloat, err := bytesize.ParseByteSize(kmerThresholdXStr)
+		if err != nil {
+			checkError(fmt.Errorf("invalid size: %s", kmerThresholdXStr))
+		}
+		if kmerThresholdXFloat <= 0 {
+			checkError(fmt.Errorf("value of flag -8/--block-sizeX-kmers-t should be positive: %d", kmerThresholdXFloat))
+		}
+
+		kmerThresholdX := uint64(kmerThresholdXFloat)
+
+		blockSizeX := getFlagPositiveInt(cmd, "block-sizeX")
+		if blockSizeX <= 8 {
+			checkError(fmt.Errorf("value of flag -X/--block-sizeX should be greater than 8: %d", blockSizeX))
+		}
+		if blockSizeX%8 != 0 {
+			checkError(fmt.Errorf("value of flag -X/--block-sizeX should be a multiple of 8: %d", blockSizeX))
+		}
+
+		// block-size8-kmers-t
+		kmerThreshold8Str := getFlagString(cmd, "block-size8-kmers-t")
 		kmerThreshold8Float, err := bytesize.ParseByteSize(kmerThreshold8Str)
 		if err != nil {
 			checkError(fmt.Errorf("invalid size: %s", kmerThreshold8Str))
 		}
 		if kmerThreshold8Float <= 0 {
-			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 should be positive: %d", kmerThreshold8Float))
+			checkError(fmt.Errorf("value of flag -8/--block-size8-kmers-t should be positive: %d", kmerThreshold8Float))
 		}
 		kmerThreshold8 := uint64(kmerThreshold8Float)
+		if kmerThresholdX >= kmerThreshold8 {
+			checkError(fmt.Errorf("value of flag -x/--block-sizeX-kmers-t (%d) should be small than -8/--block-size8-kmers-t (%d)", kmerThresholdX, kmerThreshold8))
+		}
 
-		// block-max-kmers-t2
-		kmerThresholdSStr := getFlagString(cmd, "block-max-kmers-t2")
-		kmerThresholdSFloat, err := bytesize.ParseByteSize(kmerThresholdSStr)
+		// block-size1-kmers-t
+		kmerThreshold1Str := getFlagString(cmd, "block-size1-kmers-t")
+		kmerThreshold1Float, err := bytesize.ParseByteSize(kmerThreshold1Str)
 		if err != nil {
-			checkError(fmt.Errorf("invalid size: %s", kmerThresholdSStr))
+			checkError(fmt.Errorf("invalid size: %s", kmerThreshold1Str))
 		}
-		if kmerThresholdSFloat <= 0 {
-			checkError(fmt.Errorf("value of flag -M/--block-max-kmers-t2 should be positive: %d", kmerThresholdSFloat))
+		if kmerThreshold1Float <= 0 {
+			checkError(fmt.Errorf("value of flag -1/--block-size1-kmers-t should be positive: %d", kmerThreshold1Float))
 		}
-		kmerThresholdS := uint64(kmerThresholdSFloat)
+		kmerThreshold1 := uint64(kmerThreshold1Float)
 
-		if kmerThreshold8 >= kmerThresholdS {
-			checkError(fmt.Errorf("value of flag -m/--block-max-kmers-t1 (%d) should be small than -M/--block-max-kmers-t2 (%d)", kmerThreshold8, kmerThresholdS))
+		if kmerThreshold8 >= kmerThreshold1 {
+			checkError(fmt.Errorf("value of flag -8/--block-size8-kmers-t (%d) should be small than -1/--block-size1-kmers-t (%d)", kmerThreshold8, kmerThreshold1))
 		}
 
 		// ---------------------------------------------------------------
@@ -530,8 +554,10 @@ Taxonomy data:
 			if scaled {
 				log.Infof("  down-sampling scale: %d", scale)
 			}
-			log.Infof("  block-max-kmers-threshold 1: %s", bytesize.ByteSize(kmerThreshold8))
-			log.Infof("  block-max-kmers-threshold 2: %s", bytesize.ByteSize(kmerThresholdS))
+
+			log.Infof("  block-sizeX-kmers-t: %s", bytesize.ByteSize(kmerThresholdX))
+			log.Infof("  block-size8-kmers-t: %s", bytesize.ByteSize(kmerThreshold8))
+			log.Infof("  block-size1-kmers-t: %s", bytesize.ByteSize(kmerThreshold1))
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
 			log.Infof("building index ...")
@@ -596,6 +622,13 @@ Taxonomy data:
 				sBlock = sBlock00
 			}
 
+			var skipBlockX bool
+			if blockSizeX >= sBlock {
+				skipBlockX = true
+				log.Warningf("ignore -X/--block-size (%d) which is >= -b/--block-size (%d)", blockSizeX, sBlock)
+				blockSizeX = sBlock
+			}
+
 			if sBlock < 8 {
 				sBlock = 8
 			} else if sBlock > nFiles {
@@ -652,14 +685,14 @@ Taxonomy data:
 			sBlock0 := sBlock // save for later use
 
 			batch := make([][]UnikFileInfo, 0, sBlock)
-			var flag8, flag bool
+			var flagX, flag8, flag bool
 			var lastInfos []UnikFileInfo
 			var infoGroup UnikFileInfoGroup
 
 			for i := 0; i <= nFiles; i++ {
 				if i == nFiles { // process lastInfo
 					// add previous file to batch
-					if flag || flag8 {
+					if flag || flag8 || flagX {
 						if lastInfos != nil {
 							batch = append(batch, lastInfos)
 							lastInfos = nil
@@ -672,44 +705,86 @@ Taxonomy data:
 						continue
 					}
 
-					if flag || flag8 {
+					if flag || flag8 || flagX {
 						// add previous file to batch
 						if lastInfos != nil {
 							batch = append(batch, lastInfos)
 							lastInfos = nil
 						}
 
-						if flag {
+						if flag { // single
 							lastInfos = infos // leave this file process in the next round
 							// and we have to process files aleady in batch
-						} else if infoGroup.Kmers > kmerThresholdS {
+						} else if infoGroup.Kmers > kmerThreshold1 { // !flag && (flag8 || flagx) -> flag
 							// meet a very big file the first time
 							flag = true       // mark
 							lastInfos = infos // leave this file process in the next round
 							// and we have to process files aleady in batch
-						} else { // flag8 && !flag
+						} else if skipBlockX {
+							batch = append(batch, infos)
+							if len(batch) < sBlock { // not filled
+								continue
+							}
+						} else {
+							if infoGroup.Kmers > kmerThreshold8 { // !flag && flagx -> flag8
+								if flag8 { // keep the same
+									batch = append(batch, infos)
+									if len(batch) < sBlock { // not filled
+										continue
+									}
+								} else {
+									// meet a big file > kmerThreshold8
+									sBlock = 8
+									flag8 = true // mark
+									lastInfos = infos
+									// and we have to process files aleady in batch
+								}
+							} else { //  flagX
+								batch = append(batch, infos)
+								if len(batch) < sBlock { // not filled
+									continue
+								}
+							}
+						}
+					} else if skipBlockX {
+						if infoGroup.Kmers > kmerThreshold8 {
+							if infoGroup.Kmers > kmerThreshold1 {
+								// meet a very big file the first time
+								flag = true // mark
+							} else {
+								// meet a big file > kmerThresholdX
+								sBlock = blockSizeX
+								flagX = true // mark
+							}
+							lastInfos = infos // leave this file process in the next round
+							// and we have to process files aleady in batch
+						} else {
 							batch = append(batch, infos)
 							if len(batch) < sBlock { // not filled
 								continue
 							}
 						}
-					} else if infoGroup.Kmers > kmerThreshold8 {
-						if infoGroup.Kmers > kmerThresholdS {
-							// meet a very big file the first time
-							flag = true       // mark
+					} else {
+						if infoGroup.Kmers > kmerThresholdX {
+							if infoGroup.Kmers > kmerThreshold1 {
+								// meet a very big file the first time
+								flag = true // mark
+							} else if infoGroup.Kmers > kmerThreshold8 {
+								// meet a big file > kmerThreshold8
+								sBlock = 8
+								flag8 = true // mark
+							} else {
+								// meet a big file > kmerThresholdX
+								sBlock = blockSizeX
+								flagX = true // mark
+							}
 							lastInfos = infos // leave this file process in the next round
 							// and we have to process files aleady in batch
 						} else {
-							// meet a big file > kmerThreshold8
-							sBlock = 8
-							flag8 = true      // mark
-							lastInfos = infos // leave this file process in the next batch
-							// and we have to process files aleady in batch
-						}
-					} else {
-						batch = append(batch, infos)
-						if len(batch) < sBlock { // not filled
-							continue
+							batch = append(batch, infos)
+							if len(batch) < sBlock { // not filled
+								continue
+							}
 						}
 					}
 
@@ -1237,8 +1312,10 @@ func init() {
 	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter, range: (0, 1)`)
 	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes of bloom filters`)
 	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)`)
-	indexCmd.Flags().StringP("block-max-kmers-t1", "m", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
-	indexCmd.Flags().StringP("block-max-kmers-t2", "M", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
+	indexCmd.Flags().StringP("block-sizeX-kmers-t", "x", "10M", `if k-mers of single .unik file exceeds this threshold, block size is changed to --block-sizeX. unit supported: K, M, G`)
+	indexCmd.Flags().IntP("block-sizeX", "X", 256, `if k-mers of single .unik file exceeds --block-sizeX-kmers-t, block size is changed to this value`)
+	indexCmd.Flags().StringP("block-size8-kmers-t", "8", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
+	indexCmd.Flags().StringP("block-size1-kmers-t", "1", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
 	// indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
 
 	indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)

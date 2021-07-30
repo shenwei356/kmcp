@@ -7,6 +7,7 @@
 - `index`:
     - do not roundup sizes of indexes. The searching speed is not
       affected and even faster due to optimization of `search` command.
+    - use three kmers threshold to control index file size.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.
 - `profile`:
