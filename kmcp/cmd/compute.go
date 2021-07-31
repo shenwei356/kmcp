@@ -591,12 +591,13 @@ Tips:
 					splitNumber = splitNumber0
 					if !splitSeq || seqLen < splitMinRef {
 						splitSize = seqLen
-						step = 1
+						step = seqLen
 						greedy = false
+						splitNumber = 1
 					} else if splitByNumber {
 						if splitNumber == 1 {
 							splitSize = seqLen
-							step = 1
+							step = seqLen
 							greedy = false
 						} else {
 							splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
@@ -732,7 +733,7 @@ Tips:
 							Minimizer:    minimizer,
 							MinimizerW:   minimizerW,
 							SplitSeq:     splitSeq,
-							SplitNum:     splitNumber0,
+							SplitNum:     splitNumber,
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
@@ -744,7 +745,7 @@ Tips:
 							Name:       seqID,
 							GenomeSize: uint64(len(record.Seq.Seq)),
 							Index:      slidIdx,
-							Indexes:    uint32(splitNumber0),
+							Indexes:    uint32(splitNumber),
 							Kmers:      uint64(n),
 						}
 
@@ -805,7 +806,7 @@ Tips:
 					Minimizer:    minimizer,
 					MinimizerW:   minimizerW,
 					SplitSeq:     splitSeq,
-					SplitNum:     splitNumber0,
+					SplitNum:     splitNumber,
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
@@ -817,7 +818,7 @@ Tips:
 					Name:       fileprefix,
 					GenomeSize: genomeSize,
 					Index:      slidIdx,
-					Indexes:    uint32(splitNumber0),
+					Indexes:    uint32(splitNumber),
 					Kmers:      uint64(n),
 				}
 

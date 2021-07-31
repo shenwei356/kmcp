@@ -4,6 +4,8 @@
 
 - new command:
     - `merge`: merge search results from multiple databases.
+- `compute`:
+    - fix splitting very short genomes.
 - `index`:
     - do not roundup sizes of indexes. The searching speed is not
       affected and even faster due to optimization of `search` command.
