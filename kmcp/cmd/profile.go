@@ -146,8 +146,8 @@ Profiling output formats:
 			checkError(fmt.Errorf("the value of -D/--min-dreads-prop (%f) should be in range of (0, 1]", minDReadsProp))
 		}
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
-		if minDReadsProp >= 1 {
-			checkError(fmt.Errorf("the value of -R/--max-mismatch-err (%f) should be in range of (0, 1)", minDReadsProp))
+		if maxMismatchErr >= 1 {
+			checkError(fmt.Errorf("the value of -R/--max-mismatch-err (%f) should be in range of (0, 1)", maxMismatchErr))
 		}
 
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
