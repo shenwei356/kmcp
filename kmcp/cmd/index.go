@@ -38,6 +38,7 @@ import (
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/bytesize"
+	"github.com/shenwei356/util/math"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
@@ -66,6 +67,8 @@ Tips:
      memory occupation and high I/O pressure.
      #threads * #threads files are simultaneously opened, and max number
      of opened files is limited by the flag -F/--max-open-files.
+     But you need use a small value of -F/--max-open-files and
+     -W/--max-write-files for hard disk drive storage.
   2. Value of block size -b/--block-size better be multiple of 64.
      The default values is:  (#unikFiles/#threads + 7) / 8 * 8
  *3. Use --dry-run to adjust parameters and check final number of 
@@ -179,6 +182,7 @@ Taxonomy data:
 		faster := false
 
 		maxOpenFiles := getFlagPositiveInt(cmd, "max-open-files")
+		maxWriteFiles := getFlagPositiveInt(cmd, "max-write-files")
 
 		// block-sizeX-kmers-t
 		kmerThresholdXStr := getFlagString(cmd, "block-sizeX-kmers-t")
@@ -652,11 +656,29 @@ Taxonomy data:
 			nIndexFiles := int((nFiles + sBlock - 1) / sBlock) // may be more if using -m and -M
 			indexFiles := make([]string, 0, nIndexFiles)
 
+			var barW *mpb.Bar // bar for dumping index files
+			if opt.Verbose && !dryRun {
+				prefix := "[saved index files]"
+				barW = pbs.AddBar(int64(1),
+					mpb.PrependDecorators(
+						decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
+						decor.CountersNoUnit("%d / %d", decor.WCSyncWidth),
+					),
+					mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
+					mpb.BarFillerClearOnComplete(),
+					mpb.BarPriority(math.MaxInt),
+				)
+			}
+
 			ch := make(chan string, nIndexFiles)
 			done := make(chan int)
 			go func() {
 				for f := range ch {
 					indexFiles = append(indexFiles, f)
+
+					if opt.Verbose && !dryRun {
+						barW.Increment()
+					}
 				}
 				done <- 1
 			}()
@@ -681,6 +703,7 @@ Taxonomy data:
 			}
 			tokens0 := make(chan int, maxConc)
 			tokensOpenFiles := make(chan int, maxOpenFiles)
+			tokensWriteFiles := make(chan int, maxWriteFiles)
 
 			sBlock0 := sBlock // save for later use
 
@@ -811,6 +834,8 @@ Taxonomy data:
 
 				var bar *mpb.Bar
 				if opt.Verbose && !dryRun {
+					barW.SetTotal(int64(b), false)
+
 					bar = pbs.AddBar(int64((len(batch)+7)/8),
 						mpb.PrependDecorators(
 							decor.Name(prefix, decor.WC{W: len(prefix) + 1, C: decor.DidentRight}),
@@ -1169,6 +1194,9 @@ Taxonomy data:
 						fmt.Sprintf("_block%03d%s", b, extIndex))
 
 					if !dryRun {
+						// save to index file
+
+						tokensWriteFiles <- 1
 
 						outfh, gw, w, err := outStream(blockFile, false, opt.CompressionLevel)
 						checkError(err)
@@ -1178,6 +1206,8 @@ Taxonomy data:
 								gw.Close()
 							}
 							w.Close()
+
+							<-tokensWriteFiles
 						}()
 
 						// writer, err := index.NewWriter(outfh, k, canonical, !faster, uint8(numHashes), numSigs, namesBlock, gsizesBlock, kmersBlock, indicesBlock, sizesBlock)
@@ -1218,6 +1248,7 @@ Taxonomy data:
 			<-doneFileSize
 
 			if opt.Verbose && !dryRun {
+				barW.SetTotal(int64(b), true)
 				pbs.Wait()
 			}
 
@@ -1323,7 +1354,8 @@ func init() {
 	indexCmd.Flags().IntP("seed", "", 1, `[RAMBO] seed for randomly assigning names to buckets`)
 
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
-	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files`)
+	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files, please use a small value for hard disk drive storage`)
+	indexCmd.Flags().IntP("max-write-files", "W", 4, `maximum number of writing files, please use a small value for hard disk drive storage`)
 	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
 }
 
