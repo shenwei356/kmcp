@@ -55,6 +55,7 @@ Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
   2. -n/--keep-top-scores, here it can reduce the output size, while
      it does not effect the speed.
+  3. -N/--name-map.
 
 Special attentions:
   1. The values of tCov and jacc only apply for single size of k-mer.
@@ -489,7 +490,7 @@ func init() {
 
 	// output
 	searchCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)
-	searchCmd.Flags().StringSliceP("name-map", "M", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
+	searchCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)

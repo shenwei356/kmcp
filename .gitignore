@@ -11,16 +11,9 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
 
 *.directory
-kmcp/kmcp*
-kmcp/binaries*
-doc/site/*
-
 *ssshtest
-t_*
 *.nextflow.log*
 *.brename_detail.txt
 */Rplots.pdf
@@ -28,14 +21,24 @@ t_*
 *cpu.pprof
 *mem.pprof
 *trace.out
-*gtdb-*
-*gtdb.*.tsv
-dev
-ass2name.tsv
-ass2taxid.tsv
+
+# taxonomy
 delnodes.dmp
 merged.dmp
 names.dmp
 nodes.dmp
+
+# binary and html
+kmcp/kmcp*
+kmcp/binaries*
+site
+
+# data
+t_*
 *.kmcp
-data
+# data
+*.fastq.gz
+*.kmcp.gz*
+refs-*
+*.unik
+_info.txt
