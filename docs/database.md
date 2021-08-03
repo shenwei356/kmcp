@@ -146,5 +146,10 @@ Building database
     kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
         -j 40 -f 0.05 -n 2
 
+## HumGut
+
+http://arken.nmbu.no/~larssn/humgut/
+
+
 ## Custom database
 
