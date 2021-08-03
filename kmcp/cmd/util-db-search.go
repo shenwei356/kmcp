@@ -737,7 +737,11 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				for i := 0; i < numIndices; i++ {
 					// block to read
 					_matches = <-chMatches
-					matches = append(matches, _matches...)
+					if len(_matches) > 0 {
+						matches = append(matches, _matches...)
+					}
+					_matches = _matches[:0]
+					poolMatches.Put(_matches)
 				}
 
 				// recycle objects
@@ -1047,7 +1051,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			bufIdx = 0
 			copy(counts, counts0)
 
-			// hard cop code block to reduce branch testing in loop
+			// copy code block to reduce branch testing in loop
 
 			// -------------------------------------------------------------------------
 			// useMmap
@@ -1160,15 +1164,11 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						}
 					} else {
 						for _, hs = range hashes {
-							for i, _h = range hs {
-								loc = int(_h % numSigsUint)
-								// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								offset = int(offset0 + int64(loc*numRowBytes))
+							loc = int(hs[0] % numSigsUint)
+							// loc = int(hs[0] & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset = int(offset0 + int64(loc*numRowBytes))
 
-								data[i] = sigs[offset : offset+numRowBytes]
-							}
-
-							buffs[bufIdx] = data[0] // just point to the orginial data (mmaped)
+							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
 
 							// add to buffer for counting
 							bufIdx++
@@ -1362,15 +1362,11 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						}
 					} else {
 						for _, hs = range hashes {
-							for i, _h = range hs {
-								// loc = int(_h % numSigsUint)
-								loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								offset = int(offset0 + int64(loc*numRowBytes))
+							loc = int(hs[0] % numSigsUint)
+							// loc = int(hs[0] & numSigsUintM1) // & X is faster than % X when X is power of 2
+							offset = int(offset0 + int64(loc*numRowBytes))
 
-								data[i] = sigs[offset : offset+numRowBytes]
-							}
-
-							buffs[bufIdx] = data[0] // just point to the orginial data (mmaped)
+							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
 
 							// add to buffer for counting
 							bufIdx++
@@ -1619,7 +1615,8 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 				}
 			}
 
-			results := make([]Match, 0, 1)
+			// results := make([]Match, 0, 8)
+			results := poolMatches.Get().([]Match)
 
 			for i, _counts = range counts {
 				ix8 = i << 3
@@ -1707,12 +1704,7 @@ var poolHashes = &sync.Pool{New: func() interface{} {
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
-	return make([]Match, 0, 8)
-}}
-
-// not used
-var poolChanMatch = &sync.Pool{New: func() interface{} {
-	return make(chan Match, 8)
+	return make([]Match, 0, 256)
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
