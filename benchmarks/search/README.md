@@ -66,8 +66,8 @@ Building database
     
 -              |cobs      |kmcp
 :--------------|:---------|:-------
-database size  | 86.96 G  | 55.15 G
-building time  | 51min01s | 18min25s
+database size  | 86.96G  | 55.15G
+building time  | 51min01s | 24min52s
     
 Searching (bacterial genome)
     
@@ -182,7 +182,7 @@ Building database
     seqs=gtdb202
     db=gtdb
     k=31
-    threads=16
+    threads=8
     scale=1000
     
     dbSOURMASHtmp=gtdb-sourmash-k$k-D$scale
@@ -193,14 +193,14 @@ Building database
     
     # --------------- sourmash ---------------
     
-    # 28m12s
-    # 30G
+    # 89m59.612s
+    # 5.19G
     mkdir -p $dbSOURMASHtmp
     indexSourmash() {
-        fd .fa.gz$ $seqs \
+        find $seqs -name "*.fa.gz" \
             | rush -j $threads -v d=$dbSOURMASHtmp -v s=$scale -v k=$k \
                 'sourmash -q sketch dna -p k={k},scaled={s} {} -o {d}/{%}.sig'     
-        sourmash -q index $dbSOURMASH --from-file <(ls $dbSOURMASHtmp/*.sig)
+        sourmash -q index $dbSOURMASH --from-file <(find $dbSOURMASHtmp -name "*.sig")
     }
     
     { time indexSourmash ; } 2> $dbSOURMASH.time
@@ -212,20 +212,68 @@ Building database
     memusg -t -s "kmcp compute -e -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force --quiet \
         && kmcp index -j $threads -f 0.001 -n 3 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
-    
--              |sourmash      |kmcp
+
+
+-              |sourmash  |kmcp
 :--------------|:---------|:-------
-database size  |       G  |  G
-buiding time   |          | 
+database size  |  5.19G   |  1.52G
+buiding time   |  89m59s  | 7min02s
+
 
     # searching  ---------------------------------------------------------------------------------
     
     t=0.8
     for f in refs/*.fasta; do
-        memusg -t -s "sourmash -q sketch dna -p k=$k,scaled=$scale $f -o $f.sig; \
+        echo $f
+        # sourmash
+        memusg -t -H -s "sourmash -q sketch dna -p k=$k,scaled=$scale $f -o $f.sig; \
             sourmash -q search --containment $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" 2>$f.sourmash@$db.txt.time
         
-        # 0.558s, 1.32G
-        # single-thread 1.2s
-        memusg -t -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" 2>$f.kmcp.scaled@$db.txt.time
+        # kmcp, single-thread
+        memusg -t -H -s "kmcp search -g -j 16 -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" 2>$f.kmcp.scaled@$db.txt.time
     done
+
+    # time
+    find refs/ -name "*.fasta" \
+        | rush -k 'echo -ne {%}; \
+            echo -en "\t"$(grep "elapsed time" {}.sourmash@gtdb.txt.time | sed -r "s/.+: //"); \
+            echo -en "\t"$(grep "peak rss" {}.sourmash@gtdb.txt.time | sed -r "s/.+: //"); \
+            echo -en "\t"$(grep "elapsed time" {}.kmcp.scaled@gtdb.txt.time | sed -r "s/.+: //"); \
+            echo -e "\t"$(grep "peak rss" {}.kmcp.scaled@gtdb.txt.time | sed -r "s/.+: //"); \
+            ' \
+        | sed 's/ /\t/g' \
+        | csvtk add-header -t -n "query,cobs_t,cobs_m0,kmcp_t,kmcp_m0" \
+        | csvtk mutate2 -t -n cobs_m -e '$cobs_m0 / 1024' \
+        | csvtk mutate2 -t -n kmcp_m -e '$kmcp_m0 / 1024' \
+        | csvtk cut -t -f query,cobs_t,cobs_m,kmcp_t,kmcp_m \
+        | csvtk rename -t -f 1-5 -n "query,cobs:time(s),cobs:memory(MB),kmcp:time(s),kmcp:memory(MB)" \
+        | csvtk csv2md -t
+        
+    
+Query time and peak memory (kmcp utilizes single thread)
+
+query              |cobs:time(s)|cobs:memory(MB)|kmcp:time(s)|kmcp:memory(MB)
+:------------------|:-----------|:--------------|:-----------|:--------------
+NC_000913.3.fasta  |2.630       |228.26         |1.113       |372.86
+NC_002695.2.fasta  |2.984       |222.49         |1.032       |153.66
+NC_010655.1.fasta  |2.617       |225.14         |1.102       |240.72
+NC_011750.1.fasta  |2.646       |228.81         |0.786       |696.05
+NC_012971.2.fasta  |2.526       |222.48         |1.049       |482.81
+NC_013654.1.fasta  |2.445       |222.48         |0.997       |630.01
+NC_018658.1.fasta  |2.956       |222.48         |1.083       |355.88
+NZ_CP007592.1.fasta|2.791       |243.73         |1.062       |424.53
+NZ_CP028116.1.fasta|2.914       |222.49         |0.865       |711.72
+
+Query time and peak memory (kmcp utilizes 16 threads)
+
+query              |cobs:time(s)|cobs:memory(MB)|kmcp:time(s)|kmcp:memory(MB)
+:------------------|:-----------|:--------------|:-----------|:--------------
+NC_000913.3.fasta  |2.942       |229.99         |0.667       |71.58
+NC_002695.2.fasta  |2.618       |222.49         |0.654       |46.24
+NC_010655.1.fasta  |2.542       |222.45         |0.431       |34.73
+NC_011750.1.fasta  |2.663       |222.48         |0.636       |181.39
+NC_012971.2.fasta  |2.539       |222.48         |0.649       |43.74
+NC_013654.1.fasta  |2.509       |243.60         |0.618       |351.09
+NC_018658.1.fasta  |2.629       |229.61         |0.679       |45.68
+NZ_CP007592.1.fasta|2.572       |222.48         |0.657       |433.72
+NZ_CP028116.1.fasta|2.553       |245.73         |0.678       |670.22
