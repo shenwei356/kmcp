@@ -399,7 +399,7 @@ Tips:
 				),
 				mpb.AppendDecorators(
 					decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
-					decor.EwmaETA(decor.ET_STYLE_GO, 60),
+					decor.EwmaETA(decor.ET_STYLE_GO, 10),
 					decor.OnComplete(decor.Name(""), ". done"),
 				),
 			)
