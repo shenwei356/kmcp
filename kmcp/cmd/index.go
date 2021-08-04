@@ -67,8 +67,8 @@ Tips:
      The default values is:  (#unikFiles/#threads + 7) / 8 * 8
   2. #threads files are simultaneously opened, and max number
      of opened files is limited by the flag -F/--max-open-files.
-     You may use a small value of -F/--max-open-files and
-     -W/--max-write-files for hard disk drive storage.
+     You may use a small value of -F/--max-open-files for 
+     hard disk drive storage.
  *3. Use --dry-run to adjust parameters and check final number of 
      index files (#index-files) and the total file size.
 
@@ -180,7 +180,7 @@ Taxonomy data:
 		faster := false
 
 		maxOpenFiles := getFlagPositiveInt(cmd, "max-open-files")
-		maxWriteFiles := getFlagPositiveInt(cmd, "max-write-files")
+		// maxWriteFiles := getFlagPositiveInt(cmd, "max-write-files")
 
 		// block-sizeX-kmers-t
 		kmerThresholdXStr := getFlagString(cmd, "block-sizeX-kmers-t")
@@ -670,7 +670,7 @@ Taxonomy data:
 					// mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
 					mpb.AppendDecorators(
 						decor.Name("ETA: ", decor.WC{W: len("ETA: ")}),
-						decor.EwmaETA(decor.ET_STYLE_GO, 2),
+						decor.EwmaETA(decor.ET_STYLE_GO, 1),
 						decor.OnComplete(decor.Name(""), ". done"),
 					),
 					mpb.BarFillerClearOnComplete(),
@@ -725,7 +725,7 @@ Taxonomy data:
 
 			tokens0 := make(chan int, maxConc)
 			tokensOpenFiles := make(chan int, maxOpenFiles)
-			tokensWriteFiles := make(chan int, maxWriteFiles)
+			// tokensWriteFiles := make(chan int, maxWriteFiles)
 
 			sBlock0 := sBlock // save for later use
 
@@ -1222,7 +1222,7 @@ Taxonomy data:
 					if !dryRun {
 						// save to index file
 
-						tokensWriteFiles <- 1
+						// tokensWriteFiles <- 1
 
 						outfh, gw, w, err := outStream(blockFile, false, opt.CompressionLevel)
 						checkError(err)
@@ -1250,7 +1250,7 @@ Taxonomy data:
 						}
 						w.Close()
 
-						<-tokensWriteFiles
+						// <-tokensWriteFiles
 					}
 
 					ch <- filepath.Base(blockFile)
@@ -1385,7 +1385,7 @@ func init() {
 
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files, please use a small value for hard disk drive storage`)
-	indexCmd.Flags().IntP("max-write-files", "W", 4, `maximum number of writing files, please use a small value for hard disk drive storage`)
+	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximum number of writing files, please use a small value for hard disk drive storage`)
 	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
 }
 
