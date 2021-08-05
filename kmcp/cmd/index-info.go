@@ -32,8 +32,8 @@ import (
 
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Information of index file",
-	Long: `Information of index file
+	Short: "Print information of index file",
+	Long: `Print information of index file
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -70,7 +70,7 @@ Building database
             | gzip -c > gtdb.masked/{%}'
     
     # 
-    kmcp compute -I gtdb.masked/ -e -k 21 -n 10 -B plasmid -O gtdb-r202-k21-n10 --force
+    kmcp compute -I gtdb.masked/ -k 21 -n 10 -B plasmid -O gtdb-r202-k21-n10 --force
 
     
     kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb-r202-k21-n10.db -n 1 -f 0.3 --dry-run
@@ -137,7 +137,7 @@ Building database
     name=viral
     
     kmcp compute -I files.masked/ -O refseq-$name-k21-n10 \
-        -k 21 --exact-number --seq-name-filter plasmid \
+        -k 21 --seq-name-filter plasmid \
         --split-number 10 --split-overlap 100 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
@@ -148,7 +148,7 @@ Building database
     name=fungi
     
     kmcp compute -I files.masked/ -O refseq-$name-k21-n10 \
-        -k 21 --exact-number --seq-name-filter plasmid \
+        -k 21 --seq-name-filter plasmid \
         --split-number 10 --split-overlap 100 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \

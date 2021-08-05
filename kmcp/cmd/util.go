@@ -44,7 +44,8 @@ type Options struct {
 	NumCPUs int
 	Verbose bool
 
-	LogFile string
+	LogFile  string
+	Log2File bool
 
 	Compress         bool
 	CompressionLevel int
@@ -59,12 +60,14 @@ func getOptions(cmd *cobra.Command) *Options {
 	sorts.MaxProcs = threads
 	runtime.GOMAXPROCS(threads)
 
+	logfile := getFlagString(cmd, "log")
 	return &Options{
 		NumCPUs: threads,
 		// Verbose: getFlagBool(cmd, "verbose"),
 		Verbose: !getFlagBool(cmd, "quiet"),
 
-		LogFile: getFlagString(cmd, "log"),
+		LogFile:  logfile,
+		Log2File: logfile != "",
 
 		Compress:         true,
 		CompressionLevel: -1,

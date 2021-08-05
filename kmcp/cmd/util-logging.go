@@ -51,7 +51,7 @@ func init() {
 	log = logging.MustGetLogger("kmcp")
 }
 
-func addLog(file string) *os.File {
+func addLog(file string, verbose bool) *os.File {
 	w, err := os.Create(file)
 	if err != nil {
 		checkError(fmt.Errorf("failed to write log file %s: %s", file, err))
@@ -63,7 +63,11 @@ func addLog(file string) *os.File {
 	backend := logging.NewLogBackend(w, "", 0)
 	backendFormatter2 := logging.NewBackendFormatter(backend, logFormat2)
 
-	logging.SetBackend(backendFormatter, backendFormatter2)
+	if !verbose {
+		logging.SetBackend(backendFormatter2)
+	} else {
+		logging.SetBackend(backendFormatter, backendFormatter2)
+	}
 
 	log = logging.MustGetLogger("kmcp")
 

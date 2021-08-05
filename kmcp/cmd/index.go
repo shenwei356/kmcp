@@ -104,17 +104,17 @@ Taxonomy data:
 		opt := getOptions(cmd)
 
 		var fhLog *os.File
-		if opt.LogFile != "" {
-			fhLog = addLog(opt.LogFile)
+		if opt.Log2File {
+			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
 			}
-			if opt.LogFile != "" {
+			if opt.Log2File {
 				fhLog.Close()
 			}
 		}()
@@ -340,8 +340,15 @@ Taxonomy data:
 		if err != nil {
 			checkError(fmt.Errorf("check .unik file info file: %s", err))
 		}
+
+		if opt.Verbose || opt.Log2File {
+			log.Infof("kmcp v%s", VERSION)
+			log.Info("  https://github.com/shenwei356/kmcp")
+			log.Info()
+		}
+
 		if hasInfoCache {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("loading .unik file infos from file: %s", fileInfoCache)
 			}
 
@@ -352,7 +359,7 @@ Taxonomy data:
 			}
 
 			nfiles = len(fileInfos0)
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  %d cached file infos loaded", nfiles)
 			}
 
@@ -380,7 +387,7 @@ Taxonomy data:
 			// ---------------------------------------------------------------
 			// input files
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info("checking input files ...")
 			}
 
@@ -392,13 +399,13 @@ Taxonomy data:
 				}
 			} else {
 				files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-				if opt.Verbose {
+				if opt.Verbose || opt.Log2File {
 					if len(files) == 1 && isStdin(files[0]) {
 						log.Info("  no files given, reading from stdin")
 					}
 				}
 			}
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  %d input file(s) given", len(files))
 			}
 			nfiles = len(files)
@@ -410,7 +417,7 @@ Taxonomy data:
 			// ---------------------------------------------------------------
 			// check unik files and read k-mers numbers
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info("checking .unik files ...")
 			}
 
@@ -419,7 +426,7 @@ Taxonomy data:
 			var chDuration chan time.Duration
 			var doneDuration chan int
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				pbs = mpb.New(mpb.WithWidth(40), mpb.WithOutput(os.Stderr))
 				bar = pbs.AddBar(int64(len(files)),
 					mpb.BarStyle("[=>-]<+"),
@@ -449,13 +456,13 @@ Taxonomy data:
 			// first file
 			file := files[0]
 			var t time.Time
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				t = time.Now()
 			}
 
 			info := getInfo(file, true)
 			n += info.Kmers
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				bar.Increment()
 				bar.DecoratorEwmaUpdate(time.Since(t))
 			}
@@ -500,13 +507,13 @@ Taxonomy data:
 						<-tokensGetInfo
 					}()
 					var t time.Time
-					if opt.Verbose {
+					if opt.Verbose || opt.Log2File {
 						t = time.Now()
 					}
 
 					chInfos <- getInfo(file, false)
 
-					if opt.Verbose {
+					if opt.Verbose || opt.Log2File {
 						chDuration <- time.Duration(float64(time.Since(t)) / float64(opt.NumCPUs))
 					}
 				}(file)
@@ -516,13 +523,13 @@ Taxonomy data:
 			close(chInfos)
 			<-doneGetInfo
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				close(chDuration)
 				<-doneDuration
 				pbs.Wait()
 			}
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  finished checking %d .unik files", nfiles)
 			}
 		}
@@ -537,7 +544,7 @@ Taxonomy data:
 
 		// ------------------------------------------------------------------------------------
 		// begin creating index
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Infof("  number of hashes: %d", numHashes)
@@ -638,7 +645,7 @@ Taxonomy data:
 				sBlock = nFiles
 			}
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				if singleRepeat {
 					log.Infof("  block size: %d", sBlock)
@@ -931,7 +938,7 @@ Taxonomy data:
 									// kmersBlock = append(kmersBlock, _batch.kmers...)
 									indicesBlock = append(indicesBlock, _batch.indices...)
 									sizesBlock = append(sizesBlock, _batch.sizes...)
-									if opt.Verbose && !dryRun {
+									if (opt.Verbose || opt.Log2File) && !dryRun {
 										bar.Increment()
 									}
 									delete(buf, id)
@@ -957,7 +964,7 @@ Taxonomy data:
 								// kmersBlock = append(kmersBlock, _batch.kmers...)
 								indicesBlock = append(indicesBlock, _batch.indices...)
 								sizesBlock = append(sizesBlock, _batch.sizes...)
-								if opt.Verbose && !dryRun {
+								if (opt.Verbose || opt.Log2File) && !dryRun {
 									bar.Increment()
 								}
 							}
@@ -982,7 +989,7 @@ Taxonomy data:
 					}
 					eFileSize += float64(numSigs * uint64(nBatchFiles))
 
-					if opt.Verbose && dryRun {
+					if (opt.Verbose || opt.Log2File) && dryRun {
 						if singleRepeat {
 							log.Infof("  %s #files: %d, max #k-mers: %d, #signatures: %d, file size: %8s",
 								prefix, len(batch), maxElements, numSigs, bytesize.ByteSize(eFileSize))
@@ -1352,7 +1359,7 @@ Taxonomy data:
 			fileSize0 += fileSize
 		}
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("kmcp database with %d k-mers saved to %s", n, outDir)
 			log.Infof("total file size: %s", bytesize.ByteSize(fileSize0))

@@ -101,17 +101,17 @@ Profiling output formats:
 		opt := getOptions(cmd)
 
 		var fhLog *os.File
-		if opt.LogFile != "" {
-			fhLog = addLog(opt.LogFile)
+		if opt.Log2File {
+			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
 			}
-			if opt.LogFile != "" {
+			if opt.Log2File {
 				fhLog.Close()
 			}
 		}()
@@ -198,7 +198,7 @@ Profiling output formats:
 
 		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
 		if opt.NumCPUs > 4 {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
 			}
 			opt.NumCPUs = 4
@@ -250,11 +250,15 @@ Profiling output formats:
 
 		// ---------------------------------------------------------------
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
+			log.Infof("kmcp v%s", VERSION)
+			log.Info("  https://github.com/shenwei356/kmcp")
+			log.Info()
+
 			log.Info("checking input files ...")
 		}
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			if len(files) == 1 && isStdin(files[0]) {
 				// log.Info("no files given, reading from stdin")
 				checkError(fmt.Errorf("stdin not supported"))
@@ -278,7 +282,7 @@ Profiling output formats:
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
 		if mappingNames {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("loading name mapping file ...")
 			}
 			nameMappingFile := nameMappingFiles[0]
@@ -299,7 +303,7 @@ Profiling output formats:
 				}
 			}
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
@@ -313,7 +317,7 @@ Profiling output formats:
 		var taxidMap map[string]uint32
 
 		if mappingTaxids {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("loading TaxId mapping file ...")
 			}
 			taxidMappingFile := taxidMappingFiles[0]
@@ -347,7 +351,7 @@ Profiling output formats:
 				}
 			}
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  %d pairs of TaxId mapping values from %d file(s) loaded", len(taxidMap), len(taxidMappingFiles))
 			}
 
@@ -360,7 +364,7 @@ Profiling output formats:
 			}
 		}
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
 
@@ -447,13 +451,13 @@ Profiling output formats:
 
 		// ---------------------------------------------------------------
 		// stage 1/3
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("stage 1/3: counting matches and unique matches for filtering out low-confidence references")
 		}
 		timeStart1 := time.Now()
 
 		for _, file := range files {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  parsing file: %s", file)
 			}
 
@@ -661,7 +665,7 @@ Profiling output formats:
 		// --------------------
 		// sum up
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of references in search result: %d", len(profile))
 		}
 
@@ -713,7 +717,7 @@ Profiling output formats:
 			delete(profile, h)
 		}
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(profile))
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
@@ -721,7 +725,7 @@ Profiling output formats:
 
 		// ---------------------------------------------------------------
 		// stage 2/3, counting ambiguous reads/matches
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("stage 2/3: counting ambiguous matches for correcting matches")
 		}
 		timeStart1 = time.Now()
@@ -730,7 +734,7 @@ Profiling output formats:
 		ambMatch := make(map[uint64]map[uint64]float64, 128)
 
 		for _, file := range files {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  parsing file: %s", file)
 			}
 
@@ -878,14 +882,14 @@ Profiling output formats:
 			// matches = make(map[uint64]*[]MatchResult)
 		}
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
 		}
 
 		// ---------------------------------------------------------------
 		// stage 3/3
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("stage 3/3: correcting matches and computing profile")
 		}
 		timeStart1 = time.Now()
@@ -917,7 +921,7 @@ Profiling output formats:
 		var nUnassignedReads float64
 
 		for _, file := range files {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  parsing file: %s", file)
 			}
 
@@ -1424,7 +1428,7 @@ Profiling output formats:
 			targets = append(targets, t)
 		}
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(targets))
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			if outputBinningResult {
@@ -1459,7 +1463,7 @@ Profiling output formats:
 		}
 
 		if fileterLowAbc && len(targets) > 1 {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("filtering out predictions with the smallest relative abundances summing up %v%%", lowAbcPct)
 			}
 			var accPct float64
@@ -1477,7 +1481,7 @@ Profiling output formats:
 			}
 
 			if n > 0 {
-				if opt.Verbose {
+				if opt.Verbose || opt.Log2File {
 					log.Infof("  %d targets being filtered out", n)
 				}
 				targets = targets[:len(targets)-n]
@@ -1490,7 +1494,7 @@ Profiling output formats:
 				for _, t := range targets {
 					t.Percentage = t.Coverage / totalCoverage * 100
 				}
-			} else if opt.Verbose {
+			} else if opt.Verbose || opt.Log2File {
 				log.Infof("no targets being filtered out", n)
 			}
 

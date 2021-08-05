@@ -26,7 +26,7 @@ NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM
         --in-dir refs/ \
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
-        --kmer 31 --exact-number \
+        --kmer 31 \
         --split-number 10 \
         --out-dir refs-k31-n10 \
         --force
@@ -97,7 +97,7 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
         --in-dir refs/ \
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
-        --kmer 31 --exact-number \
+        --kmer 31 \
         --minimizer-w 20 \
         --out-dir refs-k31-W20 \
         --force
@@ -138,7 +138,7 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
         --in-dir refs/ \
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
-        --kmer 31 --exact-number \
+        --kmer 31 \
         --syncmer-s 11 \
         --out-dir refs-k31-S11 \
         --force
@@ -179,7 +179,7 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
         --in-dir refs/ \
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
-        --kmer 31 --exact-number \
+        --kmer 31 \
         --scale 20 \
         --out-dir refs-k31-D20 \
         --force

@@ -49,7 +49,7 @@ Attentions:
      value of -u/--kmer-dedup-threshold to remove duplicates.
   2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
   3. Increase value of -j/--threads for acceleratation, but values larger
-     than number of index files (.uniki) won't bring extra speedup.
+     than 2 * number of index files (.uniki) won't bring extra speedup.
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
@@ -66,17 +66,17 @@ Special attentions:
 		seq.ValidateSeq = false
 
 		var fhLog *os.File
-		if opt.LogFile != "" {
-			fhLog = addLog(opt.LogFile)
+		if opt.Log2File {
+			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
 			}
-			if opt.LogFile != "" {
+			if opt.Log2File {
 				fhLog.Close()
 			}
 		}()
@@ -157,13 +157,19 @@ Special attentions:
 			checkError(fmt.Errorf("invalid kmcp database: %s", dbDir))
 		}
 
+		if opt.Verbose || opt.Log2File {
+			log.Infof("kmcp v%s", VERSION)
+			log.Info("  https://github.com/shenwei356/kmcp")
+			log.Info()
+		}
+
 		// ---------------------------------------------------------------
 		// name mapping files
 
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
 		if mappingNames {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("loading name mapping file ...")
 			}
 			nameMappingFile := nameMappingFiles[0]
@@ -184,7 +190,7 @@ Special attentions:
 				}
 			}
 
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
@@ -194,11 +200,11 @@ Special attentions:
 		// ---------------------------------------------------------------
 		// input files
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info("checking input files ...")
 		}
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			if len(files) == 1 && isStdin(files[0]) {
 				log.Info("  no files given, reading from stdin")
 			} else {
@@ -216,7 +222,7 @@ Special attentions:
 		// ---------------------------------------------------------------
 		// load db
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			if useMmap {
 				log.Info("loading database with mmap enabled ...")
 			} else {
@@ -252,7 +258,7 @@ Special attentions:
 				checkError(fmt.Errorf("query coverage threshold (%f) should not be smaller than FPR of single bloom filter of index database (%f)", queryCov, db.Info.FPR))
 			}
 		}
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Infof("database loaded: %s", dbDir)
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -294,7 +300,7 @@ Special attentions:
 		var speed float64 // k reads/second
 
 		output := func(result QueryResult) {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				total++
 			}
 
@@ -397,7 +403,7 @@ Special attentions:
 
 		var id uint64
 		for _, file := range files {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Infof("reading sequence file: %s", file)
 			}
 			fastxReader, err = fastx.NewDefaultReader(file)
@@ -466,7 +472,7 @@ Special attentions:
 		<-done    // all result returned and outputed
 
 		checkError(sg.Close()) // cleanup
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			fmt.Fprintf(os.Stderr, "\n")
 
 			speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()

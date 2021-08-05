@@ -56,7 +56,7 @@ Uncompressing and renaming
     # --------------- kmcp ---------------
     
     /bin/rm -rf $dbKMCPtmp $dbKMCP
-    memusg -t -s "kmcp compute -e -j $threads -k $k -I $seqs -O $dbKMCPtmp --force --quiet \
+    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp --force --quiet \
         && kmcp index -j $threads -f 0.3 -n 1 -b 1024 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
 
@@ -220,7 +220,7 @@ NZ_CP028116.1.fasta.short|227.358     |99.92          |17.197      |56.27
 
     # --------------- kmcp ---------------
     
-    memusg -t -s "kmcp compute -e -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force --quiet \
+    memusg -t -s "kmcp compute -j $threads -k $k -I $seqs -O $dbKMCPtmp -D $scale --force --quiet \
         && kmcp index -j $threads -f 0.001 -n 3 -I $dbKMCPtmp -O $dbKMCP --force --quiet " \
         2>$dbKMCP.time
 

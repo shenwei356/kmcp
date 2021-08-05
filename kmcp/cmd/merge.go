@@ -49,17 +49,17 @@ Attentions
 		seq.ValidateSeq = false
 
 		var fhLog *os.File
-		if opt.LogFile != "" {
-			fhLog = addLog(opt.LogFile)
+		if opt.Log2File {
+			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
 			}
-			if opt.LogFile != "" {
+			if opt.Log2File {
 				fhLog.Close()
 			}
 		}()
@@ -71,11 +71,11 @@ Attentions
 		// ---------------------------------------------------------------
 		// input files
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info("checking input files ...")
 		}
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			if len(files) == 1 && isStdin(files[0]) {
 				log.Info("  no files given, reading from stdin")
 			} else {

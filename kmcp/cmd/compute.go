@@ -54,8 +54,6 @@ Attentions:
      via the flag -I/--in-dir. A regular expression for matching
      sequencing files is available by the flag -r/--file-regexp.
   2. Multiple sizes of k-mers are supported.
-     K-mers (sketchs) are not sorted, and duplicates are kept
-     unless the flag -e/--exact-number is on.
   3. By default, we compute k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files better be distinct.
@@ -63,7 +61,7 @@ Attentions:
      the name via regular expressions (-B/--seq-name-filter).
   5. It also supports splitting sequences into fragments, this
      could increase the specificity in profiling result in cost
-     of searching speed.
+     of slower searching speed.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -100,8 +98,8 @@ Output:
      ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
 
 Tips:
-  1. Decrease value of -j/--threads for data in HDD drives to reduce I/O
-     pressure.
+  1. Decrease value of -j/--threads for data in hard disk drives to
+     reduce I/O pressure.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -109,17 +107,17 @@ Tips:
 		seq.ValidateSeq = false
 
 		var fhLog *os.File
-		if opt.LogFile != "" {
-			fhLog = addLog(opt.LogFile)
+		if opt.Log2File {
+			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
 			}
-			if opt.LogFile != "" {
+			if opt.Log2File {
 				fhLog.Close()
 			}
 		}()
@@ -143,7 +141,8 @@ Tips:
 
 		outDir := getFlagString(cmd, "out-dir")
 		force := getFlagBool(cmd, "force")
-		exactNumber := getFlagBool(cmd, "exact-number")
+		// exactNumber := getFlagBool(cmd, "exact-number")
+		exactNumber := true
 		compress := getFlagBool(cmd, "compress")
 		bySeq := getFlagBool(cmd, "by-seq")
 
@@ -281,7 +280,11 @@ Tips:
 		// ---------------------------------------------------------------
 		// input files
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
+			log.Infof("kmcp v%s", VERSION)
+			log.Info("  https://github.com/shenwei356/kmcp")
+			log.Info()
+
 			log.Info("checking input files ...")
 		}
 
@@ -296,7 +299,7 @@ Tips:
 			}
 		} else {
 			files = getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-			if opt.Verbose {
+			if opt.Verbose || opt.Log2File {
 				if len(files) == 1 && isStdin(files[0]) {
 					log.Info("  no files given, reading from stdin")
 				}
@@ -304,14 +307,14 @@ Tips:
 		}
 		if len(files) < 1 {
 			checkError(fmt.Errorf("FASTA/Q files needed"))
-		} else if opt.Verbose {
+		} else if opt.Verbose || opt.Log2File {
 			log.Infof("  %d input file(s) given", len(files))
 		}
 
 		// ---------------------------------------------------------------
 		// log
 
-		if opt.Verbose {
+		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
 
@@ -432,7 +435,7 @@ Tips:
 					wg.Done()
 					<-tokens
 
-					if opt.Verbose {
+					if opt.Verbose || opt.Log2File {
 						chDuration <- time.Duration(float64(time.Since(startTime)) / threadsFloat)
 					}
 				}()
@@ -901,7 +904,8 @@ func init() {
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
 	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
 
-	computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing`)
+	// computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing (recommended)`)
+
 	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space`)
 
 	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/--split-size`)
