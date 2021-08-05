@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.0 - 2021-07-
+## v0.6.0 - 2021-08-
 
 - new command:
     - `merge`: merge search results from multiple databases.
@@ -13,6 +13,7 @@
     - better control of cocurrency number and better progress bar.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.
+    - new flag `-S/--do-not-sort`.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.
     - fix number of ureads.

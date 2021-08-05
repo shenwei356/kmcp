@@ -103,10 +103,15 @@ Special attentions:
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-scores")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 		sortBy := getFlagString(cmd, "sort-by")
+		doNotSort := getFlagBool(cmd, "do-not-sort")
 		// keepOrder := getFlagBool(cmd, "keep-order")
 		keepOrder := true
 		wholeFile := getFlagBool(cmd, "query-whole-file")
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
+
+		if doNotSort && topNScore > 0 {
+			log.Warningf("flag -n/--keep-top-scores ignored when -S/--do-not-sort given")
+		}
 
 		switch sortBy {
 		case "qcov", "jacc", "tcov":
@@ -227,6 +232,7 @@ Special attentions:
 			TopN:       topN,
 			TopNScores: topNScore,
 			SortBy:     sortBy,
+			DoNotSort:  doNotSort,
 
 			MinQLen:      minLen,
 			MinMatched:   minCount,
@@ -498,5 +504,6 @@ func init() {
 	searchCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
+	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches`)
 
 }

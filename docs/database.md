@@ -1,6 +1,6 @@
 # Database
 
-Prebuilt databases are available for server with >=40 CPU cores.
+Prebuilt databases are available for server with >=32 CPU cores.
 
 - Bacteria and Archaea, source: GTDB(https://gtdb.ecogenomic.org/), #species, #assembly, size
 - Fungi, source: RefSeq
@@ -63,9 +63,11 @@ Building database
             | sed -e "/^>/!s/[a-z]/n/g" \
             | gzip -c > gtdb.masked/{%}'
     
-    # k21-n10
+    # 
     kmcp compute -I gtdb.masked/ -e -k 21 -n 10 -B plasmid -O gtdb-r202-k21-n10 --force
-    kmcp index -I gtdb-r202-k21-n10 -O gtdb-r202-k21-n10.db -n 1 -f 0.3 --dry-run
+
+    
+    kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb-r202-k21-n10.db -n 1 -f 0.3 --dry-run
 
 
 ## RefSeq
@@ -133,7 +135,7 @@ Building database
         --split-number 10 --split-overlap 100 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
-        -j 40 -f 0.001 -n 3
+        -j 32 -f 0.001 -n 3 --force
     
     # -----------------------------------------------------------------
     # for fungi
@@ -144,7 +146,7 @@ Building database
         --split-number 10 --split-overlap 100 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
-        -j 40 -f 0.05 -n 2
+        -j 32 -f 0.05 -n 2 --force
 
 ## HumGut
 

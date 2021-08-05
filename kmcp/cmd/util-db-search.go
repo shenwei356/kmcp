@@ -145,6 +145,7 @@ type SearchOptions struct {
 	TopN          int
 	TopNScores    int
 	SortBy        string
+	DoNotSort     bool
 
 	MinQLen      int
 	MinMatched   int
@@ -169,6 +170,9 @@ type UnikIndexDBSearchEngine struct {
 	OutCh chan QueryResult
 }
 
+func channelBuffSize(v int) int {
+	return int(float64(v) * 10)
+}
 func tokenNum(v int) int {
 	return int(float64(v) * 10)
 }
@@ -188,8 +192,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 	sg := &UnikIndexDBSearchEngine{Options: opt, DBs: dbs, DBNames: names}
 	sg.done = make(chan int)
-	sg.InCh = make(chan Query, tokenNum(opt.Threads))
-	sg.OutCh = make(chan QueryResult, tokenNum(opt.Threads))
+	sg.InCh = make(chan Query, channelBuffSize(opt.Threads))
+	sg.OutCh = make(chan QueryResult, channelBuffSize(opt.Threads))
 	multipleDBs := len(dbs) > 1
 	mappingName := len(opt.NameMap) > 0
 
@@ -199,12 +203,13 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		wg := &sg.wg
 		nDBs := len(sg.DBs)
 		sortBy := opt.SortBy
+		doNotSort := opt.DoNotSort
 		nameMap := opt.NameMap
 
 		topN := opt.TopN
 		onlyTopN := topN > 0
 		topNScore := opt.TopNScores
-		onlyTopNScore := topNScore > 0
+		onlyTopNScore := topNScore > 0 && !doNotSort
 
 		if !multipleDBs {
 			handleQuerySingleDB := func(query Query) {
@@ -217,7 +222,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				_queryResult := <-query.Ch
 
 				if _queryResult.Matches != nil {
-					if len(_queryResult.Matches) > 1 {
+					if len(_queryResult.Matches) > 1 && !doNotSort {
 						switch sortBy {
 						case "qcov":
 							sorts.Quicksort(Matches(_queryResult.Matches))
@@ -572,7 +577,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	db := &UnikIndexDB{Options: opt, Info: info, Header: idx1.Header, path: path}
 
-	db.InCh = make(chan Query, tokenNum(opt.Threads))
+	db.InCh = make(chan Query, channelBuffSize(opt.Threads))
 
 	db.DBId = dbID
 
@@ -628,10 +633,9 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		for i, j := 0, len(ks)-1; i < j; i, j = i+1, j-1 {
 			ks[i], ks[j] = ks[j], ks[i]
 		}
+		lastIk := len(ks) - 1
 
 		handleQuery := func(query Query) {
-			defer func() { <-tokens }()
-
 			for _ik, k := range ks {
 				if len(query.Seq.Seq) < minLen { // skip short query
 					query.Ch <- QueryResult{
@@ -643,6 +647,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 						// Kmers:    kmers,
 						Matches: nil,
 					} // still send result!
+					<-tokens
 					return
 				}
 
@@ -668,6 +673,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// sequence shorter than k, or too few k-mer sketchs.
 				if kmers == nil || nKmers < db.Options.MinMatched {
 					query.Ch <- result // still send result!
+					<-tokens
 					return
 				}
 
@@ -758,12 +764,14 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					result.Matches = matches
 
 					query.Ch <- result
+					<-tokens
 					return
 				}
 
 				// not found, try smaller k
-				if _ik == len(ks)-1 { // already the smallest k, give up
+				if _ik == lastIk { // already the smallest k, give up
 					query.Ch <- result
+					<-tokens
 					return
 				}
 			}
@@ -963,7 +971,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	idx.useMmap = opt.UseMMap
 
 	idx.done = make(chan int)
-	idx.InCh = make(chan IndexQuery, tokenNum(opt.Threads))
+	idx.InCh = make(chan IndexQuery, channelBuffSize(opt.Threads))
 
 	if idx.useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
