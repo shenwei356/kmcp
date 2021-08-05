@@ -1,5 +1,24 @@
 ## Demo dataset
 
+    csvtk join -t -f id \
+            <(seqkit stats -j 10 refs/*.fasta.gz -T -b \
+                | csvtk mutate -t -n id -p "(.+)\.fasta") \
+            <(csvtk add-header -t -n id,name name.map) \
+        | csvtk cut -t -f file,format,type,num_seqs,sum_len,name \
+        | csvtk csv2md -t
+
+file                  |format|type|num_seqs|sum_len|name
+:---------------------|:-----|:---|:-------|:------|:----------------------------------------
+NC_000913.3.fasta.gz  |FASTA |DNA |1       |4641652|Escherichia coli str. K-12 substr. MG1655
+NC_002695.2.fasta.gz  |FASTA |DNA |1       |5498578|Escherichia coli O157:H7 str. Sakai
+NC_010655.1.fasta.gz  |FASTA |DNA |1       |2664102|Akkermansia muciniphila ATCC BAA-835
+NC_011750.1.fasta.gz  |FASTA |DNA |1       |5132068|Escherichia coli IAI39
+NC_012971.2.fasta.gz  |FASTA |DNA |1       |4558953|Escherichia coli BL21(DE3)
+NC_013654.1.fasta.gz  |FASTA |DNA |1       |4717338|Escherichia coli SE15
+NC_018658.1.fasta.gz  |FASTA |DNA |1       |5273097|Escherichia coli O104:H4 str. 2011C-3493
+NZ_CP007592.1.fasta.gz|FASTA |DNA |1       |5104557|Escherichia coli O157:H16 strain Santai
+NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM8426
+
 ## Metagenomic Profiling
 
     # computing k-mers
@@ -20,7 +39,7 @@
         --out-dir refs-k31-n10.kmcp \
         --force
 
-    # generate mock dataset
+    # generating mock dataset
     (seqkit sliding -s 10 -W 150 refs/NC_000913.3.fasta.gz | seqkit sample -p 0.6 ; \
             seqkit sliding -s 10 -W 150 refs/NC_002695.2.fasta.gz | seqkit sample -p 0.06 ;  \
             seqkit sliding -s 10 -W 150 refs/NC_010655.1.fasta.gz | seqkit sample -p 0.006 ) \
@@ -51,14 +70,13 @@
 
     cat mock.fastq.gz.kmcp.gz.kmcp.profile \
         | csvtk cut -t -f ref,percentage,taxname \
-        | csvtk pretty -t
+        | csvtk csv2md -t
     
-    ref           percentage   taxname
-    -----------   ----------   -----------------------------------------
-    NC_000913.3   87.230664    Escherichia coli str. K-12 substr. MG1655
-    NC_002695.2   11.872444    Escherichia coli O157:H7 str. Sakai
-    NC_010655.1   0.896892     Akkermansia muciniphila ATCC BAA-835
-
+ref        |percentage|taxname
+:----------|:---------|:----------------------------------------
+NC_000913.3|87.230664 |Escherichia coli str. K-12 substr. MG1655
+NC_002695.2|11.872444 |Escherichia coli O157:H7 str. Sakai
+NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
 
 ## Sequence containment searching
 

@@ -64,7 +64,7 @@ Uncompressing and renaming
     
 Database size and building time.
 
--              |cobs      |kmcp
+.              |cobs      |kmcp
 :--------------|:---------|:-------
 database size  | 86.96GB  | 55.15GB
 building time  | 29m:55s  | 24min52s
@@ -225,7 +225,7 @@ NZ_CP028116.1.fasta.short|227.358     |99.92          |17.197      |56.27
         2>$dbKMCP.time
 
 
--              |sourmash  |kmcp
+.              |sourmash  |kmcp
 :--------------|:---------|:-------
 database size  |  5.19GB  | 1.52GB
 buiding time   |  89m59s  | 7min02s

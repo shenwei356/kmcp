@@ -1,10 +1,12 @@
 # Database
 
-Prebuilt databases are available for server with >=32 CPU cores.
+Prebuilt databases are available.
 
-- Bacteria and Archaea, source: GTDB(https://gtdb.ecogenomic.org/), #species, #assembly, size
-- Fungi, source: RefSeq
-- Viruses, source: RefSeq
+kingdom             |source     |#species|#assembly|file|file size
+:-------------------|:----------|:-------|:--------|:---|:--------
+Bacteria and Archaea|GTDB r202  |43252   |47894    |    |55.12 GB
+Viruses             |Refseq r207|7300    |11618    |    |4.14 GB
+Fungi               |Refseq r207|148     |390      |    |11.12 GB
 
 Taxonomy data
 
@@ -20,7 +22,7 @@ Tools
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
 - [dustmasker](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) for masking low-complexity regions
-- [kmcp]
+- [kmcp]()
 
 Files
 
@@ -46,13 +48,17 @@ Mapping file
         | csvtk replace -t -p '^.._' \
         | csvtk del-header \
         > taxid.map
-
         
-    # optional    
     # sequence accesion -> full head
     find gtdb/ -name *.fna.gz \
         | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
         > name.map
+    
+    # number of species
+    cat taxid.map \
+        | csvtk grep -Ht -P <(cut -f 1 name.map) \
+        | taxonkit filter -i 2 -E species \
+        | wc -l
         
 Building database
 
