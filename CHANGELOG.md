@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.0 - 2021-08-
+### v0.6.0 - 2021-08-06
 
 - new command:
     - `merge`: merge search results from multiple databases.
@@ -20,7 +20,7 @@
     - fix number of ureads.
     - new flag `-m/--keep-main-matches` and `--max-score-gap`
 
-## v0.5.0 - 2021-06-24
+### v0.5.0 - 2021-06-24
 
 - `compute`:
     - support multiple sizes of k-mer.
@@ -39,7 +39,7 @@
     - new flag `-B/--binning-result` for output reads binning result.
     - new flag `-m/--norm-abund`.
     
-## v0.4.0 - 2021-04-08
+### v0.4.0 - 2021-04-08
 
 - new command:
     - `profile` for generating taxonomic profile from search result.
@@ -50,7 +50,7 @@
     - change default threshold value.
     - new flag `-n/--keep-top-scores` for keeping matches with the top N score.
 
-## v0.3.0 - 2021-03-16
+### v0.3.0 - 2021-03-16
 
 - use `--quiet` to replace `--verbose`, making printing log info default.
 - `search`: 
@@ -63,16 +63,16 @@
 - `compute`: change default file regexp for matching `.fna` files.
 - `autocomplete`: support bash, zsh, fish, powershell.
 
-## v0.2.1 - 2020-12-31
+### v0.2.1 - 2020-12-31
 
 - `index`: reduce memory occupation.
   
-## v0.2.0 - 2020-12-30
+### v0.2.0 - 2020-12-30
 
 - Add support of RAMBO like indexing.
 - Limit to only one input database.
 - Change output format.
 
-## v0.1.0 - 2020-xx-xx
+### v0.1.0 - 2020-xx-xx
 
 - First release with basic function.

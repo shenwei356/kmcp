@@ -1,4 +1,4 @@
-# Sequence and genome containment estimation
+# Sequence and genome searching
 
 Similar tools
 

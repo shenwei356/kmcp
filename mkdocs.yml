@@ -1,0 +1,32 @@
+site_name: KMCP
+nav:
+- Home: index.md
+- Download: download.md
+- Database: database.md
+- Usage: usage.md
+- Tutorials:
+    - Taxonomic Profiling: tutorial/profiling.md
+    - Sequence and genome searching: tutorial/searching.md
+- Benchmarks:
+    - Profiling: benchmark/profiling.md
+    - Searching: benchmark/searching.md
+- FAQs: faq.md
+- More tools: https://github.com/shenwei356
+
+theme:
+    name: material
+    palette:
+        primary: teal
+        accent: blue grey
+    icon:
+        logo: material/school
+    favicon: files/favicon.ico
+    feature:
+        navigation.tabs: false
+extra:
+  manifest: manifest.webmanifest
+
+repo_url: https://github.com/shenwei356/kmcp
+site_description: kmcp - K-mer-based Metagenomic Classification and Profiling
+site_author: Wei Shen
+# google_analytics: ['UA-28948626-9', 'bioinf.shenwei.me/kmcp']
