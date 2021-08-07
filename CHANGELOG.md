@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.6.0 - 2021-08-06
+### v0.6.0 - 2021-08-07
 
 - new command:
     - `merge`: merge search results from multiple databases.
