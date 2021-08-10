@@ -2,9 +2,11 @@
 
 KMCP is a reference based taxonomic profiling tool.
 
-Prebuilt databases are available, you can also [build custom database](#custom-database).
+## Prebuilt Databases
 
-kingdom                 |source     |# species|# assembly|file                       |file size
+Prebuilt databases are available, you can also [build custom databases](#custom-database).
+
+kingdoms                |source     |# species|# assembly|file                       |file size
 :-----------------------|:----------|:--------|:---------|:--------------------------|:--------
 **Bacteria and Archaea**|GTDB r202  |43252    |47894     |[prokaryotes.kmcp.tar.gz]()|55.12 GB
 **Viruses**             |Refseq r207|7300     |11618     |[viruses.kmcp.tar.gz]()    |4.14 GB
@@ -23,6 +25,7 @@ Tools
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
 - [dustmasker](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) for masking low-complexity regions.
+- [seqkit](https://github.com/shenwei356/seqkit/releases) for FASTA file processing.
 - [kmcp](/download) for metagenomic profiling.
 
 Files
@@ -52,7 +55,7 @@ Mapping file:
         > taxid.map
         
     # assembly accesion -> full head
-    find gtdb/ -name *.fna.gz \
+    find gtdb/ -name "*.fna.gz" \
         | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
         > name.map
     
@@ -66,7 +69,7 @@ Building database:
 
     # mask low-complexity region
     mkdir -p gtdb.masked
-    find gtdb/ -name *.fna.gz \
+    find gtdb/ -name "*.fna.gz" \
         | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
             | sed -e "/^>/!s/[a-z]/n/g" \
             | gzip -c > gtdb.masked/{%}'
@@ -79,7 +82,7 @@ Building database:
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
-    #   blooum filter parameter:
+    #   bloom filter parameter:
     #     number of hash function: 1
     #     false positive rate: 0.3
     kmcp index -j 32 -I gtdb-r202-k21-n10 -O prokaryotes.kmcp -n 1 -f 0.3
@@ -128,7 +131,7 @@ Downloading viral and fungi sequences:
         | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
         > taxid.map.stats.tsv
     
-    seqkit stats -T -j 12 --infile-list <(find files -name *.fna.gz) > files.stats.tsv
+    seqkit stats -T -j 12 --infile-list <(find files -name "*.fna.gz") > files.stats.tsv
         
 Building database:
 
@@ -180,3 +183,50 @@ Dataset
 
 
 ## Custom database
+
+Files:
+
+1. Genome files
+    - (Gzip-compressed) FASTA format
+    - One genome per file with the reference identifier in the file name.
+2. TaxId mapping file (for metagenomic profiling)
+    - Two-column (reference identifier and TaxId) tab-delimited.
+3. [NCBI taxonomy dump files](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz) (for metagenomic profiling)
+    - `names.dmp`
+    - `nodes.dmp`
+    - `merged.dmp` (optional)
+    - `delnodes.dmp` (optional)
+
+Steps
+
+    # directory containing genome files
+    genomes=genomes
+
+    # mask low-complexity region
+    mkdir -p masked
+    find $genomes -name "*" \
+        | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
+            | sed -e "/^>/!s/[a-z]/n/g" \
+            | gzip -c > masked/{%}'
+    
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments
+    #   k = 21
+    kmcp compute --in-dir masked/ \
+        --kmer 21 \
+        --split-number 10 \
+        --seq-name-filter plasmid \
+        --out-dir custom-k21-n10 \
+        --force
+
+    # build database
+    #   number of index files: 32, for server with >= 32 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.3
+    kmcp index -I custom-k21-n10 \
+        --threads 32 \
+        --num-hash 1 \
+        --false-positive-rate 0.3 \
+        --out-dir custom.kmcp 

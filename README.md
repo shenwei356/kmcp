@@ -7,8 +7,8 @@ Tutorials and resources:
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Database]((https://bioinf.shenwei.me/kmcp/database))
 - Tutorials
-    - [Taxonomic Profiling](https://bioinf.shenwei.me/kmcp/profiling)
-    - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/searching)
+    - [Taxonomic Profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+    - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
 - [Usage](https://bioinf.shenwei.me/kmcp/usage)
 - [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
 - [FAQs](https://bioinf.shenwei.me/kmcp/faq)
@@ -49,9 +49,9 @@ propose new functions or ask for help.
 ## Credits
 
 - [Zhi-Luo Deng](https://dawnmy.github.io/CV/) (Helmholtz Centre for Infection Research, Germany)
-  gave many valuable advice on metagenomic profiling tool development and benchmarking.
+  gave many valuable advice on metagenomic profiling and benchmarking.
 - [Robert Clausecker](https://github.com/clausecker/) (Zuse Institute Berlin, Germany)
   wrote the high-performance vectorized positional popcount package 
   ([pospop](https://github.com/clausecker/pospop)) 
-  [during my development KMCP](https://stackoverflow.com/questions/63248047/),
+  [during my development of KMCP](https://stackoverflow.com/questions/63248047/),
   which greatly accelerated bit-matrix searching.

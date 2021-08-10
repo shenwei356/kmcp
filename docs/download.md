@@ -13,7 +13,7 @@ Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwe
 
 *Tips*
 
-- please submit an issuse for other platforms.
+- please open an issuse to request binaries for other platforms.
 - run `kmcp version` to check update !!!
 - run `kmcp autocomplete` to update Bash completion !!!
 
