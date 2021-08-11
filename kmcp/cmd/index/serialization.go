@@ -184,6 +184,8 @@ func (writer *Writer) WriteHeader() (err error) {
 		return err
 	}
 
+	// N := 24
+
 	var name string
 	for _, names := range writer.Names {
 		n := 0
@@ -197,6 +199,7 @@ func (writer *Writer) WriteHeader() (err error) {
 		if err != nil {
 			return err
 		}
+		// N += 4
 
 		// Names
 		for _, name = range names {
@@ -204,6 +207,7 @@ func (writer *Writer) WriteHeader() (err error) {
 			if err != nil {
 				return err
 			}
+			// N += len(name + "\n")
 		}
 	}
 
@@ -215,16 +219,19 @@ func (writer *Writer) WriteHeader() (err error) {
 	if err != nil {
 		return err
 	}
+	// N += 4
 
 	for _, gsizes := range writer.GSizes {
 		err = binary.Write(w, be, uint32(len(gsizes)))
 		if err != nil {
 			return err
 		}
+		// N += 4
 		err = binary.Write(w, be, gsizes)
 		if err != nil {
 			return err
 		}
+		// N += 8 * len(gsizes)
 	}
 
 	// // ----------------------------------------------------------
@@ -255,16 +262,20 @@ func (writer *Writer) WriteHeader() (err error) {
 	if err != nil {
 		return err
 	}
+	// N += 4
 
 	for _, indices := range writer.Indices {
 		err = binary.Write(w, be, uint32(len(indices)))
 		if err != nil {
 			return err
 		}
+		// N += 4
+
 		err = binary.Write(w, be, indices)
 		if err != nil {
 			return err
 		}
+		// N += 4 * len(indices)
 	}
 
 	// Sizes
@@ -272,6 +283,21 @@ func (writer *Writer) WriteHeader() (err error) {
 	if err != nil {
 		return err
 	}
+	// N += 8 * len(writer.Sizes)
+
+	// // padding to 64X
+	// nPadding := 56 - (N % 64)
+	// err = binary.Write(w, be, uint64(nPadding))
+	// if err != nil {
+	// 	return err
+	// }
+	// // N += 8
+	// padding := make([]byte, nPadding)
+	// err = binary.Write(w, be, padding)
+	// if err != nil {
+	// 	return err
+	// }
+	// // N += len(padding)
 
 	writer.wroteHeader = true
 	return nil
@@ -549,6 +575,19 @@ func (reader *Reader) readHeader() (err error) {
 	}
 
 	reader.Sizes = sizesData
+
+	// // 8 bytes padding size
+	// _, err = io.ReadFull(r, buf[:8])
+	// if err != nil {
+	// 	return err
+	// }
+	// nPadding := be.Uint64(buf[:8])
+
+	// buf2 = make([]byte, nPadding)
+	// _, err = io.ReadFull(r, buf2)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

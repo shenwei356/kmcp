@@ -23,19 +23,21 @@ or install using conda:
 ## Quick Start
 
     # compute k-mers
-    kmcp compute -I genomes/ -O genomes-k21 -k 21 --force
+    kmcp compute -k 21 -I genomes/ -O genomes-k21 
 
     # index k-mers
-    kmcp index -I genomes-k21/ -O genomes-k21.kmcp --force
+    kmcp index -I genomes-k21/ -O genomes-k21.kmcp
     
     # search    
     kmcp search -d genomes-k21.kmcp/ test.fa.gz -o search.tsv.gz
 
     # profile
-    kmcp profile search.tsv.gz -T taxid.map -X taxdump \
-        --out-prefix search.tsv.k.profile \
-        --metaphlan-report search.tsv.m.profile \
-        --cami-report search.tsv.c.profile
+    kmcp profile search.tsv.gz \
+        --taxid-map        taxid.map \
+        --taxdump          taxdump \
+        --out-prefix       search.tsv.gz.k.profile \
+        --metaphlan-report search.tsv.gz.m.profile \
+        --cami-report      search.tsv.gz.c.profile
 
 ## Support
 

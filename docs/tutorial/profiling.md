@@ -53,20 +53,20 @@ Mapping and removing mapped reads:
     # paired-ends: 
     #   file="sample_1.fq.gz sample_2.fq.gz"
     file=sample.fq.gz
-    
+
     for db in viruses.kmcp prokaryotes.kmcp ; do
         dbname=$(basename $db)
 
         kmcp search \
-            --threads 32 \
-            --db-dir $db \
+            --threads            32 \
+            --db-dir            $db \
             --min-kmers          50 \
             --min-query-len      70 \
             --min-query-cov     0.6 \
             --keep-top-scores     5 \
-            $file \
+            $file                   \
             --out-file $file.kmcp@$dbname.tsv.gz \
-            --log $file.kmcp@$dbname.tsv.gz.log
+            --log      $file.kmcp@$dbname.tsv.gz.log
     done
 
 Merging searching results on multiple database
@@ -85,9 +85,9 @@ Merging searching results on multiple database
     sfile=$file.kmcp.tsv.gz
     
     kmcp profile \
-        --taxid-map             $taxid_map \
-        --taxdump               $taxdump \
-        --level                 species \
+        --taxid-map      $taxid_map \
+        --taxdump          $taxdump \
+        --level             species \
         --keep-top-qcovs          5 \
         --min-query-cov         0.6 \
         --min-reads              50 \
@@ -95,7 +95,8 @@ Merging searching results on multiple database
         --min-hic-ureads          1 \
         --min-hic-ureads-qcov   0.8 \
         --min-hic-ureads-prop   0.1 \
-        $sfile \
-        --out-prefix $sfile.kmcp.profile \
+        $sfile                      \
+        --out-prefix       $sfile.kmcp.profile \
         --metaphlan-report $sfile.metaphlan.profile \
-        --cami-report $sfile.cami.profile --sample-id 0 \
+        --cami-report      $sfile.cami.profile \
+        --sample-id        "0"
