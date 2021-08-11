@@ -401,9 +401,9 @@ Profiling output formats:
 			if fileterLowAbc {
 				log.Infof("  filter out predictions with the smallest relative abundances summing up %d%%", lowAbcPct)
 			}
-			log.Infof("  default format: %s", outFile)
+			log.Infof("  default format  : %s", outFile)
 			if outputCamiReport {
-				log.Infof("  CAMI format: %s", camiReportFile)
+				log.Infof("  CAMI format     : %s", camiReportFile)
 			}
 			if outputMetaphlanReport {
 				log.Infof("  MetaPhlan format: %s", metaphlanReportFile)

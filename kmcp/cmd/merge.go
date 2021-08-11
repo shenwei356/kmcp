@@ -22,8 +22,8 @@ package cmd
 
 import (
 	"bufio"
+	"container/heap"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -110,6 +110,10 @@ Attentions
 
 		// ---------------------------------------------------------------
 
+		if opt.Verbose || opt.Log2File {
+			log.Info("merging ...")
+		}
+
 		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(outFile, ".gz"), opt.CompressionLevel)
 		checkError(err)
 		defer func() {
@@ -179,7 +183,8 @@ Attentions
 		var ch chan *SearchResult
 		var found bool
 		var allClosed bool
-		var i, imin uint64
+		var imin uint64
+		var ids *Uint64Slice
 		buf := make(map[uint64][]*SearchResult, 256)
 		for {
 			found = false
@@ -195,6 +200,13 @@ Attentions
 				if r.QueryIdx != idx { // not found, save to buffer
 					if _, ok = buf[r.QueryIdx]; !ok {
 						buf[r.QueryIdx] = []*SearchResult{r}
+
+						if ids == nil {
+							ids = &Uint64Slice{r.QueryIdx}
+							heap.Init(ids)
+						} else {
+							heap.Push(ids, r.QueryIdx)
+						}
 					} else {
 						buf[r.QueryIdx] = append(buf[r.QueryIdx], r)
 					}
@@ -202,7 +214,6 @@ Attentions
 				}
 
 				found = true
-
 				chOut <- r
 			}
 
@@ -211,27 +222,13 @@ Attentions
 			}
 
 			if found {
-				// still check the buffer
-				if rs, ok := buf[idx]; ok {
-					for _, r := range rs {
-						chOut <- r
-					}
-
-					delete(buf, idx)
-				}
-
 				idx++
 				continue
 			}
 
 			// not found.
 			// find the minimum idx in buffer
-			imin = math.MaxUint64
-			for i = range buf {
-				if i < imin {
-					imin = i
-				}
-			}
+			imin = heap.Pop(ids).(uint64)
 
 			for _, r := range buf[imin] {
 				chOut <- r

@@ -53,7 +53,7 @@ Mapping and removing mapped reads:
     # paired-ends: 
     #   file="sample_1.fq.gz sample_2.fq.gz"
     file=sample.fq.gz
-
+    
     for db in viruses.kmcp prokaryotes.kmcp ; do
         dbname=$(basename $db)
 
@@ -65,8 +65,8 @@ Mapping and removing mapped reads:
             --min-query-cov     0.6 \
             --keep-top-scores     5 \
             $file \
-            --out-file $file.kmcp@$bname.tsv.gz \
-            --log $file.kmcp@$bname.tsv.gz.log
+            --out-file $file.kmcp@$dbname.tsv.gz \
+            --log $file.kmcp@$dbname.tsv.gz.log
     done
 
 Merging searching results on multiple database
@@ -77,7 +77,7 @@ Merging searching results on multiple database
 
     # multiple files:
     #    taxid_map="taxid.map,taxid2.map"
-    taxid_map=taxid.map
+    taxid_map=taxid-prokaryotes.map,taxid-virus.map
 
     # taxdump directory
     taxdump=taxdump/
