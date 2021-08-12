@@ -67,7 +67,7 @@ type QueryResult struct {
 	NumKmers int // number of k-mers
 	// Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
 
-	Matches []Match // all matches
+	Matches []*Match // all matches
 }
 
 // Name2Idx is a struct of name and index
@@ -89,7 +89,7 @@ type Match struct {
 }
 
 // Matches is list of Matches, for sorting.
-type Matches []Match
+type Matches []*Match
 
 // Len returns length of Matches.
 func (ms Matches) Len() int { return len(ms) }
@@ -130,7 +130,7 @@ type IndexQuery struct {
 	Hashes  [][]uint64 // related to database
 	Hashes1 []uint64
 
-	Ch chan []Match // result chanel
+	Ch chan []*Match // result chanel
 }
 
 // ---------------------------------------------------------------
@@ -172,10 +172,10 @@ type UnikIndexDBSearchEngine struct {
 }
 
 func channelBuffSize(v int) int {
-	return int(float64(v) * 1)
+	return int(float64(v) * 10)
 }
 func tokenNum(v int) int {
-	return int(float64(v) * 1)
+	return int(float64(v) * 10)
 }
 
 // NewUnikIndexDBSearchEngine returns a search engine based on multiple engines
@@ -222,7 +222,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				// wait and receive result from it
 				_queryResult := <-query.Ch
 
-				if _queryResult.Matches != nil {
+				if len(_queryResult.Matches) > 0 {
 					if len(_queryResult.Matches) > 1 && !doNotSort {
 						switch sortBy {
 						case "qcov":
@@ -239,7 +239,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						var n, i int
 						var score, pScore float64
 						pScore = 1024
-						var m Match
+						var m *Match
 						for i, m = range _queryResult.Matches {
 							switch sortBy {
 							case "qcov":
@@ -274,7 +274,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					var t string
 					_dbInfo := dbs[_queryResult.DBId].Info
 					for _, _match := range _queryResult.Matches {
-						_m = &_match
+						_m = _match
 						if t, ok = nameMap[_match.Target[0]]; ok {
 							_m.Target[0] = t
 						} else if opt.LoadDefaultNameMap {
@@ -330,6 +330,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				_queryResult := <-query.Ch
 
 				if noInter { // skip
+					// recycle matches
+					_queryResult.Matches = _queryResult.Matches[:0]
+					poolMatches.Put(_queryResult.Matches)
 					continue
 				}
 
@@ -345,7 +348,10 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					}
 				}
 
-				if _queryResult.Matches == nil {
+				if len(_queryResult.Matches) == 0 {
+					// recycle matches
+					_queryResult.Matches = _queryResult.Matches[:0]
+					poolMatches.Put(_queryResult.Matches)
 					continue
 				}
 
@@ -417,9 +423,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				return
 			}
 
-			_matches2 := poolMatches.Get().([]Match)
+			_matches2 := poolMatches.Get().([]*Match)
 			for _, _match := range m {
-				_matches2 = append(_matches2, *_match)
+				_matches2 = append(_matches2, _match)
 			}
 
 			if len(_matches2) > 1 {
@@ -440,7 +446,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				var n, i int
 				var score, pScore float64
 				pScore = 1024
-				var m Match
+				var m *Match
 				for i, m = range queryResult.Matches {
 					switch sortBy {
 					case "qcov":
@@ -474,7 +480,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				var t string
 				_dbInfo := dbs[queryResult.DBId].Info
 				for _, _match := range queryResult.Matches {
-					_m = &_match
+					_m = _match
 					if t, ok = nameMap[_match.Target[0]]; ok {
 						_m.Target[0] = t
 					} else if opt.LoadDefaultNameMap {
@@ -764,7 +770,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// send queries
 				// reuse chan []Match object, to reduce GC
-				chMatches := poolChanMatches.Get().(chan []Match)
+				chMatches := poolChanMatches.Get().(chan []*Match)
 				if !singleHash {
 					for i := numIndices - 1; i >= 0; i-- { // start from bigger files
 						indices[i].InCh <- IndexQuery{
@@ -785,7 +791,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// get matches from all indices
 				// reuse []Match object
-				matches := poolMatches.Get().([]Match)
+				matches := poolMatches.Get().([]*Match)
 				// var _matches []Match
 				for i := 0; i < numIndices; i++ {
 					// block to read
@@ -2038,7 +2044,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 			}
 
 			// results := make([]Match, 0, 8)
-			results := poolMatches.Get().([]Match)
+			results := poolMatches.Get().([]*Match)
 
 			for i, _counts = range counts {
 				ix8 = i << 3
@@ -2069,7 +2075,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 						continue
 					}
 
-					results = append(results, Match{
+					results = append(results, &Match{
 						Target:     names[k],
 						GenomeSize: gsizes[k],
 						TargetIdx:  indices[k],
@@ -2126,19 +2132,9 @@ var poolHashes = &sync.Pool{New: func() interface{} {
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
-	return make([]Match, 0, 256)
+	return make([]*Match, 0, 256)
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
-	return make(chan []Match, 256)
-}}
-
-// not used
-var poolIdxValues = &sync.Pool{New: func() interface{} {
-	return make([]unikmer.IdxValue, 0, 128)
-}}
-
-// not used
-var poolBytes = &sync.Pool{New: func() interface{} {
-	return make([]byte, 0, 10<<20)
+	return make(chan []*Match, 256)
 }}
