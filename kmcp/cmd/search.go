@@ -299,12 +299,12 @@ Special attentions:
 		var total, matched uint64
 		var speed float64 // k reads/second
 
-		output := func(result QueryResult) {
+		output := func(result *QueryResult) {
 			if opt.Verbose || opt.Log2File {
 				total++
 			}
 
-			if len(result.Matches) == 0 && !keepUnmatched {
+			if len((*result).Matches) == 0 && !keepUnmatched {
 				result.Matches = result.Matches[:0]
 				poolMatches.Put(result.Matches)
 				return
@@ -362,27 +362,26 @@ Special attentions:
 		go func() {
 			if !keepOrder {
 				for result := range sg.OutCh {
-					output(result)
+					output(&result)
 				}
 			} else {
-				m := make(map[uint64]*[]QueryResult, opt.NumCPUs)
+				m := make(map[uint64]*QueryResult, opt.NumCPUs)
 				var id, _id uint64
 				var ok bool
-				var _result QueryResult
-				var _results *[]QueryResult
-				ndb := len(sg.DBs)
+				var _result *QueryResult
 				for result := range sg.OutCh {
 					_id = result.QueryIdx
-					if _results, ok = m[_id]; ok {
-						*_results = append(*_results, result)
-					} else {
-						m[_id] = &[]QueryResult{result}
+
+					if _id == id {
+						output(&result)
+						id++
+						continue
 					}
 
-					if _results, ok = m[id]; ok && len(*_results) == ndb {
-						for _, _result = range *_results {
-							output(_result)
-						}
+					m[_id] = &result
+
+					if _result, ok = m[id]; ok {
+						output(_result)
 						delete(m, id)
 						id++
 					}
@@ -397,10 +396,7 @@ Special attentions:
 					}
 					sortutil.Uint64s(ids)
 					for _, id = range ids {
-						_results = m[id]
-						for _, _result = range *_results {
-							output(_result)
-						}
+						output(m[id])
 					}
 				}
 			}
