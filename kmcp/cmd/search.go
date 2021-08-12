@@ -305,6 +305,8 @@ Special attentions:
 			}
 
 			if len(result.Matches) == 0 && !keepUnmatched {
+				result.Matches = result.Matches[:0]
+				poolMatches.Put(result.Matches)
 				return
 			}
 
@@ -331,6 +333,12 @@ Special attentions:
 					"", -1, 0, 0,
 					0, 0,
 					float64(0), float64(0), float64(0), result.QueryIdx))
+
+				outfh.Flush()
+
+				result.Matches = result.Matches[:0]
+				poolMatches.Put(result.Matches)
+
 				return
 			}
 
@@ -346,7 +354,8 @@ Special attentions:
 
 			outfh.Flush()
 
-			result.Recycle()
+			result.Matches = result.Matches[:0]
+			poolMatches.Put(result.Matches)
 		}
 
 		done := make(chan int)

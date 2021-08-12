@@ -172,10 +172,10 @@ type UnikIndexDBSearchEngine struct {
 }
 
 func channelBuffSize(v int) int {
-	return int(float64(v) * 10)
+	return int(float64(v) * 1)
 }
 func tokenNum(v int) int {
-	return int(float64(v) * 10)
+	return int(float64(v) * 1)
 }
 
 // NewUnikIndexDBSearchEngine returns a search engine based on multiple engines
@@ -311,7 +311,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			// get matches from all databases
-			var queryResult *QueryResult
+			var queryResult QueryResult
 			var m map[Name2Idx]*Match
 			var m2 map[Name2Idx]interface{} // mark shared keys
 			// var _match Match
@@ -323,44 +323,72 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			var _match0 *Match
 			var toDelete []Name2Idx
 			toDelete = make([]Name2Idx, 1024)
+			firstDB = true
+			var noInter bool
 			for i := 0; i < nDBs; i++ {
 				// block to read
 				_queryResult := <-query.Ch
 
-				if queryResult == nil { // assign one
-					queryResult = &_queryResult
+				if noInter { // skip
+					continue
+				}
+
+				if firstDB { // assign once
+					queryResult = QueryResult{
+						QueryIdx: _queryResult.QueryIdx,
+						QueryID:  _queryResult.QueryID,
+						QueryLen: _queryResult.QueryLen,
+						DBId:     _queryResult.DBId,
+						FPR:      _queryResult.FPR,
+						K:        _queryResult.K,
+						NumKmers: _queryResult.NumKmers,
+					}
 				}
 
 				if _queryResult.Matches == nil {
 					continue
 				}
 
-				firstDB = i == 0
-
 				if firstDB {
-					m = make(map[Name2Idx]*Match, len(_queryResult.Matches))
+					m = make(map[Name2Idx]*Match, len(_queryResult.Matches)*nDBs)
 				} else {
 					m2 = make(map[Name2Idx]interface{}, len(_queryResult.Matches))
 				}
 
-				for _i := range _queryResult.Matches {
-					_match := _queryResult.Matches[_i]
+				for _, _match := range _queryResult.Matches {
 					for j, _name = range _match.Target {
-						key = Name2Idx{Name: _name, Index: _match.TargetIdx[j]}
+						key = Name2Idx{Name: _name, Index: _match.TargetIdx[j] & 65535}
 						if firstDB {
-							m[key] = &_match
+							m[key] = &Match{
+								Target:     []string{_match.Target[j]},
+								TargetIdx:  []uint32{_match.TargetIdx[j]},
+								GenomeSize: []uint64{_match.GenomeSize[j]},
+								NumKmers:   _match.NumKmers,
+
+								QCov:         _match.QCov,
+								TCov:         _match.TCov,
+								JaccardIndex: _match.JaccardIndex,
+							}
 							continue
 						}
 
 						if _match0, ok = m[key]; ok { // shared
 							if _match.NumKmers < _match0.NumKmers { // update numkmers with smaller value
-								m[key] = &_match
+								_match0.QCov = _match.QCov
+								_match0.TCov = _match.TCov
+								_match0.JaccardIndex = _match.JaccardIndex
 							}
 							m2[key] = struct{}{} // mark shared keys
 						}
 					}
 				}
+
+				// recycle matches
+				_queryResult.Matches = _queryResult.Matches[:0]
+				poolMatches.Put(_queryResult.Matches)
+
 				if firstDB {
+					firstDB = false
 					continue
 				}
 
@@ -375,18 +403,22 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					delete(m, key)
 				}
 
-				// recycle matches
-				_queryResult.Matches = _queryResult.Matches[:0]
-				poolMatches.Put(_queryResult.Matches)
+				if len(m) == 0 {
+					noInter = true
+				}
+			}
+
+			if noInter {
+				queryResult.Matches = nil
+				sg.OutCh <- queryResult
+
+				wg.Done()
+				<-tokens
+				return
 			}
 
 			_matches2 := poolMatches.Get().([]Match)
-			for key, _match := range m {
-				_match.Target = []string{key.Name}
-				_match.TargetIdx = []uint32{key.Index}
-				if multipleDBs {
-					_match.TCov = 0
-				}
+			for _, _match := range m {
 				_matches2 = append(_matches2, *_match)
 			}
 
@@ -453,7 +485,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 			}
 
-			sg.OutCh <- *queryResult
+			sg.OutCh <- queryResult
 
 			wg.Done()
 			<-tokens
@@ -529,8 +561,8 @@ type UnikIndexDB struct {
 }
 
 func (db *UnikIndexDB) String() string {
-	return fmt.Sprintf("kmcp database v%d: %s,#blocksize: %d, #blocks: %d, #%d-mers: %d, #hashes: %d",
-		db.Info.Version, db.Info.Alias, db.Info.BlockSize, len(db.Info.Files), db.Header.K, db.Info.Kmers, db.Header.NumHashes)
+	return fmt.Sprintf("kmcp database v%d: name: %s, path: %s, #blocksize: %d, #blocks: %d, #%d-mers: %d, #hashes: %d",
+		db.Info.Version, db.Info.Alias, db.path, db.Info.BlockSize, len(db.Info.Files), db.Header.K, db.Info.Kmers, db.Header.NumHashes)
 }
 
 // NewUnikIndexDB opens and read from database directory.
@@ -754,15 +786,16 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// get matches from all indices
 				// reuse []Match object
 				matches := poolMatches.Get().([]Match)
-				var _matches []Match
+				// var _matches []Match
 				for i := 0; i < numIndices; i++ {
 					// block to read
-					_matches = <-chMatches
+					_matches := <-chMatches
 					if len(_matches) > 0 {
 						matches = append(matches, _matches...)
 					}
 					_matches = _matches[:0]
 					poolMatches.Put(_matches)
+
 				}
 
 				// recycle objects
@@ -2092,10 +2125,6 @@ var poolHashes = &sync.Pool{New: func() interface{} {
 	return make([][]uint64, 0, 256)
 }}
 
-var poolHashes1 = &sync.Pool{New: func() interface{} {
-	return make([]uint64, 0, 256)
-}}
-
 var poolMatches = &sync.Pool{New: func() interface{} {
 	return make([]Match, 0, 256)
 }}
@@ -2103,12 +2132,6 @@ var poolMatches = &sync.Pool{New: func() interface{} {
 var poolChanMatches = &sync.Pool{New: func() interface{} {
 	return make(chan []Match, 256)
 }}
-
-// Recycle put pooled objects back.
-func (r QueryResult) Recycle() {
-	r.Matches = r.Matches[:0]
-	poolMatches.Put(r.Matches)
-}
 
 // not used
 var poolIdxValues = &sync.Pool{New: func() interface{} {
