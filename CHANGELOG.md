@@ -12,6 +12,7 @@
       affected and even faster due to optimization of `search` command.
     - use three k-mers thresholds to control index file size.
     - better control of cocurrency number and better progress bar.
+    - do not support RAMBO index anymore.
 - `search`:
     - 1.1-2.1X speedup, specially for database with two or more hash functions.
     - new flag `-S/--do-not-sort`.
