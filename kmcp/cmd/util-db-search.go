@@ -127,7 +127,8 @@ func (ms SortByJacc) Less(i int, j int) bool {
 // IndexQuery is a query sent to multiple indices of a database.
 type IndexQuery struct {
 	// Kmers  []uint64
-	Hashes [][]uint64 // related to database
+	Hashes  [][]uint64 // related to database
+	Hashes1 []uint64
 
 	Ch chan []Match // result chanel
 }
@@ -624,6 +625,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		tokens := make(chan int, tokenNum(db.Options.Threads))
 
 		numHashes := db.Info.NumHashes
+		singleHash := numHashes == 1
 		indices := db.Indices
 		numIndices := len(indices)
 		ks := db.Info.Ks
@@ -715,24 +717,37 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// compute hashes
 				// reuse [][]uint64 object, to reduce GC
-				hashes := poolHashes.Get().([][]uint64)
-				for _, kmer := range kmers {
-					// for kmer := range kmers {
-					hashes = append(hashes, hashValues(kmer, numHashes))
-				}
+				var hashes [][]uint64
+				if !singleHash {
+					hashes = poolHashes.Get().([][]uint64)
+					for _, kmer := range kmers {
+						// for kmer := range kmers {
+						hashes = append(hashes, hashValues(kmer, numHashes))
+					}
 
-				// recycle kmer-sketch ([]uint64) object
-				kmers = kmers[:0]
-				poolKmers.Put(kmers)
+					// recycle kmer-sketch ([]uint64) object
+					kmers = kmers[:0]
+					poolKmers.Put(kmers)
+				}
 
 				// send queries
 				// reuse chan []Match object, to reduce GC
 				chMatches := poolChanMatches.Get().(chan []Match)
-				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
-					indices[i].InCh <- IndexQuery{
-						// Kmers:  kmers,
-						Hashes: hashes,
-						Ch:     chMatches,
+				if !singleHash {
+					for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+						indices[i].InCh <- IndexQuery{
+							// Kmers:  kmers,
+							Hashes: hashes,
+							Ch:     chMatches,
+						}
+					}
+				} else {
+					for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+						indices[i].InCh <- IndexQuery{
+							// Kmers:  kmers,
+							Hashes1: kmers,
+							Ch:      chMatches,
+						}
 					}
 				}
 
@@ -753,8 +768,13 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// recycle objects
 				poolChanMatches.Put(chMatches)
 
-				hashes = hashes[:0]
-				poolHashes.Put(hashes)
+				if !singleHash {
+					hashes = hashes[:0]
+					poolHashes.Put(hashes)
+				} else {
+					kmers = kmers[:0]
+					poolKmers.Put(kmers)
+				}
 
 				// found
 				if len(matches) > 0 {
@@ -1100,6 +1120,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		// var b byte
 		var _h uint64
 		var hashes [][]uint64
+		var hashes1 []uint64
 		var nHashes float64
 		var bufIdx int
 
@@ -1117,8 +1138,13 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		buf := make([]byte, PosPopCountBufSize)
 
 		for query := range idx.InCh {
-			hashes = query.Hashes
-			nHashes = float64(len(hashes))
+			if moreThanOneHash {
+				hashes = query.Hashes
+				nHashes = float64(len(hashes))
+			} else {
+				hashes1 = query.Hashes1
+				nHashes = float64(len(hashes1))
+			}
 
 			// reset counts
 			bufIdx = 0
@@ -1236,9 +1262,9 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 							}
 						}
 					} else {
-						for _, hs = range hashes {
-							loc = int(hs[0] % numSigsUint)
-							// loc = int(hs[0] & numSigsUintM1) // & X is faster than % X when X is power of 2
+						for _, _h = range hashes1 {
+							loc = int(_h % numSigsUint)
+							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 							offset = int(offset0 + int64(loc*numRowBytes))
 
 							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
@@ -1434,9 +1460,9 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 							}
 						}
 					} else {
-						for _, hs = range hashes {
-							loc = int(hs[0] % numSigsUint)
-							// loc = int(hs[0] & numSigsUintM1) // & X is faster than % X when X is power of 2
+						for _, _h = range hashes1 {
+							// loc = int(_h % numSigsUint)
+							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 							offset = int(offset0 + int64(loc*numRowBytes))
 
 							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
@@ -1528,123 +1554,413 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 					}
 				}
 			} else { // !useMmap {
-				for _, hs = range hashes {
-					if compactSize {
-						for i, _h = range hs {
-							loc = int(_h % numSigsUint)
-							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							offset2 = offset0 + int64(loc*numRowBytes)
-
-							fh.Seek(offset2, 0)
-							io.ReadFull(fh, data[i])
-						}
-					} else {
-						for i, _h = range hs {
-							// loc = int(_h % numSigsUint)
-							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							offset2 = offset0 + int64(loc*numRowBytes)
-
-							fh.Seek(offset2, 0)
-							io.ReadFull(fh, data[i])
-						}
-					}
-
+				if compactSize {
 					if moreThanOneHash {
-						// first two rows
-						pand.AndUnsafe(buffs[bufIdx], data[0], data[1])
+						for _, hs = range hashes {
+							for i, _h = range hs {
+								loc = int(_h % numSigsUint)
+								// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+								// offset = int(offset0 + int64(loc*numRowBytes))
 
-						// more rows
-						if moreThanTwoHashes {
-							for _, row = range data[2:] {
-								pand.AndUnsafeInplace(buffs[bufIdx], row)
+								// data[i] = sigs[offset : offset+numRowBytes]
+
+								offset2 = offset0 + int64(loc*numRowBytes)
+								fh.Seek(offset2, 0)
+								io.ReadFull(fh, data[i])
+							}
+
+							// first two rows
+							pand.AndUnsafe(buffs[bufIdx], data[0], data[1])
+
+							// more rows
+							if moreThanTwoHashes {
+								for _, row = range data[2:] {
+									pand.AndUnsafeInplace(buffs[bufIdx], row)
+								}
+							}
+
+							// add to buffer for counting
+							bufIdx++
+
+							if bufIdx == PosPopCountBufSize {
+								// transpose
+								for i = 0; i < numRowBytes; i++ { // every column in matrix
+
+									// for j = 0; j < bufIdx; j++ {
+									// 	buf[j] = buffs[j][i]
+									// }
+
+									// unroll loop
+									buf[0] = (*b0)[i]
+									buf[1] = (*b1)[i]
+									buf[2] = (*b2)[i]
+									buf[3] = (*b3)[i]
+									buf[4] = (*b4)[i]
+									buf[5] = (*b5)[i]
+									buf[6] = (*b6)[i]
+									buf[7] = (*b7)[i]
+									buf[8] = (*b8)[i]
+									buf[9] = (*b9)[i]
+									buf[10] = (*b10)[i]
+									buf[11] = (*b11)[i]
+									buf[12] = (*b12)[i]
+									buf[13] = (*b13)[i]
+									buf[14] = (*b14)[i]
+									buf[15] = (*b15)[i]
+									buf[16] = (*b16)[i]
+									buf[17] = (*b17)[i]
+									buf[18] = (*b18)[i]
+									buf[19] = (*b19)[i]
+									buf[20] = (*b20)[i]
+									buf[21] = (*b21)[i]
+									buf[22] = (*b22)[i]
+									buf[23] = (*b23)[i]
+									buf[24] = (*b24)[i]
+									buf[25] = (*b25)[i]
+									buf[26] = (*b26)[i]
+									buf[27] = (*b27)[i]
+									buf[28] = (*b28)[i]
+									buf[29] = (*b29)[i]
+									buf[30] = (*b30)[i]
+									buf[31] = (*b31)[i]
+									buf[32] = (*b32)[i]
+									buf[33] = (*b33)[i]
+									buf[34] = (*b34)[i]
+									buf[35] = (*b35)[i]
+									buf[36] = (*b36)[i]
+									buf[37] = (*b37)[i]
+									buf[38] = (*b38)[i]
+									buf[39] = (*b39)[i]
+									buf[40] = (*b40)[i]
+									buf[41] = (*b41)[i]
+									buf[42] = (*b42)[i]
+									buf[43] = (*b43)[i]
+									buf[44] = (*b44)[i]
+									buf[45] = (*b45)[i]
+									buf[46] = (*b46)[i]
+									buf[47] = (*b47)[i]
+									buf[48] = (*b48)[i]
+									buf[49] = (*b49)[i]
+									buf[50] = (*b50)[i]
+									buf[51] = (*b51)[i]
+									buf[52] = (*b52)[i]
+									buf[53] = (*b53)[i]
+									buf[54] = (*b54)[i]
+									buf[55] = (*b55)[i]
+									buf[56] = (*b56)[i]
+									buf[57] = (*b57)[i]
+									buf[58] = (*b58)[i]
+									buf[59] = (*b59)[i]
+									buf[60] = (*b60)[i]
+									buf[61] = (*b61)[i]
+									buf[62] = (*b62)[i]
+									buf[63] = (*b63)[i]
+
+									// count
+									pospop.Count8(&counts[i], buf)
+								}
+
+								bufIdx = 0
 							}
 						}
-					} else { // ！useMmap, where io.ReadFull(fh, data[i])
-						copy(buffs[bufIdx], data[0])
-					}
+					} else {
+						for _, _h = range hashes1 {
+							loc = int(_h % numSigsUint)
+							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							// offset = int(offset0 + int64(loc*numRowBytes))
 
-					// add to buffer for counting
-					bufIdx++
+							offset2 = offset0 + int64(loc*numRowBytes)
+							fh.Seek(offset2, 0)
+							io.ReadFull(fh, buffs[bufIdx])
 
-					if bufIdx == PosPopCountBufSize {
-						// transpose
-						for i = 0; i < numRowBytes; i++ { // every column in matrix
+							// add to buffer for counting
+							bufIdx++
 
-							// for j = 0; j < bufIdx; j++ {
-							// 	buf[j] = buffs[j][i]
-							// }
+							if bufIdx == PosPopCountBufSize {
+								// transpose
+								for i = 0; i < numRowBytes; i++ { // every column in matrix
 
-							// unroll loop
-							buf[0] = (*b0)[i]
-							buf[1] = (*b1)[i]
-							buf[2] = (*b2)[i]
-							buf[3] = (*b3)[i]
-							buf[4] = (*b4)[i]
-							buf[5] = (*b5)[i]
-							buf[6] = (*b6)[i]
-							buf[7] = (*b7)[i]
-							buf[8] = (*b8)[i]
-							buf[9] = (*b9)[i]
-							buf[10] = (*b10)[i]
-							buf[11] = (*b11)[i]
-							buf[12] = (*b12)[i]
-							buf[13] = (*b13)[i]
-							buf[14] = (*b14)[i]
-							buf[15] = (*b15)[i]
-							buf[16] = (*b16)[i]
-							buf[17] = (*b17)[i]
-							buf[18] = (*b18)[i]
-							buf[19] = (*b19)[i]
-							buf[20] = (*b20)[i]
-							buf[21] = (*b21)[i]
-							buf[22] = (*b22)[i]
-							buf[23] = (*b23)[i]
-							buf[24] = (*b24)[i]
-							buf[25] = (*b25)[i]
-							buf[26] = (*b26)[i]
-							buf[27] = (*b27)[i]
-							buf[28] = (*b28)[i]
-							buf[29] = (*b29)[i]
-							buf[30] = (*b30)[i]
-							buf[31] = (*b31)[i]
-							buf[32] = (*b32)[i]
-							buf[33] = (*b33)[i]
-							buf[34] = (*b34)[i]
-							buf[35] = (*b35)[i]
-							buf[36] = (*b36)[i]
-							buf[37] = (*b37)[i]
-							buf[38] = (*b38)[i]
-							buf[39] = (*b39)[i]
-							buf[40] = (*b40)[i]
-							buf[41] = (*b41)[i]
-							buf[42] = (*b42)[i]
-							buf[43] = (*b43)[i]
-							buf[44] = (*b44)[i]
-							buf[45] = (*b45)[i]
-							buf[46] = (*b46)[i]
-							buf[47] = (*b47)[i]
-							buf[48] = (*b48)[i]
-							buf[49] = (*b49)[i]
-							buf[50] = (*b50)[i]
-							buf[51] = (*b51)[i]
-							buf[52] = (*b52)[i]
-							buf[53] = (*b53)[i]
-							buf[54] = (*b54)[i]
-							buf[55] = (*b55)[i]
-							buf[56] = (*b56)[i]
-							buf[57] = (*b57)[i]
-							buf[58] = (*b58)[i]
-							buf[59] = (*b59)[i]
-							buf[60] = (*b60)[i]
-							buf[61] = (*b61)[i]
-							buf[62] = (*b62)[i]
-							buf[63] = (*b63)[i]
+									// for j = 0; j < bufIdx; j++ {
+									// 	buf[j] = buffs[j][i]
+									// }
 
-							// count
-							pospop.Count8(&counts[i], buf)
+									// unroll loop
+									buf[0] = (*b0)[i]
+									buf[1] = (*b1)[i]
+									buf[2] = (*b2)[i]
+									buf[3] = (*b3)[i]
+									buf[4] = (*b4)[i]
+									buf[5] = (*b5)[i]
+									buf[6] = (*b6)[i]
+									buf[7] = (*b7)[i]
+									buf[8] = (*b8)[i]
+									buf[9] = (*b9)[i]
+									buf[10] = (*b10)[i]
+									buf[11] = (*b11)[i]
+									buf[12] = (*b12)[i]
+									buf[13] = (*b13)[i]
+									buf[14] = (*b14)[i]
+									buf[15] = (*b15)[i]
+									buf[16] = (*b16)[i]
+									buf[17] = (*b17)[i]
+									buf[18] = (*b18)[i]
+									buf[19] = (*b19)[i]
+									buf[20] = (*b20)[i]
+									buf[21] = (*b21)[i]
+									buf[22] = (*b22)[i]
+									buf[23] = (*b23)[i]
+									buf[24] = (*b24)[i]
+									buf[25] = (*b25)[i]
+									buf[26] = (*b26)[i]
+									buf[27] = (*b27)[i]
+									buf[28] = (*b28)[i]
+									buf[29] = (*b29)[i]
+									buf[30] = (*b30)[i]
+									buf[31] = (*b31)[i]
+									buf[32] = (*b32)[i]
+									buf[33] = (*b33)[i]
+									buf[34] = (*b34)[i]
+									buf[35] = (*b35)[i]
+									buf[36] = (*b36)[i]
+									buf[37] = (*b37)[i]
+									buf[38] = (*b38)[i]
+									buf[39] = (*b39)[i]
+									buf[40] = (*b40)[i]
+									buf[41] = (*b41)[i]
+									buf[42] = (*b42)[i]
+									buf[43] = (*b43)[i]
+									buf[44] = (*b44)[i]
+									buf[45] = (*b45)[i]
+									buf[46] = (*b46)[i]
+									buf[47] = (*b47)[i]
+									buf[48] = (*b48)[i]
+									buf[49] = (*b49)[i]
+									buf[50] = (*b50)[i]
+									buf[51] = (*b51)[i]
+									buf[52] = (*b52)[i]
+									buf[53] = (*b53)[i]
+									buf[54] = (*b54)[i]
+									buf[55] = (*b55)[i]
+									buf[56] = (*b56)[i]
+									buf[57] = (*b57)[i]
+									buf[58] = (*b58)[i]
+									buf[59] = (*b59)[i]
+									buf[60] = (*b60)[i]
+									buf[61] = (*b61)[i]
+									buf[62] = (*b62)[i]
+									buf[63] = (*b63)[i]
+
+									// count
+									pospop.Count8(&counts[i], buf)
+								}
+
+								bufIdx = 0
+							}
 						}
+					}
+				} else {
+					if moreThanOneHash {
+						for _, hs = range hashes {
+							for i, _h = range hs {
+								// loc = int(_h % numSigsUint)
+								loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+								// offset = int(offset0 + int64(loc*numRowBytes))
 
-						bufIdx = 0
+								// data[i] = sigs[offset : offset+numRowBytes]
+
+								offset2 = offset0 + int64(loc*numRowBytes)
+								fh.Seek(offset2, 0)
+								io.ReadFull(fh, data[i])
+							}
+
+							// first two rows
+							pand.AndUnsafe(buffs[bufIdx], data[0], data[1])
+
+							// more rows
+							if moreThanTwoHashes {
+								for _, row = range data[2:] {
+									pand.AndUnsafeInplace(buffs[bufIdx], row)
+								}
+							}
+
+							// add to buffer for counting
+							bufIdx++
+
+							if bufIdx == PosPopCountBufSize {
+								// transpose
+								for i = 0; i < numRowBytes; i++ { // every column in matrix
+
+									// for j = 0; j < bufIdx; j++ {
+									// 	buf[j] = buffs[j][i]
+									// }
+
+									// unroll loop
+									buf[0] = (*b0)[i]
+									buf[1] = (*b1)[i]
+									buf[2] = (*b2)[i]
+									buf[3] = (*b3)[i]
+									buf[4] = (*b4)[i]
+									buf[5] = (*b5)[i]
+									buf[6] = (*b6)[i]
+									buf[7] = (*b7)[i]
+									buf[8] = (*b8)[i]
+									buf[9] = (*b9)[i]
+									buf[10] = (*b10)[i]
+									buf[11] = (*b11)[i]
+									buf[12] = (*b12)[i]
+									buf[13] = (*b13)[i]
+									buf[14] = (*b14)[i]
+									buf[15] = (*b15)[i]
+									buf[16] = (*b16)[i]
+									buf[17] = (*b17)[i]
+									buf[18] = (*b18)[i]
+									buf[19] = (*b19)[i]
+									buf[20] = (*b20)[i]
+									buf[21] = (*b21)[i]
+									buf[22] = (*b22)[i]
+									buf[23] = (*b23)[i]
+									buf[24] = (*b24)[i]
+									buf[25] = (*b25)[i]
+									buf[26] = (*b26)[i]
+									buf[27] = (*b27)[i]
+									buf[28] = (*b28)[i]
+									buf[29] = (*b29)[i]
+									buf[30] = (*b30)[i]
+									buf[31] = (*b31)[i]
+									buf[32] = (*b32)[i]
+									buf[33] = (*b33)[i]
+									buf[34] = (*b34)[i]
+									buf[35] = (*b35)[i]
+									buf[36] = (*b36)[i]
+									buf[37] = (*b37)[i]
+									buf[38] = (*b38)[i]
+									buf[39] = (*b39)[i]
+									buf[40] = (*b40)[i]
+									buf[41] = (*b41)[i]
+									buf[42] = (*b42)[i]
+									buf[43] = (*b43)[i]
+									buf[44] = (*b44)[i]
+									buf[45] = (*b45)[i]
+									buf[46] = (*b46)[i]
+									buf[47] = (*b47)[i]
+									buf[48] = (*b48)[i]
+									buf[49] = (*b49)[i]
+									buf[50] = (*b50)[i]
+									buf[51] = (*b51)[i]
+									buf[52] = (*b52)[i]
+									buf[53] = (*b53)[i]
+									buf[54] = (*b54)[i]
+									buf[55] = (*b55)[i]
+									buf[56] = (*b56)[i]
+									buf[57] = (*b57)[i]
+									buf[58] = (*b58)[i]
+									buf[59] = (*b59)[i]
+									buf[60] = (*b60)[i]
+									buf[61] = (*b61)[i]
+									buf[62] = (*b62)[i]
+									buf[63] = (*b63)[i]
+
+									// count
+									pospop.Count8(&counts[i], buf)
+								}
+
+								bufIdx = 0
+							}
+						}
+					} else {
+						for _, _h = range hashes1 {
+							// loc = int(_h % numSigsUint)
+							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
+							// offset = int(offset0 + int64(loc*numRowBytes))
+
+							offset2 = offset0 + int64(loc*numRowBytes)
+							fh.Seek(offset2, 0)
+							io.ReadFull(fh, buffs[bufIdx])
+
+							// add to buffer for counting
+							bufIdx++
+
+							if bufIdx == PosPopCountBufSize {
+								// transpose
+								for i = 0; i < numRowBytes; i++ { // every column in matrix
+
+									// for j = 0; j < bufIdx; j++ {
+									// 	buf[j] = buffs[j][i]
+									// }
+
+									// unroll loop
+									buf[0] = (*b0)[i]
+									buf[1] = (*b1)[i]
+									buf[2] = (*b2)[i]
+									buf[3] = (*b3)[i]
+									buf[4] = (*b4)[i]
+									buf[5] = (*b5)[i]
+									buf[6] = (*b6)[i]
+									buf[7] = (*b7)[i]
+									buf[8] = (*b8)[i]
+									buf[9] = (*b9)[i]
+									buf[10] = (*b10)[i]
+									buf[11] = (*b11)[i]
+									buf[12] = (*b12)[i]
+									buf[13] = (*b13)[i]
+									buf[14] = (*b14)[i]
+									buf[15] = (*b15)[i]
+									buf[16] = (*b16)[i]
+									buf[17] = (*b17)[i]
+									buf[18] = (*b18)[i]
+									buf[19] = (*b19)[i]
+									buf[20] = (*b20)[i]
+									buf[21] = (*b21)[i]
+									buf[22] = (*b22)[i]
+									buf[23] = (*b23)[i]
+									buf[24] = (*b24)[i]
+									buf[25] = (*b25)[i]
+									buf[26] = (*b26)[i]
+									buf[27] = (*b27)[i]
+									buf[28] = (*b28)[i]
+									buf[29] = (*b29)[i]
+									buf[30] = (*b30)[i]
+									buf[31] = (*b31)[i]
+									buf[32] = (*b32)[i]
+									buf[33] = (*b33)[i]
+									buf[34] = (*b34)[i]
+									buf[35] = (*b35)[i]
+									buf[36] = (*b36)[i]
+									buf[37] = (*b37)[i]
+									buf[38] = (*b38)[i]
+									buf[39] = (*b39)[i]
+									buf[40] = (*b40)[i]
+									buf[41] = (*b41)[i]
+									buf[42] = (*b42)[i]
+									buf[43] = (*b43)[i]
+									buf[44] = (*b44)[i]
+									buf[45] = (*b45)[i]
+									buf[46] = (*b46)[i]
+									buf[47] = (*b47)[i]
+									buf[48] = (*b48)[i]
+									buf[49] = (*b49)[i]
+									buf[50] = (*b50)[i]
+									buf[51] = (*b51)[i]
+									buf[52] = (*b52)[i]
+									buf[53] = (*b53)[i]
+									buf[54] = (*b54)[i]
+									buf[55] = (*b55)[i]
+									buf[56] = (*b56)[i]
+									buf[57] = (*b57)[i]
+									buf[58] = (*b58)[i]
+									buf[59] = (*b59)[i]
+									buf[60] = (*b60)[i]
+									buf[61] = (*b61)[i]
+									buf[62] = (*b62)[i]
+									buf[63] = (*b63)[i]
+
+									// count
+									pospop.Count8(&counts[i], buf)
+								}
+
+								bufIdx = 0
+							}
+						}
 					}
 				}
 			}
@@ -1774,6 +2090,10 @@ var poolKmers = &sync.Pool{New: func() interface{} {
 
 var poolHashes = &sync.Pool{New: func() interface{} {
 	return make([][]uint64, 0, 256)
+}}
+
+var poolHashes1 = &sync.Pool{New: func() interface{} {
+	return make([]uint64, 0, 256)
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
