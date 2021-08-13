@@ -501,7 +501,7 @@ func init() {
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
 	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as query`)
-	searchCmd.Flags().IntP("min-kmers", "c", 10, `minimal number of matched k-mers (sketches)`)
+	searchCmd.Flags().IntP("min-kmers", "c", 30, `minimal number of matched k-mers (sketches)`)
 	searchCmd.Flags().IntP("min-query-len", "m", 70, `minimal query length`)
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
@@ -516,6 +516,6 @@ func init() {
 	searchCmd.Flags().IntP("keep-top-scores", "n", 5, `keep matches with the top N score for a query, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
-	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches`)
+	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches of a query`)
 
 }

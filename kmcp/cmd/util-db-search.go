@@ -181,7 +181,11 @@ func tokenNum(v int) int {
 }
 
 func extraWorkers(nIdxFiles int, threads int) int {
-	return int(math.Ceil(float64(threads)/float64(nIdxFiles)-0.5)) - 1
+	n := int(math.Ceil(float64(threads)/float64(nIdxFiles)-0.5)) - 1
+	if n < 0 {
+		return 0
+	}
+	return n
 }
 
 // NewUnikIndexDBSearchEngine returns a search engine based on multiple engines

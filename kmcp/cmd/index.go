@@ -120,8 +120,14 @@ Taxonomy data:
 		}
 
 		outDir := getFlagString(cmd, "out-dir")
+		if outDir == "" {
+			checkError(fmt.Errorf("flag -O/--out-dir is needed"))
+		}
 
 		inDir := getFlagString(cmd, "in-dir")
+		if inDir == "" {
+			checkError(fmt.Errorf("flag -I/--in-dir is needed"))
+		}
 
 		if filepath.Clean(inDir) == filepath.Clean(outDir) {
 			checkError(fmt.Errorf("intput and output paths should not be the same"))
@@ -238,7 +244,8 @@ Taxonomy data:
 		if numBuckets > 0 && sBlock00 > numBuckets {
 			checkError(fmt.Errorf("value of -b/--block-size (%d) should be small than -B/--num-buckets (%d)", sBlock00, numBuckets))
 		}
-		seed := getFlagPositiveInt(cmd, "seed")
+		// seed := getFlagPositiveInt(cmd, "seed")
+		seed := 1
 
 		// ---------------------------------------------------------------
 		// out dir
@@ -1385,7 +1392,7 @@ func init() {
 
 	// indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)
 	// indexCmd.Flags().IntP("num-buckets", "B", 0, `[RAMBO] number of buckets per repitition, 0 for one set per bucket`)
-	indexCmd.Flags().IntP("seed", "", 1, `[RAMBO] seed for randomly assigning names to buckets`)
+	// indexCmd.Flags().IntP("seed", "", 1, `[RAMBO] seed for randomly assigning names to buckets`)
 
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
 	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files, please use a small value for hard disk drive storage`)

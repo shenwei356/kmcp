@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.6.0 - 2021-08-07
+### v0.6.0 - 2021-08-13
 
 - new command:
     - `merge`: merge search results from multiple databases.
@@ -14,7 +14,7 @@
     - better control of cocurrency number and better progress bar.
     - do not support RAMBO index anymore.
 - `search`:
-    - 1.2-2.2X speedup, specially for database with two or more hash functions.
+    - 1.37X speedup, and faster for database with two or more hash functions.
     - new flag `-S/--do-not-sort`.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.

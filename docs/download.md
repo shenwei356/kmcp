@@ -72,8 +72,7 @@ fish:
 
 ## Release History
 
-### v0.6.0 - 2021-08-06
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.6.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.6.0)
+### v0.6.0 - 2021-08-13
 
 - new command:
     - `merge`: merge search results from multiple databases.
@@ -85,11 +84,12 @@ fish:
       affected and even faster due to optimization of `search` command.
     - use three k-mers thresholds to control index file size.
     - better control of cocurrency number and better progress bar.
+    - do not support RAMBO index anymore.
 - `search`:
-    - 1.1-2.1X speedup, specially for database with two or more hash functions.
+    - 1.37X speedup, and faster for database with two or more hash functions.
     - new flag `-S/--do-not-sort`.
 - `profile`:
-    - fix a nil pointer bug when no taxid mapping data given.
+    - fix a nil pointer bug when no taxid mapping data given. 
     - fix number of ureads.
     - new flag `-m/--keep-main-matches` and `--max-score-gap`
 ### v0.5.0 - 2021-06-24

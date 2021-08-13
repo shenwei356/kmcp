@@ -5,7 +5,7 @@ A K-mer-based Metagenomics Classification and Profiling tool.
 Tutorials and resources:
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
-- [Database]((https://bioinf.shenwei.me/kmcp/database))
+- [Database](https://bioinf.shenwei.me/kmcp/database)
 - Tutorials
     - [Taxonomic Profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
     - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
