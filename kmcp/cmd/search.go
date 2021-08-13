@@ -232,6 +232,7 @@ Special attentions:
 		searchOpt := SearchOptions{
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
+			Verbose: opt.Verbose,
 
 			DeduplicateThreshold: deduplicateThreshold,
 
@@ -362,7 +363,7 @@ Special attentions:
 		go func() {
 			if !keepOrder {
 				for result := range sg.OutCh {
-					output(&result)
+					output(result)
 				}
 			} else {
 				m := make(map[uint64]*QueryResult, opt.NumCPUs)
@@ -373,12 +374,12 @@ Special attentions:
 					_id = result.QueryIdx
 
 					if _id == id {
-						output(&result)
+						output(result)
 						id++
 						continue
 					}
 
-					m[_id] = &result
+					m[_id] = result
 
 					if _result, ok = m[id]; ok {
 						output(_result)
@@ -437,7 +438,7 @@ Special attentions:
 						sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
 					}
 				}
-				sg.InCh <- Query{
+				sg.InCh <- &Query{
 					Idx: id,
 					ID:  recordID,
 					Seq: sequence,
@@ -462,7 +463,7 @@ Special attentions:
 				copy(recordID, record.ID)
 
 				// may block due to search engine' control
-				sg.InCh <- Query{
+				sg.InCh <- &Query{
 					Idx: id,
 					ID:  recordID,
 					Seq: record.Seq.Clone2(),

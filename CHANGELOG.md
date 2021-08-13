@@ -14,7 +14,7 @@
     - better control of cocurrency number and better progress bar.
     - do not support RAMBO index anymore.
 - `search`:
-    - 1.1-2.1X speedup, specially for database with two or more hash functions.
+    - 1.2-2.2X speedup, specially for database with two or more hash functions.
     - new flag `-S/--do-not-sort`.
 - `profile`:
     - fix a nil pointer bug when no taxid mapping data given.

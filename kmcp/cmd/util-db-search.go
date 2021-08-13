@@ -50,7 +50,7 @@ type Query struct {
 	ID  []byte
 	Seq *seq.Seq
 
-	Ch chan QueryResult // result chanel
+	Ch chan *QueryResult // result chanel
 }
 
 // QueryResult is the search result of a query sequence.
@@ -139,6 +139,7 @@ type IndexQuery struct {
 type SearchOptions struct {
 	UseMMap bool
 	Threads int
+	Verbose bool
 
 	DeduplicateThreshold int // deduplicate k-mers only number of kmers > this threshold
 
@@ -167,15 +168,20 @@ type UnikIndexDBSearchEngine struct {
 	wg   sync.WaitGroup
 	done chan int
 
-	InCh  chan Query // queries
-	OutCh chan QueryResult
+	InCh  chan *Query // queries
+	OutCh chan *QueryResult
 }
 
 func channelBuffSize(v int) int {
 	return int(float64(v) * 10)
 }
+
 func tokenNum(v int) int {
 	return int(float64(v) * 10)
+}
+
+func extraWorkers(nIdxFiles int, threads int) int {
+	return int(math.Ceil(float64(threads)/float64(nIdxFiles)-0.5)) - 1
 }
 
 // NewUnikIndexDBSearchEngine returns a search engine based on multiple engines
@@ -193,14 +199,14 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 	sg := &UnikIndexDBSearchEngine{Options: opt, DBs: dbs, DBNames: names}
 	sg.done = make(chan int)
-	sg.InCh = make(chan Query, channelBuffSize(opt.Threads))
-	sg.OutCh = make(chan QueryResult, channelBuffSize(opt.Threads))
+	sg.InCh = make(chan *Query, channelBuffSize(opt.Threads)*(1+dbs[0].ExtraWorkers))
+	sg.OutCh = make(chan *QueryResult, channelBuffSize(opt.Threads)*(1+dbs[0].ExtraWorkers))
 	multipleDBs := len(dbs) > 1
 	mappingName := len(opt.NameMap) > 0
 
 	go func() {
 		// have to control maximum concurrence number to prevent memory (goroutine) leak.
-		tokens := make(chan int, tokenNum(sg.Options.Threads))
+		tokens := make(chan int, tokenNum(sg.Options.Threads)*(1+dbs[0].ExtraWorkers))
 		wg := &sg.wg
 		nDBs := len(sg.DBs)
 		sortBy := opt.SortBy
@@ -213,8 +219,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		onlyTopNScore := topNScore > 0 && !doNotSort
 
 		if !multipleDBs {
-			handleQuerySingleDB := func(query Query) {
-				query.Ch = make(chan QueryResult, nDBs)
+			handleQuerySingleDB := func(query *Query) {
+				query.Ch = make(chan *QueryResult, nDBs)
 
 				// send to DB
 				sg.DBs[0].InCh <- query
@@ -302,8 +308,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			return
 		}
 
-		handleQueryMultiDBs := func(query Query) {
-			query.Ch = make(chan QueryResult, nDBs)
+		handleQueryMultiDBs := func(query *Query) {
+			query.Ch = make(chan *QueryResult, nDBs)
 
 			// send to all databases
 			for _, db := range sg.DBs {
@@ -311,7 +317,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			// get matches from all databases
-			var queryResult QueryResult
+			var queryResult *QueryResult
 			var m map[Name2Idx]*Match
 			var m2 map[Name2Idx]interface{} // mark shared keys
 			// var _match Match
@@ -337,7 +343,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				if firstDB { // assign once
-					queryResult = QueryResult{
+					queryResult = &QueryResult{
 						QueryIdx: _queryResult.QueryIdx,
 						QueryID:  _queryResult.QueryID,
 						QueryLen: _queryResult.QueryLen,
@@ -555,7 +561,7 @@ type UnikIndexDB struct {
 
 	DBId int // id for current database
 
-	InCh chan Query
+	InCh chan *Query
 
 	// wg0        sync.WaitGroup
 	stop, done chan int
@@ -564,6 +570,8 @@ type UnikIndexDB struct {
 	Header index.Header
 
 	Indices []*UnikIndex
+
+	ExtraWorkers int
 }
 
 func (db *UnikIndexDB) String() string {
@@ -600,8 +608,14 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	indices := make([]*UnikIndex, 0, len(info.Files))
 
+	nextraWorkers := extraWorkers(len(info.Files), opt.Threads)
+
+	if opt.Verbose && nextraWorkers > 0 {
+		log.Infof("number of extra workers for every index file: %d", nextraWorkers)
+	}
+
 	// the first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt)
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, nextraWorkers)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -616,7 +630,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 	db := &UnikIndexDB{Options: opt, Info: info, Header: idx1.Header, path: path}
 
-	db.InCh = make(chan Query, channelBuffSize(opt.Threads))
+	db.ExtraWorkers = nextraWorkers
+	db.InCh = make(chan *Query, channelBuffSize(opt.Threads)*(1+nextraWorkers))
 
 	db.DBId = dbID
 
@@ -642,7 +657,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			go func(f string) {
 				defer wg.Done()
 
-				idx, err := NewUnixIndex(f, opt)
+				idx, err := NewUnixIndex(f, opt, nextraWorkers)
 				checkError(errors.Wrap(err, f))
 
 				if !idx.Header.Compatible(idx1.Header) {
@@ -660,7 +675,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	db.Indices = indices
 
 	go func() {
-		tokens := make(chan int, tokenNum(db.Options.Threads))
+		tokens := make(chan int, tokenNum(db.Options.Threads)*(1+nextraWorkers))
 
 		numHashes := db.Info.NumHashes
 		singleHash := numHashes == 1
@@ -675,10 +690,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		}
 		lastIk := len(ks) - 1
 
-		handleQuery := func(query Query) {
+		handleQuery := func(query *Query) {
 			for _ik, k := range ks {
 				if len(query.Seq.Seq) < minLen { // skip short query
-					query.Ch <- QueryResult{
+					query.Ch <- &QueryResult{
 						QueryIdx: query.Idx,
 						QueryID:  query.ID,
 						QueryLen: query.Seq.Length(),
@@ -700,7 +715,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				}
 				nKmers := len(kmers)
 
-				result := QueryResult{
+				result := &QueryResult{
 					QueryIdx: query.Idx,
 					QueryID:  query.ID,
 					QueryLen: query.Seq.Length(),
@@ -990,6 +1005,8 @@ type UnikIndex struct {
 	useMmap bool
 	sigs    mmap.MMap // mapped sigatures
 	sigsB   []byte
+
+	ExtraWorkers int // when #threads > 1.5 * #index files
 }
 
 func (idx *UnikIndex) String() string {
@@ -997,7 +1014,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -1030,7 +1047,7 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 	idx.useMmap = opt.UseMMap
 
 	idx.done = make(chan int)
-	idx.InCh = make(chan IndexQuery, channelBuffSize(opt.Threads))
+	idx.InCh = make(chan IndexQuery, channelBuffSize(opt.Threads)*(1+nextraWorkers))
 
 	if idx.useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
@@ -2094,11 +2111,15 @@ func NewUnixIndex(file string, opt SearchOptions) (*UnikIndex, error) {
 		idx.done <- 1
 	}
 
-	// start two goroutines
 	go fn()
 
+	// start extra goroutines
+
+	idx.ExtraWorkers = nextraWorkers
 	if opt.UseMMap {
-		go fn()
+		for i := 1; i <= nextraWorkers; i++ {
+			go fn()
+		}
 	}
 
 	return idx, nil
@@ -2110,7 +2131,9 @@ func (idx *UnikIndex) Close() error {
 	<-idx.done      // confirm stopped
 	// another one
 	if idx.useMmap {
-		<-idx.done
+		for i := 1; i <= idx.ExtraWorkers; i++ {
+			<-idx.done
+		}
 	}
 
 	if idx.useMmap {
