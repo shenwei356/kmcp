@@ -313,11 +313,6 @@ Special attentions:
 
 			if opt.Verbose {
 				matched++
-
-				if (total < 8192 && total&63 == 0) || total&8191 == 0 {
-					speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
-					fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
-				}
 			}
 
 			// query, len_query, num_kmers, fpr, num_matches,
@@ -371,6 +366,13 @@ Special attentions:
 				var ok bool
 				var _result *QueryResult
 				for result := range sg.OutCh {
+					if opt.Verbose {
+						if (total < 8192 && total&63 == 0) || total&8191 == 0 {
+							speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
+							fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
+						}
+					}
+
 					_id = result.QueryIdx
 
 					if _id == id {

@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.7.0 - 2021-09
+
+- `search`:
+    - better log.
+
 ### v0.6.0 - 2021-08-13
 
 - new command:
