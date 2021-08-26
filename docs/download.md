@@ -11,11 +11,11 @@ macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/
 Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.6.0/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.6.0/kmcp_windows_amd64.exe.tar.gz)
 
 
-*Tips*
+*Notes*
 
 - please open an issuse to request binaries for other platforms.
 - run `kmcp version` to check update !!!
-- run `kmcp autocomplete` to update Bash completion !!!
+- run `kmcp autocomplete` to update shell autocompletion script !!!
 
 
 ## Installation 
