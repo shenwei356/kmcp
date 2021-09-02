@@ -559,7 +559,7 @@ Taxonomy data:
 				log.Infof("  minimizer window: %d", meta0.MinimizerW)
 			}
 			if meta0.Syncmer {
-				log.Infof("  bounded syncmer size: %d", meta0.SyncmerS)
+				log.Infof("  closed syncmer size: %d", meta0.SyncmerS)
 			}
 			if meta0.SplitSeq {
 				log.Infof("  split seqequence size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)

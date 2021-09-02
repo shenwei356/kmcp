@@ -115,7 +115,7 @@ Flags:
   -n, --split-number int          fragment number, incompatible with -s/--split-size
   -l, --split-overlap int         fragment overlap for splitting sequences
   -s, --split-size int            fragment size for splitting sequences, incompatible with -n/--split-number
-  -S, --syncmer-s int             bounded syncmer length
+  -S, --syncmer-s int             closed syncmer length
 ```
 
 Example

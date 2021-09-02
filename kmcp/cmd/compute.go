@@ -349,7 +349,7 @@ Tips:
 				log.Infof("  minimizer window: %d", minimizerW)
 			}
 			if syncmer {
-				log.Infof("  bounded syncmer size: %d", syncmerS)
+				log.Infof("  closed syncmer size: %d", syncmerS)
 			}
 			if scaled {
 				log.Infof("  down-sampling scale: %d", scale)
@@ -902,7 +902,7 @@ func init() {
 
 	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
 	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
-	computeCmd.Flags().IntP("syncmer-s", "S", 0, `bounded syncmer length`)
+	computeCmd.Flags().IntP("syncmer-s", "S", 0, `closed syncmer length`)
 
 	// computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing (recommended)`)
 
