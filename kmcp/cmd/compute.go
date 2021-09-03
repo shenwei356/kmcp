@@ -53,15 +53,15 @@ Attentions:
      positional arguments or a directory containing sequence files
      via the flag -I/--in-dir. A regular expression for matching
      sequencing files is available by the flag -r/--file-regexp.
-  2. Multiple sizes of k-mers are supported.
-  3. By default, we compute k-mers (sketches) of every file,
+  2. Unwanted sequence like plasmid can be filtered out by
+     the name via regular expressions (-B/--seq-name-filter).
+  3. By default, kmcp computes k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files better be distinct.
-  4. Unwanted sequence like plasmid can be filtered out by
-     the name via regular expressions (-B/--seq-name-filter).
-  5. It also supports splitting sequences into fragments, this
+  4. It also supports splitting sequences into fragments, this
      could increase the specificity in profiling result in cost
      of slower searching speed.
+  5. Multiple sizes of k-mers are supported.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -82,7 +82,7 @@ Splitting sequences:
      in form of meta/description data in .unik files.
 
 Meta data:
-  1. Every outputted .unik file contains the sequence ID/reference name,
+  1. Every outputted .unik file contains the sequence/reference ID,
      fragment index, number of fragments, and genome size of reference.
   2. When parsing whole sequence files or splitting by number of fragments,
      the identifier of a reference is the basename of the input file
@@ -97,7 +97,7 @@ Output:
      output files are:
      ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
 
-Tips:
+Performance tips:
   1. Decrease value of -j/--threads for data in hard disk drives to
      reduce I/O pressure.
 

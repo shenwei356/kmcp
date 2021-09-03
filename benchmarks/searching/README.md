@@ -4,7 +4,7 @@ Softwares
 
 - [cobs](https://github.com/bingmann/cobs) ([1915fc0](https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15))
 - [sourmash](https://github.com/dib-lab/sourmash) (v4.2.1)
-- kmcp (v0.6.0)
+- kmcp ([v0.6.0](https://github.com/shenwei356/kmcp/releases/tag/v0.6.0))
 
 Utilities
 
@@ -64,11 +64,11 @@ Uncompressing and renaming
     
 Database size and building time.
 
-.              |cobs      |kmcp
-:--------------|:---------|:-------
-database size  | 86.96GB  | 55.15GB
-building time  | 29m:55s  | 24min52s
-temporary files| 160.76GB | 1.19TB
+|               |cobs      |kmcp     |
+|:--------------|:---------|:--------|
+|database size  | 86.96GB  | 55.15GB |
+|building time  | 29m:55s  | 24min52s|
+|temporary files| 160.76GB | 1.19TB  |
     
 ### Searching with bacterial genomes
 
@@ -225,11 +225,11 @@ NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
         2>$dbKMCP.time
 
 
-.              |sourmash  |kmcp
-:--------------|:---------|:-------
-database size  |  5.19GB  | 1.52GB
-buiding time   |  89m59s  | 7min02s
-temporary files| -        | 3.41GB
+|               |sourmash  |kmcp    |
+:---------------|:---------|:-------|
+|database size  |  5.19GB  | 1.52GB |
+|buiding time   |  89m59s  | 7min02s|
+|temporary files| -        | 3.41GB |
 
 
 ### Searching with bacterial genomes

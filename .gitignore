@@ -38,7 +38,8 @@ t_*
 *.kmcp
 # data
 *.fastq.gz
-*.kmcp.gz*
+*.kmcp.gz
+mix*.kmcp.gz*
 refs-*
 *.unik
 _info.txt

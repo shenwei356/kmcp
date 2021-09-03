@@ -53,12 +53,12 @@ Methods:
      to reduce the false positive of ambiguous matches.
   2. Multi-aligned queries are proportionally assigned to references
      with the strategy in Metalign.
-  4. More strategies are adopted to increase accuracy.
-  5. Reference genomes can be splitted into fragments when computing
+  3. More strategies are adopted to increase accuracy.
+  4. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
      (-p/--min-frags-prop).
-  6. Input files are parsed 3 times, therefore STDIN is not supported.
+  5. Input files are parsed 3 times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
@@ -70,7 +70,7 @@ Accuracy notes:
   *. And we require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence to decrease
      the false positive.
-     E.g., H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
+     E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
      *. -U/--min-hic-ureads,      minimal number, >= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
@@ -92,9 +92,9 @@ Performance notes:
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
 Profiling output formats:
-  1. kmcp
-  2. CAMI         (-M/--metaphlan-report)
-  3. MetaPhlAn v2 (-C/--cami-report)
+  1. kmcp      (-o/--out-prefix)
+  2. CAMI      (-M/--metaphlan-report)
+  3. MetaPhlAn (-C/--cami-report)
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

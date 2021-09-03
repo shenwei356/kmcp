@@ -44,12 +44,13 @@ var searchCmd = &cobra.Command{
 	Long: `Search sequence against a database
 
 Attentions:
-  1. A long query sequences may contain duplicated k-mers, which are
+  1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+  2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
-  2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
-  3. Increase value of -j/--threads for acceleratation, but values larger
-     than 2 * number of index files (.uniki) won't bring extra speedup.
+  3. For long reads or contigs, you should split them in to short reads
+     using "seqkit sliding", e.g.,
+         seqkit sliding -s 100 -W 300
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
@@ -58,7 +59,11 @@ Shared flags between "search" and "profile":
   3. -N/--name-map.
 
 Special attentions:
-  1. The values of tCov and jacc only apply for single size of k-mer.
+  1. The values of tCov and jacc in result only apply for single size of k-mer.
+
+Performance tips:
+  1. Increase value of -j/--threads for acceleratation, but values larger
+     than number of CPU cores won't bring extra speedup.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

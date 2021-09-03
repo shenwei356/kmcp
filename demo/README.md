@@ -1,4 +1,8 @@
-## Demo dataset
+# Demo
+
+## Dataset
+
+### References
 
     csvtk join -t -f id \
             <(seqkit stats -j 10 refs/*.fasta.gz -T -b \
@@ -19,7 +23,13 @@ NC_018658.1.fasta.gz  |FASTA |DNA |1       |5273097|Escherichia coli O104:H4 str
 NZ_CP007592.1.fasta.gz|FASTA |DNA |1       |5104557|Escherichia coli O157:H16 strain Santai
 NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM8426
 
+### Taxonomy data
+
+Please download and uncompress [taxdump.tar.gz](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz),
+and then copy `names.dmp`, `nodes.dmp`, `delnodes.dmp` and `merged.dmp` to directory `taxdump`.
 ## Metagenomic Profiling
+
+Buiding database:
 
     # computing k-mers
     kmcp compute \
@@ -39,11 +49,15 @@ NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM
         --out-dir refs-k31-n10.kmcp \
         --force
 
+Generating mock dataset of three references with abundance 100:10:1.
+
     # generating mock dataset
     (seqkit sliding -s 10 -W 150 refs/NC_000913.3.fasta.gz | seqkit sample -p 0.6 ; \
             seqkit sliding -s 10 -W 150 refs/NC_002695.2.fasta.gz | seqkit sample -p 0.06 ;  \
             seqkit sliding -s 10 -W 150 refs/NC_010655.1.fasta.gz | seqkit sample -p 0.006 ) \
         | seqkit shuffle -o mock.fastq.gz
+
+Searching
 
     # searching
     for f in *.fastq.gz; do
@@ -53,6 +67,8 @@ NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM
             $f \
             --out-file $f.kmcp.gz
     done
+
+Profiling
 
     # profiling
     for f in *.kmcp.gz; do
@@ -72,64 +88,13 @@ NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM
         | csvtk cut -t -f ref,percentage,taxname \
         | csvtk csv2md -t
     
-ref        |percentage|taxname
-:----------|:---------|:----------------------------------------
-NC_000913.3|87.230664 |Escherichia coli str. K-12 substr. MG1655
-NC_002695.2|11.872444 |Escherichia coli O157:H7 str. Sakai
-NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
+|ref        |percentage|taxname                                  |
+|:----------|:---------|:----------------------------------------|
+|NC_000913.3|87.230945 |Escherichia coli str. K-12 substr. MG1655|
+|NC_002695.2|11.872163 |Escherichia coli O157:H7 str. Sakai      |
+|NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835     |
 
-## Sequence containment searching
-
-    for f in *.fastq.gz; do
-        kmcp search \
-            --db-dir refs-k31-n10.kmcp/ \
-            --min-query-cov 0.8 \
-            $f \
-            --out-file $f.kmcp.gz
-    done
-
-## Genome distance estimation
-
-### Minimizer
-
-    # computing k-mers
-    kmcp compute \
-        --in-dir refs/ \
-        --ref-name-regexp "^([\w\.\_]+\.\d+)" \
-        --seq-name-filter "plasmid" \
-        --kmer 31 \
-        --minimizer-w 20 \
-        --out-dir refs-k31-W20 \
-        --force
-
-    # indexing k-mers
-    kmcp index \
-        --in-dir refs-k31-W20/ \
-        --num-hash 3 \
-        --false-positive-rate 0.01 \
-        --out-dir refs-k31-W20.kmcp \
-        --force
-
-    # searching
-    kmcp search \
-            --db-dir refs-k31-W20.kmcp \
-            --query-whole-file \
-            --min-query-cov 0.5 \
-            --keep-top-scores 0 \
-            --sort-by jacc \
-            --name-map name.map \
-            refs/NC_018658.1.fasta.gz \
-        | csvtk cut -t -C '$' -f '#query,target,qCov,tCov,jacc' \
-        | csvtk pretty -C '$' -t 
-
-    #query        target                                      qCov     tCov     jacc
-    -----------   -----------------------------------------   ------   ------   ------
-    NC_018658.1   Escherichia coli O104:H4 str. 2011C-3493    1.0000   1.0000   1.0000
-    NC_018658.1   Escherichia coli O26 str. RM8426            0.7372   0.7151   0.5698
-    NC_018658.1   Escherichia coli str. K-12 substr. MG1655   0.5977   0.6728   0.4631
-    NC_018658.1   Escherichia coli BL21(DE3)                  0.5884   0.6751   0.4585
-    NC_018658.1   Escherichia coli O157:H16 strain Santai     0.5687   0.5816   0.4036
-    NC_018658.1   Escherichia coli O157:H7 str. Sakai         0.5377   0.5268   0.3626
+## Genome similarity estimation
 
 ### Syncmer
 
@@ -139,21 +104,22 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
         --kmer 31 \
-        --syncmer-s 11 \
-        --out-dir refs-k31-S11 \
+        --syncmer-s 15 \
+        --scale 62 \
+        --out-dir refs-k31-syncmer \
         --force
 
     # indexing k-mers
     kmcp index \
-        --in-dir refs-k31-S11/\
+        --in-dir refs-k31-syncmer/\
         --num-hash 3 \
         --false-positive-rate 0.01 \
-        --out-dir refs-k31-S11.kmcp \
+        --out-dir refs-k31-syncmer.kmcp \
         --force
 
     # searching
     kmcp search \
-            --db-dir refs-k31-S11.kmcp \
+            --db-dir refs-k31-syncmer.kmcp \
             --query-whole-file \
             --min-query-cov 0.5 \
             --keep-top-scores 0 \
@@ -166,11 +132,11 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
     #query        target                                      qCov     tCov     jacc
     -----------   -----------------------------------------   ------   ------   ------
     NC_018658.1   Escherichia coli O104:H4 str. 2011C-3493    1.0000   1.0000   1.0000
-    NC_018658.1   Escherichia coli O26 str. RM8426            0.7435   0.7212   0.5775
-    NC_018658.1   Escherichia coli str. K-12 substr. MG1655   0.6061   0.6817   0.4724
-    NC_018658.1   Escherichia coli BL21(DE3)                  0.5967   0.6841   0.4678
-    NC_018658.1   Escherichia coli O157:H16 strain Santai     0.5779   0.5917   0.4132
-    NC_018658.1   Escherichia coli O157:H7 str. Sakai         0.5487   0.5373   0.3726
+    NC_018658.1   Escherichia coli O26 str. RM8426            0.7439   0.7189   0.5763
+    NC_018658.1   Escherichia coli str. K-12 substr. MG1655   0.6041   0.6768   0.4688
+    NC_018658.1   Escherichia coli BL21(DE3)                  0.5972   0.6807   0.4665
+    NC_018658.1   Escherichia coli O157:H16 strain Santai     0.5782   0.5868   0.4109
+    NC_018658.1   Escherichia coli O157:H7 str. Sakai         0.5482   0.5322   0.3699
 
 ### Scaled MinHash
 
@@ -180,21 +146,21 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
         --ref-name-regexp "^([\w\.\_]+\.\d+)" \
         --seq-name-filter "plasmid" \
         --kmer 31 \
-        --scale 20 \
-        --out-dir refs-k31-D20 \
+        --scale 1000 \
+        --out-dir refs-k31-minhash \
         --force
 
     # indexing k-mers
     kmcp index \
-        --in-dir refs-k31-D20/\
+        --in-dir refs-k31-minhash/\
         --num-hash 3 \
         --false-positive-rate 0.01 \
-        --out-dir refs-k31-D20.kmcp \
+        --out-dir refs-k31-minhash.kmcp \
         --force
 
     # searching
     kmcp search \
-            --db-dir refs-k31-D20.kmcp \
+            --db-dir refs-k31-minhash.kmcp \
             --query-whole-file \
             --min-query-cov 0.5 \
             --keep-top-scores 0 \
@@ -207,8 +173,8 @@ NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835
     #query        target                                      qCov     tCov     jacc
     -----------   -----------------------------------------   ------   ------   ------
     NC_018658.1   Escherichia coli O104:H4 str. 2011C-3493    1.0000   1.0000   1.0000
-    NC_018658.1   Escherichia coli O26 str. RM8426            0.7485   0.7257   0.5834
-    NC_018658.1   Escherichia coli str. K-12 substr. MG1655   0.6117   0.6879   0.4788
-    NC_018658.1   Escherichia coli BL21(DE3)                  0.6022   0.6903   0.4741
-    NC_018658.1   Escherichia coli O157:H16 strain Santai     0.5853   0.5986   0.4203
-    NC_018658.1   Escherichia coli O157:H7 str. Sakai         0.5573   0.5456   0.3806
+    NC_018658.1   Escherichia coli O26 str. RM8426            0.7499   0.7234   0.5828
+    NC_018658.1   Escherichia coli str. K-12 substr. MG1655   0.6064   0.6833   0.4734
+    NC_018658.1   Escherichia coli BL21(DE3)                  0.5965   0.6893   0.4701
+    NC_018658.1   Escherichia coli O157:H16 strain Santai     0.5852   0.5958   0.4189
+    NC_018658.1   Escherichia coli O157:H7 str. Sakai         0.5527   0.5383   0.3750

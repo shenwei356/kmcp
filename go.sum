@@ -230,6 +230,7 @@ github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.8.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.8.6/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
+github.com/klauspost/compress v1.11.4/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
 github.com/klauspost/compress v1.13.4 h1:0zhec2I8zGnjWcKyLl6i3gPqKANCCn5e9xmviEEeX6s=
 github.com/klauspost/compress v1.13.4/go.mod h1:8dP1Hq4DHOhN9w426knH3Rhby4rFm6D8eO+e+Dq5Gzg=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
@@ -293,6 +294,7 @@ github.com/shenwei356/bio v0.3.0 h1:+QKBS2ehlQGeCmYZmr6xP8UiPdhRQI0uVH6KbYmXuIQ=
 github.com/shenwei356/bio v0.3.0/go.mod h1:dl64Vmd+iK1GOMZwT7XpliFN9yTmeE9+pW7SEHEXDQQ=
 github.com/shenwei356/bpool v0.0.0-20160710042833-f9e0ee4d0403 h1:/3JklLnHXiWUBxWc3joQYavDQJpncRhRA909cUb7eOw=
 github.com/shenwei356/bpool v0.0.0-20160710042833-f9e0ee4d0403/go.mod h1:YkgdTWfNnJgv5HVJbVSDmxQtkK3/jZWDoqcG26BVU8k=
+github.com/shenwei356/breader v0.2.0/go.mod h1:YXIrHIPtbJCP6Kv27qGp+cXQl7hyzD0iQrEVYCy/gqw=
 github.com/shenwei356/breader v0.3.0 h1:RwAhiE8xkS4OLawSbtzP6w0KGrh6W1zmRachfzkOVPE=
 github.com/shenwei356/breader v0.3.0/go.mod h1:dyV4ivjTV0hwP627/FQAYFgpMYEeKQYHlKs3E5iY4Dw=
 github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba h1:UvnrxFDPmz7agYX0eQ2JEorTKn1ORnZ9dT5OzbjPvK8=
@@ -305,8 +307,10 @@ github.com/shenwei356/pand v0.0.5 h1:TvafWrPusBkshVuL1DETJzCsVoAI7e3S3Y645W0bgcc
 github.com/shenwei356/pand v0.0.5/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
 github.com/shenwei356/unikmer v0.18.6 h1:9rx6l0GqGuyuFUOWAVSJBnaD/MgVWNGxVX93BMoids8=
 github.com/shenwei356/unikmer v0.18.6/go.mod h1:Mo+23rlUVvvS57/hdLHE8pW8LUzwgXnm2BprgvINDOI=
-github.com/shenwei356/util v0.3.0 h1:gTVa3sGwcyGEHgNpXTzdL3MaaJN/bGAypVKSCnT4QfU=
 github.com/shenwei356/util v0.3.0/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
+github.com/shenwei356/util v0.3.1 h1:ZX65QHwJHZHPnU1aW9rpQtKpHFK9l9RAMsU75ySIeC0=
+github.com/shenwei356/util v0.3.1/go.mod h1:rr7jhxbFXeBu8cZPkvdgzsyOYydmmQnPyaxUxAYQxrc=
+github.com/shenwei356/xopen v0.0.0-20181203091311-f4f16ddd3992/go.mod h1:6EQUa6I7Zsl2GQKqcL9qGLrTzVE+oZyly+uhzovQYSk=
 github.com/shenwei356/xopen v0.1.0 h1:PizY52rLA7A6EdkwKZ6A8h8/a+c9DCBXqfLtwVzsWnM=
 github.com/shenwei356/xopen v0.1.0/go.mod h1:6EQUa6I7Zsl2GQKqcL9qGLrTzVE+oZyly+uhzovQYSk=
 github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=

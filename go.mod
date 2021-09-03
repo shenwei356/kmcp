@@ -16,7 +16,7 @@ require (
 	github.com/shenwei356/mmap-go v1.0.1
 	github.com/shenwei356/pand v0.0.5
 	github.com/shenwei356/unikmer v0.18.6
-	github.com/shenwei356/util v0.3.0
+	github.com/shenwei356/util v0.3.1
 	github.com/spf13/cobra v1.2.1
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
 	github.com/vbauerster/mpb/v5 v5.4.0
