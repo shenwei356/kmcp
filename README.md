@@ -1,11 +1,9 @@
-# KMCP
-
-A K-mer-based Metagenomics Classification and Profiling tool.
+# KMCP - K-mer-based Metagenomics Classification and Profiling
 
 Tutorials and resources:
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
-- [Database](https://bioinf.shenwei.me/kmcp/database)
+- [Databases](https://bioinf.shenwei.me/kmcp/database)
 - Tutorials
     - [Taxonomic Profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
     - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
@@ -18,7 +16,7 @@ Tutorials and resources:
 Download [executable binaries](https://github.com/shenwei356/kmcp/releases),
 or install using conda:
 
-    conda install -c conda-forge -c bioconda kmcp
+    conda install -c bioconda kmcp
 
 ## Quick Start
 
@@ -34,7 +32,7 @@ or install using conda:
     # profile
     kmcp profile search.tsv.gz \
         --taxid-map        taxid.map \
-        --taxdump          taxdump \
+        --taxdump          taxdump/ \
         --out-prefix       search.tsv.gz.k.profile \
         --metaphlan-report search.tsv.gz.m.profile \
         --cami-report      search.tsv.gz.c.profile

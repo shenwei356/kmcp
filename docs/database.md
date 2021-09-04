@@ -4,30 +4,47 @@
 
 ### A). Databases for metagenomic profiling
 
-Prebuilt databases are available, you can also [build custom databases](#custom-database).
-
-|kingdoms                |source     |# species|# assembly|file                          |file size|
-|:-----------------------|:----------|:--------|:---------|:-----------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]()          |55.12 GB |
-|**Viruses**             |Refseq r207|7300     |11618     |[refseq-viruses.kmcp.tar.gz]()|4.14 GB  |
-|**Fungi**               |Refseq r207|148      |390       |[refseq-fungi.kmcp.tar.gz]()  |11.12 GB |
-
-Taxonomy data
-
-- [taxdump.tar.gz]()
-
 These databases are created following [steps below](#building-databases).
+Users can also [build custom databases](#building-custom-databases), it's simple and fast.
+
+|kingdoms                |source     |# species|# assembly|file                                    |size     |
+|:-----------------------|:----------|:--------|:---------|:---------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (37.13 GB)         |55.12 GB |
+|**Viruses**             |Refseq r207|7300     |11618     |[refseq-viruses.kmcp.tar.gz]() (1.09 GB)|4.14 GB  |
+|**Fungi**               |Refseq r207|148      |390       |[refseq-fungi.kmcp.tar.gz]() (8.79GB)   |11.12 GB |
+
+
+**Taxonomy data**: [taxdump.tar.gz]().
+
+**Hardware requirements**:
+
+- Prebuilt databases above were built for computers with >= 32 CPU cores
+in consideration of better parallelization,
+and computers should have at least 64 GB (> 55.12GB). 
+- By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
+Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
+while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
+- To reduce memory requirements on computers without enough memory,
+users can divide the reference genomes into several parts
+and build smaller databases for all parts, so that the biggest
+database can be loaded into RAM. After performing database searching,
+search results on all small databases can be merged with `kmcp merge`
+for downstream analysis.
+
+
+
+
 
 ### B). Databases for genome similarity estimation
 
 Check [tutorial](/tutorial/searching).
 
-|kingdoms                |source     |sketch         |parameters          |file                                  |file size|
-|:-----------------------|:----------|:--------------|:-------------------|:-------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |Scaled MinHash |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]()          |850 MB   |
-|**Bacteria and Archaea**|GTDB r202  |Closed Syncmers|k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]()          |1.04 GB  |
-|**Viruses**             |Refseq r207|Scaled MinHash |K=31, scale=10      |[refseq-viruses.minhash.kmcp.tar.gz]()|         |
-|**Viruses**             |Refseq r207|Closed Syncmers|k=31, s=21          |[refseq-viruses.syncmer.kmcp.tar.gz]()|         |
+|kingdoms                |source     |sketch         |parameters          |file                                           |size     |
+|:-----------------------|:----------|:--------------|:-------------------|:----------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |Scaled MinHash |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]() (710 MB)          |1.52 GB  |
+|**Bacteria and Archaea**|GTDB r202  |Closed Syncmers|k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.04 GB)         |2.28 GB  |
+|**Viruses**             |Refseq r207|Scaled MinHash |K=31, scale=10      |[refseq-viruses.minhash.kmcp.tar.gz]() (181 MB)|407 MB   |
+|**Viruses**             |Refseq r207|Closed Syncmers|k=31, s=21          |[refseq-viruses.syncmer.kmcp.tar.gz]() (142 MB)|312 MB   |
 
 ## Building databases
 
@@ -69,7 +86,7 @@ Mapping file:
     (cat ar122_metadata_r202.tsv; sed 1d bac120_metadata_r202.tsv) \
         | csvtk cut -t -f accession,ncbi_taxid \
         | csvtk replace -t -p '^.._' \
-        | csvtk grep -Ht -P <(cut -f 1 name.map) \
+        | csvtk grep -t -P <(cut -f 1 name.map) \
         | csvtk del-header \
         > taxid.map
 
@@ -83,7 +100,7 @@ Mapping file:
         | csvtk pretty -H -t \
         | tee taxid.map.stats
     species           43566
-    strain            4107
+    strain            4108
     subspecies        111
     forma specialis   58
     no rank           26
@@ -98,7 +115,7 @@ Mapping file:
         | csvtk pretty -H -t \
         | tee taxid.map.uniq.stats
     species           24739
-    strain            4100
+    strain            4101
     subspecies        89
     forma specialis   58
     no rank           26
@@ -362,6 +379,19 @@ Tools:
 - [dustmasker](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) for masking low-complexity regions.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files (optional)
+
+
+**Memory notes**:
+
+By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
+Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
+while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
+
+Another way is dividing the reference genomes into several parts
+and building smaller databases for all parts, so that the biggest
+database can be loaded into RAM. After performing database searching,
+search results on all small databases can be merged with `kmcp merge`
+for downstream analysis.
 
 ### Step 1. Masking low-complexity region
 

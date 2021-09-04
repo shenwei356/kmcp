@@ -1,5 +1,5 @@
-kingdoms,source,sketch,parameters,file,file size
-**Bacteria and Archaea**,GTDB r202,Scaled MinHash,"k=31, scale=1000",[gtdb.minhash.kmcp.tar.gz](),850 MB
-**Bacteria and Archaea**,GTDB r202,Closed Syncmers,"k=31, s=15, scale=60",[gtdb.syncmer.kmcp.tar.gz](),1.04 GB
-**Viruses**,Refseq r207,Scaled MinHash,"K=31, scale=10",[refseq-viruses.minhash.kmcp.tar.gz](),
-**Viruses**,Refseq r207,Closed Syncmers,"k=31, s=21",[refseq-viruses.syncmer.kmcp.tar.gz](),
+kingdoms,source,sketch,parameters,file,size
+**Bacteria and Archaea**,GTDB r202,Scaled MinHash,"k=31, scale=1000",[gtdb.minhash.kmcp.tar.gz]() (710 MB),1.52 GB
+**Bacteria and Archaea**,GTDB r202,Closed Syncmers,"k=31, s=15, scale=60",[gtdb.syncmer.kmcp.tar.gz]() (1.04 GB),2.28 GB
+**Viruses**,Refseq r207,Scaled MinHash,"K=31, scale=10",[refseq-viruses.minhash.kmcp.tar.gz]() (181 MB),407 MB
+**Viruses**,Refseq r207,Closed Syncmers,"k=31, s=21",[refseq-viruses.syncmer.kmcp.tar.gz]() (142 MB),312 MB

@@ -42,9 +42,10 @@ Taken GTDB for example:
     cp name.map gtdb-r202-k21.kmcp/
 
 The size of database is 56GB. 
+
 By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
-while it's much slower, >10X slower on SSD and should slower on HDD disks.
+while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
 
 ### Step 2. Searching
 

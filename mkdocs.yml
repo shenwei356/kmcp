@@ -1,15 +1,15 @@
-site_name: KMCP
+site_name: KMCP - metagenomic profiling
 nav:
 - Home: index.md
 - Download: download.md
-- Database: database.md
+- Databases: database.md
 - Usage: usage.md
 - Tutorials:
-    - Taxonomic Profiling: tutorial/profiling.md
+    - Taxonomic profiling: tutorial/profiling.md
     - Sequence and genome searching: tutorial/searching.md
 - Benchmarks:
-    - Profiling: benchmark/profiling.md
-    - Searching: benchmark/searching.md
+    - Taxonomic profiling: benchmark/profiling.md
+    - Sequence and genome searching: benchmark/searching.md
 - FAQs: faq.md
 - More tools: https://github.com/shenwei356
 
