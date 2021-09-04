@@ -5,7 +5,7 @@ Tutorials and resources:
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Databases](https://bioinf.shenwei.me/kmcp/database)
 - Tutorials
-    - [Taxonomic Profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+    - [Taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
     - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
 - [Usage](https://bioinf.shenwei.me/kmcp/usage)
 - [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
