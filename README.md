@@ -1,5 +1,7 @@
 # KMCP - K-mer-based Metagenomics Classification and Profiling
 
+<img src="kmcp.png" alt="" width="800" align="center" />
+
 Tutorials and resources:
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
