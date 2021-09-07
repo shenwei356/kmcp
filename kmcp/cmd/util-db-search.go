@@ -99,7 +99,14 @@ func (ms Matches) Swap(i int, j int) { ms[i], ms[j] = ms[j], ms[i] }
 
 // Less judges if element is i is less than element in j.
 func (ms Matches) Less(i int, j int) bool {
-	return ms[i].QCov > ms[j].QCov && ms[i].NumKmers > ms[j].NumKmers
+	if ms[i].QCov > ms[j].QCov {
+		return true
+	}
+	if ms[i].QCov < ms[j].QCov {
+		return false
+	}
+	return ms[i].TCov > ms[j].TCov
+	// return ms[i].QCov > ms[j].QCov
 }
 
 // SortByQCov is used to sort matches by qcov.
@@ -110,7 +117,13 @@ type SortByTCov struct{ Matches }
 
 // Less judges if element is i is less than element in j.
 func (ms SortByTCov) Less(i int, j int) bool {
-	return ms.Matches[i].TCov > ms.Matches[j].TCov && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+	if ms.Matches[i].TCov > ms.Matches[j].TCov {
+		return true
+	}
+	if ms.Matches[i].TCov < ms.Matches[j].TCov {
+		return false
+	}
+	return ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // SortByJacc is used to sort matches by jaccard index.
@@ -118,7 +131,13 @@ type SortByJacc struct{ Matches }
 
 // Less judges if element is i is less than element in j.
 func (ms SortByJacc) Less(i int, j int) bool {
-	return ms.Matches[i].JaccardIndex > ms.Matches[j].JaccardIndex && ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
+	if ms.Matches[i].JaccardIndex > ms.Matches[j].JaccardIndex {
+		return true
+	}
+	if ms.Matches[i].JaccardIndex < ms.Matches[j].JaccardIndex {
+		return false
+	}
+	return ms.Matches[i].NumKmers > ms.Matches[j].NumKmers
 }
 
 // ---------------------------------------------------------------
