@@ -1109,14 +1109,17 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 		// bit matrix
 		data := make([][]byte, reader.NumHashes)
-		for i := 0; i < int(reader.NumHashes); i++ {
-			data[i] = make([]byte, numRowBytes)
-		}
 
 		// byte matrix for counting
 		buffs := make([][]byte, PosPopCountBufSize)
-		for i := 0; i < PosPopCountBufSize; i++ {
-			buffs[i] = make([]byte, numRowBytes)
+
+		if moreThanOneHash {
+			for i := 0; i < int(reader.NumHashes); i++ {
+				data[i] = make([]byte, numRowBytes)
+			}
+			for i := 0; i < PosPopCountBufSize; i++ {
+				buffs[i] = make([]byte, numRowBytes)
+			}
 		}
 
 		b0 := &buffs[0]
