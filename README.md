@@ -1,6 +1,6 @@
 # KMCP - K-mer-based Metagenomics Classification and Profiling
 
-<img src="kmcp.png" alt="" width="800" align="center" />
+<img src="kmcp.png" alt="" width="800"/>
 
 Tutorials and resources:
 
