@@ -81,7 +81,8 @@ Profiling
             --min-uniq-reads 5 \
             --out-prefix $f.kmcp.profile \
             --metaphlan-report $f.metaphlan.profile \
-            --cami-report $f.cami.profile
+            --cami-report $f.cami.profile \
+            --binning-result $f.binning
     done
 
     cat mock.fastq.gz.kmcp.gz.kmcp.profile \
@@ -90,8 +91,8 @@ Profiling
     
 |ref        |percentage|taxname                                  |
 |:----------|:---------|:----------------------------------------|
-|NC_000913.3|87.230945 |Escherichia coli str. K-12 substr. MG1655|
-|NC_002695.2|11.872163 |Escherichia coli O157:H7 str. Sakai      |
+|NC_000913.3|87.231001 |Escherichia coli str. K-12 substr. MG1655|
+|NC_002695.2|11.872107 |Escherichia coli O157:H7 str. Sakai      |
 |NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835     |
 
 ## Genome similarity estimation

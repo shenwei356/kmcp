@@ -65,7 +65,7 @@ Databases can be built with different parameters.
     value of `-u/--kmer-dedup-threshold` (default `256`) to remove duplicates.
 3. For long reads or contigs, you should split them in to short reads
     using "seqkit sliding", e.g.,
-        seqkit sliding -s 100 -W 300
+        `seqkit sliding -s 100 -W 300`
 4. The values of `tCov` and `jacc` in result only apply for single size of k-mer.
 
 **`kmcp search` and `kmcp profile` share some flags**, therefore users
@@ -161,10 +161,12 @@ Merging searching results on multiple database:
 
 Profiling output formats:
 
-- kmcp      (`-o/--out-prefix`)
+- KMCP      (`-o/--out-prefix`)
 - CAMI      (`-M/--metaphlan-report`)
 - MetaPhlAn (`-C/--cami-report`)
 
+Taxonomic binning formats:
+- CAMI      (`-B/--binning-result`)
 
 **Commands**:
 
@@ -191,7 +193,8 @@ Profiling output formats:
         --out-prefix       $sfile.kmcp.profile \
         --metaphlan-report $sfile.metaphlan.profile \
         --cami-report      $sfile.cami.profile \
-        --sample-id        "0"
+        --sample-id        "0" \
+        --binning-result   $sfile.binning
 
 Default output:
 
@@ -201,7 +204,7 @@ Default output:
 |NC_002695.2|11.872163 |16.22|1.00     |43166 |24210 |24210    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
 |NC_010655.1|0.896892  |16.43|1.00     |1580  |1580  |1580     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
 
-[CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd)
+[CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 
     @SampleID:
     @Version:0.10.0
@@ -226,7 +229,7 @@ Default output:
     349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.896892
 
 
-Metaphlan format
+Metaphlan format:
 
     #SampleID	
     k__Bacteria	100.000000
@@ -245,3 +248,21 @@ Metaphlan format
     k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli K-12	87.230945
     k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli O157:H7 str. Sakai	11.872163
     k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila|t__Akkermansia muciniphila ATCC BAA-835	0.896892
+
+[Binning result](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_B_specification.mkd):
+
+    # This is the bioboxes.org binning output format at
+    # https://github.com/bioboxes/rfc/tree/master/data-format
+    @Version:0.10.0
+    @SampleID:
+    @@SEQUENCEID	TAXID
+    NC_000913.3_sliding:1244941-1245090	511145
+    NC_002695.2_sliding:3465891-3466040	562
+    NC_000913.3_sliding:3801041-3801190	511145
+    NC_002695.2_sliding:3230881-3231030	562
+    NC_000913.3_sliding:4080871-4081020	562
+    NC_000913.3_sliding:3588091-3588240	511145
+    NC_000913.3_sliding:2249621-2249770	562
+    NC_000913.3_sliding:109271-109420	562
+    NC_000913.3_sliding:2354841-2354990	511145
+    NC_002695.2_sliding:4376441-4376590	386585

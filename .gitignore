@@ -44,3 +44,4 @@ refs-*
 *.unik
 _info.txt
 t.gz
+*.binning

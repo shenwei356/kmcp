@@ -92,10 +92,12 @@ Performance notes:
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
 Profiling output formats:
-  1. kmcp      (-o/--out-prefix)
+  1. KMCP      (-o/--out-prefix)
   2. CAMI      (-M/--metaphlan-report)
   3. MetaPhlAn (-C/--cami-report)
 
+Taxonomic binning formats:
+  1. CAMI      (-B/--binning-result)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
