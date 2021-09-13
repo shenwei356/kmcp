@@ -45,3 +45,7 @@ refs-*
 _info.txt
 t.gz
 *.binning
+
+all*
+
+analysis/mutation/*/*.gz

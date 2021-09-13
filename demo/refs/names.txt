@@ -1,0 +1,9 @@
+NC_000913.3 Escherichia coli str. K-12 substr. MG1655, complete genome
+NC_002695.2 Escherichia coli O157:H7 str. Sakai DNA, complete genome
+NC_010655.1 Akkermansia muciniphila ATCC BAA-835, complete sequence
+NC_011750.1 Escherichia coli IAI39, complete sequence
+NC_012971.2 Escherichia coli BL21(DE3), complete genome
+NC_013654.1 Escherichia coli SE15, complete sequence
+NC_018658.1 Escherichia coli O104:H4 str. 2011C-3493, complete sequence
+NZ_CP007592.1 Escherichia coli O157:H16 strain Santai chromosome, complete genome
+NZ_CP028116.1 Escherichia coli O26 str. RM8426 chromosome, complete genome
