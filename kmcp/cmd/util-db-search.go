@@ -2094,42 +2094,251 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 				ix8 = i << 3
 				lastRound = i == iLast
 
-				for j = 0; j < 8; j++ {
-					k = ix8 + j
+				// for j = 0; j < 8; j++ {
+				// 	k = ix8 + j
 
-					if lastRound && k == numNames {
-						break
-					}
+				// 	if lastRound && k == numNames {
+				// 		break
+				// 	}
 
-					count = _counts[7-j] // because count in package pospop is in reversed order
+				// 	count = _counts[7-j] // because count in package pospop is in reversed order
 
-					if count < minMatched {
-						continue
-					}
+				// 	if count < minMatched {
+				// 		continue
+				// 	}
 
-					c = float64(count)
+				// 	c = float64(count)
 
-					t = c / nHashes // Containment index
-					if t < queryCov {
-						continue
-					}
-					nHashesTarget = sizesFloat[k]
-					T = c / nHashesTarget
-					if T < targetCov {
-						continue
-					}
+				// 	t = c / nHashes // Containment index
+				// 	if t < queryCov {
+				// 		continue
+				// 	}
+				// 	nHashesTarget = sizesFloat[k]
+				// 	T = c / nHashesTarget
+				// 	if T < targetCov {
+				// 		continue
+				// 	}
 
-					results = append(results, &Match{
-						Target:     names[k],
-						GenomeSize: gsizes[k],
-						TargetIdx:  indices[k],
-						NumKmers:   count,
-						QCov:       t,
-						TCov:       T,
+				// 	results = append(results, &Match{
+				// 		Target:     names[k],
+				// 		GenomeSize: gsizes[k],
+				// 		TargetIdx:  indices[k],
+				// 		NumKmers:   count,
+				// 		QCov:       t,
+				// 		TCov:       T,
 
-						JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-					})
+				// 		JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+				// 	})
+				// }
+
+				k = ix8
+				if lastRound && k == numNames {
+					break
 				}
+				count = _counts[7]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 1
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[6]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 2
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[5]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 3
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[4]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 4
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[3]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 5
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[2]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 6
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[1]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
+				k = ix8 + 7
+				if lastRound && k == numNames {
+					break
+				}
+				count = _counts[0]
+				if count >= minMatched {
+					c = float64(count)
+					t = c / nHashes // Containment index
+					if t >= queryCov {
+						nHashesTarget = sizesFloat[k]
+						T = c / nHashesTarget
+						if T >= targetCov {
+							results = append(results, &Match{
+								Target:     names[k],
+								GenomeSize: gsizes[k],
+								TargetIdx:  indices[k],
+								NumKmers:   count,
+								QCov:       t,
+								TCov:       T,
+
+								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+							})
+						}
+					}
+				}
+
 			}
 
 			query.Ch <- results
