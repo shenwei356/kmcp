@@ -32,7 +32,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
-	"github.com/shenwei356/kmcp/kmcp/cmd/transpose"
 	"github.com/shenwei356/mmap-go"
 	"github.com/shenwei356/pand"
 	"github.com/shenwei356/unikmer"
@@ -1123,11 +1122,6 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			}
 		}
 
-		var buffsP [PosPopCountBufSize]*[]byte
-		for i := 0; i < PosPopCountBufSize; i++ {
-			buffsP[i] = &buffs[i]
-		}
-
 		b0 := &buffs[0]
 		b1 := &buffs[1]
 		b2 := &buffs[2]
@@ -1370,7 +1364,70 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									// }
 
 									// unroll loop
-									transpose.TransposeOneColumn(&buf, &buffsP, i)
+									buf[0] = (*b0)[i]
+									buf[1] = (*b1)[i]
+									buf[2] = (*b2)[i]
+									buf[3] = (*b3)[i]
+									buf[4] = (*b4)[i]
+									buf[5] = (*b5)[i]
+									buf[6] = (*b6)[i]
+									buf[7] = (*b7)[i]
+									buf[8] = (*b8)[i]
+									buf[9] = (*b9)[i]
+									buf[10] = (*b10)[i]
+									buf[11] = (*b11)[i]
+									buf[12] = (*b12)[i]
+									buf[13] = (*b13)[i]
+									buf[14] = (*b14)[i]
+									buf[15] = (*b15)[i]
+									buf[16] = (*b16)[i]
+									buf[17] = (*b17)[i]
+									buf[18] = (*b18)[i]
+									buf[19] = (*b19)[i]
+									buf[20] = (*b20)[i]
+									buf[21] = (*b21)[i]
+									buf[22] = (*b22)[i]
+									buf[23] = (*b23)[i]
+									buf[24] = (*b24)[i]
+									buf[25] = (*b25)[i]
+									buf[26] = (*b26)[i]
+									buf[27] = (*b27)[i]
+									buf[28] = (*b28)[i]
+									buf[29] = (*b29)[i]
+									buf[30] = (*b30)[i]
+									buf[31] = (*b31)[i]
+									buf[32] = (*b32)[i]
+									buf[33] = (*b33)[i]
+									buf[34] = (*b34)[i]
+									buf[35] = (*b35)[i]
+									buf[36] = (*b36)[i]
+									buf[37] = (*b37)[i]
+									buf[38] = (*b38)[i]
+									buf[39] = (*b39)[i]
+									buf[40] = (*b40)[i]
+									buf[41] = (*b41)[i]
+									buf[42] = (*b42)[i]
+									buf[43] = (*b43)[i]
+									buf[44] = (*b44)[i]
+									buf[45] = (*b45)[i]
+									buf[46] = (*b46)[i]
+									buf[47] = (*b47)[i]
+									buf[48] = (*b48)[i]
+									buf[49] = (*b49)[i]
+									buf[50] = (*b50)[i]
+									buf[51] = (*b51)[i]
+									buf[52] = (*b52)[i]
+									buf[53] = (*b53)[i]
+									buf[54] = (*b54)[i]
+									buf[55] = (*b55)[i]
+									buf[56] = (*b56)[i]
+									buf[57] = (*b57)[i]
+									buf[58] = (*b58)[i]
+									buf[59] = (*b59)[i]
+									buf[60] = (*b60)[i]
+									buf[61] = (*b61)[i]
+									buf[62] = (*b62)[i]
+									buf[63] = (*b63)[i]
 
 									// count
 									pospop.Count8(&counts[i], buf[:])
