@@ -1005,7 +1005,7 @@ func (db *UnikIndexDB) Close() error {
 // the row size to balance time of matrix transposing and popopcount.
 //
 // 64 is the best value for my machine (AMD ryzen 2700X).
-const PosPopCountBufSize = 64
+const PosPopCountBufSize = 64 // 64 is the cache line size for most 64-bit machines.
 
 // UnikIndex defines a unik index struct.
 type UnikIndex struct {
@@ -1217,7 +1217,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
 
-		buf := make([]byte, PosPopCountBufSize)
+		// buf := make([]byte, PosPopCountBufSize)
+		var buf [PosPopCountBufSize]byte
 
 		for query := range idx.InCh {
 			if moreThanOneHash {
@@ -1337,7 +1338,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1429,7 +1430,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1535,7 +1536,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1627,7 +1628,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1739,7 +1740,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1833,7 +1834,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -1943,7 +1944,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
@@ -2037,7 +2038,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 									buf[63] = (*b63)[i]
 
 									// count
-									pospop.Count8(&counts[i], buf)
+									pospop.Count8(&counts[i], buf[:])
 								}
 
 								bufIdx = 0
