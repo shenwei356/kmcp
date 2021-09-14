@@ -809,22 +809,22 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// send queries
 				// reuse chan []Match object, to reduce GC
 				chMatches := poolChanMatches.Get().(chan []*Match)
+				var iquery *IndexQuery
 				if !singleHash {
-					for i := numIndices - 1; i >= 0; i-- { // start from bigger files
-						indices[i].InCh <- IndexQuery{
-							// Kmers:  kmers,
-							Hashes: hashes,
-							Ch:     chMatches,
-						}
+					iquery = &IndexQuery{
+						// Kmers:  kmers,
+						Hashes: hashes,
+						Ch:     chMatches,
 					}
 				} else {
-					for i := numIndices - 1; i >= 0; i-- { // start from bigger files
-						indices[i].InCh <- IndexQuery{
-							// Kmers:  kmers,
-							Hashes1: kmers,
-							Ch:      chMatches,
-						}
+					iquery = &IndexQuery{
+						// Kmers:  kmers,
+						Hashes1: kmers,
+						Ch:      chMatches,
 					}
+				}
+				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
+					indices[i].InCh <- iquery
 				}
 
 				// get matches from all indices
@@ -839,7 +839,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					}
 					_matches = _matches[:0]
 					poolMatches.Put(_matches)
-
 				}
 
 				// recycle objects
@@ -1012,7 +1011,7 @@ type UnikIndex struct {
 	Options SearchOptions
 
 	done chan int
-	InCh chan IndexQuery
+	InCh chan *IndexQuery
 
 	Path   string
 	Header index.Header
@@ -1070,7 +1069,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 	idx.useMmap = opt.UseMMap
 
 	idx.done = make(chan int)
-	idx.InCh = make(chan IndexQuery, channelBuffSize(opt.Threads)*(1+nextraWorkers))
+	idx.InCh = make(chan *IndexQuery, channelBuffSize(opt.Threads)*(1+nextraWorkers))
 
 	if idx.useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
@@ -1094,7 +1093,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		numSigs := idx.Header.NumSigs
 		numSigsUint := uint64(numSigs)
 		numSigsUintM1 := numSigsUint - 1
-		offset0 := idx.offset0
+		offset0 := int(idx.offset0)
 		fh := idx.fh
 		sizes := idx.Header.Sizes
 		sigs := idx.sigsB
@@ -1121,6 +1120,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 				buffs[i] = make([]byte, numRowBytes)
 			}
 		}
+
+		// for PosPopCountBufSize == 64
 
 		b0 := &buffs[0]
 		b1 := &buffs[1]
@@ -1245,7 +1246,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 							for i, _h = range hs {
 								loc = int(_h % numSigsUint)
 								// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								offset = int(offset0 + int64(loc*numRowBytes))
+								offset = offset0 + loc*numRowBytes
 
 								data[i] = sigs[offset : offset+numRowBytes]
 							}
@@ -1348,7 +1349,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						for _, _h = range hashes1 {
 							loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							offset = int(offset0 + int64(loc*numRowBytes))
+							offset = offset0 + loc*numRowBytes
 
 							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
 
@@ -1443,7 +1444,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 							for i, _h = range hs {
 								// loc = int(_h % numSigsUint)
 								loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								offset = int(offset0 + int64(loc*numRowBytes))
+								offset = offset0 + loc*numRowBytes
 
 								data[i] = sigs[offset : offset+numRowBytes]
 							}
@@ -1546,7 +1547,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						for _, _h = range hashes1 {
 							// loc = int(_h % numSigsUint)
 							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							offset = int(offset0 + int64(loc*numRowBytes))
+							offset = offset0 + loc*numRowBytes
 
 							buffs[bufIdx] = sigs[offset : offset+numRowBytes] // just point to the orginial data (mmaped)
 
@@ -1643,11 +1644,11 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 							for i, _h = range hs {
 								loc = int(_h % numSigsUint)
 								// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								// offset = int(offset0 + int64(loc*numRowBytes))
+								// offset = offset0 + loc*numRowBytes
 
 								// data[i] = sigs[offset : offset+numRowBytes]
 
-								offset2 = offset0 + int64(loc*numRowBytes)
+								offset2 = int64(offset0 + loc*numRowBytes)
 								fh.Seek(offset2, 0)
 								io.ReadFull(fh, data[i])
 							}
@@ -1750,9 +1751,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						for _, _h = range hashes1 {
 							loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							// offset = int(offset0 + int64(loc*numRowBytes))
+							// offset = offset0 + loc*numRowBytes
 
-							offset2 = offset0 + int64(loc*numRowBytes)
+							offset2 = int64(offset0 + loc*numRowBytes)
 							fh.Seek(offset2, 0)
 							io.ReadFull(fh, buffs[bufIdx])
 
@@ -1847,11 +1848,11 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 							for i, _h = range hs {
 								// loc = int(_h % numSigsUint)
 								loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-								// offset = int(offset0 + int64(loc*numRowBytes))
+								// offset = offset0 + loc*numRowBytes
 
 								// data[i] = sigs[offset : offset+numRowBytes]
 
-								offset2 = offset0 + int64(loc*numRowBytes)
+								offset2 = int64(offset0 + loc*numRowBytes)
 								fh.Seek(offset2, 0)
 								io.ReadFull(fh, data[i])
 							}
@@ -1954,9 +1955,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						for _, _h = range hashes1 {
 							// loc = int(_h % numSigsUint)
 							loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
-							// offset = int(offset0 + int64(loc*numRowBytes))
+							// offset = offset0 + loc*numRowBytes
 
-							offset2 = offset0 + int64(loc*numRowBytes)
+							offset2 = int64(offset0 + loc*numRowBytes)
 							fh.Seek(offset2, 0)
 							io.ReadFull(fh, buffs[bufIdx])
 
