@@ -113,6 +113,7 @@ Performance tips:
 		keepOrder := true
 		wholeFile := getFlagBool(cmd, "query-whole-file")
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
+		// immediateOutput := getFlagBool(cmd, "immediate-output")
 
 		if doNotSort && topNScore > 0 {
 			log.Warningf("flag -n/--keep-top-scores ignored when -S/--do-not-sort given")
@@ -310,11 +311,31 @@ Performance tips:
 				total++
 			}
 
-			if len((*result).Matches) == 0 && !keepUnmatched {
-				result.Matches = result.Matches[:0]
-				poolMatches.Put(result.Matches)
+			if result.Matches == nil {
+				if !keepUnmatched {
+					poolQueryResult.Put(result)
+					return
+				}
+
+				prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+					result.QueryID, result.QueryLen,
+					result.NumKmers, result.FPR, 0)
+
+				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+					prefix2,
+					"", -1, 0, 0,
+					0, 0,
+					float64(0), float64(0), float64(0), result.QueryIdx))
+
+				// if immediateOutput {
+				outfh.Flush()
+				// }
+
+				poolQueryResult.Put(result)
 				return
 			}
+
+			// found
 
 			if opt.Verbose {
 				matched++
@@ -326,24 +347,9 @@ Performance tips:
 			// 	result.NumKmers, result.FPR, len(result.Matches))
 			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
-				result.NumKmers, result.FPR, len(result.Matches))
+				result.NumKmers, result.FPR, len(*result.Matches))
 
-			if keepUnmatched && len(result.Matches) == 0 {
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-					prefix2,
-					"", -1, 0, 0,
-					0, 0,
-					float64(0), float64(0), float64(0), result.QueryIdx))
-
-				outfh.Flush()
-
-				result.Matches = result.Matches[:0]
-				poolMatches.Put(result.Matches)
-
-				return
-			}
-
-			for _, match := range result.Matches {
+			for _, match := range *result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
 				// target, fragIdx, idxNum, tlength, num_matched_kmers, qcov, tcov, jacc
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
@@ -353,10 +359,14 @@ Performance tips:
 					match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
 			}
 
+			//if immediateOutput {
 			outfh.Flush()
+			//}
 
-			result.Matches = result.Matches[:0]
+			(*result.Matches) = (*(result.Matches))[:0]
 			poolMatches.Put(result.Matches)
+
+			poolQueryResult.Put(result)
 		}
 
 		done := make(chan int)
@@ -445,6 +455,13 @@ Performance tips:
 						sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
 					}
 				}
+
+				// query := poolQuery.Get().(*Query)
+				// query.Idx = id
+				// query.ID = recordID
+				// query.Seq = sequence
+				// sg.InCh <- query
+
 				sg.InCh <- &Query{
 					Idx: id,
 					ID:  recordID,
@@ -470,6 +487,10 @@ Performance tips:
 				copy(recordID, record.ID)
 
 				// may block due to search engine' control
+				// query := poolQuery.Get().(*Query)
+				// query.Idx = id
+				// query.ID = recordID
+				// query.Seq = record.Seq.Clone2()
 				sg.InCh <- &Query{
 					Idx: id,
 					ID:  recordID,
@@ -524,5 +545,6 @@ func init() {
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches of a query`)
+	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
 
 }

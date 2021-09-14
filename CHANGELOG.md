@@ -6,6 +6,7 @@
     - better log.
     - fix matches order of a query.
     - avoid uneccessary allocation.
+    - faster.
 
 ### v0.6.0 - 2021-08-13
 

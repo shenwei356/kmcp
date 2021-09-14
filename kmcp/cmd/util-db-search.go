@@ -67,7 +67,7 @@ type QueryResult struct {
 	NumKmers int // number of k-mers
 	// Kmers    []uint64 // hashes of k-mers (sketch), for alignment vs target
 
-	Matches []*Match // all matches
+	Matches *[]*Match // all matches
 }
 
 // Name2Idx is a struct of name and index
@@ -149,7 +149,7 @@ type IndexQuery struct {
 	Hashes  [][]uint64 // related to database
 	Hashes1 []uint64
 
-	Ch chan []*Match // result chanel
+	Ch chan *[]*Match // result chanel
 }
 
 // ---------------------------------------------------------------
@@ -251,15 +251,15 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				// wait and receive result from it
 				_queryResult := <-query.Ch
 
-				if len(_queryResult.Matches) > 0 {
-					if len(_queryResult.Matches) > 1 && !doNotSort {
+				if _queryResult.Matches != nil {
+					if len(*_queryResult.Matches) > 1 && !doNotSort {
 						switch sortBy {
 						case "qcov":
-							sorts.Quicksort(Matches(_queryResult.Matches))
+							sorts.Quicksort(Matches(*_queryResult.Matches))
 						case "tcov":
-							sorts.Quicksort(SortByTCov{Matches(_queryResult.Matches)})
+							sorts.Quicksort(SortByTCov{Matches(*_queryResult.Matches)})
 						case "jacc":
-							sorts.Quicksort(SortByJacc{Matches(_queryResult.Matches)})
+							sorts.Quicksort(SortByJacc{Matches(*_queryResult.Matches)})
 						}
 					}
 
@@ -269,7 +269,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						var score, pScore float64
 						pScore = 1024
 						var m *Match
-						for i, m = range _queryResult.Matches {
+						for i, m = range *(_queryResult.Matches) {
 							switch sortBy {
 							case "qcov":
 								score = m.QCov
@@ -289,32 +289,34 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 							}
 
 						}
-						_queryResult.Matches = _queryResult.Matches[:i+1]
+						(*_queryResult.Matches) = (*(_queryResult.Matches))[:i+1]
 					}
-				}
 
-				if onlyTopN && len(_queryResult.Matches) > topN {
-					_queryResult.Matches = _queryResult.Matches[:topN]
-				}
+					if onlyTopN && len(*_queryResult.Matches) > topN {
+						(*_queryResult.Matches) = (*(_queryResult.Matches))[:topN]
+					}
 
-				if mappingName {
-					var _m *Match
-					var ok bool
-					var t string
-					_dbInfo := dbs[_queryResult.DBId].Info
-					for _, _match := range _queryResult.Matches {
-						_m = _match
-						if t, ok = nameMap[_match.Target[0]]; ok {
-							_m.Target[0] = t
-						} else if opt.LoadDefaultNameMap {
-							if t, ok = _dbInfo.NameMapping[_match.Target[0]]; ok {
+					if mappingName {
+						var _m *Match
+						var ok bool
+						var t string
+						_dbInfo := dbs[_queryResult.DBId].Info
+						for _, _match := range *_queryResult.Matches {
+							_m = _match
+							if t, ok = nameMap[_match.Target[0]]; ok {
 								_m.Target[0] = t
+							} else if opt.LoadDefaultNameMap {
+								if t, ok = _dbInfo.NameMapping[_match.Target[0]]; ok {
+									_m.Target[0] = t
+								}
 							}
 						}
 					}
 				}
 
 				sg.OutCh <- _queryResult
+
+				// poolQuery.Put(query)
 
 				wg.Done()
 				<-tokens
@@ -360,8 +362,10 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				if noInter { // skip
 					// recycle matches
-					_queryResult.Matches = _queryResult.Matches[:0]
-					poolMatches.Put(_queryResult.Matches)
+					if _queryResult.Matches != nil {
+						(*_queryResult.Matches) = (*(_queryResult.Matches))[:0]
+						poolMatches.Put(_queryResult.Matches)
+					}
 					continue
 				}
 
@@ -377,20 +381,17 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					}
 				}
 
-				if len(_queryResult.Matches) == 0 {
-					// recycle matches
-					_queryResult.Matches = _queryResult.Matches[:0]
-					poolMatches.Put(_queryResult.Matches)
+				if _queryResult.Matches == nil {
 					continue
 				}
 
 				if firstDB {
-					m = make(map[Name2Idx]*Match, len(_queryResult.Matches)*nDBs)
+					m = make(map[Name2Idx]*Match, len(*_queryResult.Matches)*nDBs)
 				} else {
-					m2 = make(map[Name2Idx]interface{}, len(_queryResult.Matches))
+					m2 = make(map[Name2Idx]interface{}, len(*_queryResult.Matches))
 				}
 
-				for _, _match := range _queryResult.Matches {
+				for _, _match := range *_queryResult.Matches {
 					for j, _name = range _match.Target {
 						key = Name2Idx{Name: _name, Index: _match.TargetIdx[j] & 65535}
 						if firstDB {
@@ -419,7 +420,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				// recycle matches
-				_queryResult.Matches = _queryResult.Matches[:0]
+				(*_queryResult.Matches) = (*(_queryResult.Matches))[:0]
 				poolMatches.Put(_queryResult.Matches)
 
 				if firstDB {
@@ -447,24 +448,26 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				queryResult.Matches = nil
 				sg.OutCh <- queryResult
 
+				// poolQuery.Put(query)
+
 				wg.Done()
 				<-tokens
 				return
 			}
 
-			_matches2 := poolMatches.Get().([]*Match)
+			_matches2 := poolMatches.Get().(*[]*Match)
 			for _, _match := range m {
-				_matches2 = append(_matches2, _match)
+				*_matches2 = append(*_matches2, _match)
 			}
 
-			if len(_matches2) > 1 {
+			if len(*_matches2) > 1 {
 				switch sortBy {
 				case "qcov":
-					sorts.Quicksort(Matches(_matches2))
+					sorts.Quicksort(Matches(*_matches2))
 				case "tcov":
-					sorts.Quicksort(SortByTCov{Matches(_matches2)})
+					sorts.Quicksort(SortByTCov{Matches(*_matches2)})
 				case "jacc":
-					sorts.Quicksort(SortByJacc{Matches(_matches2)})
+					sorts.Quicksort(SortByJacc{Matches(*_matches2)})
 				}
 			}
 
@@ -476,7 +479,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				var score, pScore float64
 				pScore = 1024
 				var m *Match
-				for i, m = range queryResult.Matches {
+				for i, m = range *queryResult.Matches {
 					switch sortBy {
 					case "qcov":
 						score = m.QCov
@@ -496,11 +499,11 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 					}
 
 				}
-				queryResult.Matches = queryResult.Matches[:i+1]
+				(*queryResult.Matches) = (*(queryResult.Matches))[:i+1]
 			}
 
-			if onlyTopN && len(queryResult.Matches) > topN {
-				queryResult.Matches = queryResult.Matches[:topN]
+			if onlyTopN && len(*queryResult.Matches) > topN {
+				(*queryResult.Matches) = (*(queryResult.Matches))[:topN]
 			}
 
 			if mappingName {
@@ -508,7 +511,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				var ok bool
 				var t string
 				_dbInfo := dbs[queryResult.DBId].Info
-				for _, _match := range queryResult.Matches {
+				for _, _match := range *queryResult.Matches {
 					_m = _match
 					if t, ok = nameMap[_match.Target[0]]; ok {
 						_m.Target[0] = t
@@ -521,6 +524,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			sg.OutCh <- queryResult
+			// poolQuery.Put(query)
 
 			wg.Done()
 			<-tokens
@@ -715,16 +719,19 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 		handleQuery := func(query *Query) {
 			for _ik, k := range ks {
+				queryResult := poolQueryResult.Get().(*QueryResult)
+				// queryResult := &QueryResult{}
+
+				queryResult.QueryIdx = query.Idx
+				queryResult.QueryID = query.ID
+				queryResult.QueryLen = query.Seq.Length()
+				queryResult.K = k
+				queryResult.Matches = nil
+
 				if len(query.Seq.Seq) < minLen { // skip short query
-					query.Ch <- &QueryResult{
-						QueryIdx: query.Idx,
-						QueryID:  query.ID,
-						QueryLen: query.Seq.Length(),
-						K:        k,
-						NumKmers: 0,
-						// Kmers:    kmers,
-						Matches: nil,
-					} // still send result!
+					queryResult.NumKmers = 0
+
+					query.Ch <- queryResult
 					<-tokens
 					return
 				}
@@ -738,19 +745,11 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				}
 				nKmers := len(kmers)
 
-				result := &QueryResult{
-					QueryIdx: query.Idx,
-					QueryID:  query.ID,
-					QueryLen: query.Seq.Length(),
-					K:        k,
-					NumKmers: nKmers,
-					// Kmers:    kmers,
-					Matches: nil,
-				}
+				queryResult.NumKmers = nKmers
 
 				// sequence shorter than k, or too few k-mer sketchs.
 				if kmers == nil || nKmers < db.Options.MinMatched {
-					query.Ch <- result // still send result!
+					query.Ch <- queryResult // still send result!
 					<-tokens
 					return
 				}
@@ -789,7 +788,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				// update nKmers
 				nKmers = len(kmers)
 
-				result.NumKmers = nKmers
+				queryResult.NumKmers = nKmers
 
 				// compute hashes
 				// reuse [][]uint64 object, to reduce GC
@@ -808,41 +807,46 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// send queries
 				// reuse chan []Match object, to reduce GC
-				chMatches := poolChanMatches.Get().(chan []*Match)
-				var iquery *IndexQuery
+				chMatches := poolChanMatches.Get().(chan *[]*Match)
+				// var iquery *IndexQuery
+				iquery := poolIndexQuery.Get().(*IndexQuery)
 				if !singleHash {
-					iquery = &IndexQuery{
-						// Kmers:  kmers,
-						Hashes: hashes,
-						Ch:     chMatches,
-					}
+					iquery.Hashes = hashes
 				} else {
-					iquery = &IndexQuery{
-						// Kmers:  kmers,
-						Hashes1: kmers,
-						Ch:      chMatches,
-					}
+					iquery.Hashes1 = kmers
 				}
+				iquery.Ch = chMatches
+
 				for i := numIndices - 1; i >= 0; i-- { // start from bigger files
 					indices[i].InCh <- iquery
 				}
 
 				// get matches from all indices
 				// reuse []Match object
-				matches := poolMatches.Get().([]*Match)
-				// var _matches []Match
+				// matches := poolMatches.Get().(*[]*Match)
+				var matches *[]*Match
+				first := true
 				for i := 0; i < numIndices; i++ {
 					// block to read
 					_matches := <-chMatches
-					if len(_matches) > 0 {
-						matches = append(matches, _matches...)
+
+					// not found
+					if _matches == nil {
+						continue
 					}
-					_matches = _matches[:0]
-					poolMatches.Put(_matches)
+
+					if first {
+						matches = _matches
+						first = false
+						continue
+					}
+
+					*matches = append(*matches, (*_matches)...)
 				}
 
 				// recycle objects
 				poolChanMatches.Put(chMatches)
+				poolIndexQuery.Put(iquery)
 
 				if !singleHash {
 					hashes = hashes[:0]
@@ -853,20 +857,20 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				}
 
 				// found
-				if len(matches) > 0 {
+				if matches != nil {
 					// send result
-					result.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
-					result.DBId = db.DBId
-					result.Matches = matches
+					queryResult.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
+					queryResult.DBId = db.DBId
+					queryResult.Matches = matches
 
-					query.Ch <- result
+					query.Ch <- queryResult
 					<-tokens
 					return
 				}
 
 				// not found, try smaller k
 				if _ik == lastIk { // already the smallest k, give up
-					query.Ch <- result
+					query.Ch <- queryResult
 					<-tokens
 					return
 				}
@@ -2089,7 +2093,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			}
 
 			// results := make([]Match, 0, 8)
-			results := poolMatches.Get().([]*Match)
+			results := poolMatches.Get().(*[]*Match)
 
 			for i, _counts = range counts {
 				ix8 = i << 3
@@ -2144,7 +2148,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2170,7 +2174,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2196,7 +2200,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2222,7 +2226,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2248,7 +2252,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2274,7 +2278,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2300,7 +2304,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2326,7 +2330,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							results = append(results, &Match{
+							*results = append(*results, &Match{
 								Target:     names[k],
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
@@ -2342,7 +2346,13 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 			}
 
-			query.Ch <- results
+			// not found
+			if len(*results) == 0 {
+				poolMatches.Put(results)
+				query.Ch <- nil
+			} else {
+				query.Ch <- results
+			}
 		}
 
 		idx.done <- 1
@@ -2392,9 +2402,22 @@ var poolHashes = &sync.Pool{New: func() interface{} {
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
-	return make([]*Match, 0, 256)
+	tmp := make([]*Match, 0, 256)
+	return &tmp
 }}
 
 var poolChanMatches = &sync.Pool{New: func() interface{} {
-	return make(chan []*Match, 256)
+	return make(chan *[]*Match, 1024)
+}}
+
+var poolIndexQuery = &sync.Pool{New: func() interface{} {
+	return &IndexQuery{}
+}}
+
+var poolQueryResult = &sync.Pool{New: func() interface{} {
+	return &QueryResult{}
+}}
+
+var poolQuery = &sync.Pool{New: func() interface{} {
+	return &Query{}
 }}
