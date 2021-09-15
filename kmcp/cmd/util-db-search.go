@@ -192,11 +192,11 @@ type UnikIndexDBSearchEngine struct {
 }
 
 func channelBuffSize(v int) int {
-	return int(float64(v) * 10)
+	return int(float64(v) * 30)
 }
 
 func tokenNum(v int) int {
-	return int(float64(v) * 10)
+	return int(float64(v) * 30)
 }
 
 func extraWorkers(nIdxFiles int, threads int) int {

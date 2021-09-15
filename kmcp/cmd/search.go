@@ -456,6 +456,7 @@ Performance tips:
 					}
 				}
 
+				// do not use sync.Pool for Query
 				// query := poolQuery.Get().(*Query)
 				// query.Idx = id
 				// query.ID = recordID
@@ -486,8 +487,7 @@ Performance tips:
 				recordID := make([]byte, len(record.ID))
 				copy(recordID, record.ID)
 
-				// may block due to search engine' control
-
+				// do not use sync.Pool for Query
 				// query := poolQuery.Get().(*Query)
 				// query.Idx = id
 				// query.ID = recordID
