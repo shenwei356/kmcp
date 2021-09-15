@@ -487,10 +487,13 @@ Performance tips:
 				copy(recordID, record.ID)
 
 				// may block due to search engine' control
+
 				// query := poolQuery.Get().(*Query)
 				// query.Idx = id
 				// query.ID = recordID
 				// query.Seq = record.Seq.Clone2()
+				// sg.InCh <- query
+
 				sg.InCh <- &Query{
 					Idx: id,
 					ID:  recordID,
