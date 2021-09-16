@@ -371,18 +371,23 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				}
 
 				if firstDB { // assign once
-					queryResult = &QueryResult{
-						QueryIdx: _queryResult.QueryIdx,
-						QueryID:  _queryResult.QueryID,
-						QueryLen: _queryResult.QueryLen,
-						DBId:     _queryResult.DBId,
-						FPR:      _queryResult.FPR,
-						K:        _queryResult.K,
-						NumKmers: _queryResult.NumKmers,
-					}
+					queryResult = poolQueryResult.Get().(*QueryResult)
+
+					queryResult.QueryIdx = _queryResult.QueryIdx
+					queryResult.QueryID = _queryResult.QueryID
+					queryResult.QueryLen = _queryResult.QueryLen
+					queryResult.DBId = _queryResult.DBId
+					queryResult.FPR = _queryResult.FPR
+					queryResult.K = _queryResult.K
+					queryResult.NumKmers = _queryResult.NumKmers
 				}
 
-				if _queryResult.Matches == nil {
+				if _queryResult.Matches == nil { // one of the database does not found any matches
+					noInter = true
+
+					if firstDB {
+						firstDB = false
+					}
 					continue
 				}
 

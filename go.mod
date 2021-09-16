@@ -11,13 +11,13 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/profile v1.6.0
-	github.com/shenwei356/bio v0.3.0
-	github.com/shenwei356/breader v0.3.0
+	github.com/shenwei356/bio v0.3.1
+	github.com/shenwei356/breader v0.3.1
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
 	github.com/shenwei356/mmap-go v1.0.1
 	github.com/shenwei356/pand v0.0.5
 	github.com/shenwei356/unikmer v0.18.6
-	github.com/shenwei356/util v0.3.1
+	github.com/shenwei356/util v0.3.2
 	github.com/shenwei356/xopen v0.1.0
 	github.com/spf13/cobra v1.2.1
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
@@ -31,7 +31,7 @@ require (
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/klauspost/compress v1.13.4 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
