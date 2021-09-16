@@ -299,7 +299,6 @@ Performance tips:
 		var record *fastx.Record
 
 		var prefix2 string
-
 		// ---------------------------------------------------------------
 		// receive result and output
 
@@ -400,6 +399,7 @@ Performance tips:
 
 					if _result, ok = m[id]; ok {
 						output(_result)
+
 						delete(m, id)
 						id++
 					}

@@ -223,7 +223,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 	sg := &UnikIndexDBSearchEngine{Options: opt, DBs: dbs, DBNames: names}
 	sg.done = make(chan int)
 	sg.InCh = make(chan *Query, channelBuffSize(opt.Threads)*(1+dbs[0].ExtraWorkers))
-	sg.OutCh = make(chan *QueryResult, channelBuffSize(opt.Threads)*(1+dbs[0].ExtraWorkers))
+	sg.OutCh = make(chan *QueryResult, 2*channelBuffSize(opt.Threads)*(1+dbs[0].ExtraWorkers))
 	multipleDBs := len(dbs) > 1
 	mappingName := len(opt.NameMap) > 0
 
@@ -236,8 +236,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		doNotSort := opt.DoNotSort
 		nameMap := opt.NameMap
 
-		topN := opt.TopN
-		onlyTopN := topN > 0
+		// topN := opt.TopN
+		// onlyTopN := topN > 0
 		topNScore := opt.TopNScores
 		onlyTopNScore := topNScore > 0 && !doNotSort
 
@@ -292,9 +292,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 						(*_queryResult.Matches) = (*(_queryResult.Matches))[:i+1]
 					}
 
-					if onlyTopN && len(*_queryResult.Matches) > topN {
-						(*_queryResult.Matches) = (*(_queryResult.Matches))[:topN]
-					}
+					// if onlyTopN && len(*_queryResult.Matches) > topN {
+					// 	(*_queryResult.Matches) = (*(_queryResult.Matches))[:topN]
+					// }
 
 					if mappingName {
 						var _m *Match
@@ -333,6 +333,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			return
 		}
 
+		// may not be updated in time
 		handleQueryMultiDBs := func(query *Query) {
 			query.Ch = make(chan *QueryResult, nDBs)
 
@@ -502,9 +503,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				(*queryResult.Matches) = (*(queryResult.Matches))[:i+1]
 			}
 
-			if onlyTopN && len(*queryResult.Matches) > topN {
-				(*queryResult.Matches) = (*(queryResult.Matches))[:topN]
-			}
+			// if onlyTopN && len(*queryResult.Matches) > topN {
+			// 	(*queryResult.Matches) = (*(queryResult.Matches))[:topN]
+			// }
 
 			if mappingName {
 				var _m *Match
@@ -1025,8 +1026,6 @@ type UnikIndex struct {
 
 	// -------------------------------
 
-	moreThanOneHash bool
-
 	useMmap bool
 	sigs    mmap.MMap // mapped sigatures
 	sigsB   []byte
@@ -1068,6 +1067,11 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 	h.NumRowBytes = reader.NumRowBytes
 	h.NumSigs = reader.NumSigs
 
+	useMmap := opt.UseMMap
+	numHashes := reader.NumHashes
+	moreThanOneHash := numHashes > 1
+	moreThanTwoHashes := numHashes > 2
+
 	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
 	idx.useMmap = opt.UseMMap
 
@@ -1082,41 +1086,42 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		idx.sigsB = []byte(idx.sigs)
 	}
 
-	idx.moreThanOneHash = reader.NumHashes > 1
-
 	// -------------------------------------------------------
 
 	// receive query and execute
 	fn := func() {
-		names := idx.Header.Names
-		gsizes := idx.Header.GSizes
-		indices := idx.Header.Indices
-		numNames := len(idx.Header.Names)
-		numRowBytes := idx.Header.NumRowBytes
-		numSigs := idx.Header.NumSigs
+		names := h.Names
+		gsizes := h.GSizes
+		indices := h.Indices
+		numNames := len(h.Names)
+		numRowBytes := h.NumRowBytes
+		numSigs := h.NumSigs
 		numSigsUint := uint64(numSigs)
 		// numSigsUintM1 := numSigsUint - 1
-		offset0 := int(idx.offset0)
-		fh := idx.fh
-		sizes := idx.Header.Sizes
+		offset0 := int(offset)
+		fh := fh
+		sizes := h.Sizes
 		sigs := idx.sigsB
-		// useMmap := idx.useMmap
-		useMmap := opt.UseMMap
-		moreThanOneHash := idx.moreThanOneHash
-		moreThanTwoHashes := idx.reader.NumHashes > 2
-		queryCov := idx.Options.MinQueryCov
-		targetCov := idx.Options.MinTargetCov
-		minMatched := idx.Options.MinMatched
+
+		// use local variables
+		useMmap := useMmap
+		numHashes := numHashes
+		moreThanOneHash := moreThanOneHash
+		moreThanTwoHashes := moreThanTwoHashes
+
+		queryCov := opt.MinQueryCov
+		targetCov := opt.MinTargetCov
+		minMatched := opt.MinMatched
 		// compactSize := idx.Header.Compact
 
 		// bit matrix
-		data := make([][]byte, reader.NumHashes)
+		data := make([][]byte, numHashes)
 
 		// byte matrix for counting
 		buffs := make([][]byte, PosPopCountBufSize)
 
 		if moreThanOneHash {
-			for i := 0; i < int(reader.NumHashes); i++ {
+			for i := 0; i < int(numHashes); i++ {
 				data[i] = make([]byte, numRowBytes)
 			}
 			for i := 0; i < PosPopCountBufSize; i++ {
