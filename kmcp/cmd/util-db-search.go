@@ -146,8 +146,8 @@ func (ms SortByJacc) Less(i int, j int) bool {
 // IndexQuery is a query sent to multiple indices of a database.
 type IndexQuery struct {
 	// Kmers  []uint64
-	Hashes  [][]uint64 // related to database
-	Hashes1 []uint64
+	Hashes  *[][]uint64 // related to database
+	Hashes1 *[]uint64
 
 	Ch chan *[]*Match // result chanel
 }
@@ -241,15 +241,22 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 		topNScore := opt.TopNScores
 		onlyTopNScore := topNScore > 0 && !doNotSort
 
+		var poolChanQueryResult = &sync.Pool{New: func() interface{} {
+			return make(chan *QueryResult, nDBs)
+		}}
+
 		if !multipleDBs {
 			handleQuerySingleDB := func(query *Query) {
-				query.Ch = make(chan *QueryResult, nDBs)
+				// query.Ch = make(chan *QueryResult, nDBs)
+				query.Ch = poolChanQueryResult.Get().(chan *QueryResult)
 
 				// send to DB
 				sg.DBs[0].InCh <- query
 
 				// wait and receive result from it
 				_queryResult := <-query.Ch
+
+				poolChanQueryResult.Put(query.Ch)
 
 				if _queryResult.Matches != nil {
 					if len(*_queryResult.Matches) > 1 && !doNotSort {
@@ -316,7 +323,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 
 				sg.OutCh <- _queryResult
 
-				// poolQuery.Put(query)
+				poolSeq.Put(query.Seq)
+				poolQuery.Put(query)
 
 				wg.Done()
 				<-tokens
@@ -454,7 +462,8 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				queryResult.Matches = nil
 				sg.OutCh <- queryResult
 
-				// poolQuery.Put(query)
+				poolSeq.Put(query.Seq)
+				poolQuery.Put(query)
 
 				wg.Done()
 				<-tokens
@@ -530,7 +539,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			}
 
 			sg.OutCh <- queryResult
-			// poolQuery.Put(query)
+
+			poolSeq.Put(query.Seq)
+			poolQuery.Put(query)
 
 			wg.Done()
 			<-tokens
@@ -743,12 +754,12 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
-				kmers := poolKmers.Get().([]uint64)
+				kmers := poolKmers.Get().(*[]uint64)
 				kmers, err = db.generateKmers(query.Seq, k, kmers)
 				if err != nil {
 					checkError(err)
 				}
-				nKmers := len(kmers)
+				nKmers := len(*kmers)
 
 				queryResult.NumKmers = nKmers
 
@@ -774,39 +785,39 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					// }
 					// kmers = kmers[:i]
 
-					sortutil.Uint64s(kmers)
-					_kmers := poolKmers.Get().([]uint64)
+					sortutil.Uint64s(*kmers)
+					_kmers := poolKmers.Get().(*[]uint64)
 					var p uint64 = math.MaxUint64
 					i := 0
-					for _, v := range kmers {
+					for _, v := range *kmers {
 						if p != v {
-							_kmers = append(_kmers, v)
+							*_kmers = append(*_kmers, v)
 							i++
 							p = v
 						}
 					}
-					kmers = kmers[:0]
+					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 					kmers = _kmers
 				}
 
 				// update nKmers
-				nKmers = len(kmers)
+				nKmers = len(*kmers)
 
 				queryResult.NumKmers = nKmers
 
 				// compute hashes
 				// reuse [][]uint64 object, to reduce GC
-				var hashes [][]uint64
+				var hashes *[][]uint64
 				if !singleHash {
-					hashes = poolHashes.Get().([][]uint64)
-					for _, kmer := range kmers {
+					hashes = poolHashes.Get().(*[][]uint64)
+					for _, kmer := range *kmers {
 						// for kmer := range kmers {
-						hashes = append(hashes, hashValues(kmer, numHashes))
+						*hashes = append(*hashes, hashValues(kmer, numHashes))
 					}
 
 					// recycle kmer-sketch ([]uint64) object
-					kmers = kmers[:0]
+					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 				}
 
@@ -854,10 +865,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				poolIndexQuery.Put(iquery)
 
 				if !singleHash {
-					hashes = hashes[:0]
+					*hashes = (*hashes)[:0]
 					poolHashes.Put(hashes)
 				} else {
-					kmers = kmers[:0]
+					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 				}
 
@@ -892,7 +903,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	return db, nil
 }
 
-func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers []uint64) ([]uint64, error) {
+func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) (*[]uint64, error) {
 	scaled := db.Info.Scaled
 	scale := db.Info.Scale
 	maxHash := ^uint64(0)
@@ -930,7 +941,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers []uint64) (
 			if scaled && code > maxHash {
 				continue
 			}
-			kmers = append(kmers, code)
+			*kmers = append(*kmers, code)
 		}
 	} else if db.Info.Minimizer {
 		for {
@@ -941,7 +952,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers []uint64) (
 			if scaled && code > maxHash {
 				continue
 			}
-			kmers = append(kmers, code)
+			*kmers = append(*kmers, code)
 		}
 	} else {
 		for {
@@ -952,7 +963,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers []uint64) (
 			if scaled && code > maxHash {
 				continue
 			}
-			kmers = append(kmers, code)
+			*kmers = append(*kmers, code)
 		}
 	}
 	return kmers, nil
@@ -1215,8 +1226,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		var row []byte
 		// var b byte
 		var _h uint64
-		var hashes [][]uint64
-		var hashes1 []uint64
+		var hashes *[][]uint64
+		var hashes1 *[]uint64
 		var nHashes float64
 		var bufIdx int
 
@@ -1237,10 +1248,10 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		for query := range idx.InCh {
 			if moreThanOneHash {
 				hashes = query.Hashes
-				nHashes = float64(len(hashes))
+				nHashes = float64(len(*hashes))
 			} else {
 				hashes1 = query.Hashes1
-				nHashes = float64(len(hashes1))
+				nHashes = float64(len(*hashes1))
 			}
 
 			// reset counts
@@ -1255,7 +1266,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			if useMmap {
 				// if compactSize {
 				if moreThanOneHash {
-					for _, hs = range hashes {
+					for _, hs = range *hashes {
 						for i, _h = range hs {
 							loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
@@ -1359,7 +1370,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						}
 					}
 				} else {
-					for _, _h = range hashes1 {
+					for _, _h = range *hashes1 {
 						loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						offset = offset0 + loc*numRowBytes
@@ -1653,7 +1664,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			} else { // !useMmap {
 				// if compactSize {
 				if moreThanOneHash {
-					for _, hs = range hashes {
+					for _, hs = range *hashes {
 						for i, _h = range hs {
 							loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
@@ -1761,7 +1772,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						}
 					}
 				} else {
-					for _, _h = range hashes1 {
+					for _, _h = range *hashes1 {
 						loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						// offset = offset0 + loc*numRowBytes
@@ -2403,15 +2414,17 @@ func (idx *UnikIndex) Close() error {
 }
 
 var poolKmers = &sync.Pool{New: func() interface{} {
-	return make([]uint64, 0, 256)
+	tmp := make([]uint64, 0, 256)
+	return &tmp
 }}
 
 var poolHashes = &sync.Pool{New: func() interface{} {
-	return make([][]uint64, 0, 256)
+	tmp := make([][]uint64, 0, 256)
+	return &tmp
 }}
 
 var poolMatches = &sync.Pool{New: func() interface{} {
-	tmp := make([]*Match, 0, 256)
+	tmp := make([]*Match, 0, 1024)
 	return &tmp
 }}
 

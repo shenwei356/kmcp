@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -616,17 +617,17 @@ Performance tips:
 				}
 
 				// do not use sync.Pool for Query
-				// query := poolQuery.Get().(*Query)
-				// query.Idx = id
-				// query.ID = recordID
-				// query.Seq = sequence
-				// sg.InCh <- query
+				query := poolQuery.Get().(*Query)
+				query.Idx = id
+				query.ID = recordID
+				query.Seq = sequence
+				sg.InCh <- query
 
-				sg.InCh <- &Query{
-					Idx: id,
-					ID:  recordID,
-					Seq: sequence,
-				}
+				// sg.InCh <- &Query{
+				// 	Idx: id,
+				// 	ID:  recordID,
+				// 	Seq: sequence,
+				// }
 
 				id++
 
@@ -647,17 +648,18 @@ Performance tips:
 				copy(recordID, record.ID)
 
 				// do not use sync.Pool for Query
-				// query := poolQuery.Get().(*Query)
-				// query.Idx = id
-				// query.ID = recordID
+				query := poolQuery.Get().(*Query)
+				query.Idx = id
+				query.ID = recordID
 				// query.Seq = record.Seq.Clone2()
-				// sg.InCh <- query
+				query.Seq = cloneFastx(record.Seq)
+				sg.InCh <- query
 
-				sg.InCh <- &Query{
-					Idx: id,
-					ID:  recordID,
-					Seq: record.Seq.Clone2(),
-				}
+				// sg.InCh <- &Query{
+				// 	Idx: id,
+				// 	ID:  recordID,
+				// 	Seq: record.Seq.Clone2(),
+				// }
 
 				id++
 			}
@@ -710,3 +712,32 @@ func init() {
 	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
 
 }
+
+func cloneFastx(sequence *seq.Seq) *seq.Seq {
+	s := make([]byte, len(sequence.Seq))
+	copy(s, sequence.Seq)
+
+	q := make([]byte, len(sequence.Qual))
+	copy(q, sequence.Qual)
+
+	qv := make([]int, len(sequence.QualValue))
+	copy(qv, sequence.QualValue)
+
+	// return &seq.Seq{
+	// 	Alphabet:  sequence.Alphabet,
+	// 	Seq:       s,
+	// 	Qual:      q,
+	// 	QualValue: qv,
+	// }
+
+	clone := poolSeq.Get().(*seq.Seq)
+	clone.Alphabet = sequence.Alphabet
+	clone.Seq = s
+	clone.Qual = q
+	clone.QualValue = qv
+	return clone
+}
+
+var poolSeq = &sync.Pool{New: func() interface{} {
+	return &seq.Seq{}
+}}
