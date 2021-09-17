@@ -1059,6 +1059,7 @@ Taxonomic binning formats:
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
 												Scores:       make([]float64, m.IdxNum),
+												NScores:      make([]int, m.IdxNum),
 											}
 											profile2[h] = &t0
 											t = &t0
@@ -1068,7 +1069,10 @@ Taxonomic binning formats:
 
 										if first { // count once
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
-											t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
+											if levelSpecies && theSameSpecies {
+												t.Scores[m.FragIdx] += similarity(m.QCov)
+												t.NScores[m.FragIdx]++
+											}
 											first = false
 										}
 
@@ -1106,6 +1110,7 @@ Taxonomic binning formats:
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
 											Scores:       make([]float64, m.IdxNum),
+											NScores:      make([]int, m.IdxNum),
 										}
 										profile2[h] = &t0
 										t = &t0
@@ -1117,11 +1122,11 @@ Taxonomic binning formats:
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
 											}
+											t.Scores[m.FragIdx] += similarity(m.QCov)
+											t.NScores[m.FragIdx]++
 										}
 
 										t.QLen[m.FragIdx] += float64(m.QLen)
-										prop = 1
-										t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 										first = false
 
 										if outputBinningResult {
@@ -1279,6 +1284,7 @@ Taxonomic binning formats:
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
 									Scores:       make([]float64, m.IdxNum),
+									NScores:      make([]int, m.IdxNum),
 								}
 								profile2[h] = &t0
 								t = &t0
@@ -1288,7 +1294,10 @@ Taxonomic binning formats:
 
 							if first { // count once
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
-								t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
+								if levelSpecies && theSameSpecies {
+									t.Scores[m.FragIdx] += similarity(m.QCov)
+									t.NScores[m.FragIdx]++
+								}
 								first = false
 							}
 
@@ -1325,6 +1334,7 @@ Taxonomic binning formats:
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
 								Scores:       make([]float64, m.IdxNum),
+								NScores:      make([]int, m.IdxNum),
 							}
 							profile2[h] = &t0
 							t = &t0
@@ -1336,11 +1346,11 @@ Taxonomic binning formats:
 								if m.QCov >= hicUreadsMinQcov {
 									t.UniqMatchHic[m.FragIdx]++
 								}
+								t.Scores[m.FragIdx] += similarity(m.QCov)
+								t.NScores[m.FragIdx]++
 							}
 
 							t.QLen[m.FragIdx] += float64(m.QLen)
-							prop = 1
-							t.Scores[m.FragIdx] += -math.Log10(m.FPR) * prop * m.QCov
 							first = false
 
 							if outputBinningResult {
@@ -1425,7 +1435,13 @@ Taxonomic binning formats:
 			for _, c2 = range t.Scores {
 				t.Score += c2
 			}
-			t.Score /= t.SumMatch
+
+			for _, c3 := range t.NScores {
+				t.SumNScores += c3
+			}
+
+			t.Score /= float64(t.SumNScores)
+			t.Score *= 100 * t.FragsProp
 
 			targets = append(targets, t)
 		}
@@ -1713,4 +1729,8 @@ func init() {
 	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
+}
+
+func similarity(qcov float64) float64 {
+	return math.Sqrt(math.Sqrt(math.Sqrt(math.Sqrt(qcov))))
 }

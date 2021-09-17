@@ -56,21 +56,23 @@ https://data.cami-challenge.org/participate
     reads=19122017_mousegut_scaffolds
     
     
+    t=0.55
+    j=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -v db=$db -v dbname=$dbname -j 4 -v j=$j \
-            'kmcp search -d {db} {} -o {}.kmcp@{dbname}.tsv.gz --log {}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+        | rush -v db=$db -v dbname=$dbname -v t=$t -j 4 -v j=$j \
+            'kmcp search -d {db} {} -o {}.kmcp@{dbname}.t{t}.tsv.gz --log {}.kmcp@{dbname}.t{t}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
 
     X=taxdump
     T=ref2taxid.tsv
-    fd kmcp@$dbname.tsv.gz$ $reads/ \
+    fd kmcp@$dbname.t$t.tsv.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T \
             'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {@sample_(\d+)}' 
     
-    profile=$reads@$dbname.c.profile
-    fd kmcp@$dbname.tsv.gz.c.profile$ $reads/ \
+    profile=$reads@$dbname.t$t.c.profile
+    fd kmcp@$dbname.t$t.tsv.gz.c.profile$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $profile

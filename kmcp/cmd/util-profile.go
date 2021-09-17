@@ -162,6 +162,9 @@ type Target struct {
 
 	Percentage float64
 
+	NScores    []int
+	SumNScores int
+
 	Scores []float64
 	Score  float64
 }
