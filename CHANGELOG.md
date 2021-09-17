@@ -5,7 +5,6 @@
 - `search`:
     - better log.
     - fix matches order of a query.
-    - avoid uneccessary allocation.
     - 12-15% faster.
 
 ### v0.6.0 - 2021-08-13

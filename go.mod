@@ -16,7 +16,7 @@ require (
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
 	github.com/shenwei356/mmap-go v1.0.1
 	github.com/shenwei356/pand v0.0.5
-	github.com/shenwei356/unikmer v0.18.6
+	github.com/shenwei356/unikmer v0.18.8
 	github.com/shenwei356/util v0.3.2
 	github.com/shenwei356/xopen v0.1.0
 	github.com/spf13/cobra v1.2.1
@@ -38,6 +38,6 @@ require (
 	github.com/shenwei356/bpool v0.0.0-20160710042833-f9e0ee4d0403 // indirect
 	github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/will-rowe/nthash v0.3.0 // indirect
+	github.com/will-rowe/nthash v0.4.0 // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 )

@@ -74,9 +74,13 @@ Performance tips:
 		if opt.Log2File {
 			fhLog = addLog(opt.LogFile, opt.Verbose)
 		}
+
+		outputLog := opt.Verbose || opt.Log2File
+		verbose := opt.Verbose
+
 		timeStart := time.Now()
 		defer func() {
-			if opt.Verbose || opt.Log2File {
+			if outputLog {
 				log.Info()
 				log.Infof("elapsed time: %s", time.Since(timeStart))
 				log.Info()
@@ -163,7 +167,7 @@ Performance tips:
 			checkError(fmt.Errorf("invalid kmcp database: %s", dbDir))
 		}
 
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			log.Infof("kmcp v%s", VERSION)
 			log.Info("  https://github.com/shenwei356/kmcp")
 			log.Info()
@@ -175,7 +179,7 @@ Performance tips:
 		var namesMap map[string]string
 		mappingNames := len(nameMappingFiles) != 0
 		if mappingNames {
-			if opt.Verbose || opt.Log2File {
+			if outputLog {
 				log.Infof("loading name mapping file ...")
 			}
 			nameMappingFile := nameMappingFiles[0]
@@ -196,7 +200,7 @@ Performance tips:
 				}
 			}
 
-			if opt.Verbose || opt.Log2File {
+			if outputLog {
 				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
 			}
 
@@ -206,11 +210,11 @@ Performance tips:
 		// ---------------------------------------------------------------
 		// input files
 
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			log.Info("checking input files ...")
 		}
 		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			if len(files) == 1 && isStdin(files[0]) {
 				log.Info("  no files given, reading from stdin")
 			} else {
@@ -228,7 +232,7 @@ Performance tips:
 		// ---------------------------------------------------------------
 		// load db
 
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			if useMmap {
 				log.Info("loading database with mmap enabled ...")
 			} else {
@@ -265,7 +269,7 @@ Performance tips:
 				checkError(fmt.Errorf("query coverage threshold (%f) should not be smaller than FPR of single bloom filter of index database (%f)", queryCov, db.Info.FPR))
 			}
 		}
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			log.Infof("database loaded: %s", dbDir)
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -305,10 +309,8 @@ Performance tips:
 		var total, matched uint64
 		var speed float64 // k reads/second
 
-		output := func(result *QueryResult) {
-			if opt.Verbose || opt.Log2File {
-				total++
-			}
+		// output = func(result *QueryResult) {
+		_ = func(result *QueryResult) {
 
 			if result.Matches == nil {
 				if !keepUnmatched {
@@ -326,19 +328,12 @@ Performance tips:
 					0, 0,
 					float64(0), float64(0), float64(0), result.QueryIdx))
 
-				// if immediateOutput {
-				outfh.Flush()
-				// }
-
 				poolQueryResult.Put(result)
 				return
 			}
 
 			// found
-
-			if opt.Verbose {
-				matched++
-			}
+			matched++
 
 			// query, len_query, num_kmers, fpr, num_matches,
 			// prefix2 = fmt.Sprintf("%d\t%s\t%d\t%d\t%e\t%d",
@@ -371,16 +366,61 @@ Performance tips:
 		done := make(chan int)
 		go func() {
 			if !keepOrder {
+				var match *Match
+
 				for result := range sg.OutCh {
-					output(result)
+					total++
+
+					// output(result)
+					if result.Matches == nil {
+						if !keepUnmatched {
+							poolQueryResult.Put(result)
+							continue
+						}
+
+						prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+							result.QueryID, result.QueryLen,
+							result.NumKmers, result.FPR, 0)
+
+						outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+							prefix2,
+							"", -1, 0, 0,
+							0, 0,
+							float64(0), float64(0), float64(0), result.QueryIdx))
+
+						poolQueryResult.Put(result)
+						continue
+					}
+
+					matched++
+					prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+						result.QueryID, result.QueryLen,
+						result.NumKmers, result.FPR, len(*result.Matches))
+
+					for _, match = range *result.Matches {
+						outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+							prefix2,
+							match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
+							result.K, match.NumKmers,
+							match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+					}
+
+					outfh.Flush()
+
+					(*result.Matches) = (*(result.Matches))[:0]
+					poolMatches.Put(result.Matches)
+
+					poolQueryResult.Put(result)
 				}
 			} else {
 				m := make(map[uint64]*QueryResult, opt.NumCPUs)
 				var id, _id uint64
 				var ok bool
-				var _result *QueryResult
+				var match *Match
+
 				for result := range sg.OutCh {
-					if opt.Verbose {
+					if verbose {
+						total++
 						if (total < 8192 && total&63 == 0) || total&8191 == 0 {
 							speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
 							fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
@@ -390,15 +430,92 @@ Performance tips:
 					_id = result.QueryIdx
 
 					if _id == id {
-						output(result)
+						// output(result)
+
+						if result.Matches == nil {
+							if !keepUnmatched {
+								poolQueryResult.Put(result)
+							} else {
+								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+									result.QueryID, result.QueryLen,
+									result.NumKmers, result.FPR, 0)
+
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									"", -1, 0, 0,
+									0, 0,
+									float64(0), float64(0), float64(0), result.QueryIdx))
+
+								poolQueryResult.Put(result)
+							}
+						} else {
+							matched++
+							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+								result.QueryID, result.QueryLen,
+								result.NumKmers, result.FPR, len(*result.Matches))
+
+							for _, match = range *result.Matches {
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
+									result.K, match.NumKmers,
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+							}
+
+							outfh.Flush()
+
+							(*result.Matches) = (*(result.Matches))[:0]
+							poolMatches.Put(result.Matches)
+
+							poolQueryResult.Put(result)
+						}
+
 						id++
 						continue
 					}
 
 					m[_id] = result
 
-					if _result, ok = m[id]; ok {
-						output(_result)
+					if result, ok = m[id]; ok {
+						// output(_result)
+
+						if result.Matches == nil {
+							if !keepUnmatched {
+								poolQueryResult.Put(result)
+							} else {
+								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+									result.QueryID, result.QueryLen,
+									result.NumKmers, result.FPR, 0)
+
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									"", -1, 0, 0,
+									0, 0,
+									float64(0), float64(0), float64(0), result.QueryIdx))
+
+								poolQueryResult.Put(result)
+							}
+						} else {
+							matched++
+							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+								result.QueryID, result.QueryLen,
+								result.NumKmers, result.FPR, len(*result.Matches))
+
+							for _, match = range *result.Matches {
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
+									result.K, match.NumKmers,
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+							}
+
+							outfh.Flush()
+
+							(*result.Matches) = (*(result.Matches))[:0]
+							poolMatches.Put(result.Matches)
+
+							poolQueryResult.Put(result)
+						}
 
 						delete(m, id)
 						id++
@@ -413,8 +530,50 @@ Performance tips:
 						i++
 					}
 					sortutil.Uint64s(ids)
+					var result *QueryResult
 					for _, id = range ids {
-						output(m[id])
+						// output(m[id])
+
+						result = m[id]
+
+						if result.Matches == nil {
+							if !keepUnmatched {
+								poolQueryResult.Put(result)
+							} else {
+								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+									result.QueryID, result.QueryLen,
+									result.NumKmers, result.FPR, 0)
+
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									"", -1, 0, 0,
+									0, 0,
+									float64(0), float64(0), float64(0), result.QueryIdx))
+
+								poolQueryResult.Put(result)
+							}
+						} else {
+							matched++
+							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
+								result.QueryID, result.QueryLen,
+								result.NumKmers, result.FPR, len(*result.Matches))
+
+							for _, match = range *result.Matches {
+								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+									prefix2,
+									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
+									result.K, match.NumKmers,
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+							}
+
+							outfh.Flush()
+
+							(*result.Matches) = (*(result.Matches))[:0]
+							poolMatches.Put(result.Matches)
+
+							poolQueryResult.Put(result)
+						}
+
 					}
 				}
 			}
@@ -426,7 +585,7 @@ Performance tips:
 
 		var id uint64
 		for _, file := range files {
-			if opt.Verbose || opt.Log2File {
+			if outputLog {
 				log.Infof("reading sequence file: %s", file)
 			}
 			fastxReader, err = fastx.NewDefaultReader(file)
@@ -509,7 +668,7 @@ Performance tips:
 		<-done    // all result returned and outputed
 
 		checkError(sg.Close()) // cleanup
-		if opt.Verbose || opt.Log2File {
+		if outputLog {
 			fmt.Fprintf(os.Stderr, "\n")
 
 			speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
