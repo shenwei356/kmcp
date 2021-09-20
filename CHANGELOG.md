@@ -5,7 +5,7 @@
 - `search`:
     - better log.
     - fix matches order of a query.
-    - 12-15% faster.
+    - 10-25% faster.
     - change default value of flag -t/--min-query-qcov from `0.6` to `0.55`.
 - `profile`:
     - change computation of `score`.
