@@ -79,7 +79,9 @@ Accuracy notes:
      could decrease the sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
-  *. --keep-perfect-match is not recommended, which decreases sensitivity.  
+  *. --keep-perfect-match is not recommended, which decreases sensitivity. 
+  *. -m/--keep-main-match is not recommended, which affects accuracy of
+     abundance estimation.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -1688,7 +1690,7 @@ func init() {
 
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
-	profileCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage of a read in search result`)
+	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-qcovs", "n", 5, `keep matches with the top N qcovs for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
 	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)`)

@@ -695,7 +695,7 @@ func init() {
 	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as query`)
 	searchCmd.Flags().IntP("min-kmers", "c", 30, `minimal number of matched k-mers (sketches)`)
 	searchCmd.Flags().IntP("min-query-len", "m", 70, `minimal query length`)
-	searchCmd.Flags().Float64P("min-query-cov", "t", 0.6, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
+	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
 
 	// output

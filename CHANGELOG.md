@@ -6,8 +6,10 @@
     - better log.
     - fix matches order of a query.
     - 12-15% faster.
+    - change default value of flag -t/--min-query-qcov from `0.6` to `0.55`.
 - `profile`:
     - change computation of `score`.
+    - change default value of flag -t/--min-query-qcov from `0.6` to `0.55`.
 
 ### v0.6.0 - 2021-08-13
 
