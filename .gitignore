@@ -46,6 +46,7 @@ _info.txt
 t.gz
 *.binning
 
-all*
+analysis/kmer-similarity/*/all.n*
+analysis/kmer-similarity/*/*.fasta
 
-analysis/mutation/*/*.gz
+analysis/kmer-similarity/*/*.gz

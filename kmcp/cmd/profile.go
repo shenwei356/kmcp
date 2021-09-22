@@ -431,7 +431,8 @@ Taxonomic binning formats:
 		// ---------------------------------------------------------------
 
 		pool := &sync.Pool{New: func() interface{} {
-			return make([]string, numFields)
+			tmp := make([]string, numFields)
+			return &tmp
 		}}
 
 		fn := func(line string) (interface{}, bool, error) {
@@ -439,9 +440,9 @@ Taxonomic binning formats:
 				return "", false, nil
 			}
 
-			items := pool.Get().([]string)
+			items := pool.Get().(*[]string)
 
-			match, ok := parseMatchResult(line, numFields, &items, maxFPR, minQcov)
+			match, ok := parseMatchResult(line, numFields, items, maxFPR, minQcov)
 			if !ok {
 				pool.Put(items)
 				return nil, false, nil
@@ -1443,7 +1444,7 @@ Taxonomic binning formats:
 			}
 
 			t.Score /= float64(t.SumNScores)
-			t.Score *= 100 * t.FragsProp
+			t.Score *= t.FragsProp
 
 			targets = append(targets, t)
 		}
@@ -1734,5 +1735,6 @@ func init() {
 }
 
 func similarity(qcov float64) float64 {
-	return math.Sqrt(math.Sqrt(math.Sqrt(math.Sqrt(qcov))))
+	square := qcov * qcov
+	return 87.4572 + 26.4016*qcov - 21.9855*square + 7.3097*square*qcov
 }
