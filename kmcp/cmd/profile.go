@@ -50,16 +50,19 @@ var profileCmd = &cobra.Command{
 	Long: `Generate taxonomic profile from search results
 
 Methods:
-  1. We use the two-stage taxonomy assignment algorithm in MegaPath
-     to reduce the false positive of ambiguous matches.
-  2. Multi-aligned queries are proportionally assigned to references
-     with the strategy in Metalign.
-  3. More strategies are adopted to increase accuracy.
-  4. Reference genomes can be splitted into fragments when computing
+  1. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-prop).
-  5. Input files are parsed 3 times, therefore STDIN is not supported.
+     (-p/--min-frags-prop). (***highly recommended***)
+  2. We require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
+  3. We also use the two-stage taxonomy assignment algorithm in MegaPath
+     to reduce the false positive of ambiguous matches.
+     While it only has little effect on the abundance.
+  4. Multi-aligned queries are proportionally assigned to references
+     with the strategy in Metalign.
+  5. Input files are parsed three times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
@@ -69,8 +72,8 @@ Accuracy notes:
   *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
      positive rate (-f/--max-fpr) of a query.
   *. And we require part of the uniquely matched reads of a reference
-     having high similarity, i.e., with high confidence to decrease
-     the false positive.
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
      *. -U/--min-hic-ureads,      minimal number, >= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
