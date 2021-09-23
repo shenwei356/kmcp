@@ -228,6 +228,28 @@ func stringSplitN(s string, sep string, n int, a *[]string) {
 	(*a) = (*a)[:i+1]
 }
 
+func stringSplitNByByte(s string, sep byte, n int, a *[]string) {
+	if a == nil {
+		tmp := make([]string, n)
+		a = &tmp
+	}
+
+	n--
+	i := 0
+	for i < n {
+		m := strings.IndexByte(s, sep)
+		if m < 0 {
+			break
+		}
+		(*a)[i] = s[:m]
+		s = s[m+1:]
+		i++
+	}
+	(*a)[i] = s
+
+	(*a) = (*a)[:i+1]
+}
+
 // modify from https://github.com/mxschmitt/golang-combinations/blob/master/combinations.go
 // too slow for big n.
 func Combinations(set []uint64, n int) (subsets [][]uint64) {

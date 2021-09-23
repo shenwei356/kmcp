@@ -10,6 +10,7 @@
 - `profile`:
     - change computation of `score`.
     - change default value of flag -t/--min-query-qcov from `0.6` to `0.55`.
+    - 20% faster.
 
 ### v0.6.0 - 2021-08-13
 

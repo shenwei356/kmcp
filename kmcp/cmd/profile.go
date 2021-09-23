@@ -364,6 +364,7 @@ Taxonomic binning formats:
 
 			if mappingTaxids {
 				taxdb = loadTaxonomy(opt, taxonomyDataDir)
+				taxdb.CacheLCA()
 			} else {
 				checkError(fmt.Errorf("no valid TaxIds found in TaxId mapping file: %s", strings.Join(taxidMappingFiles, ", ")))
 			}
@@ -467,24 +468,21 @@ Taxonomic binning formats:
 				log.Infof("  parsing file: %s", file)
 			}
 
-			var matches map[uint64]*[]MatchResult // target -> match result
-			var m MatchResult
-			var ms *[]MatchResult
+			var matches map[uint64]*[]*MatchResult // target -> match result
+			var m *MatchResult
+			var ms *[]*MatchResult
 			var t *Target
 			var ok bool
 			var hTarget, h uint64
 			var prevQuery string
 			var floatMsSize float64
-			var match MatchResult
+			var match *MatchResult
 			var first bool
 
 			onlyTopNScore := topNScore > 0
 			var nScore int
 			var pScore float64
 			var processThisMatch bool
-			pScore = 1024
-			nScore = 0
-			processThisMatch = true
 
 			taxids := make([]uint32, 0, 128)
 			var taxid1, taxid2 uint32
@@ -494,11 +492,15 @@ Taxonomic binning formats:
 			checkError(err)
 			var data interface{}
 
+			matches = make(map[uint64]*[]*MatchResult)
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 			for chunk := range reader.Ch {
 				checkError(chunk.Err)
 
 				for _, data = range chunk.Data {
-					match = data.(MatchResult)
+					match = data.(*MatchResult)
 
 					if prevQuery != match.Query { // new query
 						nReads++
@@ -545,6 +547,7 @@ Taxonomic binning formats:
 											}
 										}
 										t.QLen[m.FragIdx] += float64(m.QLen)
+
 										first = false
 									}
 
@@ -552,10 +555,11 @@ Taxonomic binning formats:
 									// the sum is still the one.
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
+								poolMatchResults.Put(ms)
 							}
 						}
 
-						matches = make(map[uint64]*[]MatchResult)
+						matches = make(map[uint64]*[]*MatchResult)
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
@@ -604,8 +608,11 @@ Taxonomic binning formats:
 
 					hTarget = wyhash.HashString(match.Target, 1)
 					if ms, ok = matches[hTarget]; !ok {
-						tmp := []MatchResult{match}
-						matches[hTarget] = &tmp
+						// tmp := []*MatchResult{match}
+						tmp := poolMatchResults.Get().(*[]*MatchResult)
+						*tmp = (*tmp)[:0]
+						*tmp = append(*tmp, match)
+						matches[hTarget] = tmp
 					} else {
 						*ms = append(*ms, match)
 					}
@@ -636,7 +643,7 @@ Taxonomic binning formats:
 			for h, ms = range matches {
 				floatMsSize = float64(len(*ms))
 				first = true
-				for _, m = range *ms {
+				for _, m = range *ms { // multiple matches in different fragments
 					if t, ok = profile[h]; !ok {
 						t0 := Target{
 							Name:         m.Target,
@@ -658,6 +665,7 @@ Taxonomic binning formats:
 							}
 						}
 						t.QLen[m.FragIdx] += float64(m.QLen)
+
 						first = false
 					}
 
@@ -665,6 +673,7 @@ Taxonomic binning formats:
 					// the sum is still the one.
 					t.Match[m.FragIdx] += floatOne / floatMsSize
 				}
+				poolMatchResults.Put(ms)
 			}
 		}
 
@@ -679,7 +688,7 @@ Taxonomic binning formats:
 		var c1 float64
 		var c2 float64
 		var hs []uint64
-		hs = make([]uint64, 0, 1024) // list to delete
+		hs = make([]uint64, 0, 10240) // list to delete
 		for h, t := range profile {
 			for _, c = range t.Match {
 				if c > minReads {
@@ -708,15 +717,15 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				continue
 			}
-			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+			if t.SumUniqMatchHic < t.SumUniqMatch*HicUreadsMinProp {
 				hs = append(hs, h)
 				continue
 			}
 
-			for _, c2 = range t.QLen {
-				t.Qlens += c2
-			}
-			t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
+			// for _, c2 = range t.QLen {
+			// 	t.Qlens += c2
+			// }
+			// t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
 		}
 
 		for _, h := range hs {
@@ -744,13 +753,13 @@ Taxonomic binning formats:
 				log.Infof("  parsing file: %s", file)
 			}
 
-			var matches map[uint64]*[]MatchResult // target -> match result
+			var matches map[uint64]*[]*MatchResult // target -> match result
 			var ok bool
-			var ms *[]MatchResult
+			// var ms *[]*MatchResult
 			var hTarget, h, h1, h2 uint64
 			var prevQuery string
 			hs := make([]uint64, 0, 256)
-			var match MatchResult
+			var match *MatchResult
 			var amb map[uint64]float64
 			var i, j int
 			var n, np1 int
@@ -759,20 +768,20 @@ Taxonomic binning formats:
 			var nScore int
 			var pScore float64
 			var processThisMatch bool
-			pScore = 1024
-			nScore = 0
-			processThisMatch = true
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
 			var data interface{}
 
-			matches = make(map[uint64]*[]MatchResult)
+			matches = make(map[uint64]*[]*MatchResult)
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 			for chunk := range reader.Ch {
 				checkError(chunk.Err)
 
 				for _, data = range chunk.Data {
-					match = data.(MatchResult)
+					match = data.(*MatchResult)
 
 					hTarget = wyhash.HashString(match.Target, 1)
 					if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
@@ -794,8 +803,9 @@ Taxonomic binning formats:
 								for j = i + 1; j < n; j++ {
 									h1, h2 = hs[i], hs[j]
 									if amb, ok = ambMatch[h1]; !ok {
-										ambMatch[h1] = make(map[uint64]float64, 128)
-										ambMatch[h1][h2]++ // count of cooccurence
+										tmp := make(map[uint64]float64, 128)
+										tmp[h2]++ // count of cooccurence
+										ambMatch[h1] = tmp
 									} else {
 										amb[h2]++
 									}
@@ -803,7 +813,7 @@ Taxonomic binning formats:
 							}
 						}
 
-						matches = make(map[uint64]*[]MatchResult)
+						matches = make(map[uint64]*[]*MatchResult)
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
@@ -850,12 +860,8 @@ Taxonomic binning formats:
 						}
 					}
 
-					if ms, ok = matches[hTarget]; !ok {
-						tmp := []MatchResult{match}
-						matches[hTarget] = &tmp
-					} else {
-						*ms = append(*ms, match)
-					}
+					// just need to collect keys
+					matches[hTarget] = nil
 
 					prevQuery = match.Query
 					pScore = match.QCov
@@ -876,16 +882,15 @@ Taxonomic binning formats:
 					for j = i + 1; j < n; j++ {
 						h1, h2 = hs[i], hs[j]
 						if amb, ok = ambMatch[h1]; !ok {
-							ambMatch[h1] = make(map[uint64]float64, 128)
-							ambMatch[h1][h2]++
+							tmp := make(map[uint64]float64, 128)
+							tmp[h2]++ // count of cooccurence
+							ambMatch[h1] = tmp
 						} else {
 							amb[h2]++
 						}
 					}
 				}
 			}
-
-			// matches = make(map[uint64]*[]MatchResult)
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -931,9 +936,9 @@ Taxonomic binning formats:
 				log.Infof("  parsing file: %s", file)
 			}
 
-			var matches map[uint64]*[]MatchResult // target -> match result
-			var m MatchResult
-			var ms *[]MatchResult
+			var matches map[uint64]*[]*MatchResult // target -> match result
+			var m *MatchResult
+			var ms *[]*MatchResult
 			var t *Target
 			var ok bool
 			var hTarget, h, h1, h2 uint64
@@ -945,15 +950,12 @@ Taxonomic binning formats:
 			hss := make([]uint64, 0, 256) // for sorting hash value of reference
 			hsm := make([]bool, 0, 256)   // marking hash values to delete
 			var n, np1, i, j int
-			var match MatchResult
+			var match *MatchResult
 
 			onlyTopNScore := topNScore > 0
 			var nScore int
 			var pScore float64
 			var processThisMatch bool
-			pScore = 1024
-			nScore = 0
-			processThisMatch = true
 
 			taxids := make([]uint32, 0, 128)
 			var taxid1, taxid2 uint32
@@ -963,12 +965,15 @@ Taxonomic binning formats:
 			checkError(err)
 			var data interface{}
 
-			matches = make(map[uint64]*[]MatchResult)
+			matches = make(map[uint64]*[]*MatchResult)
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
 			for chunk := range reader.Ch {
 				checkError(chunk.Err)
 
 				for _, data = range chunk.Data {
-					match = data.(MatchResult)
+					match = data.(*MatchResult)
 
 					hTarget = wyhash.HashString(match.Target, 1)
 					if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
@@ -1087,6 +1092,7 @@ Taxonomic binning formats:
 											}
 										}
 									}
+									poolMatchResults.Put(ms)
 								}
 							} else { // len(matches) == 1
 								uniqMatch = true
@@ -1137,10 +1143,11 @@ Taxonomic binning formats:
 
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
+								poolMatchResults.Put(ms)
 							}
 						}
 
-						matches = make(map[uint64]*[]MatchResult)
+						matches = make(map[uint64]*[]*MatchResult)
 						pScore = 1024
 						nScore = 0
 						processThisMatch = true
@@ -1188,8 +1195,11 @@ Taxonomic binning formats:
 					}
 
 					if ms, ok = matches[hTarget]; !ok {
-						tmp := []MatchResult{match}
-						matches[hTarget] = &tmp
+						// tmp := []*MatchResult{match}
+						tmp := poolMatchResults.Get().(*[]*MatchResult)
+						*tmp = (*tmp)[:0]
+						*tmp = append(*tmp, match)
+						matches[hTarget] = tmp
 					} else {
 						*ms = append(*ms, match)
 					}
@@ -1308,6 +1318,7 @@ Taxonomic binning formats:
 								}
 							}
 						}
+						poolMatchResults.Put(ms)
 					}
 				} else { // len(matches) == 1
 					uniqMatch = true
@@ -1357,6 +1368,7 @@ Taxonomic binning formats:
 
 						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
+					poolMatchResults.Put(ms)
 				}
 			}
 
@@ -1724,3 +1736,8 @@ func similarity(qcov float64) float64 {
 	square := qcov * qcov
 	return 87.4572 + 26.4016*qcov - 21.9855*square + 7.3097*square*qcov
 }
+
+var poolMatchResults = &sync.Pool{New: func() interface{} {
+	tmp := make([]*MatchResult, 0, 128)
+	return &tmp
+}}

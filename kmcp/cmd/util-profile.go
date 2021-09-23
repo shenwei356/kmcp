@@ -44,13 +44,13 @@ type MatchResult struct {
 	QCov    float64
 }
 
-func parseMatchResult(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (MatchResult, bool) {
-	stringSplitN(line, "\t", numFields, items)
+func parseMatchResult(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (*MatchResult, bool) {
+	stringSplitNByByte(line, '\t', numFields, items)
 	if len(*items) < numFields {
 		checkError(fmt.Errorf("invalid kmcp search result format"))
 	}
 
-	var m MatchResult
+	m := &MatchResult{} // do not use sync.Pool, which is slower for this case
 
 	var err error
 
