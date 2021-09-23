@@ -1380,7 +1380,7 @@ Taxonomic binning formats:
 		// --------------------
 		// sum up
 
-		targets := make([]*Target, 0, 128)
+		targets := make([]*Target, 0, 256)
 
 		for _, t := range profile2 {
 			for _, c = range t.Match {
@@ -1690,7 +1690,7 @@ func init() {
 	profileCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.01, `maximal false positive rate of a read in search result`)
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-qcovs", "n", 5, `keep matches with the top N qcovs for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
