@@ -38,6 +38,7 @@ import (
 	"github.com/shenwei356/breader"
 	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
+	"github.com/shenwei356/util/stats"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts"
 	"github.com/zeebo/wyhash"
@@ -1061,8 +1062,7 @@ Taxonomic binning formats:
 												UniqMatch:    make([]float64, m.IdxNum),
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
-												Scores:       make([]float64, m.IdxNum),
-												NScores:      make([]int, m.IdxNum),
+												Stats:        stats.NewQuantiler(),
 											}
 											profile2[h] = &t0
 											t = &t0
@@ -1073,8 +1073,7 @@ Taxonomic binning formats:
 										if first { // count once
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
 											if levelSpecies && theSameSpecies {
-												t.Scores[m.FragIdx] += similarity(m.QCov)
-												t.NScores[m.FragIdx]++
+												t.Stats.Add(m.QCov) // the best match on a subject
 											}
 											first = false
 										}
@@ -1112,8 +1111,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
-											Scores:       make([]float64, m.IdxNum),
-											NScores:      make([]int, m.IdxNum),
+											Stats:        stats.NewQuantiler(),
 										}
 										profile2[h] = &t0
 										t = &t0
@@ -1125,8 +1123,7 @@ Taxonomic binning formats:
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
 											}
-											t.Scores[m.FragIdx] += similarity(m.QCov)
-											t.NScores[m.FragIdx]++
+											t.Stats.Add(m.QCov) // the best match on a subject
 										}
 
 										t.QLen[m.FragIdx] += float64(m.QLen)
@@ -1286,8 +1283,7 @@ Taxonomic binning formats:
 									UniqMatch:    make([]float64, m.IdxNum),
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
-									Scores:       make([]float64, m.IdxNum),
-									NScores:      make([]int, m.IdxNum),
+									Stats:        stats.NewQuantiler(),
 								}
 								profile2[h] = &t0
 								t = &t0
@@ -1298,8 +1294,7 @@ Taxonomic binning formats:
 							if first { // count once
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop
 								if levelSpecies && theSameSpecies {
-									t.Scores[m.FragIdx] += similarity(m.QCov)
-									t.NScores[m.FragIdx]++
+									t.Stats.Add(m.QCov) // the best match on a subject
 								}
 								first = false
 							}
@@ -1336,8 +1331,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
-								Scores:       make([]float64, m.IdxNum),
-								NScores:      make([]int, m.IdxNum),
+								Stats:        stats.NewQuantiler(),
 							}
 							profile2[h] = &t0
 							t = &t0
@@ -1349,8 +1343,7 @@ Taxonomic binning formats:
 								if m.QCov >= hicUreadsMinQcov {
 									t.UniqMatchHic[m.FragIdx]++
 								}
-								t.Scores[m.FragIdx] += similarity(m.QCov)
-								t.NScores[m.FragIdx]++
+								t.Stats.Add(m.QCov) // the best match on a subject
 							}
 
 							t.QLen[m.FragIdx] += float64(m.QLen)
@@ -1435,16 +1428,8 @@ Taxonomic binning formats:
 				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize) * float64(len(t.QLen))
 			}
 
-			for _, c2 = range t.Scores {
-				t.Score += c2
-			}
-
-			for _, c3 := range t.NScores {
-				t.SumNScores += c3
-			}
-
-			t.Score /= float64(t.SumNScores)
-			t.Score *= t.FragsProp
+			// t.Score = similarity(t.Stats.Percentile(90))
+			t.Score = t.Stats.Percentile(90) * 100
 
 			targets = append(targets, t)
 		}
@@ -1734,6 +1719,7 @@ func init() {
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
 }
 
+// s = lambda qcov: 87.4572 + 26.4016*qcov - 21.9855*qcov*qcov + 7.3097*qcov*qcov*qcov
 func similarity(qcov float64) float64 {
 	square := qcov * qcov
 	return 87.4572 + 26.4016*qcov - 21.9855*square + 7.3097*square*qcov

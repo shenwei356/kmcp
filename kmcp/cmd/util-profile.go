@@ -26,6 +26,7 @@ import (
 	"strconv"
 
 	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/util/stats"
 )
 
 type MatchResult struct {
@@ -160,13 +161,11 @@ type Target struct {
 	CompleteLineageNames  []string
 	CompleteLineageTaxids []uint32
 
-	Percentage float64
+	Percentage float64 // relative abundance
 
-	NScores    []int
-	SumNScores int
+	Stats *stats.Quantiler // for computing percentil of qcov of unique matches
 
-	Scores []float64
-	Score  float64
+	Score float64
 }
 
 func (t *Target) AddTaxonomy(taxdb *unikmer.Taxonomy, showRanksMap map[string]interface{}, taxid uint32) {
