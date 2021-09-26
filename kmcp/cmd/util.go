@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"math/bits"
 	"os"
@@ -216,6 +217,28 @@ func stringSplitN(s string, sep string, n int, a *[]string) {
 	i := 0
 	for i < n {
 		m := strings.Index(s, sep)
+		if m < 0 {
+			break
+		}
+		(*a)[i] = s[:m]
+		s = s[m+len(sep):]
+		i++
+	}
+	(*a)[i] = s
+
+	(*a) = (*a)[:i+1]
+}
+
+func bytesSplitN(s []byte, sep []byte, n int, a *[][]byte) {
+	if a == nil {
+		tmp := make([][]byte, n)
+		a = &tmp
+	}
+
+	n--
+	i := 0
+	for i < n {
+		m := bytes.Index(s, sep)
 		if m < 0 {
 			break
 		}

@@ -38,7 +38,9 @@
 Preprocessing genomes by concatenating all chromosomes
 
     find -name "*.fna.gz" \
-        | rush -v 'acc={@(..._\d+\.\d+)_}' '(echo ">{acc}"; seqkit grep -vnir -p plasmid {} | seqkit seq -s) | seqkit seq -o {acc}.fasta.gz'
+        | rush -v 'acc={@(..._\d+\.\d+)_}' \
+            '(echo ">{acc}"; seqkit grep -vnir -p plasmid {} | seqkit seq -s) \
+                | seqkit seq -o {acc}.fasta.gz'
     
     seqkit stats *.fasta.gz
     file                      format  type  num_seqs    sum_len    min_len    avg_len    max_len

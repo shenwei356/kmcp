@@ -188,7 +188,7 @@ NZ_CP007592.1.fasta.short|194.866     |98.67          |16.223      |55.71
 NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
 
 
-## KMCP vs sourmash
+## KMCP vs sourmash vs mash
 
 
 ### Building database (MinHash sketches)

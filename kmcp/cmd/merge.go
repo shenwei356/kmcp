@@ -66,7 +66,8 @@ Attentions
 		}()
 
 		outFile := getFlagString(cmd, "out-file")
-		queryIdxField := getFlagPositiveInt(cmd, "queryIdx-field")
+		queryIdxField := getFlagPositiveInt(cmd, "field-queryIdx")
+		hitsField := getFlagPositiveInt(cmd, "field-hits")
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 
 		sortBy := getFlagString(cmd, "sort-by")
@@ -127,16 +128,30 @@ Attentions
 			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
 
+		poolMatches := &sync.Pool{New: func() interface{} {
+			tmp := make([]*_Match, 0, 32)
+			return &tmp
+		}}
+
+		poolStrings := &sync.Pool{New: func() interface{} {
+			tmp := make([]string, queryIdxField)
+			return &tmp
+		}}
+
 		chOut := make(chan *SearchResult, 256)
 		done := make(chan int)
 		go func() {
 			var preId uint64
 			first := true
-			var match _Match
-			buf0 := make([]_Match, 0, 1024)
+			var match *_Match
+			buf0 := make([]*_Match, 0, 1024)
+			var hits string
+			hitsFieldM1 := hitsField - 1
+			var item string
 			for r := range chOut {
 				if first {
-					buf0 = append(buf0, r.Matches...)
+					buf0 = append(buf0, *r.Matches...)
+					poolMatches.Put(r.Matches)
 
 					preId = r.QueryIdx
 					first = false
@@ -145,35 +160,54 @@ Attentions
 
 				if r.QueryIdx != preId {
 					sorts.Quicksort(_Matches(buf0))
+					hits = strconv.Itoa(len(buf0))
 					for _, match = range buf0 {
-						outfh.WriteString(match.Data + "\n")
+						(*match.Data)[hitsFieldM1] = hits
+
+						for _, item = range *match.Data {
+							outfh.WriteString(item)
+							outfh.WriteByte('\t')
+						}
+						outfh.WriteByte('\n')
+
+						poolStrings.Put(match.Data)
+						// pool_Match.Put(match)
 					}
 
 					buf0 = buf0[:0]
-					buf0 = append(buf0, r.Matches...)
+					buf0 = append(buf0, *r.Matches...)
+					poolMatches.Put(r.Matches)
+
 					preId = r.QueryIdx
 					continue
 				}
 
-				buf0 = append(buf0, r.Matches...)
+				buf0 = append(buf0, *r.Matches...)
+				poolMatches.Put(r.Matches)
 			}
 
 			// last one
 			sorts.Quicksort(_Matches(buf0))
+			hits = strconv.Itoa(len(buf0))
 			for _, match = range buf0 {
-				outfh.WriteString(match.Data + "\n")
+				(*match.Data)[hitsFieldM1] = hits
+
+				for _, item = range *match.Data {
+					outfh.WriteString(item)
+					outfh.WriteByte('\t')
+				}
+				outfh.WriteByte('\n')
+
+				poolStrings.Put(match.Data)
+				// pool_Match.Put(match)
 			}
 
 			done <- 1
 		}()
 
-		poolMatches := &sync.Pool{New: func() interface{} {
-			return make([]_Match, 0, 32)
-		}}
-
 		m := make([]chan *SearchResult, len(files))
 		for i, file := range files {
-			ch, err := NewSearchResultParser(file, poolMatches, scoreField, queryIdxField, 128)
+			ch, err := NewSearchResultParser(file, poolStrings, poolMatches, hitsField, scoreField, queryIdxField, 128)
 			checkError(err)
 			m[i] = ch
 		}
@@ -254,17 +288,24 @@ func init() {
 	RootCmd.AddCommand(mergeCmd)
 
 	mergeCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)
-	mergeCmd.Flags().IntP("queryIdx-field", "f", 15, `field of queryIdx`)
+	mergeCmd.Flags().IntP("field-queryIdx", "f", 15, `field of queryIdx`)
+	mergeCmd.Flags().IntP("field-hits", "n", 5, `field of hits`)
 	mergeCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
 	mergeCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 }
 
+var pool_Match = &sync.Pool{New: func() interface{} {
+	return &_Match{}
+}}
+
 type _Match struct {
-	Data  string
+	Data  *[]string
 	Score float64
+
+	Hits int
 }
 
-type _Matches []_Match
+type _Matches []*_Match
 
 func (s _Matches) Len() int           { return len(s) }
 func (s _Matches) Less(i, j int) bool { return s[i].Score > s[j].Score }
@@ -272,10 +313,10 @@ func (s _Matches) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 type SearchResult struct {
 	QueryIdx uint64
-	Matches  []_Match
+	Matches  *[]*_Match
 }
 
-func NewSearchResultParser(file string, poolMatches *sync.Pool, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
+func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, matchesField int, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
 	ch := make(chan *SearchResult, bufferSize)
 
 	go func() {
@@ -283,15 +324,16 @@ func NewSearchResultParser(file string, poolMatches *sync.Pool, scoreField int, 
 		checkError(err)
 
 		field := numFields - 1
+		fieldNum := matchesField - 1
 		fieldScore := scoreField - 1
-		items := make([]string, numFields)
 		scanner := bufio.NewScanner(infh)
 
-		matches := poolMatches.Get().([]_Match)
-		matches = matches[:0]
+		matches := poolMatches.Get().(*[]*_Match)
+		*matches = (*matches)[:0]
 
 		var idx, i uint64
 		var score float64
+		var nmatches int
 		var line string
 		first := true
 		for scanner.Scan() {
@@ -300,25 +342,38 @@ func NewSearchResultParser(file string, poolMatches *sync.Pool, scoreField int, 
 				continue
 			}
 
-			stringSplitN(line, "\t", numFields, &items)
-			if len(items) < numFields {
-				checkError(fmt.Errorf("number of fields (%d) < query index field (%d)", len(items), numFields))
+			// items := make([]string, numFields)
+			items := poolStrings.Get().(*[]string)
+
+			stringSplitN(line, "\t", numFields, items)
+			if len(*items) < numFields {
+				checkError(fmt.Errorf("number of fields (%d) < query index field (%d)", len(*items), numFields))
 			}
 
-			i, err = strconv.ParseUint(items[field], 10, 64)
+			i, err = strconv.ParseUint((*items)[field], 10, 64)
 			if err != nil {
-				checkError(fmt.Errorf("invalid query index at field %d: %s", numFields, items[field]))
+				checkError(fmt.Errorf("invalid query index at field %d: %s", numFields, (*items)[field]))
 			}
 
-			score, err = strconv.ParseFloat(items[fieldScore], 64)
+			nmatches, err = strconv.Atoi((*items)[fieldNum])
 			if err != nil {
-				checkError(fmt.Errorf("failed to parse score: %s", items[fieldScore]))
+				checkError(fmt.Errorf("invalid matches number at field %d: %s", fieldNum, (*items)[fieldNum]))
+			}
+
+			score, err = strconv.ParseFloat((*items)[fieldScore], 64)
+			if err != nil {
+				checkError(fmt.Errorf("failed to parse score: %s", (*items)[fieldScore]))
 			}
 
 			if first {
 				idx = i
 				first = false
-				matches = append(matches, _Match{Data: line, Score: score})
+				*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+				// _m := pool_Match.Get().(*_Match)
+				// _m.Data = items
+				// _m.Score = score
+				// _m.Hits = nmatches
+				// *matches = append(*matches, _m)
 				continue
 			}
 
@@ -327,11 +382,16 @@ func NewSearchResultParser(file string, poolMatches *sync.Pool, scoreField int, 
 					QueryIdx: idx,
 					Matches:  matches,
 				}
-				matches = poolMatches.Get().([]_Match)
-				matches = matches[:0]
+				matches = poolMatches.Get().(*[]*_Match)
+				*matches = (*matches)[:0]
 				idx = i
 			}
-			matches = append(matches, _Match{Data: line, Score: score})
+			*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+			// _m := pool_Match.Get().(*_Match)
+			// _m.Data = items
+			// _m.Score = score
+			// _m.Hits = nmatches
+			// *matches = append(*matches, _m)
 		}
 
 		checkError(scanner.Err())

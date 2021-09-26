@@ -13,4 +13,9 @@ Searching
 
     kmcp search -d gtdb.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@gtdb.tsv.gz
     
-    kmcp search -d gtdb.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@gtdb.tsv.gz
+    kmcp search -d refseq-fungi.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-fungi.tsv.gz
+    
+    kmcp search -d refseq-viruses.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-viruses.tsv.gz
+    
+    
+    kmcp merge $file.fa.gz.kmcp@* -o $file.fa.gz.kmcp.tsv.gz
