@@ -65,7 +65,8 @@ Generating reads
     seqkit seq *.fasta.gz > all.fasta
     
     # splitting genomes
-    seqkit sliding  -s 10 -W $len all.fasta -w 0 -o all.se$len.fasta
+    seqkit sliding  -s 10 -W $len all.fasta -w 0 \
+        | seqkit grep -i -s -v -p 'n' -w 0 -o all.se$len.fasta
 
 BLASTN
     
@@ -103,9 +104,9 @@ Filtering blastn result
 Statistics
       
     # compile the command
-    # CGO_ENABLED=0 go build -o stats -tags netgo -ldflags '-w -s' -asmflags '-trimpath'
+    # CGO_ENABLED=0 go build -o tool-kmer-similarity -tags netgo -ldflags '-w -s' -asmflags '-trimpath'
 
-    ./stats all.fasta all.se$len.fasta.blastn.filter.tsv.gz \
+    ./tool-kmer-similarity all.fasta all.se$len.fasta.blastn.filter.tsv.gz \
         21 all.se$len.fasta.blastn.filter.tsv.gz.stats.gz
     
 Removing identical matches

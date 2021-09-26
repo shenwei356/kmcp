@@ -1737,7 +1737,7 @@ func init() {
 // s = lambda qcov: 87.4572 + 26.4016*qcov - 21.9855*qcov*qcov + 7.3097*qcov*qcov*qcov
 func similarity(qcov float64) float64 {
 	square := qcov * qcov
-	return 87.4572 + 26.4016*qcov - 21.9855*square + 7.3097*square*qcov
+	return 87.456 + 26.410*qcov - -22.008*square + 7.325*square*qcov
 }
 
 var poolMatchResults = &sync.Pool{New: func() interface{} {

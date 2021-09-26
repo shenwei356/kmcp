@@ -50,3 +50,6 @@ analysis/kmer-similarity/*/all.n*
 analysis/kmer-similarity/*/*.fasta
 
 analysis/kmer-similarity/*/*.gz
+analysis/*/tool-*
+
+kmer-similarity

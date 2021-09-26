@@ -46,14 +46,14 @@ blastn output format:
 
 	// -----------------------------------------------
 
-	kmers := make(map[string]map[uint64]interface{}, len(sequences))
-	var ok bool
-	for id, record := range sequences {
-		kmers[id], ok, err = getKmers(record.Seq, k)
-		if err != nil || !ok {
-			checkError(fmt.Errorf("fail to compute kmers for %s", id))
-		}
-	}
+	// kmers := make(map[string]map[uint64]interface{}, len(sequences))
+	// var ok bool
+	// for id, record := range sequences {
+	// 	kmers[id], ok, err = getKmers(record.Seq, k)
+	// 	if err != nil || !ok {
+	// 		checkError(fmt.Errorf("fail to compute kmers for %s", id))
+	// 	}
+	// }
 
 	// -----------------------------------------------
 
