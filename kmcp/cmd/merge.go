@@ -41,7 +41,6 @@ var mergeCmd = &cobra.Command{
 	Long: `Merge search results from multiple databases
 
 Attentions
-  0. Input files should contain queryIdx field.
   1. Referene IDs should be distinct accross all databases.
 
 `,
@@ -107,6 +106,15 @@ Attentions
 
 		if len(files) < 2 {
 			checkError(fmt.Errorf(">= 2 files needed"))
+		}
+
+		// checking duplication
+		fileMap := make(map[string]interface{})
+		for _, file := range files {
+			if _, ok := fileMap[file]; ok {
+				checkError(fmt.Errorf("duplicated file: %s", file))
+			}
+			fileMap[file] = struct{}{}
 		}
 
 		// ---------------------------------------------------------------
