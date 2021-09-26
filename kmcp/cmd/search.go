@@ -323,11 +323,11 @@ Performance tips:
 					result.QueryID, result.QueryLen,
 					result.NumKmers, result.FPR, 0)
 
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+				fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 					prefix2,
 					"", -1, 0, 0,
 					0, 0,
-					float64(0), float64(0), float64(0), result.QueryIdx))
+					float64(0), float64(0), float64(0), result.QueryIdx)
 
 				poolQueryResult.Put(result)
 				return
@@ -347,11 +347,11 @@ Performance tips:
 			for _, match := range *result.Matches {
 				// query, len_query, num_kmers, fpr, num_matches
 				// target, fragIdx, idxNum, tlength, num_matched_kmers, qcov, tcov, jacc
-				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+				fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 					prefix2,
 					match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
 					result.K, match.NumKmers,
-					match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+					match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 			}
 
 			//if immediateOutput {
@@ -383,11 +383,11 @@ Performance tips:
 							result.QueryID, result.QueryLen,
 							result.NumKmers, result.FPR, 0)
 
-						outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+						fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 							prefix2,
 							"", -1, 0, 0,
 							0, 0,
-							float64(0), float64(0), float64(0), result.QueryIdx))
+							float64(0), float64(0), float64(0), result.QueryIdx)
 
 						poolQueryResult.Put(result)
 						continue
@@ -399,11 +399,11 @@ Performance tips:
 						result.NumKmers, result.FPR, len(*result.Matches))
 
 					for _, match = range *result.Matches {
-						outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+						fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 							prefix2,
 							match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
 							result.K, match.NumKmers,
-							match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+							match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 					}
 
 					outfh.Flush()
@@ -441,11 +441,11 @@ Performance tips:
 									result.QueryID, result.QueryLen,
 									result.NumKmers, result.FPR, 0)
 
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									"", -1, 0, 0,
 									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx))
+									float64(0), float64(0), float64(0), result.QueryIdx)
 
 								poolQueryResult.Put(result)
 							}
@@ -456,11 +456,11 @@ Performance tips:
 								result.NumKmers, result.FPR, len(*result.Matches))
 
 							for _, match = range *result.Matches {
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
 									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
 							outfh.Flush()
@@ -488,11 +488,11 @@ Performance tips:
 									result.QueryID, result.QueryLen,
 									result.NumKmers, result.FPR, 0)
 
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									"", -1, 0, 0,
 									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx))
+									float64(0), float64(0), float64(0), result.QueryIdx)
 
 								poolQueryResult.Put(result)
 							}
@@ -503,11 +503,11 @@ Performance tips:
 								result.NumKmers, result.FPR, len(*result.Matches))
 
 							for _, match = range *result.Matches {
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
 									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
 							outfh.Flush()
@@ -545,11 +545,11 @@ Performance tips:
 									result.QueryID, result.QueryLen,
 									result.NumKmers, result.FPR, 0)
 
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									"", -1, 0, 0,
 									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx))
+									float64(0), float64(0), float64(0), result.QueryIdx)
 
 								poolQueryResult.Put(result)
 							}
@@ -560,11 +560,11 @@ Performance tips:
 								result.NumKmers, result.FPR, len(*result.Matches))
 
 							for _, match = range *result.Matches {
-								outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
+								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
 									prefix2,
 									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
 									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx))
+									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
 							outfh.Flush()

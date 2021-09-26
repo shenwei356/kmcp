@@ -293,8 +293,8 @@ github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQD
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg65j358z/aeFdxmN0P9QXhEzd20vsDc=
 github.com/shenwei356/bio v0.3.1/go.mod h1:rHA8DoaDooXKdqX7bqoksQDKm3mEAQ3MsD9nivVTSf0=
-github.com/shenwei356/bio v0.3.2 h1:MListM7D7998IdQeJAd8Ysn3ST2NX6tcYGeCoCPAUbI=
-github.com/shenwei356/bio v0.3.2/go.mod h1:rHA8DoaDooXKdqX7bqoksQDKm3mEAQ3MsD9nivVTSf0=
+github.com/shenwei356/bio v0.3.3 h1:ZO+Z7QsA+ybAzQujKiDbGeLt9esb72P0LS1E+h4IObg=
+github.com/shenwei356/bio v0.3.3/go.mod h1:OTcIoUSG24Ozq/Yln6bh23jEsvOW68OE6XgTihRokQ0=
 github.com/shenwei356/bpool v0.0.0-20160710042833-f9e0ee4d0403 h1:/3JklLnHXiWUBxWc3joQYavDQJpncRhRA909cUb7eOw=
 github.com/shenwei356/bpool v0.0.0-20160710042833-f9e0ee4d0403/go.mod h1:YkgdTWfNnJgv5HVJbVSDmxQtkK3/jZWDoqcG26BVU8k=
 github.com/shenwei356/breader v0.3.1 h1:OjgfeHhpNGQPkS1+lgsl4eNuuO//Y16N6TkqG5oxO5U=

@@ -159,7 +159,7 @@ Attentions
 			for r := range chOut {
 				if first {
 					buf0 = append(buf0, *r.Matches...)
-					poolMatches.Put(r.Matches)
+					// poolMatches.Put(r.Matches)
 
 					preId = r.QueryIdx
 					first = false
@@ -178,20 +178,20 @@ Attentions
 						}
 						outfh.WriteByte('\n')
 
-						poolStrings.Put(match.Data)
+						// poolStrings.Put(match.Data)
 						// pool_Match.Put(match)
 					}
 
 					buf0 = buf0[:0]
 					buf0 = append(buf0, *r.Matches...)
-					poolMatches.Put(r.Matches)
+					// poolMatches.Put(r.Matches)
 
 					preId = r.QueryIdx
 					continue
 				}
 
 				buf0 = append(buf0, *r.Matches...)
-				poolMatches.Put(r.Matches)
+				// poolMatches.Put(r.Matches)
 			}
 
 			// last one
@@ -206,7 +206,7 @@ Attentions
 				}
 				outfh.WriteByte('\n')
 
-				poolStrings.Put(match.Data)
+				// poolStrings.Put(match.Data)
 				// pool_Match.Put(match)
 			}
 
@@ -227,7 +227,8 @@ Attentions
 		var allClosed bool
 		var imin uint64
 		var ids *Uint64Slice
-		buf := make(map[uint64][]*SearchResult, 256)
+		buf := make(map[uint64]*[]*SearchResult, 256)
+		var results *[]*SearchResult
 		for {
 			found = false
 			allClosed = true
@@ -240,8 +241,8 @@ Attentions
 				}
 
 				if r.QueryIdx != idx { // not found, save to buffer
-					if _, ok = buf[r.QueryIdx]; !ok {
-						buf[r.QueryIdx] = []*SearchResult{r}
+					if results, ok = buf[r.QueryIdx]; !ok {
+						buf[r.QueryIdx] = &[]*SearchResult{r}
 
 						if ids == nil {
 							ids = &Uint64Slice{r.QueryIdx}
@@ -250,7 +251,7 @@ Attentions
 							heap.Push(ids, r.QueryIdx)
 						}
 					} else {
-						buf[r.QueryIdx] = append(buf[r.QueryIdx], r)
+						*results = append(*results, r)
 					}
 					continue
 				}
@@ -272,7 +273,7 @@ Attentions
 			// find the minimum idx in buffer
 			imin = heap.Pop(ids).(uint64)
 
-			for _, r := range buf[imin] {
+			for _, r := range *buf[imin] {
 				chOut <- r
 			}
 			delete(buf, imin)
@@ -281,8 +282,8 @@ Attentions
 		}
 
 		// left data in buffer, no need to sort
-		for _, rs := range buf {
-			for _, r := range rs {
+		for _, results = range buf {
+			for _, r := range *results {
 				chOut <- r
 			}
 		}
@@ -302,6 +303,7 @@ func init() {
 	mergeCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
 }
 
+// do not use, it's slower
 var pool_Match = &sync.Pool{New: func() interface{} {
 	return &_Match{}
 }}
@@ -336,8 +338,10 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		fieldScore := scoreField - 1
 		scanner := bufio.NewScanner(infh)
 
-		matches := poolMatches.Get().(*[]*_Match)
-		*matches = (*matches)[:0]
+		tmp := make([]*_Match, 0, 32)
+		matches := &tmp
+		// matches := poolMatches.Get().(*[]*_Match)
+		// *matches = (*matches)[:0]
 
 		var idx, i uint64
 		var score float64
@@ -350,10 +354,13 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 				continue
 			}
 
-			// items := make([]string, numFields)
-			items := poolStrings.Get().(*[]string)
+			tmp := make([]string, numFields)
+			items := &tmp
 
-			stringSplitN(line, "\t", numFields, items)
+			// Strangely, it's much slower (nearly 1/2 speed) in server with Intel CPUs.
+			// items := poolStrings.Get().(*[]string)
+
+			stringSplitNByByte(line, '\t', numFields, items)
 			if len(*items) < numFields {
 				checkError(fmt.Errorf("number of fields (%d) < query index field (%d)", len(*items), numFields))
 			}
@@ -377,6 +384,8 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 				idx = i
 				first = false
 				*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+
+				// do not use, it's slower
 				// _m := pool_Match.Get().(*_Match)
 				// _m.Data = items
 				// _m.Score = score
@@ -390,11 +399,15 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 					QueryIdx: idx,
 					Matches:  matches,
 				}
-				matches = poolMatches.Get().(*[]*_Match)
-				*matches = (*matches)[:0]
+				tmp := make([]*_Match, 0, 32)
+				matches = &tmp
+				// matches = poolMatches.Get().(*[]*_Match)
+				// *matches = (*matches)[:0]
 				idx = i
 			}
 			*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+
+			// do not use, it's slower
 			// _m := pool_Match.Get().(*_Match)
 			// _m.Data = items
 			// _m.Score = score
