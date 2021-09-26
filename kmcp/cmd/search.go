@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -337,9 +338,6 @@ Performance tips:
 			matched++
 
 			// query, len_query, num_kmers, fpr, num_matches,
-			// prefix2 = fmt.Sprintf("%d\t%s\t%d\t%d\t%e\t%d",
-			// 	result.QueryIdx, result.QueryID, result.QueryLen,
-			// 	result.NumKmers, result.FPR, len(result.Matches))
 			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
 				result.QueryID, result.QueryLen,
 				result.NumKmers, result.FPR, len(*result.Matches))
@@ -355,7 +353,7 @@ Performance tips:
 			}
 
 			//if immediateOutput {
-			outfh.Flush()
+			// outfh.Flush()
 			//}
 
 			(*result.Matches) = (*(result.Matches))[:0]
@@ -406,7 +404,7 @@ Performance tips:
 							match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 					}
 
-					outfh.Flush()
+					// outfh.Flush()
 
 					(*result.Matches) = (*(result.Matches))[:0]
 					poolMatches.Put(result.Matches)
@@ -463,7 +461,7 @@ Performance tips:
 									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
-							outfh.Flush()
+							// outfh.Flush()
 
 							(*result.Matches) = (*(result.Matches))[:0]
 							poolMatches.Put(result.Matches)
@@ -510,7 +508,7 @@ Performance tips:
 									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
-							outfh.Flush()
+							// outfh.Flush()
 
 							(*result.Matches) = (*(result.Matches))[:0]
 							poolMatches.Put(result.Matches)
@@ -567,7 +565,7 @@ Performance tips:
 									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
 							}
 
-							outfh.Flush()
+							// outfh.Flush()
 
 							(*result.Matches) = (*(result.Matches))[:0]
 							poolMatches.Put(result.Matches)
@@ -585,6 +583,9 @@ Performance tips:
 		// send query
 
 		var id uint64
+		NNN := []byte("NNN")
+		nnn := []byte("nnn")
+
 		for _, file := range files {
 			if outputLog {
 				log.Infof("reading sequence file: %s", file)
@@ -616,7 +617,6 @@ Performance tips:
 					}
 				}
 
-				// do not use sync.Pool for Query
 				query := poolQuery.Get().(*Query)
 				query.Idx = id
 				query.ID = recordID
@@ -644,10 +644,14 @@ Performance tips:
 					break
 				}
 
+				// ignore sequences with "NNN"
+				if bytes.Contains(record.Seq.Seq, nnn) || bytes.Contains(record.Seq.Seq, NNN) {
+					continue
+				}
+
 				recordID := make([]byte, len(record.ID))
 				copy(recordID, record.ID)
 
-				// do not use sync.Pool for Query
 				query := poolQuery.Get().(*Query)
 				query.Idx = id
 				query.ID = recordID
