@@ -5,6 +5,7 @@
 - `search`:
     - better log.
     - fix matches order of a query.
+    - fix queries with many Ns.
     - 10-25% faster.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
 - `merge`:

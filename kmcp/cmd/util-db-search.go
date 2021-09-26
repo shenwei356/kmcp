@@ -941,7 +941,9 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 			if scaled && code > maxHash {
 				continue
 			}
-			*kmers = append(*kmers, code)
+			if code > 0 {
+				*kmers = append(*kmers, code)
+			}
 		}
 	} else if db.Info.Minimizer {
 		for {
@@ -952,7 +954,9 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 			if scaled && code > maxHash {
 				continue
 			}
-			*kmers = append(*kmers, code)
+			if code > 0 {
+				*kmers = append(*kmers, code)
+			}
 		}
 	} else {
 		for {
@@ -963,7 +967,9 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 			if scaled && code > maxHash {
 				continue
 			}
-			*kmers = append(*kmers, code)
+			if code > 0 {
+				*kmers = append(*kmers, code)
+			}
 		}
 	}
 	return kmers, nil

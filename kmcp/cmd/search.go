@@ -21,12 +21,12 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -304,69 +304,158 @@ Performance tips:
 		var fastxReader *fastx.Reader
 		var record *fastx.Record
 
-		var prefix2 string
 		// ---------------------------------------------------------------
 		// receive result and output
 
 		var total, matched uint64
 		var speed float64 // k reads/second
 
-		// output = func(result *QueryResult) {
-		_ = func(result *QueryResult) {
+		donePrint := make(chan int)
+		ch := make(chan *QueryResult, 1024)
+		go func() {
+			var query []byte
+			var qLen, qKmers, FPR, hits string
+			var target, fragIdx, frags, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
 
-			if result.Matches == nil {
-				if !keepUnmatched {
+			for result := range ch {
+				if result.Matches == nil {
+					if !keepUnmatched {
+						poolQueryResult.Put(result)
+						continue
+					}
+
+					query = result.QueryID
+					qLen = strconv.Itoa(result.QueryLen)
+					qKmers = strconv.Itoa(result.NumKmers)
+					FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+					hits = "0"
+
+					kSize = strconv.Itoa(result.K)
+					queryIdx = strconv.Itoa(int(result.QueryIdx))
+
+					target = ""
+					fragIdx = "-1"
+					frags = "0"
+					tLen = "0"
+					mKmers = "0"
+					qCov = "0"
+					tCov = "0"
+					jacc = "0"
+
+					outfh.Write(query)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qLen)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qKmers)
+					outfh.WriteByte('\t')
+					outfh.WriteString(FPR)
+					outfh.WriteByte('\t')
+					outfh.WriteString(hits)
+					outfh.WriteByte('\t')
+
+					outfh.WriteString(target)
+					outfh.WriteByte('\t')
+					outfh.WriteString(fragIdx)
+					outfh.WriteByte('\t')
+					outfh.WriteString(frags)
+					outfh.WriteByte('\t')
+					outfh.WriteString(tLen)
+					outfh.WriteByte('\t')
+					outfh.WriteString(kSize)
+					outfh.WriteByte('\t')
+
+					outfh.WriteString(mKmers)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qCov)
+					outfh.WriteByte('\t')
+					outfh.WriteString(tCov)
+					outfh.WriteByte('\t')
+					outfh.WriteString(jacc)
+					outfh.WriteByte('\t')
+					outfh.WriteString(queryIdx)
+
+					outfh.WriteByte('\n')
+
 					poolQueryResult.Put(result)
-					return
+					continue
 				}
 
-				prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-					result.QueryID, result.QueryLen,
-					result.NumKmers, result.FPR, 0)
+				// found
+				matched++
 
-				fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-					prefix2,
-					"", -1, 0, 0,
-					0, 0,
-					float64(0), float64(0), float64(0), result.QueryIdx)
+				query = result.QueryID
+				qLen = strconv.Itoa(result.QueryLen)
+				qKmers = strconv.Itoa(result.NumKmers)
+				FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+				hits = strconv.Itoa(len(*result.Matches))
+
+				kSize = strconv.Itoa(result.K)
+				queryIdx = strconv.Itoa(int(result.QueryIdx))
+
+				for _, match := range *result.Matches {
+
+					target = match.Target[0]
+					fragIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
+					frags = strconv.Itoa(int(match.TargetIdx[0] >> 16))
+					tLen = strconv.Itoa(int(match.GenomeSize[0]))
+					mKmers = strconv.Itoa(match.NumKmers)
+					qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
+					tCov = strconv.FormatFloat(match.TCov, 'f', 4, 64)
+					jacc = strconv.FormatFloat(match.JaccardIndex, 'f', 4, 64)
+
+					outfh.Write(query)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qLen)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qKmers)
+					outfh.WriteByte('\t')
+					outfh.WriteString(FPR)
+					outfh.WriteByte('\t')
+					outfh.WriteString(hits)
+					outfh.WriteByte('\t')
+
+					outfh.WriteString(target)
+					outfh.WriteByte('\t')
+					outfh.WriteString(fragIdx)
+					outfh.WriteByte('\t')
+					outfh.WriteString(frags)
+					outfh.WriteByte('\t')
+					outfh.WriteString(tLen)
+					outfh.WriteByte('\t')
+					outfh.WriteString(kSize)
+					outfh.WriteByte('\t')
+
+					outfh.WriteString(mKmers)
+					outfh.WriteByte('\t')
+					outfh.WriteString(qCov)
+					outfh.WriteByte('\t')
+					outfh.WriteString(tCov)
+					outfh.WriteByte('\t')
+					outfh.WriteString(jacc)
+					outfh.WriteByte('\t')
+					outfh.WriteString(queryIdx)
+
+					outfh.WriteByte('\n')
+				}
+
+				//if immediateOutput {
+				// outfh.Flush()
+				//}
+
+				(*result.Matches) = (*(result.Matches))[:0]
+				poolMatches.Put(result.Matches)
 
 				poolQueryResult.Put(result)
-				return
 			}
-
-			// found
-			matched++
-
-			// query, len_query, num_kmers, fpr, num_matches,
-			prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-				result.QueryID, result.QueryLen,
-				result.NumKmers, result.FPR, len(*result.Matches))
-
-			for _, match := range *result.Matches {
-				// query, len_query, num_kmers, fpr, num_matches
-				// target, fragIdx, idxNum, tlength, num_matched_kmers, qcov, tcov, jacc
-				fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-					prefix2,
-					match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
-					result.K, match.NumKmers,
-					match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
-			}
-
-			//if immediateOutput {
-			// outfh.Flush()
-			//}
-
-			(*result.Matches) = (*(result.Matches))[:0]
-			poolMatches.Put(result.Matches)
-
-			poolQueryResult.Put(result)
-		}
+			donePrint <- 1
+		}()
 
 		done := make(chan int)
 		go func() {
 			if !keepOrder {
-				var match *Match
-
+				var query []byte
+				var qLen, qKmers, FPR, hits string
+				var target, fragIdx, frags, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
 				for result := range sg.OutCh {
 					total++
 
@@ -377,34 +466,123 @@ Performance tips:
 							continue
 						}
 
-						prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-							result.QueryID, result.QueryLen,
-							result.NumKmers, result.FPR, 0)
+						query = result.QueryID
+						qLen = strconv.Itoa(result.QueryLen)
+						qKmers = strconv.Itoa(result.NumKmers)
+						FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+						hits = "0"
 
-						fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-							prefix2,
-							"", -1, 0, 0,
-							0, 0,
-							float64(0), float64(0), float64(0), result.QueryIdx)
+						kSize = strconv.Itoa(result.K)
+						queryIdx = strconv.Itoa(int(result.QueryIdx))
+
+						target = ""
+						fragIdx = "-1"
+						frags = "0"
+						tLen = "0"
+						mKmers = "0"
+						qCov = "0"
+						tCov = "0"
+						jacc = "0"
+
+						outfh.Write(query)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qLen)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qKmers)
+						outfh.WriteByte('\t')
+						outfh.WriteString(FPR)
+						outfh.WriteByte('\t')
+						outfh.WriteString(hits)
+						outfh.WriteByte('\t')
+
+						outfh.WriteString(target)
+						outfh.WriteByte('\t')
+						outfh.WriteString(fragIdx)
+						outfh.WriteByte('\t')
+						outfh.WriteString(frags)
+						outfh.WriteByte('\t')
+						outfh.WriteString(tLen)
+						outfh.WriteByte('\t')
+						outfh.WriteString(kSize)
+						outfh.WriteByte('\t')
+
+						outfh.WriteString(mKmers)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qCov)
+						outfh.WriteByte('\t')
+						outfh.WriteString(tCov)
+						outfh.WriteByte('\t')
+						outfh.WriteString(jacc)
+						outfh.WriteByte('\t')
+						outfh.WriteString(queryIdx)
+
+						outfh.WriteByte('\n')
 
 						poolQueryResult.Put(result)
 						continue
 					}
 
+					// found
 					matched++
-					prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-						result.QueryID, result.QueryLen,
-						result.NumKmers, result.FPR, len(*result.Matches))
 
-					for _, match = range *result.Matches {
-						fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-							prefix2,
-							match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
-							result.K, match.NumKmers,
-							match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
+					query = result.QueryID
+					qLen = strconv.Itoa(result.QueryLen)
+					qKmers = strconv.Itoa(result.NumKmers)
+					FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+					hits = strconv.Itoa(len(*result.Matches))
+
+					kSize = strconv.Itoa(result.K)
+					queryIdx = strconv.Itoa(int(result.QueryIdx))
+
+					for _, match := range *result.Matches {
+
+						target = match.Target[0]
+						fragIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
+						frags = strconv.Itoa(int(match.TargetIdx[0] >> 16))
+						tLen = strconv.Itoa(int(match.GenomeSize[0]))
+						mKmers = strconv.Itoa(match.NumKmers)
+						qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
+						tCov = strconv.FormatFloat(match.TCov, 'f', 4, 64)
+						jacc = strconv.FormatFloat(match.JaccardIndex, 'f', 4, 64)
+
+						outfh.Write(query)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qLen)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qKmers)
+						outfh.WriteByte('\t')
+						outfh.WriteString(FPR)
+						outfh.WriteByte('\t')
+						outfh.WriteString(hits)
+						outfh.WriteByte('\t')
+
+						outfh.WriteString(target)
+						outfh.WriteByte('\t')
+						outfh.WriteString(fragIdx)
+						outfh.WriteByte('\t')
+						outfh.WriteString(frags)
+						outfh.WriteByte('\t')
+						outfh.WriteString(tLen)
+						outfh.WriteByte('\t')
+						outfh.WriteString(kSize)
+						outfh.WriteByte('\t')
+
+						outfh.WriteString(mKmers)
+						outfh.WriteByte('\t')
+						outfh.WriteString(qCov)
+						outfh.WriteByte('\t')
+						outfh.WriteString(tCov)
+						outfh.WriteByte('\t')
+						outfh.WriteString(jacc)
+						outfh.WriteByte('\t')
+						outfh.WriteString(queryIdx)
+
+						outfh.WriteByte('\n')
 					}
 
+					//if immediateOutput {
 					// outfh.Flush()
+					//}
 
 					(*result.Matches) = (*(result.Matches))[:0]
 					poolMatches.Put(result.Matches)
@@ -415,7 +593,6 @@ Performance tips:
 				m := make(map[uint64]*QueryResult, opt.NumCPUs)
 				var id, _id uint64
 				var ok bool
-				var match *Match
 
 				for result := range sg.OutCh {
 					if verbose {
@@ -430,44 +607,7 @@ Performance tips:
 
 					if _id == id {
 						// output(result)
-
-						if result.Matches == nil {
-							if !keepUnmatched {
-								poolQueryResult.Put(result)
-							} else {
-								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-									result.QueryID, result.QueryLen,
-									result.NumKmers, result.FPR, 0)
-
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									"", -1, 0, 0,
-									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx)
-
-								poolQueryResult.Put(result)
-							}
-						} else {
-							matched++
-							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-								result.QueryID, result.QueryLen,
-								result.NumKmers, result.FPR, len(*result.Matches))
-
-							for _, match = range *result.Matches {
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
-									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
-							}
-
-							// outfh.Flush()
-
-							(*result.Matches) = (*(result.Matches))[:0]
-							poolMatches.Put(result.Matches)
-
-							poolQueryResult.Put(result)
-						}
+						ch <- result
 
 						id++
 						continue
@@ -477,44 +617,7 @@ Performance tips:
 
 					if result, ok = m[id]; ok {
 						// output(_result)
-
-						if result.Matches == nil {
-							if !keepUnmatched {
-								poolQueryResult.Put(result)
-							} else {
-								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-									result.QueryID, result.QueryLen,
-									result.NumKmers, result.FPR, 0)
-
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									"", -1, 0, 0,
-									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx)
-
-								poolQueryResult.Put(result)
-							}
-						} else {
-							matched++
-							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-								result.QueryID, result.QueryLen,
-								result.NumKmers, result.FPR, len(*result.Matches))
-
-							for _, match = range *result.Matches {
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
-									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
-							}
-
-							// outfh.Flush()
-
-							(*result.Matches) = (*(result.Matches))[:0]
-							poolMatches.Put(result.Matches)
-
-							poolQueryResult.Put(result)
-						}
+						ch <- result
 
 						delete(m, id)
 						id++
@@ -529,53 +632,14 @@ Performance tips:
 						i++
 					}
 					sortutil.Uint64s(ids)
-					var result *QueryResult
 					for _, id = range ids {
 						// output(m[id])
-
-						result = m[id]
-
-						if result.Matches == nil {
-							if !keepUnmatched {
-								poolQueryResult.Put(result)
-							} else {
-								prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-									result.QueryID, result.QueryLen,
-									result.NumKmers, result.FPR, 0)
-
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									"", -1, 0, 0,
-									0, 0,
-									float64(0), float64(0), float64(0), result.QueryIdx)
-
-								poolQueryResult.Put(result)
-							}
-						} else {
-							matched++
-							prefix2 = fmt.Sprintf("%s\t%d\t%d\t%e\t%d",
-								result.QueryID, result.QueryLen,
-								result.NumKmers, result.FPR, len(*result.Matches))
-
-							for _, match = range *result.Matches {
-								fmt.Fprintf(outfh, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%0.4f\t%0.4f\t%0.4f\t%d\n",
-									prefix2,
-									match.Target[0], uint16(match.TargetIdx[0]), match.TargetIdx[0]>>16, match.GenomeSize[0],
-									result.K, match.NumKmers,
-									match.QCov, match.TCov, match.JaccardIndex, result.QueryIdx)
-							}
-
-							// outfh.Flush()
-
-							(*result.Matches) = (*(result.Matches))[:0]
-							poolMatches.Put(result.Matches)
-
-							poolQueryResult.Put(result)
-						}
-
+						ch <- m[id]
 					}
 				}
 			}
+
+			close(ch)
 			done <- 1
 		}()
 
@@ -583,9 +647,6 @@ Performance tips:
 		// send query
 
 		var id uint64
-		NNN := []byte("NNN")
-		nnn := []byte("nnn")
-
 		for _, file := range files {
 			if outputLog {
 				log.Infof("reading sequence file: %s", file)
@@ -644,11 +705,6 @@ Performance tips:
 					break
 				}
 
-				// ignore sequences with "NNN"
-				if bytes.Contains(record.Seq.Seq, nnn) || bytes.Contains(record.Seq.Seq, NNN) {
-					continue
-				}
-
 				recordID := make([]byte, len(record.ID))
 				copy(recordID, record.ID)
 
@@ -672,6 +728,7 @@ Performance tips:
 
 		sg.Wait() // wait all searching finished
 		<-done    // all result returned and outputed
+		<-donePrint
 
 		checkError(sg.Close()) // cleanup
 		if outputLog {
