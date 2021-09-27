@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.7.0 - 2021-09
+### v0.7.0 - 2021-10
 
 - `search`:
     - better log.

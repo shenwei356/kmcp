@@ -30,9 +30,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// genautocompleteCmd represents the fq2fa command
-var genautocompleteCmd = &cobra.Command{
-	Use:   "autocomplete",
+// autocompletionCmd represents the fq2fa command
+var autocompletionCmd = &cobra.Command{
+	Use:   "autocompletion",
 	Short: "Generate shell autocompletion script",
 	Long: `Generate shell autocompletion script
 
@@ -41,7 +41,7 @@ Supported shell: bash|zsh|fish|powershell
 Bash:
 
     # generate completion shell
-    kmcp genautocomplete --shell bash
+    kmcp autocompletion --shell bash
 
     # configure if never did.
     # install bash-completion if the "complete" command is not found.
@@ -51,7 +51,7 @@ Bash:
 Zsh:
 
     # generate completion shell
-    kmcp genautocomplete --shell zsh --file ~/.zfunc/_kmcp
+    kmcp autocompletion --shell zsh --file ~/.zfunc/_kmcp
 
     # configure if never did
     echo 'fpath=( ~/.zfunc "${fpath[@]}" )' >> ~/.zshrc
@@ -59,7 +59,7 @@ Zsh:
 
 fish:
 
-    kmcp genautocomplete --shell fish --file ~/.config/fish/completions/kmcp.fish
+    kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -91,9 +91,9 @@ fish:
 }
 
 func init() {
-	RootCmd.AddCommand(genautocompleteCmd)
+	RootCmd.AddCommand(autocompletionCmd)
 	defaultCompletionFile, err := homedir.Expand("~/.bash_completion.d/kmcp.sh")
 	checkError(err)
-	genautocompleteCmd.Flags().StringP("file", "", defaultCompletionFile, "autocompletion file")
-	genautocompleteCmd.Flags().StringP("shell", "", "bash", "autocompletion type (bash|zsh|fish|powershell)")
+	autocompletionCmd.Flags().StringP("file", "", defaultCompletionFile, "autocompletion file")
+	autocompletionCmd.Flags().StringP("shell", "", "bash", "autocompletion type (bash|zsh|fish|powershell)")
 }

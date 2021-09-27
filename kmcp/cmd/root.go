@@ -61,4 +61,6 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("quiet", "q", false, "do not print any verbose information. you can write them to file with --log")
 	RootCmd.PersistentFlags().StringP("infile-list", "i", "", "file of input files list (one file per line), if given, they are appended to files from cli arguments")
 	RootCmd.PersistentFlags().StringP("log", "", "", "log file")
+
+	RootCmd.CompletionOptions.DisableDefaultCmd = true
 }

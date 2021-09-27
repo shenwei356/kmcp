@@ -3,7 +3,7 @@
 
 ## Softwares
 
-- kmcp ([v0.6.0](https://github.com/shenwei356/kmcp/releases/tag/v0.6.0)
+- kmcp ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
 
 ## Databases
 

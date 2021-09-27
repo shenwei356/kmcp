@@ -732,7 +732,6 @@ Performance tips:
 		<-done    // all result returned and outputed
 		<-donePrint
 
-		checkError(sg.Close()) // cleanup
 		if outputLog {
 			fmt.Fprintf(os.Stderr, "\n")
 
@@ -743,6 +742,7 @@ Performance tips:
 			log.Infof("done searching")
 		}
 
+		checkError(sg.Close()) // cleanup
 	},
 }
 
