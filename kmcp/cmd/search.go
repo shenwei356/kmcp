@@ -66,6 +66,8 @@ Special attentions:
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger
      than number of CPU cores won't bring extra speedup.
+  2. Use --low-mem for database larger than RAM, but the searching would be
+     very very slow for a large number of queries.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -749,7 +751,7 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory, the searching would be very very slow`)
+	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory, the searching would be very very slow for a large number of queries`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)

@@ -100,7 +100,7 @@ Attentions
 			if len(files) == 1 && isStdin(files[0]) {
 				log.Info("  no files given, reading from stdin")
 			} else {
-				log.Infof("  %d input file(s) given", len(files))
+				log.Infof("  %d input files given", len(files))
 			}
 		}
 
