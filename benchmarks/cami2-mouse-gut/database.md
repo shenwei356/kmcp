@@ -142,7 +142,9 @@ Building database
 
     # -----------------------------------------------------------------
     
-    genomes=refseq-cami2-slim.masked/
+    # genomes=refseq-cami2-slim.masked/
+    
+    genomes=refseq-cami2-slim
     genomes=${genomes%/}
     prefix=refseq-cami2
     
@@ -150,12 +152,13 @@ Building database
     
     # for short reads
     k=21
-    kmcp compute -I $genomes/ -O $prefix-k$k-n10 \
-        -k $k -n 10 -B plasmid
+    kmcp compute -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
+        --log $prefix-k$k-n10.log
         
     n=1
     f=0.3
-    kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k.db -j $j -n $n -f $f --dry-run   
+    kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k-n10.db -j $j -n $n -f $f \
+        --log $prefix-k$k-n10.db.log
 
 ## Viruses
 
@@ -227,8 +230,10 @@ Building database
         > name-virus.map
         
     # create kmcp database
-    kmcp compute -k 21 -e -n 5 -l 100 -I virus.masked/ -O refseq-cami2-virus-k21-n5
+    kmcp compute -k 21 -e -n 5 -l 100 -I virus.masked/ -O refseq-cami2-virus-k21-n5 \
+        --log refseq-cami2-virus-k21-n5.log
     
     kmcp index -I refseq-cami2-virus-k21-n5/ -O refseq-cami2-virus-k21-n5.db \
-        -j 40 -n 3 -f 0.001 -x 100k
+        -j 40 -n 3 -f 0.001 -x 100k \
+        --log refseq-cami2-virus-k21-n5.db.log
     

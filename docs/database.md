@@ -132,18 +132,24 @@ Building database:
             | sed -e "/^>/!s/[a-z]/n/g" \
             | gzip -c > gtdb.masked/{%}'
     
+    
+    # input=gtdb.masked/
+    input=gtdb
+    
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments
+    #   reference genomes are splitted into 10 fragments with 100bp overlap
     #   k = 21
-    kmcp compute -I gtdb.masked/ -k 21 -n 10 -B plasmid -O gtdb-r202-k21-n10 --force
+    kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+        --log gtdb-r202-k21-n10.log --force
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
     #   bloom filter parameter:
     #     number of hash function: 1
     #     false positive rate: 0.3
-    kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3
+    kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
+        --log gtdb.kmcp.log
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
@@ -212,36 +218,42 @@ Building database:
     # for viral
     name=viral
     
-    kmcp compute -I files.masked/ -O refseq-$name-k21-n10 \
+    # input=files.masked
+    input=files
+    
+    kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 --force
+        --split-number 10 --split-overlap 100 \
+        --log refseq-$name-k21-n10.log --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
-        -j 32 -f 0.001 -n 3 --force
-    
-    mv refseq-$name-k21-n10.db refseq-viruses.kmcp
+    kmcp index -I refseq-$name-k21-n10/ -O refseq-viruses.kmcp \
+        -j 32 -f 0.001 -n 3 \
+        --log refseq-viruses.kmcp.log --force
     
     # cp taxid and name mapping file to database directory
-    cp taxid.map name.map gtdb.kmcp/
+    cp taxid.map name.map refseq-viruses.kmcp/
 
     # -----------------------------------------------------------------
     # for fungi
     name=fungi
     
-    kmcp compute -I files.masked/ -O refseq-$name-k21-n10 \
+    # input=files.masked
+    input=files
+    
+    kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 --force
+        --split-number 10 --split-overlap 100 \
+        --log refseq-$name-k21-n10.log --force
       
-    kmcp index -I refseq-$name-k21-n10/ -O refseq-$name-k21-n10.db \
-        -j 32 -f 0.05 -n 2 --force
-
-    mv refseq-$name-k21-n10.db refseq-fungi.kmcp
+    kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
+        -j 32 -f 0.05 -n 2 \
+        --log refseq-fungi.kmcp.log --force
     
     # cp taxid and name mapping file to database directory
-    cp taxid.map name.map gtdb.kmcp/
+    cp taxid.map name.map refseq-fungi.kmcp/
 
 ### HumGut
 
