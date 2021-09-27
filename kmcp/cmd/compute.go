@@ -652,7 +652,9 @@ Performance tips:
 									if scaled && code > maxHash {
 										continue
 									}
-									codes = append(codes, code)
+									if code > 0 {
+										codes = append(codes, code)
+									}
 								}
 							} else if minimizer {
 								for {
@@ -663,7 +665,9 @@ Performance tips:
 									if scaled && code > maxHash {
 										continue
 									}
-									codes = append(codes, code)
+									if code > 0 {
+										codes = append(codes, code)
+									}
 								}
 							} else {
 								for {
@@ -674,7 +678,9 @@ Performance tips:
 									if scaled && code > maxHash {
 										continue
 									}
-									codes = append(codes, code)
+									if code > 0 {
+										codes = append(codes, code)
+									}
 								}
 							}
 						}

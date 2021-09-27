@@ -4,6 +4,8 @@
 
 - new command:
     - `filter`: Filter search results and find species-specific queries.
+- `compute`:
+    - skip k-mer containing Ns.
 - `search`:
     - better log.
     - fix matches order of a query.

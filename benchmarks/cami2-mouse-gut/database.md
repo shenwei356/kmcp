@@ -151,7 +151,7 @@ Building database
     # for short reads
     k=21
     kmcp compute -I $genomes/ -O $prefix-k$k-n10 \
-        -e -k $k -n 10 -B plasmid
+        -k $k -n 10 -B plasmid
         
     n=1
     f=0.3
