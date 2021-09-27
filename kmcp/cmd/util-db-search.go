@@ -1148,7 +1148,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			}
 		}
 
-		if !useMmap {
+		if !useMmap || moreThanOneHash {
 			for i := 0; i < PosPopCountBufSize; i++ {
 				buffs[i] = make([]byte, numRowBytes)
 			}

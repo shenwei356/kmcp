@@ -50,7 +50,8 @@ Uncompressing and renaming
     /bin/rm -rf $dbCOBS
     find $seqs -name "*.cobs_cache" | rush "/bin/rm {}"
 
-    memusg -t -s "cobs compact-construct -T $threads -k $k -f 0.3 --num-hashes 1 -p 1024 --file-type fasta $seqs $dbCOBS --keep-temporary --clobber" \
+    memusg -t -s "cobs compact-construct -T $threads -k $k -f 0.3 --num-hashes 1 -p 1024 \
+        --file-type fasta $seqs $dbCOBS --keep-temporary --clobber" \
         2>$dbCOBS.time
     
     du -sh $dbCOBS > $dbCOBS.size
@@ -89,10 +90,12 @@ Database size and building time.
     for f in refs/*.fasta; do
         echo $f
         # cobs
-        memusg -t -H -s "cobs query --load-complete -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" 2>$f.cobs@$db.txt.time
+        memusg -t -H -s "cobs query --load-complete -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" \
+            2>$f.cobs@$db.txt.time
         
         # kmcp
-        memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
+        memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" \
+            2>$f.kmcp@$db.txt.time
     done
 
     # time
@@ -113,17 +116,17 @@ Database size and building time.
         
 Query time and peak memory (cold start, loading all data in memory)
 
-query              |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)
-:------------------|:-----------|:--------------|:-----------|:--------------
-NC_000913.3.fasta  |68.113      |113.56         |161.158     |54.74
-NC_002695.2.fasta  |51.283      |118.47         |15.429      |54.86
-NC_010655.1.fasta  |44.998      |102.24         |11.647      |54.51
-NC_011750.1.fasta  |52.408      |116.37         |11.928      |54.87
-NC_012971.2.fasta  |51.739      |113.09         |12.038      |54.84
-NC_013654.1.fasta  |50.885      |114.00         |12.297      |54.87
-NC_018658.1.fasta  |55.553      |117.19         |12.288      |54.84
-NZ_CP007592.1.fasta|52.696      |116.22         |12.641      |54.85
-NZ_CP028116.1.fasta|52.767      |119.33         |12.210      |54.87
+|query              |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)|
+|:------------------|:-----------|:--------------|:-----------|:--------------|
+|NC_000913.3.fasta  |67.733      |113.56         |170.532     |54.74          |
+|NC_002695.2.fasta  |53.863      |118.48         |16.069      |54.91          |
+|NC_010655.1.fasta  |49.738      |102.23         |12.001      |54.40          |
+|NC_011750.1.fasta  |52.687      |116.38         |12.355      |54.87          |
+|NC_012971.2.fasta  |51.707      |113.09         |12.268      |54.83          |
+|NC_013654.1.fasta  |54.652      |114.00         |12.536      |54.84          |
+|NC_018658.1.fasta  |52.455      |117.18         |12.632      |54.87          |
+|NZ_CP007592.1.fasta|50.348      |116.22         |12.691      |54.88          |
+|NZ_CP028116.1.fasta|54.619      |119.33         |12.999      |54.90          |
 
 
 ### Searching with short reads
@@ -135,27 +138,29 @@ NZ_CP028116.1.fasta|52.767      |119.33         |12.210      |54.87
 
     seqkit stats -j 10 -T refs/*.short | csvtk csv2md -t
     
-file                          |format|type|num_seqs|sum_len |min_len|avg_len|max_len
-:-----------------------------|:-----|:---|:-------|:-------|:------|:------|:------
-refs/NC_000913.3.fasta.short  |FASTA |DNA |232076  |34811400|150    |150.0  |150
-refs/NC_002695.2.fasta.short  |FASTA |DNA |274922  |41238300|150    |150.0  |150
-refs/NC_010655.1.fasta.short  |FASTA |DNA |133198  |19979700|150    |150.0  |150
-refs/NC_011750.1.fasta.short  |FASTA |DNA |256596  |38489400|150    |150.0  |150
-refs/NC_012971.2.fasta.short  |FASTA |DNA |227941  |34191150|150    |150.0  |150
-refs/NC_013654.1.fasta.short  |FASTA |DNA |235860  |35379000|150    |150.0  |150
-refs/NC_018658.1.fasta.short  |FASTA |DNA |263648  |39547200|150    |150.0  |150
-refs/NZ_CP007592.1.fasta.short|FASTA |DNA |255221  |38283150|150    |150.0  |150
-refs/NZ_CP028116.1.fasta.short|FASTA |DNA |282402  |42360300|150    |150.0  |150
+|file                          |format|type|num_seqs|sum_len |min_len|avg_len|max_len|
+|:-----------------------------|:-----|:---|:-------|:-------|:------|:------|:------|
+|refs/NC_000913.3.fasta.short  |FASTA |DNA |232076  |34811400|150    |150.0  |150    |
+|refs/NC_002695.2.fasta.short  |FASTA |DNA |274922  |41238300|150    |150.0  |150    |
+|refs/NC_010655.1.fasta.short  |FASTA |DNA |133198  |19979700|150    |150.0  |150    |
+|refs/NC_011750.1.fasta.short  |FASTA |DNA |256596  |38489400|150    |150.0  |150    |
+|refs/NC_012971.2.fasta.short  |FASTA |DNA |227941  |34191150|150    |150.0  |150    |
+|refs/NC_013654.1.fasta.short  |FASTA |DNA |235860  |35379000|150    |150.0  |150    |
+|refs/NC_018658.1.fasta.short  |FASTA |DNA |263648  |39547200|150    |150.0  |150    |
+|refs/NZ_CP007592.1.fasta.short|FASTA |DNA |255221  |38283150|150    |150.0  |150    |
+|refs/NZ_CP028116.1.fasta.short|FASTA |DNA |282402  |42360300|150    |150.0  |150    |
 
     t=0.8
     
     for f in refs/*.fasta.short; do
         echo $f
         # cobs
-        memusg -t -H -s "cobs query --load-complete -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" 2>$f.cobs@$db.txt.time
+        memusg -t -H -s "cobs query --load-complete -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" \
+            2>$f.cobs@$db.txt.time
         
         # kmcp
-        memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" 2>$f.kmcp@$db.txt.time
+        memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp@$db.txt" \
+            2>$f.kmcp@$db.txt.time
     done
 
     find refs/ -name "*.fasta.short" \
@@ -173,22 +178,22 @@ refs/NZ_CP028116.1.fasta.short|FASTA |DNA |282402  |42360300|150    |150.0  |150
         | csvtk rename -t -f 1-5 -n "query,cobs:time(s),cobs:memory(GB),kmcp:time(s),kmcp:memory(GB)" \
         | csvtk csv2md -t
     
-Query time and peak memory (hot start)
+Query time and peak memory (hot start, loading all data in memory)
 
-query                    |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)
-:------------------------|:-----------|:--------------|:-----------|:--------------
-NC_000913.3.fasta.short  |184.737     |97.60          |15.813      |55.70
-NC_002695.2.fasta.short  |212.143     |99.57          |17.209      |56.08
-NC_010655.1.fasta.short  |132.232     |93.07          |13.830      |55.33
-NC_011750.1.fasta.short  |199.384     |98.73          |16.925      |55.69
-NC_012971.2.fasta.short  |176.219     |97.42          |16.189      |55.65
-NC_013654.1.fasta.short  |180.648     |97.78          |16.169      |55.67
-NC_018658.1.fasta.short  |198.074     |99.06          |17.354      |55.64
-NZ_CP007592.1.fasta.short|194.866     |98.67          |16.223      |55.71
-NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
+|query                    |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)|
+|:------------------------|:-----------|:--------------|:-----------|:--------------|
+|NC_000913.3.fasta.short  |181.941     |97.61          |16.781      |55.79          |
+|NC_002695.2.fasta.short  |210.005     |99.57          |16.960      |56.18          |
+|NC_010655.1.fasta.short  |121.183     |93.08          |14.384      |55.19          |
+|NC_011750.1.fasta.short  |202.856     |98.73          |16.355      |55.79          |
+|NC_012971.2.fasta.short  |184.675     |97.42          |16.041      |55.65          |
+|NC_013654.1.fasta.short  |183.921     |97.77          |16.694      |55.79          |
+|NC_018658.1.fasta.short  |203.736     |99.05          |17.266      |55.79          |
+|NZ_CP007592.1.fasta.short|193.875     |98.67          |17.195      |55.79          |
+|NZ_CP028116.1.fasta.short|213.337     |99.92          |17.253      |56.18          |
 
 
-## KMCP vs sourmash vs mash
+## KMCP vs Mash and Sourmash
 
 
 ### Building database (MinHash sketches)
@@ -198,11 +203,20 @@ NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
     k=31
     threads=8
     scale=1000
+    scaleMash=3400 // average genome size: 3.4Mb.
     
+    dbMASH=gtdb-mash-k$k-S$scaleMash.msh
     dbSOURMASHtmp=gtdb-sourmash-k$k-D$scale
     dbSOURMASH=gtdb-sourmash-k$k-D$scale/_db.sbt.json
     dbKMCPtmp=gtdb-kmcp-k$k-D$scale
     dbKMCP=gtdb-kmcp-k$k-D$scale.db
+    
+    
+    # --------------- mash ---------------
+    
+    find $seqs -name *.fa.gz > $seqs.list
+    memusg -t -s "mash sketch -p $threads -s $scaleMash -k $k -o $dbMASH -l $seqs.list " \
+        2>$dbMASH.time
     
     
     # --------------- sourmash ---------------
@@ -227,11 +241,11 @@ NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
         2>$dbKMCP.time
 
 
-|               |sourmash  |kmcp    |
-:---------------|:---------|:-------|
-|database size  |  5.19GB  | 1.52GB |
-|buiding time   |  89m59s  | 7min02s|
-|temporary files| -        | 3.41GB |
+|               |mash   |sourmash  |kmcp    |
+|:--------------|:------|:---------|:-------|
+|database size  |743MB  | 5.19GB   | 1.52GB |
+|buiding time   |11m39s | 89m59s   | 7min02s|
+|temporary files|-      |-         | 3.41GB |
 
 
 ### Searching with bacterial genomes
@@ -239,60 +253,72 @@ NZ_CP028116.1.fasta.short|207.710     |99.91          |17.642      |56.12
     # emptying the buffers cache
     # su -c "free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
     
-    t=0.5
+    
+    threads=8
+    
+    t=0.4
     for f in refs/*.fasta; do
         echo $f
+        # mash
+        memusg -t -H -s "mash dist -p $threads -s $scaleMash -v 0.01 -d 0.05 $dbMASH $f > $f.mash@$db.txt " \
+            2>$f.mash@$db.txt.time
+        
         # sourmash
         memusg -t -H -s "sourmash -q sketch dna -p k=$k,scaled=$scale $f -o $f.sig; \
-            sourmash -q search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" 2>$f.sourmash@$db.txt.time
+            sourmash -q search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" \
+            2>$f.sourmash@$db.txt.time
         
         # kmcp, single-thread
-        memusg -t -H -s "kmcp search -g -j 1 -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" 2>$f.kmcp.scaled@$db.txt.time
+        memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" \
+            2>$f.kmcp.scaled@$db.txt.time
     done
 
     # time
     find refs/ -name "*.fasta" \
         | rush -k 'echo -ne {%}; \
+            echo -en "\t"$(grep "elapsed time" {}.mash@gtdb.txt.time | sed -r "s/.+: //"); \
+            echo -en "\t"$(grep "peak rss" {}.mash@gtdb.txt.time | sed -r "s/.+: //"); \
             echo -en "\t"$(grep "elapsed time" {}.sourmash@gtdb.txt.time | sed -r "s/.+: //"); \
             echo -en "\t"$(grep "peak rss" {}.sourmash@gtdb.txt.time | sed -r "s/.+: //"); \
             echo -en "\t"$(grep "elapsed time" {}.kmcp.scaled@gtdb.txt.time | sed -r "s/.+: //"); \
             echo -e "\t"$(grep "peak rss" {}.kmcp.scaled@gtdb.txt.time | sed -r "s/.+: //"); \
             ' \
         | sed 's/ /\t/g' \
-        | csvtk add-header -t -n "query,sourmash_t,sourmash_m0,kmcp_t,kmcp_m0" \
+        | csvtk add-header -t -n "query,mash_t,mash_m0,sourmash_t,sourmash_m0,kmcp_t,kmcp_m0" \
+        | csvtk mutate2 -t -n mash_m -e '$mash_m0 / 1024' \
         | csvtk mutate2 -t -n sourmash_m -e '$sourmash_m0 / 1024' \
         | csvtk mutate2 -t -n kmcp_m -e '$kmcp_m0 / 1024' \
-        | csvtk cut -t -f query,sourmash_t,sourmash_m,kmcp_t,kmcp_m \
-        | csvtk rename -t -f 1-5 -n "query,sourmash:time(s),sourmash:memory(MB),kmcp:time(s),kmcp:memory(MB)" \
+        | csvtk cut -t -f query,mash_t,mash_m,sourmash_t,sourmash_m,kmcp_t,kmcp_m \
+        | csvtk rename -t -f 1-7 -n "query,mash:time(s),mash:mem(MB),sourmash:time(s),sourmash:mem(MB),kmcp:time(s),kmcp:mem(MB)" \
         | csvtk csv2md -t
         
     
-Query time and peak memory (kmcp utilizes single thread, cold start)
+Query time and peak memory (mash and kmcp utilize single thread, cold start)
 
-query              |sourmash:time(s)|sourmash:memory(MB)|kmcp:time(s)|kmcp:memory(MB)
-:------------------|:---------------|:------------------|:-----------|:--------------
-NC_000913.3.fasta  |12.491          |187.77             |20.866      |693.22
-NC_002695.2.fasta  |6.499           |185.69             |5.054       |753.05
-NC_010655.1.fasta  |3.611           |205.79             |1.275       |477.62
-NC_011750.1.fasta  |4.416           |185.69             |1.461       |565.40
-NC_012971.2.fasta  |3.812           |183.69             |1.236       |516.36
-NC_013654.1.fasta  |3.956           |185.68             |1.271       |590.29
-NC_018658.1.fasta  |4.157           |183.70             |1.235       |721.58
-NZ_CP007592.1.fasta|3.959           |183.70             |1.278       |664.78
-NZ_CP028116.1.fasta|4.333           |187.68             |1.250       |416.22
+|query              |mash:time(s)|mash:mem(MB)|sourmash:time(s)|sourmash:mem(MB)|kmcp:time(s)|kmcp:mem(MB)|
+|:------------------|:-----------|:-----------|:---------------|:---------------|:-----------|:-----------|
+|NC_000913.3.fasta  |3.382       |1492.70     |12.960          |241.41          |20.112      |680.85      |
+|NC_002695.2.fasta  |3.615       |1495.46     |7.182           |228.50          |4.862       |746.45      |
+|NC_010655.1.fasta  |3.150       |1488.69     |3.912           |232.46          |1.686       |454.02      |
+|NC_011750.1.fasta  |3.369       |1494.16     |4.664           |228.50          |1.278       |655.17      |
+|NC_012971.2.fasta  |3.597       |1492.43     |4.216           |230.56          |0.861       |615.64      |
+|NC_013654.1.fasta  |3.914       |1493.46     |4.254           |234.48          |1.454       |642.32      |
+|NC_018658.1.fasta  |3.413       |1493.92     |4.307           |228.51          |1.051       |639.74      |
+|NZ_CP007592.1.fasta|3.485       |1494.42     |5.099           |234.48          |1.272       |584.30      |
+|NZ_CP028116.1.fasta|3.783       |1496.68     |5.099           |228.51          |1.297       |614.72      |
 
 
 
-Query time and peak memory (kmcp utilizes 8 threads, cold start)
+Query time and peak memory (mash and kmcp utilize 8 threads, cold start)
 
-query              |sourmash:time(s)|sourmash:memory(MB)|kmcp:time(s)|kmcp:memory(MB)
-:------------------|:---------------|:------------------|:-----------|:--------------
-NC_000913.3.fasta  |12.515          |185.86             |4.891       |692.79
-NC_002695.2.fasta  |6.559           |181.71             |2.495       |745.04
-NC_010655.1.fasta  |3.806           |208.96             |0.792       |467.58
-NC_011750.1.fasta  |4.029           |195.29             |0.639       |575.79
-NC_012971.2.fasta  |3.939           |195.64             |0.641       |299.26
-NC_013654.1.fasta  |3.969           |183.69             |0.630       |186.05
-NC_018658.1.fasta  |4.196           |185.69             |0.636       |152.86
-NZ_CP007592.1.fasta|4.027           |187.68             |0.658       |59.88
-NZ_CP028116.1.fasta|4.194           |187.68             |0.644       |58.36
+|query              |mash:time(s)|mash:mem(MB)|sourmash:time(s)|sourmash:mem(MB)|kmcp:time(s)|kmcp:mem(MB)|
+|:------------------|:-----------|:-----------|:---------------|:---------------|:-----------|:-----------|
+|NC_000913.3.fasta  |2.292       |1495.78     |12.994          |228.59          |4.868       |682.43      |
+|NC_002695.2.fasta  |2.517       |1494.37     |7.227           |238.47          |2.219       |713.38      |
+|NC_010655.1.fasta  |2.292       |1488.93     |3.906           |224.49          |0.852       |460.16      |
+|NC_011750.1.fasta  |2.343       |1496.29     |4.671           |230.50          |0.563       |705.36      |
+|NC_012971.2.fasta  |2.347       |1495.78     |4.220           |230.49          |0.646       |227.00      |
+|NC_013654.1.fasta  |2.544       |1495.78     |4.234           |230.49          |0.644       |360.12      |
+|NC_018658.1.fasta  |2.340       |1496.29     |4.468           |228.51          |0.620       |41.04       |
+|NZ_CP007592.1.fasta|2.341       |1496.30     |4.843           |234.49          |0.632       |81.90       |
+|NZ_CP028116.1.fasta|2.547       |1496.84     |4.866           |232.50          |0.647       |76.75       |
