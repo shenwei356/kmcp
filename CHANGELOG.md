@@ -2,6 +2,8 @@
 
 ### v0.7.0 - 2021-10
 
+- new command:
+    - `filter`: Filter search results and find species-specific queries.
 - `search`:
     - better log.
     - fix matches order of a query.
@@ -10,6 +12,7 @@
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
 - `merge`:
     - fix adding up `hits`, does not affect `profile`.
+    - fix bug of incorrect order.
 - `profile`:
     - change computation of `score`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.

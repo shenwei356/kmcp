@@ -1,4 +1,4 @@
-## Generating datasets 
+## For one genome
 
 Generating reads
 
@@ -11,11 +11,17 @@ Generating reads
     
 Searching
 
-    kmcp search -d gtdb.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@gtdb.tsv.gz
-    
-    kmcp search -d refseq-fungi.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-fungi.tsv.gz
-    
+    kmcp search -d gtdb.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@gtdb.tsv.gz    
+    kmcp search -d refseq-fungi.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-fungi.tsv.gz    
     kmcp search -d refseq-viruses.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-viruses.tsv.gz
     
-    
     kmcp merge $file.fa.gz.kmcp@* -o $file.fa.gz.kmcp.tsv.gz
+    
+Filtering
+
+    kmcp filter -T gtdb.kmcp/taxid.map -X ~/.taxonkit $file.fa.gz.kmcp.tsv.gz -o $file.fa.gz.kmcp.uniq.tsv.gz
+
+## For all genomes
+
+
+    

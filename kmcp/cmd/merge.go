@@ -215,7 +215,7 @@ Attentions
 
 		m := make([]chan *SearchResult, len(files))
 		for i, file := range files {
-			ch, err := NewSearchResultParser(file, poolStrings, poolMatches, hitsField, scoreField, queryIdxField, 128)
+			ch, err := NewSearchResultParser(file, poolStrings, poolMatches, scoreField, queryIdxField, 128)
 			checkError(err)
 			m[i] = ch
 		}
@@ -229,6 +229,7 @@ Attentions
 		var ids *Uint64Slice
 		buf := make(map[uint64]*[]*SearchResult, 256)
 		var results *[]*SearchResult
+		var r2 *SearchResult
 		for {
 			found = false
 			allClosed = true
@@ -257,7 +258,16 @@ Attentions
 				}
 
 				found = true
-				chOut <- r
+
+				if results, ok = buf[r.QueryIdx]; ok { // send previously saved
+					for _, r2 = range *results {
+						chOut <- r2
+					}
+
+					delete(buf, r.QueryIdx)
+					heap.Pop(ids) // we believe it's there
+				}
+				chOut <- r // send this one
 			}
 
 			if allClosed {
@@ -311,8 +321,6 @@ var pool_Match = &sync.Pool{New: func() interface{} {
 type _Match struct {
 	Data  *[]string
 	Score float64
-
-	Hits int
 }
 
 type _Matches []*_Match
@@ -326,7 +334,7 @@ type SearchResult struct {
 	Matches  *[]*_Match
 }
 
-func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, matchesField int, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
+func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
 	ch := make(chan *SearchResult, bufferSize)
 
 	go func() {
@@ -334,7 +342,6 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		checkError(err)
 
 		field := numFields - 1
-		fieldNum := matchesField - 1
 		fieldScore := scoreField - 1
 		scanner := bufio.NewScanner(infh)
 
@@ -345,7 +352,6 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 
 		var idx, i uint64
 		var score float64
-		var nmatches int
 		var line string
 		first := true
 		for scanner.Scan() {
@@ -370,11 +376,6 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 				checkError(fmt.Errorf("invalid query index at field %d: %s", numFields, (*items)[field]))
 			}
 
-			nmatches, err = strconv.Atoi((*items)[fieldNum])
-			if err != nil {
-				checkError(fmt.Errorf("invalid matches number at field %d: %s", fieldNum, (*items)[fieldNum]))
-			}
-
 			score, err = strconv.ParseFloat((*items)[fieldScore], 64)
 			if err != nil {
 				checkError(fmt.Errorf("failed to parse score: %s", (*items)[fieldScore]))
@@ -383,13 +384,12 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 			if first {
 				idx = i
 				first = false
-				*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+				*matches = append(*matches, &_Match{Data: items, Score: score})
 
 				// do not use, it's slower
 				// _m := pool_Match.Get().(*_Match)
 				// _m.Data = items
 				// _m.Score = score
-				// _m.Hits = nmatches
 				// *matches = append(*matches, _m)
 				continue
 			}
@@ -405,13 +405,12 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 				// *matches = (*matches)[:0]
 				idx = i
 			}
-			*matches = append(*matches, &_Match{Data: items, Score: score, Hits: nmatches})
+			*matches = append(*matches, &_Match{Data: items, Score: score})
 
 			// do not use, it's slower
 			// _m := pool_Match.Get().(*_Match)
 			// _m.Data = items
 			// _m.Score = score
-			// _m.Hits = nmatches
 			// *matches = append(*matches, _m)
 		}
 
