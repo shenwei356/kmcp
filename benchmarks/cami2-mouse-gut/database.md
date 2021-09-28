@@ -122,11 +122,13 @@ Simplified database
         | csvtk grep -Ht -f 2 -P <(cut -f 1 ../ref2taxid.slim.tsv) \
         | cut -f 1 \
         | rush 'ln -s ../refseq-cami2/{}'
+        
+    # rename files
+    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' refseq-cami2-slim       
 
 Building database
             
     genomes=refseq-cami2-slim/
-    
     genomes=${genomes%/}
     
     # mask low-complexity region
@@ -136,15 +138,12 @@ Building database
         | rush -v outdir=$outdir 'dustmasker -in <(zcat {}) -outfmt fasta \
             | sed -e "/^>/!s/[a-z]/n/g" \
             | gzip -c > {outdir}/{%}'
-            
-    # rename files
-    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $outdir
 
     # -----------------------------------------------------------------
     
-    # genomes=refseq-cami2-slim.masked/
-    
+    # genomes=refseq-cami2-slim.masked/    
     genomes=refseq-cami2-slim
+    
     genomes=${genomes%/}
     prefix=refseq-cami2
     
@@ -159,6 +158,7 @@ Building database
     f=0.3
     kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k-n10.db -j $j -n $n -f $f \
         --log $prefix-k$k-n10.db.log
+
 
 ## Viruses
 
@@ -199,9 +199,7 @@ Building database
         | rush -v outdir=$outdir 'dustmasker -in <(zcat {}) -outfmt fasta \
             | sed -e "/^>/!s/[a-z]/n/g" \
             | gzip -c > {outdir}/{%}'
-            
-    # rename files
-    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $outdir
+
     
     TODO: mapping new TaxId to old taxId
     

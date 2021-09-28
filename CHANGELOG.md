@@ -12,6 +12,7 @@
     - fix queries with many Ns.
     - 10-25% faster.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
+    - change default value of flag `-n/--keep-top-scores` from `5` to `0`.
 - `merge`:
     - fix adding up `hits`, does not affect `profile`.
     - fix bug of incorrect order.
@@ -19,6 +20,7 @@
     - change computation of `score`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
+    - change default value of flag `-n/--keep-top-qcovs` from `5` to `0`.
     - 20% faster.
     
 ### v0.6.0 - 2021-08-13
