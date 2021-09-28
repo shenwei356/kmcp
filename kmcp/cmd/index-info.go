@@ -31,7 +31,7 @@ import (
 )
 
 var infoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   "index-info",
 	Short: "Print information of index file",
 	Long: `Print information of index file
 
@@ -117,7 +117,7 @@ var infoCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(infoCmd)
+	utilsCmd.AddCommand(infoCmd)
 
 	infoCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
 	infoCmd.Flags().BoolP("all", "a", false, "all information")

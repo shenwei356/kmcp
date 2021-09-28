@@ -22,11 +22,12 @@ package cmd
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"sync"
 )
 
-type MatchResult2 struct {
+type MatchResult3 struct {
 	Query string
 	// QLen    int
 	// QKmers  int
@@ -40,16 +41,18 @@ type MatchResult2 struct {
 	// MKmers  int
 	QCov float64
 
-	Line *string
+	Ref   string
+	Begin int
+	End   int
 }
 
-func parseMatchResult2(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (*MatchResult2, bool) {
+func parseMatchResult3(line string, numFields int, items *[]string, maxPFR float64, minQcov float64, re *regexp.Regexp) (*MatchResult3, bool) {
 	stringSplitNByByte(line, '\t', numFields, items)
 	if len(*items) < numFields {
 		checkError(fmt.Errorf("invalid kmcp search result format"))
 	}
 
-	m := &MatchResult2{} // do not use sync.Pool, which is slower for this case
+	m := &MatchResult3{} // do not use sync.Pool, which is slower for this case
 
 	var err error
 
@@ -76,12 +79,18 @@ func parseMatchResult2(line string, numFields int, items *[]string, maxPFR float
 	m.Query = (*items)[0]
 	m.Target = (*items)[5]
 
-	m.Line = &line
+	founds := re.FindAllStringSubmatch(m.Query, 3)
+	if len(founds) == 0 {
+		checkError(fmt.Errorf("no reference and location found in the query name"))
+	}
+	m.Ref = founds[0][1]
+	m.Begin, _ = strconv.Atoi(founds[0][2])
+	m.End, _ = strconv.Atoi(founds[0][3])
 
 	return m, true
 }
 
-var poolMatchResults2 = &sync.Pool{New: func() interface{} {
-	tmp := make([]*MatchResult2, 0, 128)
+var poolMatchResults3 = &sync.Pool{New: func() interface{} {
+	tmp := make([]*MatchResult3, 0, 128)
 	return &tmp
 }}

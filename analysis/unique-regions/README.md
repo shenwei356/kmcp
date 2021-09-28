@@ -15,7 +15,7 @@ Searching
     kmcp search -d refseq-fungi.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-fungi.tsv.gz    
     kmcp search -d refseq-viruses.kmcp/ $file.fa.gz -o $file.fa.gz.kmcp@refseq-viruses.tsv.gz
     
-    kmcp merge $file.fa.gz.kmcp@* -o $file.fa.gz.kmcp.tsv.gz
+    kmcp merge $file.fa.gz.kmcp@*.tsv.gz -o $file.fa.gz.kmcp.tsv.gz
     
 Filtering
 

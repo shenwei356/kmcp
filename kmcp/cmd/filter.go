@@ -40,8 +40,8 @@ import (
 
 var filterCmd = &cobra.Command{
 	Use:   "filter",
-	Short: "Filter search results and find species-specific queries",
-	Long: `Filter search results and find species-specific queries
+	Short: "Filter search results and find species/assembly-specific queries",
+	Long: `Filter search results and find species/assembly-specific queries
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -87,10 +87,10 @@ Performance notes:
 		switch level {
 		case "species":
 			levelSpecies = true
-		case "strain":
+		case "strain", "assembly":
 			levelSpecies = false
 		default:
-			checkError(fmt.Errorf("invalid value for --level, available values: species, strain"))
+			checkError(fmt.Errorf("invalid value for --level, available values: species, strain/assembly"))
 		}
 
 		// -----
@@ -426,10 +426,5 @@ func init() {
 	// name mapping
 	filterCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)
 
-	filterCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
+	filterCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 }
-
-var poolMatchResults2 = &sync.Pool{New: func() interface{} {
-	tmp := make([]*MatchResult2, 0, 128)
-	return &tmp
-}}

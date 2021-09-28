@@ -63,4 +63,5 @@ func init() {
 	RootCmd.PersistentFlags().StringP("log", "", "", "log file")
 
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }

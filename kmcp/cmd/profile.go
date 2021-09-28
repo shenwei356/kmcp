@@ -171,10 +171,10 @@ Taxonomic binning formats:
 		switch level {
 		case "species":
 			levelSpecies = true
-		case "strain":
+		case "strain", "assembly":
 			levelSpecies = false
 		default:
-			checkError(fmt.Errorf("invalid value for --level, available values: species, strain"))
+			checkError(fmt.Errorf("invalid value for --level, available values: species, strain/assembly"))
 		}
 
 		// -----
@@ -1731,7 +1731,7 @@ func init() {
 	// abundance
 	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
-	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain`)
+	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 }
 
 // s = lambda qcov: 87.4572 + 26.4016*qcov - 21.9855*qcov*qcov + 7.3097*qcov*qcov*qcov
