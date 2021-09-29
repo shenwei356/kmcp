@@ -95,8 +95,6 @@ Performance notes:
 
 		// -----
 
-		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
-
 		taxidMappingFiles := getFlagStringSlice(cmd, "taxid-map")
 		taxonomyDataDir := getFlagString(cmd, "taxdump")
 
@@ -149,40 +147,6 @@ Performance notes:
 			} else if filepath.Clean(file) == outFileClean {
 				checkError(fmt.Errorf("out file should not be one of the input file"))
 			}
-		}
-
-		// ---------------------------------------------------------------
-		// name mapping files
-
-		var namesMap map[string]string
-		mappingNames := len(nameMappingFiles) != 0
-		if mappingNames {
-			if opt.Verbose || opt.Log2File {
-				log.Infof("loading name mapping file ...")
-			}
-			nameMappingFile := nameMappingFiles[0]
-			namesMap, err = cliutil.ReadKVs(nameMappingFile, false)
-			if err != nil {
-				checkError(errors.Wrap(err, nameMappingFile))
-			}
-
-			if len(nameMappingFiles) > 1 {
-				for _, _nameMappingFile := range nameMappingFiles[1:] {
-					_namesMap, err := cliutil.ReadKVs(_nameMappingFile, false)
-					if err != nil {
-						checkError(errors.Wrap(err, nameMappingFile))
-					}
-					for _k, _v := range _namesMap {
-						namesMap[_k] = _v
-					}
-				}
-			}
-
-			if opt.Verbose || opt.Log2File {
-				log.Infof("  %d pairs of name mapping values from %d file(s) loaded", len(namesMap), len(nameMappingFiles))
-			}
-
-			mappingNames = len(namesMap) > 0
 		}
 
 		// ---------------------------------------------------------------
@@ -346,7 +310,11 @@ Performance notes:
 							if levelSpecies {
 								taxids = taxids[:0]
 								for _, ms = range matches {
-									taxids = append(taxids, taxidMap[(*ms)[0].Target])
+									taxid1, ok = taxidMap[(*ms)[0].Target]
+									if !ok {
+										checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+									}
+									taxids = append(taxids, taxid1)
 								}
 
 								theSameSpecies = false
@@ -422,9 +390,6 @@ func init() {
 	// taxonomy
 	filterCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
 	filterCmd.Flags().StringP("taxdump", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
-
-	// name mapping
-	filterCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)
 
 	filterCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 }

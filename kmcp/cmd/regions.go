@@ -36,11 +36,11 @@ import (
 )
 
 var regionsCmd = &cobra.Command{
-	Use:   "regions",
-	Short: "Extract species/assembly-specific regions",
-	Long: `Extract species/assembly-specific regions
+	Use:   "merge-regions",
+	Short: "Merge species/assembly-specific regions",
+	Long: `Merge species/assembly-specific regions
 
-Input:
+Steps:
   # 1. Simulating reads and searching on one or more databases.
   seqkit sliding -s 10 -W 100 ref.fna.gz \
       | kmcp search -d db1.kmcp -o ref.fna.gz.kmcp@db1.tsv.gz
@@ -50,7 +50,19 @@ Input:
   # 2. Merging and filtering searching results
   kmcp merge ref.fna.gz.kmcp@*.tsv.gz \
       | kmcp filter -X taxdump -T taxid.map \
-	    -o ref.fna.gz.kmcp.uniq.tsv.gz
+            -o ref.fna.gz.kmcp.uniq.tsv.gz
+  
+  # 3. Merging regions
+  kmcp utils merge-regions ref.fna.gz.kmcp.uniq.tsv.gz \
+      -o ref.fna.gz.kmcp.uniq.tsv.gz.bed
+
+Output (BED6 format):
+  1. chrom      - chromosome name
+  2. chromStart - starting position (0-based)
+  3. chromEnd   - ending position (0-based)
+  4. name       - "species-specific" or "assembly-specific"
+  5. score      - 0-1000, 1000 for "assembly-specific", others for ""species-specific"
+  6. strand     - "."
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
@@ -249,14 +261,16 @@ Performance notes:
 							}
 
 							if begin0 > 0 {
-								if begin <= end0 && name == name0 { // has overlap, update region
+								if ref == ref0 && begin <= end0 && name == name0 {
+									// 1. the same chromesome; 2. has overlap; 3 the same type
+									// update region
 									end0 = end
 									if name0 == nameMultiple {
 										score0 = (score0 + score) / 2
 									}
 								} else { // print previous region
 									nRegions++
-									fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0, end0, name0, score0*100)
+									fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0-1, end0, name0, score0*1000)
 
 									ref0, begin0, end0, name0, score0 = ref, begin, end, name, score
 								}
@@ -284,14 +298,18 @@ Performance notes:
 			}
 
 			nReads++
-			if begin <= end0 && name == name0 { // has overlap, update region
+			if ref == ref0 && begin <= end0 && name == name0 {
+				// 1. the same chromesome; 2. has overlap; 3 the same type
+				// update region
 				end0 = end
 				if name0 == nameMultiple {
 					score0 = (score0 + score) / 2
 				}
 			}
+
+			// print the last region
 			nRegions++
-			fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0, end0, name0, score0*100)
+			fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0-1, end0, name0, score0*1000)
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -312,7 +330,7 @@ func init() {
 	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
 
 	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, `regular expression for extract reference name and query locations`)
-	regionsCmd.Flags().StringP("name-species", "s", "species", `name of species-specific regions`)
-	regionsCmd.Flags().StringP("name-assembly", "a", "assembly", `name of assembly-specific regions`)
+	regionsCmd.Flags().StringP("name-species", "s", "species-specific", `name of species-specific regions`)
+	regionsCmd.Flags().StringP("name-assembly", "a", "assembly-specific", `name of assembly-specific regions`)
 
 }

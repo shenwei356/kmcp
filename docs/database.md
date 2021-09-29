@@ -54,7 +54,6 @@ Tools:
 
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
-- [dustmasker](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) for masking low-complexity regions.
 - [seqkit](https://github.com/shenwei356/seqkit/releases) for FASTA file processing.
 - [kmcp](/download) for metagenomic profiling.
 
@@ -71,7 +70,7 @@ Uncompressing and renaming:
     tar -zxvf gtdb_genomes_reps_r202.tar.gz -O gtdb
     
     # rename
-    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb    
+    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
   
 Mapping file:
 
@@ -125,15 +124,6 @@ Mapping file:
         
 Building database:
 
-    # mask low-complexity region
-    mkdir -p gtdb.masked
-    find gtdb/ -name "*.fna.gz" \
-        | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > gtdb.masked/{%}'
-    
-    
-    # input=gtdb.masked/
     input=gtdb
     
     # compute k-mers
@@ -199,27 +189,29 @@ Downloading viral and fungi sequences:
         > taxid.map.stats.tsv
     
     seqkit stats -T -j 12 --infile-list <(find files -name "*.fna.gz") > files.stats.tsv
+    
+    
+    
+    # create another directory linking to genome files
+    
+    input=files.renamed    
+    
+    mkdir -p $input
+    # create soft links
+    cd $input
+    find ../files -name "*.fna.gz" \
+        | rush 'ln -s {}'
+    cd ..    
+    # rename
+    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
         
 Building database:
-
-    # mask
-    mkdir -p files.masked
-    fd fna.gz files \
-        | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > files.masked/{%}'
-            
-    # rename
-    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' files.masked   
-    
-    
-    
+        
     # -----------------------------------------------------------------
     # for viral
     name=viral
     
-    # input=files.masked
-    input=files
+    input=files.renamed
     
     kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
@@ -240,8 +232,7 @@ Building database:
     # for fungi
     name=fungi
     
-    # input=files.masked
-    input=files
+    input=files.renamed
     
     kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
@@ -348,19 +339,12 @@ Stats:
     class     2
         
 Building database:
-
-    # mask low-complexity region
-    mkdir -p humgut.masked
-    find fna/ -name "*.fna.gz" \
-        | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > humgut.masked/{%}'
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments
     #   k = 21
-    kmcp compute -I humgut.masked/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 --force
+    kmcp compute -I humgut/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 --force
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
@@ -388,7 +372,6 @@ Files:
 Tools:
 
 - [kmcp](/download) for metagenomic profiling.
-- [dustmasker](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) for masking low-complexity regions.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files (optional)
 
@@ -405,31 +388,16 @@ database can be loaded into RAM. After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
 for downstream analysis.
 
-### Step 1. Masking low-complexity region
+
+### Step 1. Computing k-mers
 
 Plain or gzip-compressed input genome sequence files better be saved in one directory,
 with multiple-level directories allowed. 
 The file extension could be `fa`, `fasta`, `fna`, `fq`, `fastq`, `fa.gz`, `fasta.gz`,
  `fna.gz`, `fq.gz` or `fastq.gz`.
 
-`dustmasker` is used to mask low-complexity regions, while it only accept plain text input.
-Therefore, a named pipe (`<(zcat $infile)`) is used to decompress gzipped file.
-
-    # directory containing genome files
-    genomes=genomes
-
-    # mask low-complexity region
-    mkdir -p masked
-
-    find $genomes -name "*" \
-        | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > masked/{%}'
-    
-### Step 2. Compute k-mers
-
 **Input files** can be given as a list of FASTA/Q files via
-positional arguments or a directory containing sequence files
+positional arguments or a directory (with multiple-level directories allowed) containing sequence files
 via the flag `-I/--in-dir`. A regular expression for matching
 sequencing files is available by the flag `-r/--file-regexp`.
 The default pattern matches files with extension of 
@@ -504,7 +472,7 @@ is good enough.
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments,
     #   k = 21
-    kmcp compute --in-dir masked/ \
+    kmcp compute --in-dir sequences-dir/ \
         --kmer 21 \
         --split-number 10 \
         --seq-name-filter plasmid \
@@ -557,7 +525,7 @@ Meta data in the `.unik` file can be showed using [unikmer](https://github.com/s
     unikmer info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116-frag_0.unik -a
 
 
-### Step 3. Building databases
+### Step 2. Building databases
 
 KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
 Signature Index ([COBS](https://arxiv.org/abs/1905.09624)). 

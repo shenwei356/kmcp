@@ -512,7 +512,11 @@ Taxonomic binning formats:
 							if levelSpecies {
 								taxids = taxids[:0]
 								for h, ms = range matches {
-									taxids = append(taxids, taxidMap[(*ms)[0].Target])
+									taxid1, ok = taxidMap[(*ms)[0].Target]
+									if !ok {
+										checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+									}
+									taxids = append(taxids, taxid1)
 								}
 
 								theSameSpecies = false
@@ -630,7 +634,11 @@ Taxonomic binning formats:
 			if levelSpecies {
 				taxids = taxids[:0]
 				for h, ms = range matches {
-					taxids = append(taxids, taxidMap[(*ms)[0].Target])
+					taxid1, ok = taxidMap[(*ms)[0].Target]
+					if !ok {
+						checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+					}
+					taxids = append(taxids, taxid1)
 				}
 
 				theSameSpecies = false
@@ -1036,7 +1044,11 @@ Taxonomic binning formats:
 									sumUReads += profile[h].SumUniqMatch
 
 									if mappingTaxids {
-										taxids = append(taxids, taxidMap[(*ms)[0].Target])
+										taxid1, ok = taxidMap[(*ms)[0].Target]
+										if !ok {
+											checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+										}
+										taxids = append(taxids, taxid1)
 									}
 								}
 
@@ -1262,7 +1274,11 @@ Taxonomic binning formats:
 						sumUReads += profile[h].SumUniqMatch
 
 						if mappingTaxids {
-							taxids = append(taxids, taxidMap[(*ms)[0].Target])
+							taxid1, ok = taxidMap[(*ms)[0].Target]
+							if !ok {
+								checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+							}
+							taxids = append(taxids, taxid1)
 						}
 					}
 
@@ -1734,7 +1750,7 @@ func init() {
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 }
 
-// s = lambda qcov: 87.4572 + 26.4016*qcov - 21.9855*qcov*qcov + 7.3097*qcov*qcov*qcov
+// s = lambda qcov: 87.456 + 26.410*qcov - 22.008*qcov*qcov + 7.325*qcov*qcov*qcov
 func similarity(qcov float64) float64 {
 	square := qcov * qcov
 	return 87.456 + 26.410*qcov - -22.008*square + 7.325*square*qcov

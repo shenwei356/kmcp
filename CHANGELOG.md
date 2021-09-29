@@ -6,6 +6,9 @@
     - `filter`: Filter search results and find species-specific queries.
 - `compute`:
     - skip k-mer containing Ns.
+    - when splitting genome into fragments, sequences are concatenated with k-1 'N's
+     instead of directly concatenation.
+     It eliminates fake k-mers at the concatenation position.
 - `search`:
     - better log.
     - fix matches order of a query.
@@ -17,6 +20,7 @@
     - fix adding up `hits`, does not affect `profile`.
     - fix bug of incorrect order.
 - `profile`:
+    - addd checking if the taxid of a target is given.
     - change computation of `score`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.

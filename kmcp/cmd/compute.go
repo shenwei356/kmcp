@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -77,7 +78,7 @@ Splitting sequences:
      with overlap (-l/--split-overlap).
   2. When splitting by number of fragments, all sequences (except for
      these mathching any regular expression given by -B/--seq-name-filter)
-     in a sequence file are concatenated before splitting.
+     in a sequence file are concatenated with k-1 'N's before splitting.
   3. Both sequence IDs and fragments indices are saved for later use,
      in form of meta/description data in .unik files.
 
@@ -492,6 +493,7 @@ Performance tips:
 				var allSeqs [][]byte
 				var bigSeq []byte
 				var record1 *fastx.Record
+				nnn := bytes.Repeat([]byte{'N'}, kMax-1)
 
 				var ignoreSeq bool
 				var re *regexp.Regexp
@@ -534,11 +536,14 @@ Performance tips:
 					if len(allSeqs) == 1 {
 						bigSeq = allSeqs[0]
 					} else {
-						bigSeq = make([]byte, lenSum)
+						bigSeq = make([]byte, lenSum+(len(allSeqs)-1)*(kMax-1))
 						i := 0
-						for _, aseq := range allSeqs {
+						for j, aseq := range allSeqs {
 							copy(bigSeq[i:i+len(aseq)], aseq)
-							i += len(aseq)
+							if j < len(allSeqs)-1 {
+								copy(bigSeq[i+len(aseq):i+len(aseq)+kMax-1], nnn)
+							}
+							i += len(aseq) + kMax - 1
 						}
 					}
 					if lenSum == 0 {
@@ -603,7 +608,7 @@ Performance tips:
 							step = seqLen
 							greedy = false
 						} else {
-							splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
+							splitSize = (seqLen + (splitNumber-1)*(splitOverlap+kMax-1) + splitNumber - 1) / splitNumber
 							step = splitSize - splitOverlap
 						}
 					}
