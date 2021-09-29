@@ -358,13 +358,35 @@ Performance notes:
 
 			nReads++
 
-			if len(matches) == 1 || theSameSpecies {
-				nPassed++
-				for _, ms = range matches {
-					for _, m = range *ms { // multiple matches in different fragments
-						outfh.WriteString(*m.Line)
+			if len(matches) > 0 {
+				if levelSpecies {
+					taxids = taxids[:0]
+					for _, ms = range matches {
+						taxid1, ok = taxidMap[(*ms)[0].Target]
+						if !ok {
+							checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+						}
+						taxids = append(taxids, taxid1)
 					}
-					poolMatchResults.Put(ms)
+
+					theSameSpecies = false
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+					if taxdb.AtOrBelowRank(taxid1, "species") {
+						theSameSpecies = true
+					}
+				}
+
+				if len(matches) == 1 || theSameSpecies {
+					nPassed++
+					for _, ms = range matches {
+						for _, m = range *ms { // multiple matches in different fragments
+							outfh.WriteString(*m.Line)
+						}
+						poolMatchResults.Put(ms)
+					}
 				}
 			}
 		}
@@ -391,5 +413,5 @@ func init() {
 	filterCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
 	filterCmd.Flags().StringP("taxdump", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
 
-	filterCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
+	filterCmd.Flags().StringP("level", "", "species", `level to filter. available values: species, strain/assembly`)
 }

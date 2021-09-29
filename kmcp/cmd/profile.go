@@ -629,62 +629,64 @@ Taxonomic binning formats:
 				}
 			}
 
-			nReads++
+			if len(matches) > 0 {
+				nReads++
 
-			if levelSpecies {
-				taxids = taxids[:0]
+				if levelSpecies {
+					taxids = taxids[:0]
+					for h, ms = range matches {
+						taxid1, ok = taxidMap[(*ms)[0].Target]
+						if !ok {
+							checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+						}
+						taxids = append(taxids, taxid1)
+					}
+
+					theSameSpecies = false
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+					if taxdb.AtOrBelowRank(taxid1, "species") {
+						theSameSpecies = true
+					}
+				}
+
 				for h, ms = range matches {
-					taxid1, ok = taxidMap[(*ms)[0].Target]
-					if !ok {
-						checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
-					}
-					taxids = append(taxids, taxid1)
-				}
-
-				theSameSpecies = false
-				taxid1 = taxids[0]
-				for _, taxid2 = range taxids[1:] {
-					taxid1 = taxdb.LCA(taxid1, taxid2)
-				}
-				if taxdb.AtOrBelowRank(taxid1, "species") {
-					theSameSpecies = true
-				}
-			}
-
-			for h, ms = range matches {
-				floatMsSize = float64(len(*ms))
-				first = true
-				for _, m = range *ms { // multiple matches in different fragments
-					if t, ok = profile[h]; !ok {
-						t0 := Target{
-							Name:         m.Target,
-							GenomeSize:   m.GSize,
-							Match:        make([]float64, m.IdxNum),
-							UniqMatch:    make([]float64, m.IdxNum),
-							UniqMatchHic: make([]float64, m.IdxNum),
-							QLen:         make([]float64, m.IdxNum),
-						}
-						profile[h] = &t0
-						t = &t0
-					}
-
-					if first { // count once
-						if len(matches) == 1 || theSameSpecies {
-							t.UniqMatch[m.FragIdx]++
-							if m.QCov >= hicUreadsMinQcov {
-								t.UniqMatchHic[m.FragIdx]++
+					floatMsSize = float64(len(*ms))
+					first = true
+					for _, m = range *ms { // multiple matches in different fragments
+						if t, ok = profile[h]; !ok {
+							t0 := Target{
+								Name:         m.Target,
+								GenomeSize:   m.GSize,
+								Match:        make([]float64, m.IdxNum),
+								UniqMatch:    make([]float64, m.IdxNum),
+								UniqMatchHic: make([]float64, m.IdxNum),
+								QLen:         make([]float64, m.IdxNum),
 							}
+							profile[h] = &t0
+							t = &t0
 						}
-						t.QLen[m.FragIdx] += float64(m.QLen)
 
-						first = false
+						if first { // count once
+							if len(matches) == 1 || theSameSpecies {
+								t.UniqMatch[m.FragIdx]++
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx]++
+								}
+							}
+							t.QLen[m.FragIdx] += float64(m.QLen)
+
+							first = false
+						}
+
+						// for a read matching multiple regions of a reference, distribute count to multiple regions,
+						// the sum is still the one.
+						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
-
-					// for a read matching multiple regions of a reference, distribute count to multiple regions,
-					// the sum is still the one.
-					t.Match[m.FragIdx] += floatOne / floatMsSize
+					poolMatchResults.Put(ms)
 				}
-				poolMatchResults.Put(ms)
 			}
 		}
 

@@ -42,9 +42,9 @@ var regionsCmd = &cobra.Command{
 
 Steps:
   # 1. Simulating reads and searching on one or more databases.
-  seqkit sliding -s 10 -W 100 ref.fna.gz \
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
       | kmcp search -d db1.kmcp -o ref.fna.gz.kmcp@db1.tsv.gz
-  seqkit sliding -s 10 -W 100 ref.fna.gz \
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
       | kmcp search -d db2.kmcp -o ref.fna.gz.kmcp@db2.tsv.gz
   
   # 2. Merging and filtering searching results
@@ -52,8 +52,10 @@ Steps:
       | kmcp filter -X taxdump -T taxid.map \
             -o ref.fna.gz.kmcp.uniq.tsv.gz
   
-  # 3. Merging regions
-  kmcp utils merge-regions ref.fna.gz.kmcp.uniq.tsv.gz \
+  # 3. Merging regions.
+  # Here the value of --max-gap should be the same as the value
+  # of --step in the step 1.
+  kmcp utils merge-regions --max-gap 10 ref.fna.gz.kmcp.uniq.tsv.gz \
       -o ref.fna.gz.kmcp.uniq.tsv.gz.bed
 
 Output (BED6 format):
@@ -106,9 +108,12 @@ Performance notes:
 			runtime.GOMAXPROCS(opt.NumCPUs)
 		}
 
+		maxGap := getFlagNonNegativeInt(cmd, "max-gap")
 		reQueryStr := getFlagString(cmd, "regexp")
 		reQuery, err := regexp.Compile(reQueryStr)
 		checkError(err)
+
+		limitGap := maxGap > 0
 
 		nameMultiple := getFlagString(cmd, "name-species")
 		nameSingle := getFlagString(cmd, "name-assembly")
@@ -224,6 +229,9 @@ Performance notes:
 			var begin0, end0 int
 			var name0 string
 			var score0 float64
+			var extend bool
+
+			var begin1, end1 int
 
 			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
 			checkError(err)
@@ -237,9 +245,9 @@ Performance notes:
 					match = data.(*MatchResult3)
 
 					if prevQuery != match.Query { // new query
-						nReads++
-
 						if len(matches) > 0 { // not the first query
+							nReads++
+
 							first = true
 							for _, ms = range matches {
 								if first {
@@ -261,9 +269,20 @@ Performance notes:
 							}
 
 							if begin0 > 0 {
-								if ref == ref0 && begin <= end0 && name == name0 {
-									// 1. the same chromesome; 2. has overlap; 3 the same type
-									// update region
+								extend = false
+
+								// 1. the same chromesome; 2. has overlap; 3 the same type
+								if ref == ref0 && begin <= end1 && name == name0 {
+									if limitGap {
+										if begin-begin1 <= maxGap {
+											extend = true
+										}
+									} else {
+										extend = true
+									}
+								}
+
+								if extend {
 									end0 = end
 									if name0 == nameMultiple {
 										score0 = (score0 + score) / 2
@@ -277,6 +296,8 @@ Performance notes:
 							} else { // first record
 								ref0, begin0, end0, name0, score0 = ref, begin, end, name, score
 							}
+
+							begin1, end1 = begin, end
 						}
 
 						matches = make(map[uint64]*[]*MatchResult3)
@@ -297,19 +318,58 @@ Performance notes:
 				}
 			}
 
-			nReads++
-			if ref == ref0 && begin <= end0 && name == name0 {
+			if len(matches) > 0 {
+				nReads++
+
+				first = true
+				for _, ms = range matches {
+					if first {
+						ref = (*ms)[0].Ref
+						begin, end = (*ms)[0].Begin, (*ms)[0].End
+						score = (*ms)[0].QCov
+						first = false
+					} else {
+						score += (*ms)[0].QCov
+					}
+
+					poolMatchResults.Put(ms)
+				}
+				if len(matches) == 1 {
+					name = nameSingle
+				} else {
+					name = nameMultiple
+					score /= float64(len(matches))
+				}
+
+				extend = false
+
 				// 1. the same chromesome; 2. has overlap; 3 the same type
-				// update region
-				end0 = end
-				if name0 == nameMultiple {
-					score0 = (score0 + score) / 2
+				if ref == ref0 && begin <= end1 && name == name0 {
+					if limitGap {
+						if begin-begin1 <= maxGap {
+							extend = true
+						}
+					} else {
+						extend = true
+					}
+				}
+
+				if extend {
+					end0 = end
+					if name0 == nameMultiple {
+						score0 = (score0 + score) / 2
+					}
+
+					nRegions++
+					fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0-1, end0, name0, score0*1000)
+				} else {
+					nRegions++
+					fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0-1, end0, name0, score0*1000)
+
+					nRegions++
+					fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref, begin-1, end, name, score*1000)
 				}
 			}
-
-			// print the last region
-			nRegions++
-			fmt.Fprintf(outfh, "%s\t%d\t%d\t%s\t%.0f\t.\n", ref0, begin0-1, end0, name0, score0*1000)
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -328,6 +388,8 @@ func init() {
 	// for single read
 	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
 	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
+
+	regionsCmd.Flags().IntP("max-gap", "g", 1, `maximum gap length`)
 
 	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, `regular expression for extract reference name and query locations`)
 	regionsCmd.Flags().StringP("name-species", "s", "species-specific", `name of species-specific regions`)
