@@ -123,8 +123,9 @@ Mapping file:
   
         
 Building database:
-
+    
     input=gtdb
+    
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,

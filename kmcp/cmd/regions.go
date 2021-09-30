@@ -53,9 +53,8 @@ Steps:
             -o ref.fna.gz.kmcp.uniq.tsv.gz
   
   # 3. Merging regions.
-  # Here the value of --max-gap should be the same as the value
-  # of --step in the step 1.
-  kmcp utils merge-regions --max-gap 10 ref.fna.gz.kmcp.uniq.tsv.gz \
+  # Here the value of --min-overlap should be k-1.
+  kmcp utils merge-regions --min-overlap 20 ref.fna.gz.kmcp.uniq.tsv.gz \
       -o ref.fna.gz.kmcp.uniq.tsv.gz.bed
 
 Output (BED6 format):
@@ -109,11 +108,15 @@ Performance notes:
 		}
 
 		maxGap := getFlagNonNegativeInt(cmd, "max-gap")
+		limitGap := maxGap > 0
+		minOverlap := getFlagPositiveInt(cmd, "min-overlap")
+		if minOverlap == 1 {
+			log.Warningf("you may set -l/--min-overlap as k-1, where k is the k-mer size")
+		}
+
 		reQueryStr := getFlagString(cmd, "regexp")
 		reQuery, err := regexp.Compile(reQueryStr)
 		checkError(err)
-
-		limitGap := maxGap > 0
 
 		nameMultiple := getFlagString(cmd, "name-species")
 		nameSingle := getFlagString(cmd, "name-assembly")
@@ -166,6 +169,10 @@ Performance notes:
 			log.Infof("  maximal false positive rate: %f", maxFPR)
 			log.Infof("  minimal query coverage: %4f", minQcov)
 			log.Info()
+
+			log.Infof("region merging: ")
+			log.Infof("  minimal overlap of two adjacent regions: %d", minOverlap)
+			log.Infof("  maximal distance of starting positions of two adjacent regions: %d", maxGap)
 
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
@@ -272,7 +279,7 @@ Performance notes:
 								extend = false
 
 								// 1. the same chromesome; 2. has overlap; 3 the same type
-								if ref == ref0 && begin <= end1 && name == name0 {
+								if ref == ref0 && begin+minOverlap-1 <= end1 && name == name0 {
 									if limitGap {
 										if begin-begin1 <= maxGap {
 											extend = true
@@ -344,7 +351,7 @@ Performance notes:
 				extend = false
 
 				// 1. the same chromesome; 2. has overlap; 3 the same type
-				if ref == ref0 && begin <= end1 && name == name0 {
+				if ref == ref0 && begin+minOverlap-1 <= end1 && name == name0 {
 					if limitGap {
 						if begin-begin1 <= maxGap {
 							extend = true
@@ -389,7 +396,9 @@ func init() {
 	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
 	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
 
-	regionsCmd.Flags().IntP("max-gap", "g", 1, `maximum gap length`)
+	// for merge
+	regionsCmd.Flags().IntP("max-gap", "g", 0, `maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging`)
+	regionsCmd.Flags().IntP("min-overlap", "l", 1, `minimal overlap of two adjacent regions, recommend K-1`)
 
 	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, `regular expression for extract reference name and query locations`)
 	regionsCmd.Flags().StringP("name-species", "s", "species-specific", `name of species-specific regions`)
