@@ -1972,36 +1972,70 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			// left data in buffer
 			if bufIdx > 0 {
 				// transpose
+				forward = true
 				for i = 0; i < numRowBytes; i++ { // every column in matrix
 					// for j = 0; j < bufIdx; j++ {
 					// 	buf[j] = buffs[j][i]
 					// }
 
-					// unroll loop
-					tmp = bufIdx - 8
-					for j = 0; j < tmp; j++ {
+					if forward {
+						// unroll loop
+						tmp = bufIdx - 8
+						for j = 0; j < tmp; j++ {
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+							j++
+							buf[j] = buffs[j][i]
+						}
+						for ; j < bufIdx; j++ {
+							buf[j] = buffs[j][i]
+						}
+
+						forward = false
+
+						// count
+						pospop.Count8(&counts[i], buf[:bufIdx])
+
+						continue
+					}
+
+					for j = bufIdx - 1; j >= 8; j-- {
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
-						j++
+						j--
 						buf[j] = buffs[j][i]
 					}
-					for ; j < bufIdx; j++ {
+					for ; j >= 0; j-- {
 						buf[j] = buffs[j][i]
 					}
 
+					forward = true
+
 					// count
 					pospop.Count8(&counts[i], buf[:bufIdx])
+
 				}
 			}
 

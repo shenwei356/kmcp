@@ -118,6 +118,8 @@ Performance tips:
 		// keepOrder := getFlagBool(cmd, "keep-order")
 		keepOrder := true
 		wholeFile := getFlagBool(cmd, "query-whole-file")
+		useFileName := getFlagBool(cmd, "use-filename")
+		queryID := getFlagString(cmd, "query-id")
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
 		// immediateOutput := getFlagBool(cmd, "immediate-output")
 
@@ -669,8 +671,15 @@ Performance tips:
 					}
 
 					if first {
-						recordID = make([]byte, len(record.ID))
-						copy(recordID, record.ID)
+						if useFileName {
+							filename, _ := filepathTrimExtension(file)
+							recordID = []byte(filename)
+						} else if queryID != "" {
+							recordID = []byte(queryID)
+						} else {
+							recordID = make([]byte, len(record.ID))
+							copy(recordID, record.ID)
+						}
 						sequence = record.Seq.Clone2()
 						first = false
 					} else {
@@ -753,7 +762,10 @@ func init() {
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
-	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as query`)
+	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as a query`)
+	searchCmd.Flags().BoolP("use-filename", "G", false, `use file name as query ID when using the whole file as a query`)
+	searchCmd.Flags().StringP("query-id", "", "", `custom query Id when using the whole file as a query`)
+
 	searchCmd.Flags().IntP("min-kmers", "c", 30, `minimal number of matched k-mers (sketches)`)
 	searchCmd.Flags().IntP("min-query-len", "m", 70, `minimal query length`)
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
