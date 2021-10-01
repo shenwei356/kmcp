@@ -84,7 +84,6 @@ Taxonomy data:
   2. Taxonomy information are only needed in "profile" command.
   
 Performance tips:
-
   1. Number of blocks (.uniki files) better be smaller than or equal
      to number of CPU cores for faster searching speed. 
      We can set -j/--threads to control blocks number.

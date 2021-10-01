@@ -19,6 +19,7 @@
 - `merge`:
     - fix adding up `hits`, does not affect `profile`.
     - fix bug of incorrect order.
+    - support one input file.
 - `profile`:
     - addd checking if the taxid of a target is given.
     - change computation of `score`.

@@ -127,21 +127,7 @@ Simplified database
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' refseq-cami2-slim       
 
 Building database
-            
-    genomes=refseq-cami2-slim/
-    genomes=${genomes%/}
-    
-    # mask low-complexity region
-    outdir=$genomes.masked
-    mkdir -p $outdir
-    fd fna.gz $genomes/ \
-        | rush -v outdir=$outdir 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > {outdir}/{%}'
 
-    # -----------------------------------------------------------------
-    
-    # genomes=refseq-cami2-slim.masked/    
     genomes=refseq-cami2-slim
     
     genomes=${genomes%/}
@@ -150,7 +136,7 @@ Building database
     j=40
     
     # for short reads
-    k=21
+    k=31
     kmcp compute -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
         --log $prefix-k$k-n10.log
         
@@ -185,21 +171,7 @@ Building database
         | rush -v 'prefix={}/{%}' -v outdir=$genomes \
             ' wget -c {prefix}_genomic.fna.gz -O {outdir}/{%}_genomic.fna.gz' \
             -j 10 -c -C download.rush
-    
    
-    # filter by length and mask low-complexity region
-    outdir=virus.masked
-    mkdir -p $outdir  
-    /bin/rm -rf $outdir
-    mkdir -p $outdir    
-    seqkit stats -j 4 -T --infile-list <(ls $genomes/*) \
-        | csvtk filter2 -t -f '$sum_len >= 1000' \
-        | csvtk cut -t -f file \
-        | csvtk del-header -t \
-        | rush -v outdir=$outdir 'dustmasker -in <(zcat {}) -outfmt fasta \
-            | sed -e "/^>/!s/[a-z]/n/g" \
-            | gzip -c > {outdir}/{%}'
-
     
     TODO: mapping new TaxId to old taxId
     
@@ -228,7 +200,7 @@ Building database
         > name-virus.map
         
     # create kmcp database
-    kmcp compute -k 21 -e -n 5 -l 100 -I virus.masked/ -O refseq-cami2-virus-k21-n5 \
+    kmcp compute -k 21 -e -n 5 -l 100 -I virus/ -O refseq-cami2-virus-k21-n5 \
         --log refseq-cami2-virus-k21-n5.log
     
     kmcp index -I refseq-cami2-virus-k21-n5/ -O refseq-cami2-virus-k21-n5.db \

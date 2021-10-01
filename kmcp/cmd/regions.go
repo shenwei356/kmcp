@@ -121,6 +121,8 @@ Performance notes:
 		nameMultiple := getFlagString(cmd, "name-species")
 		nameSingle := getFlagString(cmd, "name-assembly")
 
+		ignoreType := getFlagBool(cmd, "ignore-type")
+
 		// ---------------------------------------------------------------
 
 		if opt.Verbose || opt.Log2File {
@@ -279,7 +281,7 @@ Performance notes:
 								extend = false
 
 								// 1. the same chromesome; 2. has overlap; 3 the same type
-								if ref == ref0 && begin+minOverlap-1 <= end1 && name == name0 {
+								if ref == ref0 && begin+minOverlap-1 <= end1 && (ignoreType || name == name0) {
 									if limitGap {
 										if begin-begin1 <= maxGap {
 											extend = true
@@ -291,6 +293,9 @@ Performance notes:
 
 								if extend {
 									end0 = end
+									if name0 != name {
+										name0 = nameMultiple
+									}
 									if name0 == nameMultiple {
 										score0 = (score0 + score) / 2
 									}
@@ -351,7 +356,7 @@ Performance notes:
 				extend = false
 
 				// 1. the same chromesome; 2. has overlap; 3 the same type
-				if ref == ref0 && begin+minOverlap-1 <= end1 && name == name0 {
+				if ref == ref0 && begin+minOverlap-1 <= end1 && (ignoreType || name == name0) {
 					if limitGap {
 						if begin-begin1 <= maxGap {
 							extend = true
@@ -363,6 +368,9 @@ Performance notes:
 
 				if extend {
 					end0 = end
+					if name0 != name {
+						name0 = nameMultiple
+					}
 					if name0 == nameMultiple {
 						score0 = (score0 + score) / 2
 					}
@@ -399,9 +407,10 @@ func init() {
 	// for merge
 	regionsCmd.Flags().IntP("max-gap", "g", 0, `maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging`)
 	regionsCmd.Flags().IntP("min-overlap", "l", 1, `minimal overlap of two adjacent regions, recommend K-1`)
+	regionsCmd.Flags().BoolP("ignore-type", "I", false, "merge species and assembly-specific regions")
 
 	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, `regular expression for extract reference name and query locations`)
+
 	regionsCmd.Flags().StringP("name-species", "s", "species-specific", `name of species-specific regions`)
 	regionsCmd.Flags().StringP("name-assembly", "a", "assembly-specific", `name of assembly-specific regions`)
-
 }

@@ -193,6 +193,7 @@ Downloading viral and fungi sequences:
     
     
     
+    # ------------------------------------------------------ 
     # create another directory linking to genome files
     
     input=files.renamed    
@@ -209,25 +210,25 @@ Downloading viral and fungi sequences:
 Building database:
         
     # -----------------------------------------------------------------
-    # for viral
+    # for viral, only splitting into 5 fragments
     name=viral
     
     input=files.renamed
     
-    kmcp compute -I $input -O refseq-$name-k21-n10 \
+    kmcp compute -I $input -O refseq-$name-k21-n5 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 \
-        --log refseq-$name-k21-n10.log --force
+        --split-number 5 --split-overlap 100 \
+        --log refseq-$name-k21-n5.log --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n10/ -O refseq-viruses.kmcp \
-        -j 32 -f 0.001 -n 3 \
-        --log refseq-viruses.kmcp.log --force
+    kmcp index -I refseq-$name-k21-n5/ -O refseq-viral.kmcp \
+        -j 32 -f 0.001 -n 3 -x 100K \
+        --log refseq-viral.kmcp.log --force
     
     # cp taxid and name mapping file to database directory
-    cp taxid.map name.map refseq-viruses.kmcp/
+    cp taxid.map name.map refseq-viral.kmcp/
 
     # -----------------------------------------------------------------
     # for fungi
@@ -241,7 +242,7 @@ Building database:
         --log refseq-$name-k21-n10.log --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
-        -j 32 -f 0.05 -n 2 \
+        -j 32 -f 0.3 -n 1 \
         --log refseq-fungi.kmcp.log --force
     
     # cp taxid and name mapping file to database directory

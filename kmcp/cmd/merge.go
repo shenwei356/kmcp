@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -40,8 +41,10 @@ var mergeCmd = &cobra.Command{
 	Short: "Merge search results from multiple databases",
 	Long: `Merge search results from multiple databases
 
-Attentions
-  1. Referene IDs should be distinct accross all databases.
+Input:
+  *. Searching results of the same reads on different databases.
+  *. When only one input given, we just copy and write to the input file.
+     This is friendly to workflows which assume multiple inputs are given.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -105,7 +108,27 @@ Attentions
 		}
 
 		if len(files) < 2 {
-			checkError(fmt.Errorf(">= 2 files needed"))
+			// checkError(fmt.Errorf(">= 2 files needed"))
+			log.Warning("only one file given, we just copy and write the original data")
+
+			infh, r, _, err := inStream(files[0])
+			checkError(err)
+
+			outfh, gw, w, err := outStream(outFile, strings.HasSuffix(outFile, ".gz"), opt.CompressionLevel)
+			checkError(err)
+
+			_, err = io.Copy(outfh, infh)
+			checkError(err)
+
+			r.Close()
+
+			outfh.Flush()
+			if gw != nil {
+				gw.Close()
+			}
+			w.Close()
+
+			return
 		}
 
 		// checking duplication

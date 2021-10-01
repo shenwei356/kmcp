@@ -1,8 +1,60 @@
+## Create database of Scaled MinHash sketch
+
+Using scale `5`.
+
+GTDB
+
+    k=21
+    scale=5
+    
+    in=gtdb
+    out=gtdb.smin$scale.kmcp
+    tmp=gtdb-r202-k21-n10-d$scale
+    
+    kmcp compute -I $in -O $tmp -k $k -n 10 -l 100 -B plasmid -D $scale \
+        --log $tmp.log --force        
+    kmcp index -j 40 -I $tmp -O $out -n 1 -f 0.3 \
+        --log $out.log
+    
+    cp taxid.map name.map $out/
+
+Refseq-fungi
+
+    k=21
+    scale=5
+    
+    in=files.renamed
+    out=refseq-fungi.smin$scale.kmcp
+    tmp=refseq-fungi-k21-n10-d$scale
+    
+    kmcp compute -I $in -O $tmp -k $k -n 10 -l 100 -B plasmid -D $scale \
+        --log $tmp.log --force        
+    kmcp index -j 40 -I $tmp -O $out -n 1 -f 0.3 \
+        --log $out.log
+    cp taxid.map name.map $out/
+    
+Refseq-viral
+
+    k=21
+    scale=5
+    
+    in=files.renamed
+    out=refseq-viral.smin$scale.kmcp
+    tmp=refseq-viral-k21-n5-d$scale
+    
+    kmcp compute -I $in -O $tmp -k $k -n 5 -l 100 -B plasmid -D $scale \
+        --log $tmp.log --force        
+    kmcp index -j 40 -I $tmp -O $out -n 3 -f 0.001 \
+        --log $out.log
+    cp taxid.map name.map $out/
+
+
+
 ## For one genome
 
-
-    step=10
-    len=100
+    step=200
+    len=500
+    
     
     file=GCF_003697165.2.fna.gz # E.coli
     
@@ -12,28 +64,28 @@
         
     # simulating reads and searching
     
-    seqkit grep -n -i -v -p plasmid  $file \
-        | seqkit sliding --step $step --window $len -w 0 \
-        | kmcp search -d gtdb.kmcp/ -o $file.fa.gz.kmcp@gtdb.tsv.gz
+    seqkit grep -n -i -v -r -p plasmid  $file \
+        | seqkit sliding --greedy --step $step --window $len -w 0 \
+        | kmcp search -d gtdb.kmcp/ -o $file.kmcp@gtdb.tsv.gz
         
-    seqkit grep -n -i -v -p plasmid  $file \
-        | seqkit sliding --step $step --window $len -w 0 \
-        | kmcp search -d refseq-fungi.kmcp/ -o $file.fa.gz.kmcp@refseq-fungi.tsv.gz
+    seqkit grep -n -i -v -r -p plasmid  $file \
+        | seqkit sliding --greedy --step $step --window $len -w 0 \
+        | kmcp search -d refseq-fungi.kmcp/ -o $file.kmcp@refseq-fungi.tsv.gz
         
-    seqkit grep -n -i -v -p plasmid  $file \
-        | seqkit sliding --step $step --window $len -w 0 \
-        | kmcp search -d refseq-viruses.kmcp/ -o $file.fa.gz.kmcp@refseq-viruses.tsv.gz
+    seqkit grep -n -i -v -r -p plasmid  $file \
+        | seqkit sliding --greedy --step $step --window $len -w 0 \
+        | kmcp search -d refseq-viruses.kmcp/ -o $file.kmcp@refseq-viruses.tsv.gz
     
     # merging searching results
-    kmcp merge $file.fa.gz.kmcp@*.tsv.gz -o $file.fa.gz.kmcp.tsv.gz
+    kmcp merge $file.kmcp@*.tsv.gz -o $file.kmcp.tsv.gz
     
     # filtering searching results
     kmcp filter -T taxid.map -X ~/.taxonkit \
-        $file.fa.gz.kmcp.tsv.gz -o $file.fa.gz.kmcp.uniq.tsv.gz
+        $file.kmcp.tsv.gz -o $file.kmcp.uniq.tsv.gz
         
     # merge regions
-    kmcp utils merge-regions -g $step $file.fa.gz.kmcp.uniq.tsv.gz \
-        -o $file.fa.gz.kmcp.uniq.tsv.gz.bed
+    kmcp utils merge-regions -I -l 20 $file.kmcp.uniq.tsv.gz \
+        -o $file.kmcp.uniq.tsv.gz.bed
 
 
 ## For all genomes
@@ -61,8 +113,8 @@
     # --------------------------------------------------
     # search and filter
     
-    step=10
-    len=100
+    step=200
+    len=500
     dbs="gtdb.kmcp refseq-fungi.kmcp refseq-viruses.kmcp"
     taxidmap=taxid.map
     taxdump=taxdump/
@@ -73,8 +125,8 @@
         | rush -j $j -v j=$J -v step=$step -v len=$len -v "dbs=$dbs" \
             -v taxidmap=$taxidmap -v taxdump=$taxdump \
             'for db in {dbs}; do \
-                seqkit grep -n -i -v -p plasmid {} \
-                    | seqkit sliding --step {step} --window {len} -w 0 \
+                seqkit grep -n -i -v -r -p plasmid {} \
+                    | seqkit sliding --greedy --step {step} --window {len} -w 0 \
                     | kmcp search -j {j} -d $db -o {}.kmcp@$db.tsv.gz; \
             done; \
             kmcp merge {}.kmcp@*.tsv.gz \
