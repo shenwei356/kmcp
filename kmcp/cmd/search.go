@@ -601,7 +601,7 @@ Performance tips:
 						total++
 						if (total < 8192 && total&63 == 0) || total&8191 == 0 {
 							speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
-							fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.2f million queries per minute\r", total, speed)
+							fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.3f million queries per minute\r", total, speed)
 						}
 					}
 
@@ -744,7 +744,7 @@ Performance tips:
 
 			speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
 			log.Infof("")
-			log.Infof("processed queries: %d, speed: %.2f million queries per minute\n", total, speed)
+			log.Infof("processed queries: %d, speed: %.3f million queries per minute\n", total, speed)
 			log.Infof("%.4f%% (%d/%d) queries matched", float64(matched)/float64(total)*100, matched, total)
 			log.Infof("done searching")
 		}

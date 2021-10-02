@@ -1230,7 +1230,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		var offset int
 		var offset2 int64
 		var loc int
-		var i, j int
+		var i int // , j int
 		var hs []uint64
 		var row []byte
 		// var b byte
@@ -1246,13 +1246,5173 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		var k int
 		var nHashesTarget, c, t, T float64
 		var lastRound bool
-		var tmp int
+		// var tmp int
 
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
 
 		// buf := make([]byte, PosPopCountBufSize)
 		var buf [PosPopCountBufSize]byte
+
+		countKmers63 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+					buf[58] = (*b58)[i]
+					buf[59] = (*b59)[i]
+					buf[60] = (*b60)[i]
+					buf[61] = (*b61)[i]
+					buf[62] = (*b62)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:63])
+
+					continue
+				}
+
+				buf[62] = (*b62)[i]
+				buf[61] = (*b61)[i]
+				buf[60] = (*b60)[i]
+				buf[59] = (*b59)[i]
+				buf[58] = (*b58)[i]
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:63])
+			}
+		}
+
+		countKmers62 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+					buf[58] = (*b58)[i]
+					buf[59] = (*b59)[i]
+					buf[60] = (*b60)[i]
+					buf[61] = (*b61)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:62])
+
+					continue
+				}
+
+				buf[61] = (*b61)[i]
+				buf[60] = (*b60)[i]
+				buf[59] = (*b59)[i]
+				buf[58] = (*b58)[i]
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:62])
+			}
+		}
+
+		countKmers61 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+					buf[58] = (*b58)[i]
+					buf[59] = (*b59)[i]
+					buf[60] = (*b60)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:61])
+
+					continue
+				}
+
+				buf[60] = (*b60)[i]
+				buf[59] = (*b59)[i]
+				buf[58] = (*b58)[i]
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:61])
+			}
+		}
+
+		countKmers60 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+					buf[58] = (*b58)[i]
+					buf[59] = (*b59)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:60])
+
+					continue
+				}
+
+				buf[59] = (*b59)[i]
+				buf[58] = (*b58)[i]
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:60])
+			}
+		}
+
+		countKmers59 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+					buf[58] = (*b58)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:59])
+
+					continue
+				}
+
+				buf[58] = (*b58)[i]
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:59])
+			}
+		}
+
+		countKmers58 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+					buf[57] = (*b57)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:58])
+
+					continue
+				}
+
+				buf[57] = (*b57)[i]
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:58])
+			}
+		}
+
+		countKmers57 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+					buf[56] = (*b56)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:57])
+
+					continue
+				}
+
+				buf[56] = (*b56)[i]
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:57])
+			}
+		}
+
+		countKmers56 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+					buf[55] = (*b55)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:56])
+
+					continue
+				}
+
+				buf[55] = (*b55)[i]
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:56])
+			}
+		}
+
+		countKmers55 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+					buf[54] = (*b54)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:55])
+
+					continue
+				}
+
+				buf[54] = (*b54)[i]
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:55])
+			}
+		}
+
+		countKmers54 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+					buf[53] = (*b53)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:54])
+
+					continue
+				}
+
+				buf[53] = (*b53)[i]
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:54])
+			}
+		}
+
+		countKmers53 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+					buf[52] = (*b52)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:53])
+
+					continue
+				}
+
+				buf[52] = (*b52)[i]
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:53])
+
+			}
+		}
+
+		countKmers52 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+					buf[51] = (*b51)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:52])
+
+					continue
+				}
+
+				buf[51] = (*b51)[i]
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:52])
+			}
+		}
+
+		countKmers51 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+					buf[50] = (*b50)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:51])
+
+					continue
+				}
+
+				buf[50] = (*b50)[i]
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = false
+				pospop.Count8(&counts[i], buf[:51])
+			}
+		}
+
+		countKmers50 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+					buf[49] = (*b49)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:50])
+
+					continue
+				}
+
+				buf[49] = (*b49)[i]
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:50])
+			}
+		}
+
+		countKmers49 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+					buf[48] = (*b48)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:49])
+
+					continue
+				}
+
+				buf[48] = (*b48)[i]
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:49])
+			}
+		}
+
+		countKmers48 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+					buf[47] = (*b47)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:48])
+
+					continue
+				}
+
+				buf[47] = (*b47)[i]
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:48])
+			}
+		}
+
+		countKmers47 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+					buf[46] = (*b46)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:47])
+
+					continue
+				}
+
+				buf[46] = (*b46)[i]
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:47])
+			}
+		}
+
+		countKmers46 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+					buf[45] = (*b45)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:46])
+
+					continue
+				}
+
+				buf[45] = (*b45)[i]
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:46])
+			}
+		}
+
+		countKmers45 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+					buf[44] = (*b44)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:45])
+
+					continue
+				}
+
+				buf[44] = (*b44)[i]
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:45])
+			}
+		}
+
+		countKmers44 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+					buf[43] = (*b43)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:44])
+
+					continue
+				}
+
+				buf[43] = (*b43)[i]
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:44])
+			}
+		}
+
+		countKmers43 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+					buf[42] = (*b42)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:43])
+
+					continue
+				}
+
+				buf[42] = (*b42)[i]
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:43])
+			}
+		}
+
+		countKmers42 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+					buf[41] = (*b41)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:42])
+
+					continue
+				}
+
+				buf[41] = (*b41)[i]
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:42])
+			}
+		}
+
+		countKmers41 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+					buf[40] = (*b40)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:41])
+
+					continue
+				}
+
+				buf[40] = (*b40)[i]
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:41])
+			}
+		}
+
+		countKmers40 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+					buf[39] = (*b39)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:40])
+
+					continue
+				}
+
+				buf[39] = (*b39)[i]
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:40])
+			}
+		}
+
+		countKmers39 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+					buf[38] = (*b38)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:39])
+
+					continue
+				}
+
+				buf[38] = (*b38)[i]
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:39])
+			}
+		}
+
+		countKmers38 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+					buf[37] = (*b37)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:38])
+
+					continue
+				}
+
+				buf[37] = (*b37)[i]
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:38])
+			}
+		}
+
+		countKmers37 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+					buf[36] = (*b36)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:37])
+
+					continue
+				}
+
+				buf[36] = (*b36)[i]
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:37])
+			}
+		}
+
+		countKmers36 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+					buf[35] = (*b35)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:36])
+
+					continue
+				}
+
+				buf[35] = (*b35)[i]
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:36])
+			}
+		}
+
+		countKmers35 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+					buf[34] = (*b34)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:35])
+
+					continue
+				}
+
+				buf[34] = (*b34)[i]
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:35])
+			}
+		}
+
+		countKmers34 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+					buf[33] = (*b33)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:34])
+
+					continue
+				}
+
+				buf[33] = (*b33)[i]
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:34])
+			}
+		}
+
+		countKmers33 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+					buf[32] = (*b32)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:33])
+
+					continue
+				}
+
+				buf[32] = (*b32)[i]
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:33])
+			}
+		}
+
+		countKmers32 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+					buf[31] = (*b31)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:32])
+
+					continue
+				}
+
+				buf[31] = (*b31)[i]
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:32])
+			}
+		}
+
+		countKmers31 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+					buf[30] = (*b30)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:31])
+
+					continue
+				}
+
+				buf[30] = (*b30)[i]
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:31])
+			}
+		}
+
+		countKmers30 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+					buf[29] = (*b29)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:30])
+
+					continue
+				}
+
+				buf[29] = (*b29)[i]
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:30])
+			}
+		}
+
+		countKmers29 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+					buf[28] = (*b28)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:29])
+
+					continue
+				}
+
+				buf[28] = (*b28)[i]
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:29])
+			}
+		}
+
+		countKmers28 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+					buf[27] = (*b27)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:28])
+
+					continue
+				}
+
+				buf[27] = (*b27)[i]
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:28])
+			}
+		}
+
+		countKmers27 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+					buf[26] = (*b26)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:27])
+
+					continue
+				}
+
+				buf[26] = (*b26)[i]
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:27])
+			}
+		}
+
+		countKmers26 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+					buf[25] = (*b25)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:26])
+
+					continue
+				}
+
+				buf[25] = (*b25)[i]
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:26])
+			}
+		}
+
+		countKmers25 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+					buf[24] = (*b24)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:25])
+
+					continue
+				}
+
+				buf[24] = (*b24)[i]
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:25])
+			}
+		}
+
+		countKmers24 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+					buf[23] = (*b23)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:24])
+
+					continue
+				}
+
+				buf[23] = (*b23)[i]
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:24])
+			}
+		}
+
+		countKmers23 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+					buf[22] = (*b22)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:23])
+
+					continue
+				}
+
+				buf[22] = (*b22)[i]
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:23])
+			}
+		}
+
+		countKmers22 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+					buf[21] = (*b21)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:22])
+
+					continue
+				}
+
+				buf[21] = (*b21)[i]
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:22])
+			}
+		}
+
+		countKmers21 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+					buf[20] = (*b20)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:21])
+
+					continue
+				}
+
+				buf[20] = (*b20)[i]
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:21])
+			}
+		}
+
+		countKmers20 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+					buf[19] = (*b19)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:20])
+
+					continue
+				}
+
+				buf[19] = (*b19)[i]
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:20])
+			}
+		}
+
+		countKmers19 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+					buf[18] = (*b18)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:19])
+
+					continue
+				}
+
+				buf[18] = (*b18)[i]
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:19])
+			}
+		}
+
+		countKmers18 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+					buf[17] = (*b17)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:18])
+
+					continue
+				}
+
+				buf[17] = (*b17)[i]
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:18])
+			}
+		}
+
+		countKmers17 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+					buf[16] = (*b16)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:17])
+
+					continue
+				}
+
+				buf[16] = (*b16)[i]
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:17])
+			}
+		}
+
+		countKmers16 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+					buf[15] = (*b15)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:16])
+
+					continue
+				}
+
+				buf[15] = (*b15)[i]
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:16])
+			}
+		}
+
+		countKmers15 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+					buf[14] = (*b14)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:15])
+
+					continue
+				}
+
+				buf[14] = (*b14)[i]
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:15])
+			}
+		}
+
+		countKmers14 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+					buf[13] = (*b13)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:14])
+
+					continue
+				}
+
+				buf[13] = (*b13)[i]
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:14])
+			}
+		}
+
+		countKmers13 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+					buf[12] = (*b12)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:13])
+
+					continue
+				}
+
+				buf[12] = (*b12)[i]
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:13])
+			}
+		}
+
+		countKmers12 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+					buf[11] = (*b11)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:12])
+
+					continue
+				}
+
+				buf[11] = (*b11)[i]
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:12])
+			}
+		}
+
+		countKmers11 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+					buf[10] = (*b10)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:11])
+
+					continue
+				}
+
+				buf[10] = (*b10)[i]
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:11])
+			}
+		}
+
+		countKmers10 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+					buf[9] = (*b9)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:10])
+
+					continue
+				}
+
+				buf[9] = (*b9)[i]
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:10])
+			}
+		}
+
+		countKmers9 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+					buf[8] = (*b8)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:9])
+
+					continue
+				}
+
+				buf[8] = (*b8)[i]
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:9])
+			}
+		}
+
+		countKmers8 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+					buf[7] = (*b7)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:8])
+
+					continue
+				}
+
+				buf[7] = (*b7)[i]
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:8])
+			}
+		}
+
+		countKmers7 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+					buf[6] = (*b6)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:7])
+
+					continue
+				}
+
+				buf[6] = (*b6)[i]
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:7])
+			}
+		}
+
+		countKmers6 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+					buf[5] = (*b5)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:6])
+
+					continue
+				}
+
+				buf[5] = (*b5)[i]
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:6])
+			}
+		}
+
+		countKmers5 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+					buf[4] = (*b4)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:5])
+
+					continue
+				}
+
+				buf[4] = (*b4)[i]
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:5])
+			}
+		}
+
+		countKmers4 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+					buf[3] = (*b3)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:4])
+
+					continue
+				}
+
+				buf[3] = (*b3)[i]
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:4])
+			}
+		}
+
+		countKmers3 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+					buf[2] = (*b2)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:3])
+
+					continue
+				}
+
+				buf[2] = (*b2)[i]
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:3])
+			}
+		}
+
+		countKmers2 := func() {
+			forward := true
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				if forward {
+					buf[0] = (*b0)[i]
+					buf[1] = (*b1)[i]
+
+					forward = false
+					pospop.Count8(&counts[i], buf[:2])
+
+					continue
+				}
+
+				buf[1] = (*b1)[i]
+				buf[0] = (*b0)[i]
+
+				forward = true
+				pospop.Count8(&counts[i], buf[:2])
+			}
+		}
+
+		countKmers1 := func() {
+			for i := 0; i < numRowBytes; i++ { // every column in matrix
+				buf[0] = (*b0)[i]
+
+				pospop.Count8(&counts[i], buf[:1])
+			}
+		}
+
+		countKmerss := []func(){
+			nil,
+			countKmers1,
+			countKmers2,
+			countKmers3,
+			countKmers4,
+			countKmers5,
+			countKmers6,
+			countKmers7,
+			countKmers8,
+			countKmers9,
+			countKmers10,
+			countKmers11,
+			countKmers12,
+			countKmers13,
+			countKmers14,
+			countKmers15,
+			countKmers16,
+			countKmers17,
+			countKmers18,
+			countKmers19,
+			countKmers20,
+			countKmers21,
+			countKmers22,
+			countKmers23,
+			countKmers24,
+			countKmers25,
+			countKmers26,
+			countKmers27,
+			countKmers28,
+			countKmers29,
+			countKmers30,
+			countKmers31,
+			countKmers32,
+			countKmers33,
+			countKmers34,
+			countKmers35,
+			countKmers36,
+			countKmers37,
+			countKmers38,
+			countKmers39,
+			countKmers40,
+			countKmers41,
+			countKmers42,
+			countKmers43,
+			countKmers44,
+			countKmers45,
+			countKmers46,
+			countKmers47,
+			countKmers48,
+			countKmers49,
+			countKmers50,
+			countKmers51,
+			countKmers52,
+			countKmers53,
+			countKmers54,
+			countKmers55,
+			countKmers56,
+			countKmers57,
+			countKmers58,
+			countKmers59,
+			countKmers60,
+			countKmers61,
+			countKmers62,
+			countKmers63,
+		}
 
 		var forward bool
 
@@ -1971,72 +7131,74 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 			// left data in buffer
 			if bufIdx > 0 {
-				// transpose
-				forward = true
-				for i = 0; i < numRowBytes; i++ { // every column in matrix
-					// for j = 0; j < bufIdx; j++ {
-					// 	buf[j] = buffs[j][i]
-					// }
+				// // transpose
+				// forward = true
+				// for i = 0; i < numRowBytes; i++ { // every column in matrix
+				// 	// for j = 0; j < bufIdx; j++ {
+				// 	// 	buf[j] = buffs[j][i]
+				// 	// }
 
-					if forward {
-						// unroll loop
-						tmp = bufIdx - 8
-						for j = 0; j < tmp; j++ {
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-							j++
-							buf[j] = buffs[j][i]
-						}
-						for ; j < bufIdx; j++ {
-							buf[j] = buffs[j][i]
-						}
+				// 	if forward {
+				// 		// unroll loop
+				// 		tmp = bufIdx - 8
+				// 		for j = 0; j < tmp; j++ {
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 			j++
+				// 			buf[j] = buffs[j][i]
+				// 		}
+				// 		for ; j < bufIdx; j++ {
+				// 			buf[j] = buffs[j][i]
+				// 		}
 
-						forward = false
+				// 		forward = false
 
-						// count
-						pospop.Count8(&counts[i], buf[:bufIdx])
+				// 		// count
+				// 		pospop.Count8(&counts[i], buf[:bufIdx])
 
-						continue
-					}
+				// 		continue
+				// 	}
 
-					for j = bufIdx - 1; j >= 8; j-- {
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-						j--
-						buf[j] = buffs[j][i]
-					}
-					for ; j >= 0; j-- {
-						buf[j] = buffs[j][i]
-					}
+				// 	for j = bufIdx - 1; j >= 8; j-- {
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 		j--
+				// 		buf[j] = buffs[j][i]
+				// 	}
+				// 	for ; j >= 0; j-- {
+				// 		buf[j] = buffs[j][i]
+				// 	}
 
-					forward = true
+				// 	forward = true
 
-					// count
-					pospop.Count8(&counts[i], buf[:bufIdx])
+				// 	// count
+				// 	pospop.Count8(&counts[i], buf[:bufIdx])
 
-				}
+				// }
+
+				countKmerss[bufIdx]()
 			}
 
 			// results := make([]Match, 0, 8)
