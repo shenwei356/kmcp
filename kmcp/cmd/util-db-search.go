@@ -6347,7 +6347,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			}
 		}
 
-		countKmerss := []func(){
+		countKmerss := [64]func(){
 			nil,
 			countKmers1,
 			countKmers2,
@@ -7271,7 +7271,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 1
+				// k = ix8 + 1
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7297,7 +7298,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 2
+				// k = ix8 + 2
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7323,7 +7325,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 3
+				// k = ix8 + 3
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7349,7 +7352,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 4
+				// k = ix8 + 4
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7375,7 +7379,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 5
+				// k = ix8 + 5
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7401,7 +7406,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 6
+				// k = ix8 + 6
+				k++
 				if lastRound && k == numNames {
 					break
 				}
@@ -7427,7 +7433,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 					}
 				}
 
-				k = ix8 + 7
+				// k = ix8 + 7
+				k++
 				if lastRound && k == numNames {
 					break
 				}

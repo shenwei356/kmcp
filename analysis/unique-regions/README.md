@@ -1,11 +1,11 @@
 ## Create database of Scaled MinHash sketch
 
-Using scale `5`.
+Using scale `10`.
 
 GTDB
 
     k=21
-    scale=5
+    scale=10
     
     in=gtdb
     out=gtdb.smin$scale.kmcp
@@ -21,7 +21,7 @@ GTDB
 Refseq-fungi
 
     k=21
-    scale=5
+    scale=10
     
     in=files.renamed
     out=refseq-fungi.smin$scale.kmcp
@@ -36,7 +36,7 @@ Refseq-fungi
 Refseq-viral
 
     k=21
-    scale=5
+    scale=10
     
     in=files.renamed
     out=refseq-viral.smin$scale.kmcp
@@ -64,17 +64,17 @@ Refseq-viral
         
     # simulating reads and searching
     
-    seqkit grep -n -i -v -r -p plasmid  $file \
+    seqkit grep -n -i -v -r -p plasmid  $file -w 0 \
         | seqkit sliding --greedy --step $step --window $len -w 0 \
-        | kmcp search -d gtdb.kmcp/ -o $file.kmcp@gtdb.tsv.gz
+        | kmcp search -j 40 -d gtdb.smin10.kmcp/ -o $file.kmcp@gtdb.tsv.gz
         
-    seqkit grep -n -i -v -r -p plasmid  $file \
+    seqkit grep -n -i -v -r -p plasmid  $file -w 0 \
         | seqkit sliding --greedy --step $step --window $len -w 0 \
-        | kmcp search -d refseq-fungi.kmcp/ -o $file.kmcp@refseq-fungi.tsv.gz
+        | kmcp search -j 40 -d refseq-fungi.smin10.kmcp/ -o $file.kmcp@refseq-fungi.tsv.gz
         
-    seqkit grep -n -i -v -r -p plasmid  $file \
+    seqkit grep -n -i -v -r -p plasmid  $file -w 0 \
         | seqkit sliding --greedy --step $step --window $len -w 0 \
-        | kmcp search -d refseq-viruses.kmcp/ -o $file.kmcp@refseq-viruses.tsv.gz
+        | kmcp search -j 40 -d refseq-viral.smin10.kmcp/ -o $file.kmcp@refseq-viral.tsv.gz
     
     # merging searching results
     kmcp merge $file.kmcp@*.tsv.gz -o $file.kmcp.tsv.gz
@@ -100,37 +100,64 @@ Refseq-viral
     find ../../gtdb/gtdb -name "*.fna.gz" | rush 'ln -s {}'
     cd ../../
     
-    mkdir -p uniq/viruses
-    cd uniq/viruses
-    find ../../refseq-viral/2021-07-30_21-51-31/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
+    mkdir -p uniq/viral
+    cd uniq/viral
+    find ../../refseq-viral/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
     cd ../../
     
     mkdir -p uniq/fungi
     cd uniq/fungi
-    find ../../refseq-fungi/2021-07-30_21-54-19/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
+    find ../../refseq-fungi/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
     cd ../../
     
+    
+    
+    
+    input=uniq/viral
+    
     # --------------------------------------------------
-    # search and filter
+    # search and filter (2days for gtdb, 3hours for fungi)
     
     step=200
     len=500
-    dbs="gtdb.kmcp refseq-fungi.kmcp refseq-viruses.kmcp"
+    dbs="gtdb.smin10.kmcp refseq-fungi.smin10.kmcp refseq-viral.smin10.kmcp"
     taxidmap=taxid.map
     taxdump=taxdump/
-    
+            
     j=4
     J=40
-    find uniq/gtdb -name "*.fna.gz" \
+    time find $input -name "*fna.gz" \
         | rush -j $j -v j=$J -v step=$step -v len=$len -v "dbs=$dbs" \
             -v taxidmap=$taxidmap -v taxdump=$taxdump \
             'for db in {dbs}; do \
-                seqkit grep -n -i -v -r -p plasmid {} \
+                seqkit grep -n -i -v -r -p plasmid {} -w 0 \
                     | seqkit sliding --greedy --step {step} --window {len} -w 0 \
-                    | kmcp search -j {j} -d $db -o {}.kmcp@$db.tsv.gz; \
+                    | kmcp search -q -j {j} -d $db -o {}.kmcp@$db.tsv.gz; \
             done; \
-            kmcp merge {}.kmcp@*.tsv.gz \
-                | kmcp filter -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; \
+            kmcp merge -q {}.kmcp@*.tsv.gz \
+                | kmcp filter -q -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; \
             /bin/rm {}.kmcp@*.tsv.gz; ' -c -C search.rush
     
+    # merge regions
+    time find $input -name "*.fna.gz" \
+        | rush 'kmcp utils merge-regions -q -I -l 20 {}.kmcp.uniq.tsv.gz -o {}.kmcp.uniq.tsv.gz.bed' \
+            -c -C merge.rush
     
+    # -----------------------
+    # length summary
+    time find $input -name "*.fna.gz" \
+        | rush -j 1 'glen=$(seqkit stats -T {} | csvtk cut -t -f sum_len | csvtk del-header); \
+                len=$(awk "{print \$3-\$2}" {}.kmcp.uniq.tsv.gz.bed | csvtk summary -Ht -n 0  -f 1:sum); \
+                echo -ne "$len,$glen\n" ' \
+        | csvtk add-header -n uniqs,genome -o $input.len.csv.gz
+    
+    # --------------------------------------------------
+    # extract subsequences
+
+    output=uniqs/gtdb
+    mkdir -p $output
+    
+    find $input/ -name "*.fna.gz" \
+        | rush -v out=$output \
+            'seqkit subseq --quiet --bed {}.kmcp.uniq.tsv.gz.bed {} -o {out}/{%}' \
+            -c -C subseq.rush

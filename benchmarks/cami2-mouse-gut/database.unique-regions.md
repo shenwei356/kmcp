@@ -60,7 +60,7 @@
     
     find $input/ -name "*.fna.gz" \
         | rush -v out=$output \
-            'bedtools getfasta -fi {} -bed {}.kmcp.uniq.tsv.gz.bed -fo {out}/{%}'
+            'seqkit subseq --quiet --bed {}.kmcp.uniq.tsv.gz.bed {} -o {out}/{%}'
 
 ## check some genome without unique regions found
 

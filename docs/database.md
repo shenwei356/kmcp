@@ -126,7 +126,6 @@ Building database:
     
     input=gtdb
     
-    
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments with 100bp overlap
