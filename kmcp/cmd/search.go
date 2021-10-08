@@ -104,7 +104,7 @@ Performance tips:
 		minLen := getFlagNonNegativeInt(cmd, "min-query-len")
 		queryCov := getFlagFloat64(cmd, "min-query-cov")
 		targetCov := getFlagFloat64(cmd, "min-target-cov")
-		minCount := getFlagNonNegativeInt(cmd, "min-kmers")
+		minCount := getFlagPositiveInt(cmd, "min-kmers")
 		useMmap := !getFlagBool(cmd, "low-mem")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")

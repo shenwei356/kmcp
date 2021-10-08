@@ -1115,7 +1115,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		names := h.Names
 		gsizes := h.GSizes
 		indices := h.Indices
-		numNames := len(h.Names)
+		// numNames := len(h.Names)
 		numRowBytes := h.NumRowBytes
 		numSigs := h.NumSigs
 		numSigsUint := uint64(numSigs)
@@ -1221,7 +1221,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		b62 := &buffs[62]
 		b63 := &buffs[63]
 
-		iLast := numRowBytes - 1
+		// iLast := numRowBytes - 1
 		sizesFloat := make([]float64, len(sizes))
 		for i, s := range sizes {
 			sizesFloat[i] = float64(s)
@@ -1245,7 +1245,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		var ix8 int
 		var k int
 		var nHashesTarget, c, t, T float64
-		var lastRound bool
+		// var lastRound bool
 		// var tmp int
 
 		counts0 := make([][8]int, numRowBytes)
@@ -7206,7 +7206,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 			for i, _counts = range counts {
 				ix8 = i << 3
-				lastRound = i == iLast
+				// lastRound = i == iLast
 
 				// for j = 0; j < 8; j++ {
 				// 	k = ix8 + j
@@ -7246,9 +7246,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 				// }
 
 				k = ix8
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[7]
 				if count >= minMatched {
 					c = float64(count)
@@ -7273,9 +7273,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 1
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[6]
 				if count >= minMatched {
 					c = float64(count)
@@ -7300,9 +7300,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 2
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[5]
 				if count >= minMatched {
 					c = float64(count)
@@ -7327,9 +7327,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 3
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[4]
 				if count >= minMatched {
 					c = float64(count)
@@ -7354,9 +7354,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 4
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[3]
 				if count >= minMatched {
 					c = float64(count)
@@ -7381,9 +7381,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 5
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[2]
 				if count >= minMatched {
 					c = float64(count)
@@ -7408,9 +7408,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 6
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[1]
 				if count >= minMatched {
 					c = float64(count)
@@ -7435,9 +7435,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 				// k = ix8 + 7
 				k++
-				if lastRound && k == numNames {
-					break
-				}
+				// if lastRound && k == numNames {
+				// 	break
+				// }
 				count = _counts[0]
 				if count >= minMatched {
 					c = float64(count)
