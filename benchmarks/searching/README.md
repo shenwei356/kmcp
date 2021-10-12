@@ -1,12 +1,14 @@
 # Benchmarks on sequence and genome searching
 
+<img src="bench.searching.jpg" alt="" width="600"/>
+
 ## Softwares
 
 Softwares
 
 - [cobs](https://github.com/bingmann/cobs) ([1915fc0](https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15))
-- [sourmash](https://github.com/dib-lab/sourmash) (v4.2.1)
-- kmcp ([v0.6.0](https://github.com/shenwei356/kmcp/releases/tag/v0.6.0))
+- [sourmash](https://github.com/dib-lab/sourmash) (v4.2.2)
+- kmcp ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
 
 Utilities
 
@@ -90,7 +92,7 @@ Database size and building time.
     for f in refs/*.fasta; do
         echo $f
         # cobs
-        memusg -t -H -s "cobs query --load-complete -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" \
+        memusg -t -H -s "cobs query -T $threads -i $dbCOBS -f $f -t $t > $f.cobs@$db.txt" \
             2>$f.cobs@$db.txt.time
         
         # kmcp
@@ -112,9 +114,11 @@ Database size and building time.
         | csvtk mutate2 -t -n kmcp_m -e '$kmcp_m0 / 1048576' \
         | csvtk cut -t -f query,cobs_t,cobs_m,kmcp_t,kmcp_m \
         | csvtk rename -t -f 1-5 -n "query,cobs:time(s),cobs:memory(GB),kmcp:time(s),kmcp:memory(GB)" \
-        | csvtk csv2md -t
+        > bench.kmcp-cobs.long.tsv
         
-Query time and peak memory (cold start, loading all data in memory)
+    csvtk csv2md -t bench.kmcp-cobs.long.tsv
+        
+Query time and peak memory (cold start)
 
 |query              |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)|
 |:------------------|:-----------|:--------------|:-----------|:--------------|
@@ -128,6 +132,19 @@ Query time and peak memory (cold start, loading all data in memory)
 |NZ_CP007592.1.fasta|50.348      |116.22         |12.691      |54.88          |
 |NZ_CP028116.1.fasta|54.619      |119.33         |12.999      |54.90          |
 
+Query time and peak memory (hot start)
+
+|query              |cobs:time(s)|cobs:memory(GB)|kmcp:time(s)|kmcp:memory(GB)|
+|:------------------|:-----------|:--------------|:-----------|:--------------|
+|NC_000913.3.fasta  |38.077      |69.26          |12.533      |54.85          |
+|NC_002695.2.fasta  |49.512      |82.78          |12.966      |54.86          |
+|NC_010655.1.fasta  |22.023      |52.66          |11.433      |54.45          |
+|NC_011750.1.fasta  |42.081      |81.61          |12.901      |54.84          |
+|NC_012971.2.fasta  |37.044      |71.42          |12.075      |54.85          |
+|NC_013654.1.fasta  |34.247      |74.15          |12.319      |54.84          |
+|NC_018658.1.fasta  |42.646      |80.13          |12.902      |54.88          |
+|NZ_CP007592.1.fasta|36.686      |79.34          |12.945      |54.86          |
+|NZ_CP028116.1.fasta|43.989      |84.34          |13.226      |54.85          |
 
 ### Searching with short reads
 
@@ -176,7 +193,9 @@ Query time and peak memory (cold start, loading all data in memory)
         | csvtk mutate2 -t -n kmcp_m -e '$kmcp_m0 / 1048576' \
         | csvtk cut -t -f query,cobs_t,cobs_m,kmcp_t,kmcp_m \
         | csvtk rename -t -f 1-5 -n "query,cobs:time(s),cobs:memory(GB),kmcp:time(s),kmcp:memory(GB)" \
-        | csvtk csv2md -t
+        > bench.kmcp-cobs.short.tsv
+        
+    csvtk csv2md -t bench.kmcp-cobs.short.tsv
     
 Query time and peak memory (hot start, loading all data in memory)
 
@@ -203,7 +222,7 @@ Query time and peak memory (hot start, loading all data in memory)
     k=31
     threads=8
     scale=1000
-    scaleMash=3400 // average genome size: 3.4Mb.
+    scaleMash=3400 # average genome size: 3.4Mb.
     
     dbMASH=gtdb-mash-k$k-S$scaleMash.msh
     dbSOURMASHtmp=gtdb-sourmash-k$k-D$scale
@@ -254,7 +273,7 @@ Query time and peak memory (hot start, loading all data in memory)
     # su -c "free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
     
     
-    threads=8
+    threads=1
     
     t=0.4
     for f in refs/*.fasta; do
@@ -268,7 +287,7 @@ Query time and peak memory (hot start, loading all data in memory)
             sourmash -q search $f.sig $dbSOURMASH  --threshold $t > $f.sourmash@$db.txt" \
             2>$f.sourmash@$db.txt.time
         
-        # kmcp, single-thread
+        # kmcp
         memusg -t -H -s "kmcp search -g -j $threads -d $dbKMCP    $f -t $t --quiet > $f.kmcp.scaled@$db.txt" \
             2>$f.kmcp.scaled@$db.txt.time
     done
@@ -290,24 +309,38 @@ Query time and peak memory (hot start, loading all data in memory)
         | csvtk mutate2 -t -n kmcp_m -e '$kmcp_m0 / 1024' \
         | csvtk cut -t -f query,mash_t,mash_m,sourmash_t,sourmash_m,kmcp_t,kmcp_m \
         | csvtk rename -t -f 1-7 -n "query,mash:time(s),mash:mem(MB),sourmash:time(s),sourmash:mem(MB),kmcp:time(s),kmcp:mem(MB)" \
-        | csvtk csv2md -t
+        > bench.kmcp-mash-sourmash.thread$threads.tsv
+        
+    csvtk csv2md -t bench.kmcp-mash-sourmash.thread$threads.tsv
         
     
 Query time and peak memory (mash and kmcp utilize single thread, cold start)
 
 |query              |mash:time(s)|mash:mem(MB)|sourmash:time(s)|sourmash:mem(MB)|kmcp:time(s)|kmcp:mem(MB)|
 |:------------------|:-----------|:-----------|:---------------|:---------------|:-----------|:-----------|
-|NC_000913.3.fasta  |3.382       |1492.70     |12.960          |241.41          |20.112      |680.85      |
-|NC_002695.2.fasta  |3.615       |1495.46     |7.182           |228.50          |4.862       |746.45      |
-|NC_010655.1.fasta  |3.150       |1488.69     |3.912           |232.46          |1.686       |454.02      |
-|NC_011750.1.fasta  |3.369       |1494.16     |4.664           |228.50          |1.278       |655.17      |
-|NC_012971.2.fasta  |3.597       |1492.43     |4.216           |230.56          |0.861       |615.64      |
-|NC_013654.1.fasta  |3.914       |1493.46     |4.254           |234.48          |1.454       |642.32      |
-|NC_018658.1.fasta  |3.413       |1493.92     |4.307           |228.51          |1.051       |639.74      |
-|NZ_CP007592.1.fasta|3.485       |1494.42     |5.099           |234.48          |1.272       |584.30      |
-|NZ_CP028116.1.fasta|3.783       |1496.68     |5.099           |228.51          |1.297       |614.72      |
+|NC_000913.3.fasta  |6.152       |2515.87     |13.061          |248.26          |20.204      |681.07      |
+|NC_002695.2.fasta  |6.776       |2518.40     |7.593           |230.26          |4.853       |737.49      |
+|NC_010655.1.fasta  |6.742       |2511.90     |4.060           |226.48          |1.708       |470.96      |
+|NC_011750.1.fasta  |6.498       |2516.28     |4.665           |228.50          |1.281       |703.99      |
+|NC_012971.2.fasta  |6.892       |2515.50     |4.248           |228.49          |1.044       |540.29      |
+|NC_013654.1.fasta  |6.579       |2518.83     |4.248           |226.51          |1.488       |649.11      |
+|NC_018658.1.fasta  |6.565       |2516.71     |4.474           |230.59          |1.255       |588.92      |
+|NZ_CP007592.1.fasta|6.540       |2519.28     |4.913           |222.53          |1.284       |597.50      |
+|NZ_CP028116.1.fasta|6.299       |2517.82     |5.118           |228.51          |1.291       |512.18      |
 
+Query time and peak memory (mash and kmcp utilize single thread, hot start)
 
+|query              |mash:time(s)|mash:mem(MB)|sourmash:time(s)|sourmash:mem(MB)|kmcp:time(s)|kmcp:mem(MB)|
+|:------------------|:-----------|:-----------|:---------------|:---------------|:-----------|:-----------|
+|NC_000913.3.fasta  |6.057       |2515.18     |4.316           |222.52          |0.854       |568.07      |
+|NC_002695.2.fasta  |6.522       |2518.07     |4.561           |222.53          |1.288       |605.14      |
+|NC_010655.1.fasta  |6.081       |2511.89     |3.666           |242.26          |0.872       |343.70      |
+|NC_011750.1.fasta  |6.676       |2515.18     |4.331           |230.50          |1.072       |664.12      |
+|NC_012971.2.fasta  |6.283       |2516.24     |4.316           |232.48          |0.851       |346.34      |
+|NC_013654.1.fasta  |6.062       |2517.02     |4.326           |222.52          |1.084       |361.44      |
+|NC_018658.1.fasta  |6.508       |2516.40     |4.500           |222.53          |1.094       |680.78      |
+|NZ_CP007592.1.fasta|7.065       |2515.96     |4.329           |222.53          |1.096       |397.45      |
+|NZ_CP028116.1.fasta|6.048       |2517.14     |4.583           |232.49          |1.270       |602.71      |
 
 Query time and peak memory (mash and kmcp utilize 8 threads, cold start)
 
@@ -322,3 +355,18 @@ Query time and peak memory (mash and kmcp utilize 8 threads, cold start)
 |NC_018658.1.fasta  |2.340       |1496.29     |4.468           |228.51          |0.620       |41.04       |
 |NZ_CP007592.1.fasta|2.341       |1496.30     |4.843           |234.49          |0.632       |81.90       |
 |NZ_CP028116.1.fasta|2.547       |1496.84     |4.866           |232.50          |0.647       |76.75       |
+
+Query time and peak memory (mash and kmcp utilize 8 threads, hot start)
+
+|query              |mash:time(s)|mash:mem(MB)|sourmash:time(s)|sourmash:mem(MB)|kmcp:time(s)|kmcp:mem(MB)|
+|:------------------|:-----------|:-----------|:---------------|:---------------|:-----------|:-----------|
+|NC_000913.3.fasta  |4.209       |2515.24     |4.241           |228.50          |0.620       |36.24       |
+|NC_002695.2.fasta  |4.205       |2516.84     |4.477           |228.50          |0.610       |51.00       |
+|NC_010655.1.fasta  |4.260       |2513.10     |3.775           |231.27          |0.411       |278.21      |
+|NC_011750.1.fasta  |4.230       |2517.41     |4.467           |222.52          |0.624       |59.85       |
+|NC_012971.2.fasta  |4.231       |2516.90     |4.243           |222.52          |0.613       |158.48      |
+|NC_013654.1.fasta  |4.058       |2517.50     |4.237           |222.52          |0.646       |127.05      |
+|NC_018658.1.fasta  |3.846       |2516.50     |4.478           |236.48          |0.641       |460.02      |
+|NZ_CP007592.1.fasta|3.778       |2516.32     |4.475           |234.48          |0.622       |301.88      |
+|NZ_CP028116.1.fasta|4.049       |2517.30     |4.505           |222.53          |0.605       |730.17      |
+

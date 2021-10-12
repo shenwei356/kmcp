@@ -1,0 +1,19 @@
+query,app,time,group
+NC_000913.3.fasta.short,COBS,181.941,short reads
+NC_000913.3.fasta.short,KMCP,16.781,short reads
+NC_002695.2.fasta.short,COBS,210.005,short reads
+NC_002695.2.fasta.short,KMCP,16.960,short reads
+NC_010655.1.fasta.short,COBS,121.183,short reads
+NC_010655.1.fasta.short,KMCP,14.384,short reads
+NC_011750.1.fasta.short,COBS,202.856,short reads
+NC_011750.1.fasta.short,KMCP,16.355,short reads
+NC_012971.2.fasta.short,COBS,184.675,short reads
+NC_012971.2.fasta.short,KMCP,16.041,short reads
+NC_013654.1.fasta.short,COBS,183.921,short reads
+NC_013654.1.fasta.short,KMCP,16.694,short reads
+NC_018658.1.fasta.short,COBS,203.736,short reads
+NC_018658.1.fasta.short,KMCP,17.266,short reads
+NZ_CP007592.1.fasta.short,COBS,193.875,short reads
+NZ_CP007592.1.fasta.short,KMCP,17.195,short reads
+NZ_CP028116.1.fasta.short,COBS,213.337,short reads
+NZ_CP028116.1.fasta.short,KMCP,17.253,short reads

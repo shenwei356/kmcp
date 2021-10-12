@@ -119,6 +119,9 @@ Ploting
 
     ./plot.R all.se$len.fasta.blastn.filter.tsv.gz.stats.uniq.gz \
         all.se$len.fasta.blastn.filter.tsv.gz.stats.uniq.gz.jpg
+        
+    # ./plot.R all.se$len.fasta.blastn.filter.tsv.gz.stats.uniq.gz \
+    #    all.se$len.fasta.blastn.filter.tsv.gz.stats.uniq.gz.svg
 
 
 ![](e.coli/all.se150.fasta.blastn.filter.tsv.gz.stats.uniq.gz.jpg)

@@ -15,7 +15,7 @@
     - better log.
     - fix matches order of a query.
     - fix queries with many Ns.
-    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
+    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of flag `-n/--keep-top-scores` from `5` to `0`.
     - 10-25% faster.
 - `merge`:
@@ -27,10 +27,10 @@
     - check if the taxid of a target is given by taxid mapping file.
     - change computation of `score`.
     - new flag `-d/--max-frags-cov-stdev`.
-    - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
-    - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
     - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
+    - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
+    - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
     - 20% faster.
     
 ### v0.6.0 - 2021-08-13
