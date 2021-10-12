@@ -54,14 +54,14 @@ Methods:
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
      (-p/--min-frags-prop). (***highly recommended***)
+     Another flag -d/--max-frags-cov-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
-     While it only has little effect on the abundance.
   4. Multi-aligned queries are proportionally assigned to references
-     with the strategy in Metalign.
+     with a similar strategy in Metalign.
   5. Input files are parsed three times, therefore STDIN is not supported.
 
 Reference:
@@ -71,7 +71,7 @@ Reference:
 Accuracy notes:
   *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
      positive rate (-f/--max-fpr) of a query.
-  *. And we require part of the uniquely matched reads of a reference
+  *. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
@@ -79,12 +79,12 @@ Accuracy notes:
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
-  *. -n/--keep-top-qcovs could increase the speed, while too small value
-     could decrease the sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
   *. --keep-perfect-match is not recommended, which decreases sensitivity. 
   *. -m/--keep-main-match is not recommended, which affects accuracy of
+     abundance estimation.
+  *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
      abundance estimation.
 
 Taxonomy data:
@@ -135,9 +135,10 @@ Taxonomic binning formats:
 		keepMainMatch := getFlagBool(cmd, "keep-main-match")
 		maxScoreGap := getFlagFloat64(cmd, "max-qcov-gap")
 
-		minReads := float64(getFlagPositiveInt(cmd, "min-reads"))
+		minReads := float64(getFlagPositiveInt(cmd, "min-frags-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
+		maxFragsCovStdev := getFlagPositiveFloat64(cmd, "max-frags-cov-stdev")
 
 		minHicUreads := float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
 		if minHicUreads > minUReads {
@@ -541,6 +542,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
+											RelCoverage:  make([]float64, m.IdxNum),
 										}
 										profile[h] = &t0
 										t = &t0
@@ -664,6 +666,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
+								RelCoverage:  make([]float64, m.IdxNum),
 							}
 							profile[h] = &t0
 							t = &t0
@@ -703,18 +706,6 @@ Taxonomic binning formats:
 		var hs []uint64
 		hs = make([]uint64, 0, 10240) // list to delete
 		for h, t := range profile {
-			for _, c = range t.Match {
-				if c > minReads {
-					t.FragsProp++
-				}
-				t.SumMatch += c
-			}
-			t.FragsProp = t.FragsProp / float64(len(t.Match))
-			if t.FragsProp < minFragsProp { // low coverage
-				hs = append(hs, h)
-				continue
-			}
-
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
@@ -735,10 +726,34 @@ Taxonomic binning formats:
 				continue
 			}
 
-			// for _, c2 = range t.QLen {
-			// 	t.Qlens += c2
-			// }
-			// t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
+			// ---------------
+
+			for _, c = range t.Match {
+				if c > minReads {
+					t.FragsProp++
+				}
+				t.SumMatch += c
+			}
+			t.FragsProp = t.FragsProp / float64(len(t.Match))
+			if t.FragsProp < minFragsProp { // low coverage
+				hs = append(hs, h)
+				continue
+			}
+
+			t.Qlens = 0
+			for _, c2 = range t.QLen {
+				t.Qlens += c2
+			}
+			for i, c2 := range t.QLen {
+				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
+			}
+
+			_, t.RelCovStd = MeanStdev(t.RelCoverage)
+			if t.RelCovStd > maxFragsCovStdev {
+				hs = append(hs, h)
+				continue
+			}
+
 		}
 
 		for _, h := range hs {
@@ -1084,6 +1099,7 @@ Taxonomic binning formats:
 												UniqMatch:    make([]float64, m.IdxNum),
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
+												RelCoverage:  make([]float64, m.IdxNum),
 												Stats:        stats.NewQuantiler(),
 											}
 											profile2[h] = &t0
@@ -1134,6 +1150,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
+											RelCoverage:  make([]float64, m.IdxNum),
 											Stats:        stats.NewQuantiler(),
 										}
 										profile2[h] = &t0
@@ -1314,6 +1331,7 @@ Taxonomic binning formats:
 									UniqMatch:    make([]float64, m.IdxNum),
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
+									RelCoverage:  make([]float64, m.IdxNum),
 									Stats:        stats.NewQuantiler(),
 								}
 								profile2[h] = &t0
@@ -1363,6 +1381,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
+								RelCoverage:  make([]float64, m.IdxNum),
 								Stats:        stats.NewQuantiler(),
 							}
 							profile2[h] = &t0
@@ -1401,17 +1420,6 @@ Taxonomic binning formats:
 		targets := make([]*Target, 0, 256)
 
 		for _, t := range profile2 {
-			for _, c = range t.Match {
-				if c > minReads {
-					t.FragsProp++
-				}
-				t.SumMatch += c
-			}
-			t.FragsProp = t.FragsProp / float64(len(t.Match))
-			if t.FragsProp < minFragsProp {
-				continue
-			}
-
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
@@ -1426,39 +1434,63 @@ Taxonomic binning formats:
 				continue
 			}
 
-			if t.SumUniqMatchHic/t.SumUniqMatch < HicUreadsMinProp {
+			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				continue
 			}
 
+			// ----------------------
+
+			for _, c = range t.Match {
+				if c > minReads {
+					t.FragsProp++
+				}
+				t.SumMatch += c
+			}
+			t.FragsProp = t.FragsProp / float64(len(t.Match))
+			if t.FragsProp < minFragsProp {
+				continue
+			}
+
+			t.Qlens = 0
+			for _, c2 = range t.QLen {
+				t.Qlens += c2
+			}
+			for i, c2 := range t.QLen {
+				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
+			}
+
+			_, t.RelCovStd = MeanStdev(t.RelCoverage)
+			if t.RelCovStd > maxFragsCovStdev {
+				continue
+			}
+
+			// ----------------------
+
 			switch normAbund {
 			case "mean":
-				t.Qlens = 0
-				for _, c2 = range t.QLen {
-					t.Qlens += c2
-				}
-				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize)
+				t.Coverage = t.Qlens / float64(t.GenomeSize)
 			case "min":
-				t.Qlens = math.MaxFloat64
+				tmp := math.MaxFloat64
 				for _, c2 = range t.QLen {
 					if c2 == 0 {
 						continue
 					}
-					if c2 < t.Qlens {
-						t.Qlens = c2
+					if c2 < tmp {
+						tmp = c2
 					}
 				}
-				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize) * float64(len(t.QLen))
+				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
 			case "max":
-				t.Qlens = 0
+				var tmp float64
 				for _, c2 = range t.QLen {
 					if c2 == 0 {
 						continue
 					}
-					if c2 > t.Qlens {
-						t.Qlens = c2
+					if c2 > tmp {
+						tmp = c2
 					}
 				}
-				t.Coverage = float64(t.Qlens) / float64(t.GenomeSize) * float64(len(t.QLen))
+				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
 			}
 
 			// t.Score = similarity(t.Stats.Percentile(90))
@@ -1553,7 +1585,7 @@ Taxonomic binning formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString("ref\tpercentage\tscore\tfragsProp\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
+		outfh.WriteString("ref\tpercentage\tscore\tfragsProp\tfragsRelCov\tfragsRelCovStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {
@@ -1567,10 +1599,15 @@ Taxonomic binning formats:
 					t.AddTaxonomy(taxdb, showRanksMap, taxid)
 				}
 			}
+			covs := make([]string, len(t.QLen))
+			for i, v := range t.RelCoverage {
+				covs[i] = fmt.Sprintf("%.2f", v)
+			}
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
 				t.Name, t.Percentage, t.Score,
-				t.FragsProp, t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
+				t.FragsProp, strings.Join(covs, ";"), t.RelCovStd,
+				t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
 				taxid, t.Rank, t.TaxonName,
 				strings.Join(t.LineageNames, separator),
@@ -1716,12 +1753,13 @@ func init() {
 	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.2, `max qcov gap between adjacent matches`)
 
 	// for matches against a reference
-	profileCmd.Flags().IntP("min-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference fragment`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments`)
+	profileCmd.Flags().IntP("min-frags-reads", "r", 50, `minimal number of reads for a reference fragment`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference`)
+	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads`)
+	profileCmd.Flags().Float64P("max-frags-cov-stdev", "d", 2, `maximal standard deviation of relative coverages of all fragments`)
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference`)
-	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.8, `minimal query coverage of high-confidence uniquely matched reads`)
+	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75, `minimal query coverage of high-confidence uniquely matched reads`)
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath

@@ -1254,6 +1254,8 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		// buf := make([]byte, PosPopCountBufSize)
 		var buf [PosPopCountBufSize]byte
 
+		// counters for < 64 hashes
+
 		countKmers63 := func() {
 			forward := true
 			for i := 0; i < numRowBytes; i++ { // every column in matrix
@@ -6417,25 +6419,18 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		var forward bool
 
 		for query := range idx.InCh {
-			if moreThanOneHash {
-				hashes = query.Hashes
-				nHashes = float64(len(*hashes))
-			} else {
-				hashes1 = query.Hashes1
-				nHashes = float64(len(*hashes1))
-			}
-
 			// reset counts
 			bufIdx = 0
 			copy(counts, counts0)
 
-			// copy code block to reduce branch testing in loop
-
 			// -------------------------------------------------------------------------
-			// useMmap
+			// counting
 
 			if useMmap {
 				if moreThanOneHash {
+					hashes = query.Hashes
+					nHashes = float64(len(*hashes))
+
 					for _, hs = range *hashes {
 						for i, _h = range hs {
 							loc = int(_h % numSigsUint)
@@ -6460,7 +6455,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 						if bufIdx == PosPopCountBufSize {
 							forward = true
-							// transpose
+
 							for i = 0; i < numRowBytes; i++ { // every column in matrix
 
 								// for j = 0; j < bufIdx; j++ {
@@ -6612,6 +6607,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						}
 					}
 				} else {
+					hashes1 = query.Hashes1
+					nHashes = float64(len(*hashes1))
+
 					for _, _h = range *hashes1 {
 						loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
@@ -6624,7 +6622,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 						if bufIdx == PosPopCountBufSize {
 							forward = true
-							// transpose
+
 							for i = 0; i < numRowBytes; i++ { // every column in matrix
 
 								// for j = 0; j < bufIdx; j++ {
@@ -6778,6 +6776,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 				}
 			} else { // !useMmap {
 				if moreThanOneHash {
+					hashes = query.Hashes
+					nHashes = float64(len(*hashes))
+
 					for _, hs = range *hashes {
 						for i, _h = range hs {
 							loc = int(_h % numSigsUint)
@@ -6806,7 +6807,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 						if bufIdx == PosPopCountBufSize {
 							forward = true
-							// transpose
+
 							for i = 0; i < numRowBytes; i++ { // every column in matrix
 
 								// for j = 0; j < bufIdx; j++ {
@@ -6958,6 +6959,9 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 						}
 					}
 				} else {
+					hashes1 = query.Hashes1
+					nHashes = float64(len(*hashes1))
+
 					for _, _h = range *hashes1 {
 						loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
@@ -6972,7 +6976,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 
 						if bufIdx == PosPopCountBufSize {
 							forward = true
-							// transpose
+
 							for i = 0; i < numRowBytes; i++ { // every column in matrix
 
 								// for j = 0; j < bufIdx; j++ {
@@ -7127,11 +7131,10 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 			}
 
 			// -------------------------------------------------------------------------
-			// -------------------------------------------------------------------------
+			// check counts
 
 			// left data in buffer
 			if bufIdx > 0 {
-				// // transpose
 				// forward = true
 				// for i = 0; i < numRowBytes; i++ { // every column in matrix
 				// 	// for j = 0; j < bufIdx; j++ {

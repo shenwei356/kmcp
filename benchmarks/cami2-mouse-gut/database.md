@@ -136,7 +136,7 @@ Building database
     j=40
     
     # for short reads
-    k=31
+    k=21
     kmcp compute -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
         --log $prefix-k$k-n10.log
         

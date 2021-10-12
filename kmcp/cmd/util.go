@@ -23,6 +23,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"math/bits"
 	"os"
 	"path/filepath"
@@ -373,4 +374,30 @@ func IntSlice2StringSlice(vals []int) []string {
 		s[i] = strconv.Itoa(v)
 	}
 	return s
+}
+
+func MeanStdev(values []float64) (float64, float64) {
+	n := len(values)
+
+	if n == 0 {
+		return 0, 0
+	}
+
+	if n == 1 {
+		return values[0], 0
+	}
+
+	var sum float64
+	for _, v := range values {
+		sum += v
+	}
+
+	mean := sum / float64(n)
+
+	var variance float64
+	for _, v := range values {
+		variance += (v - mean) * (v - mean)
+	}
+
+	return mean, math.Sqrt(variance / float64(n))
 }

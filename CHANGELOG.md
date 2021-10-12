@@ -2,8 +2,10 @@
 
 ### v0.7.0 - 2021-10
 
-- new command:
-    - `filter`: Filter search results and find species-specific queries.
+- commands:
+    - new command `filter`: Filter search results and find species-specific queries.
+    - new command `utils merge-regions`: Merge species/assembly-specific regions.
+    - rename `info` to `utils index-info`.
 - `compute`:
     - skip k-mer containing Ns.
     - when splitting genome into fragments, sequences are concatenated with k-1 'N's
@@ -13,19 +15,22 @@
     - better log.
     - fix matches order of a query.
     - fix queries with many Ns.
-    - 10-25% faster.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
     - change default value of flag `-n/--keep-top-scores` from `5` to `0`.
+    - 10-25% faster.
 - `merge`:
     - fix adding up `hits`, does not affect `profile`.
     - fix bug of incorrect order.
     - support one input file.
 - `profile`:
-    - addd checking if the taxid of a target is given.
+    - output format change: new column `fragsRelCov` and `fragsRelCovStd`.
+    - check if the taxid of a target is given by taxid mapping file.
     - change computation of `score`.
-    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55`.
+    - new flag `-d/--max-frags-cov-stdev`.
+    - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
+    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
-    - change default value of flag `-n/--keep-top-qcovs` from `5` to `0`.
+    - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
     - 20% faster.
     
 ### v0.6.0 - 2021-08-13

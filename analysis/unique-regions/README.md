@@ -146,7 +146,7 @@ Refseq-viral
     # -----------------------
     # length summary
     time find $input -name "*.fna.gz" \
-        | rush -j 1 'glen=$(seqkit stats -T {} | csvtk cut -t -f sum_len | csvtk del-header); \
+        | rush -k 'glen=$(seqkit stats -T {} | csvtk cut -t -f sum_len | csvtk del-header); \
                 len=$(awk "{print \$3-\$2}" {}.kmcp.uniq.tsv.gz.bed | csvtk summary -Ht -n 0  -f 1:sum); \
                 echo -ne "$len,$glen\n" ' \
         | csvtk add-header -n uniqs,genome -o $input.len.csv.gz

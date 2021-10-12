@@ -96,8 +96,8 @@ can use stricter criteria in `kmcp profile`.
             --db-dir            $db \
             --min-kmers          30 \
             --min-query-len      70 \
-            --min-query-cov     0.6 \
-            --keep-top-scores     5 \
+            --min-query-cov    0.55 \
+            --keep-top-scores     0 \
             $file                   \
             --out-file $file.kmcp@$dbname.tsv.gz \
             --log      $file.kmcp@$dbname.tsv.gz.log
@@ -117,17 +117,19 @@ Merging searching results on multiple database:
 
 **Methods**
 
-1. We use the two-stage taxonomy assignment algorithm in [MegaPath](https://doi.org/10.1186/s12864-020-06875-6)
-    to reduce the false positive of ambiguous matches.
-2. Multi-aligned queries are proportionally assigned to references
-    with the strategy in [Metalign](https://doi.org/10.1186/s13059-020-02159-0).
-4. More strategies are adopted to increase accuracy.
-5. Reference genomes can be splitted into fragments when computing
+1. Reference genomes can be splitted into fragments when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimal proportion of matched fragments
-    (`-p/--min-frags-prop`).
-6. Input files are parsed 3 times, therefore STDIN is not supported.
-
+    (`-p`/--min-frags-prop). (***highly recommended***)
+    Another flag `-d/--max-frags-cov-stdev` further reduces false positives.
+2. We require part of the uniquely matched reads of a reference
+    having high similarity, i.e., with high confidence for decreasing
+    the false positive rate.
+3. We also use the two-stage taxonomy assignment algorithm in [MegaPath](https://doi.org/10.1186/s12864-020-06875-6)
+    to reduce the false positive of ambiguous matches.
+4. Multi-aligned queries are proportionally assigned to references
+    with a similar strategy in [Metalign](https://doi.org/10.1186/s13059-020-02159-0).
+5. Input files are parsed three times, therefore STDIN is not supported.
 
 **Accuracy notes**:
 
@@ -141,11 +143,11 @@ Merging searching results on multiple database:
     - `-H/--min-hic-ureads-qcov`, minimal query coverage, `>= -t/--min-qcov`
     - `-P/--min-hic-ureads-prop`, minimal proportion, higher values
     increase precision in cost of sensitivity.
-- `-n/--keep-top-qcovs` could increase the speed, while too small value
-    could decrease the sensitivity.
 - `-R/--max-mismatch-err` and `-D/--min-dreads-prop` is for determing
     the right reference for ambigous reads.
 - `--keep-perfect-match` is not recommended, which decreases sensitivity.
+- `-n/--keep-top-qcovs`  is not recommended, which affects accuracy of
+     abundance estimation.
 
 **Taxonomy data**:
 
@@ -182,12 +184,14 @@ Taxonomic binning formats:
         --taxid-map      $taxid_map \
         --taxdump          $taxdump \
         --level             species \
-        --keep-top-qcovs          5 \
-        --min-query-cov         0.6 \
-        --min-reads              50 \
+        --min-query-cov        0.55 \
+        --keep-top-qcovs          0 \
+        --min-frags-reads        50 \
+        --min-frags-prop        0.8 \
+        --max-frags-cov-stdev     2 \
         --min-uniq-reads         10 \
         --min-hic-ureads          1 \
-        --min-hic-ureads-qcov   0.8 \
+        --min-hic-ureads-qcov  0.75 \
         --min-hic-ureads-prop   0.1 \
         $sfile                      \
         --out-prefix       $sfile.kmcp.profile \
@@ -198,11 +202,11 @@ Taxonomic binning formats:
 
 Default output:
 
-|ref        |percentage|score|fragsProp|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
-|:----------|:---------|:----|:--------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
-|NC_000913.3|87.230945 |16.41|1.00     |267738|191286|191286   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
-|NC_002695.2|11.872163 |16.22|1.00     |43166 |24210 |24210    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
-|NC_010655.1|0.896892  |16.43|1.00     |1580  |1580  |1580     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
+|ref        |percentage|score |fragsProp|fragsRelCov                                      |fragsRelCovStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
+|:----------|:---------|:-----|:--------|:------------------------------------------------|:-------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
+|NC_000913.3|87.231001 |100.00|1.00     |1.04;0.99;0.99;1.00;0.99;0.99;0.99;0.97;1.04;0.99|0.02          |267738|191287|191287   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
+|NC_002695.2|11.872107 |100.00|1.00     |0.97;0.99;0.86;1.06;1.02;0.93;1.04;1.05;1.08;1.01|0.06          |43166 |24210 |24210    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
+|NC_010655.1|0.896892  |100.00|1.00     |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10          |1580  |1580  |1580     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 

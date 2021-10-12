@@ -144,9 +144,11 @@ type Target struct {
 	SumUniqMatch    float64
 	SumUniqMatchHic float64
 
-	FragsProp float64 // coverage
-	Coverage  float64
-	Qlens     float64
+	FragsProp   float64 // coverage
+	Coverage    float64
+	Qlens       float64
+	RelCoverage []float64
+	RelCovStd   float64
 
 	//
 	RefName string

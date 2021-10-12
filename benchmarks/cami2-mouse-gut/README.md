@@ -50,8 +50,8 @@ https://data.cami-challenge.org/participate
         
 ## Searching and Profiling
     
-    db=refseq-cami2-k31-n10.db
-    dbname=refseq-cami2-k31-n10
+    db=refseq-cami2-k21-n10.db
+    dbname=refseq-cami2-k21-n10
     
     reads=19122017_mousegut_scaffolds
     
