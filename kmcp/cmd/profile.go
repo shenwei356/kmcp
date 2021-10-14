@@ -381,15 +381,16 @@ Taxonomic binning formats:
 			log.Infof("match filtration: ")
 			log.Infof("  maximal false positive rate: %f", maxFPR)
 			log.Infof("  minimal query coverage: %4f", minQcov)
-			log.Infof("  keep matches with the top N score: N=%d", topNScore)
+			log.Infof("  keep matches with the top N scores: N=%d", topNScore)
 			log.Infof("  only keep the full matches: %v", keepFullMatch)
 			log.Infof("  only keep main matches: %v, maximal score gap: %f", keepMainMatch, maxScoreGap)
 			log.Info()
 
 			log.Infof("deciding the existence of a reference:")
-			log.Infof("  minimal number of reads per refence fragment: %.0f", minReads)
+			log.Infof("  minimal number of reads per reference fragment: %.0f", minReads)
 			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
 			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
+			log.Infof("  maximal standard deviation of relative coverages of all fragments: %f", maxFragsCovStdev)
 			log.Info()
 
 			log.Infof("  minimal number of high-confidence uniquely matched reads: %.0f", minHicUreads)
@@ -967,7 +968,7 @@ Taxonomic binning formats:
 			var matches map[uint64]*[]*MatchResult // target -> match result
 			var m *MatchResult
 			var ms *[]*MatchResult
-			var t *Target
+			var t, t1 *Target
 			var ok bool
 			var hTarget, h, h1, h2 uint64
 			var prevQuery string
@@ -1090,6 +1091,7 @@ Taxonomic binning formats:
 								for h, ms = range matches {
 									floatMsSize = float64(len(*ms))
 									first = true
+									t1 = profile[h]
 									for _, m = range *ms {
 										if t, ok = profile2[h]; !ok {
 											t0 := Target{
@@ -1106,7 +1108,15 @@ Taxonomic binning formats:
 											t = &t0
 										}
 
-										prop = profile[h].SumUniqMatch / sumUReads
+										// TODO: did not consider unique sequence proportion of references.
+										prop = t1.SumUniqMatch / sumUReads
+										switch h {
+										case 18035176030307346372:
+											prop = prop / 0.13
+										case 14046586069746084300:
+											prop = prop / 0.31
+										case 14521390220062575897:
+										}
 
 										if first { // count once
 											t.QLen[m.FragIdx] += float64(m.QLen) * prop
@@ -1322,6 +1332,7 @@ Taxonomic binning formats:
 					for h, ms = range matches {
 						floatMsSize = float64(len(*ms))
 						first = true
+						t1 = profile[h]
 						for _, m = range *ms {
 							if t, ok = profile2[h]; !ok {
 								t0 := Target{
@@ -1338,7 +1349,7 @@ Taxonomic binning formats:
 								t = &t0
 							}
 
-							prop = profile[h].SumUniqMatch / sumUReads
+							prop = t1.SumUniqMatch / sumUReads
 
 							if first { // count once
 								t.QLen[m.FragIdx] += float64(m.QLen) * prop

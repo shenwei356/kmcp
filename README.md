@@ -23,13 +23,17 @@ or install using conda:
 ## Quick Start
 
     # compute k-mers
-    kmcp compute -k 21 -I genomes/ -O genomes-k21 
+    kmcp compute -k 21 --split-number 10 --split-overlap 100 \
+        --in-dir genomes/ --out-dir genomes-k21-n10
 
     # index k-mers
-    kmcp index -I genomes-k21/ -O genomes-k21.kmcp
+    kmcp index --in-dir genomes-k21-n10/ --out-dir genomes.kmcp
+    
+    # delete temporary files
+    # rm -rf genomes-k21-n10/
     
     # search    
-    kmcp search -d genomes-k21.kmcp/ test.fa.gz -o search.tsv.gz
+    kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.tsv.gz
 
     # profile
     kmcp profile search.tsv.gz \

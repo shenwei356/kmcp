@@ -762,7 +762,7 @@ func init() {
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
-	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as a query`)
+	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database`)
 	searchCmd.Flags().BoolP("use-filename", "G", false, `use file name as query ID when using the whole file as a query`)
 	searchCmd.Flags().StringP("query-id", "", "", `custom query Id when using the whole file as a query`)
 
