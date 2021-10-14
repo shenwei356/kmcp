@@ -62,7 +62,7 @@ Methods:
      to reduce the false positive of ambiguous matches.
   4. Multi-aligned queries are proportionally assigned to references
      with a similar strategy in Metalign.
-  5. Input files are parsed three times, therefore STDIN is not supported.
+  5. Input files are parsed fours times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
@@ -177,6 +177,11 @@ Taxonomic binning formats:
 		default:
 			checkError(fmt.Errorf("invalid value for --level, available values: species, strain/assembly"))
 		}
+
+		// -----
+
+		UregionPropFiles := getFlagStringSlice(cmd, "uregion-prop-map")
+		considerUregionProp := len(UregionPropFiles) > 0
 
 		// -----
 
@@ -374,6 +379,58 @@ Taxonomic binning formats:
 			}
 		}
 
+		// ---------------------------------------------------------------
+
+		var uregionPropMap map[string]float64
+
+		if considerUregionProp {
+			if opt.Verbose || opt.Log2File {
+				log.Infof("loading reference unique regions proportion mapping file ...")
+			}
+			uregionPropFile := UregionPropFiles[0]
+			uregionPropStr, err := cliutil.ReadKVs(uregionPropFile, false)
+			if err != nil {
+				checkError(errors.Wrap(err, uregionPropFile))
+			}
+			uregionPropMap = make(map[string]float64, len(uregionPropStr))
+			var p float64
+			for k, s := range uregionPropStr {
+				p, err = strconv.ParseFloat(s, 64)
+				if err != nil {
+					checkError(fmt.Errorf("invalid proportion: %s", s))
+				}
+				uregionPropMap[k] = p
+			}
+
+			if len(UregionPropFiles) > 1 {
+				for _, uregionPropFile := range taxidMappingFiles[1:] {
+					uregionPropStr, err := cliutil.ReadKVs(uregionPropFile, false)
+					if err != nil {
+						checkError(errors.Wrap(err, uregionPropFile))
+					}
+					uregionPropMap = make(map[string]float64, len(uregionPropStr))
+					var p float64
+					for k, s := range uregionPropStr {
+						p, err = strconv.ParseFloat(s, 64)
+						if err != nil {
+							checkError(fmt.Errorf("invalid proportion: %s", s))
+						}
+						uregionPropMap[k] = p
+					}
+				}
+			}
+
+			if opt.Verbose || opt.Log2File {
+				log.Infof("  %d pairs of reference unique regions proportion mapping values from %d file(s) loaded", len(uregionPropMap), len(UregionPropFiles))
+			}
+
+			considerUregionProp = len(uregionPropMap) > 0
+
+			if !considerUregionProp {
+				checkError(fmt.Errorf("no valid reference unique regions proportions found in mapping file: %s", strings.Join(UregionPropFiles, ", ")))
+			}
+		}
+
 		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -462,9 +519,9 @@ Taxonomic binning formats:
 		var nReads float64
 
 		// ---------------------------------------------------------------
-		// stage 1/3
+		// stage 1/4
 		if opt.Verbose || opt.Log2File {
-			log.Infof("stage 1/3: counting matches and unique matches for filtering out low-confidence references")
+			log.Infof("stage 1/4: counting matches and unique matches for filtering out low-confidence references")
 		}
 		timeStart1 := time.Now()
 
@@ -520,7 +577,7 @@ Taxonomic binning formats:
 									}
 									taxids = append(taxids, taxid1)
 								}
-
+								// LCA
 								theSameSpecies = false
 								taxid1 = taxids[0]
 								for _, taxid2 = range taxids[1:] {
@@ -542,8 +599,8 @@ Taxonomic binning formats:
 											Match:        make([]float64, m.IdxNum),
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
-											QLen:         make([]float64, m.IdxNum),
-											RelCoverage:  make([]float64, m.IdxNum),
+											// QLen:         make([]float64, m.IdxNum),
+											// RelCoverage:  make([]float64, m.IdxNum),
 										}
 										profile[h] = &t0
 										t = &t0
@@ -556,7 +613,7 @@ Taxonomic binning formats:
 												t.UniqMatchHic[m.FragIdx]++
 											}
 										}
-										t.QLen[m.FragIdx] += float64(m.QLen)
+										// t.QLen[m.FragIdx] += float64(m.QLen)
 
 										first = false
 									}
@@ -666,8 +723,8 @@ Taxonomic binning formats:
 								Match:        make([]float64, m.IdxNum),
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
-								QLen:         make([]float64, m.IdxNum),
-								RelCoverage:  make([]float64, m.IdxNum),
+								// QLen:         make([]float64, m.IdxNum),
+								// RelCoverage:  make([]float64, m.IdxNum),
 							}
 							profile[h] = &t0
 							t = &t0
@@ -680,7 +737,7 @@ Taxonomic binning formats:
 									t.UniqMatchHic[m.FragIdx]++
 								}
 							}
-							t.QLen[m.FragIdx] += float64(m.QLen)
+							// t.QLen[m.FragIdx] += float64(m.QLen)
 
 							first = false
 						}
@@ -722,10 +779,13 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				continue
 			}
-			if t.SumUniqMatchHic < t.SumUniqMatch*HicUreadsMinProp {
-				hs = append(hs, h)
-				continue
-			}
+
+			// the SumUniqMatchHic may inrease later
+
+			// if t.SumUniqMatchHic < t.SumUniqMatch*HicUreadsMinProp {
+			// 	hs = append(hs, h)
+			// 	continue
+			// }
 
 			// ---------------
 
@@ -740,21 +800,6 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				continue
 			}
-
-			t.Qlens = 0
-			for _, c2 = range t.QLen {
-				t.Qlens += c2
-			}
-			for i, c2 := range t.QLen {
-				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
-			}
-
-			_, t.RelCovStd = MeanStdev(t.RelCoverage)
-			if t.RelCovStd > maxFragsCovStdev {
-				hs = append(hs, h)
-				continue
-			}
-
 		}
 
 		for _, h := range hs {
@@ -768,14 +813,14 @@ Taxonomic binning formats:
 		}
 
 		// ---------------------------------------------------------------
-		// stage 2/3, counting ambiguous reads/matches
+		// stage 2/4, counting ambiguous reads/matches
 		if opt.Verbose || opt.Log2File {
-			log.Infof("stage 2/3: counting ambiguous matches for correcting matches")
+			log.Infof("stage 2/4: counting ambiguous matches for correcting matches")
 		}
 		timeStart1 = time.Now()
 
 		// hashA -> hashB -> count
-		ambMatch := make(map[uint64]map[uint64]float64, 128)
+		ambMatch := make(map[uint64]map[uint64]float64, len(profile))
 
 		for _, file := range files {
 			if opt.Verbose || opt.Log2File {
@@ -928,37 +973,13 @@ Taxonomic binning formats:
 		}
 
 		// ---------------------------------------------------------------
-		// stage 3/3
+		// stage 3/4
 		if opt.Verbose || opt.Log2File {
-			log.Infof("stage 3/3: correcting matches and computing profile")
+			log.Infof("stage 3/4: recounting matches and unique matches")
 		}
 		timeStart1 = time.Now()
 
-		var outfhB *bufio.Writer
-		var gwB io.WriteCloser
-		var wB *os.File
-		var nB uint64
-		if outputBinningResult {
-			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
-			checkError(err)
-			defer func() {
-				outfhB.Flush()
-				if gwB != nil {
-					gwB.Close()
-				}
-				wB.Close()
-			}()
-
-			outfhB.WriteString("# This is the bioboxes.org binning output format at\n")
-			outfhB.WriteString("# https://github.com/bioboxes/rfc/tree/master/data-format\n")
-			outfhB.WriteString("@Version:0.10.0\n")
-			outfhB.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
-			outfhB.WriteString("@@SEQUENCEID	TAXID\n")
-		}
-
-		profile2 := make(map[uint64]*Target, 128)
-
-		var nUnassignedReads float64
+		profile2 := make(map[uint64]*Target, len(profile))
 
 		for _, file := range files {
 			if opt.Verbose || opt.Log2File {
@@ -968,14 +989,13 @@ Taxonomic binning formats:
 			var matches map[uint64]*[]*MatchResult // target -> match result
 			var m *MatchResult
 			var ms *[]*MatchResult
-			var t, t1 *Target
+			var t *Target
 			var ok bool
 			var hTarget, h, h1, h2 uint64
 			var prevQuery string
 			var floatMsSize float64
 			var uniqMatch bool
 			var first bool
-			var sumUReads, prop float64
 			hss := make([]uint64, 0, 256) // for sorting hash value of reference
 			hsm := make([]bool, 0, 256)   // marking hash values to delete
 			var n, np1, i, j int
@@ -1055,43 +1075,29 @@ Taxonomic binning formats:
 							}
 
 							if len(matches) > 1 { // redistribute matches
-								sumUReads = 0
-
 								taxids = taxids[:0]
-								for h, ms = range matches {
-									sumUReads += profile[h].SumUniqMatch
-
-									if mappingTaxids {
+								if levelSpecies {
+									for h, ms = range matches {
 										taxid1, ok = taxidMap[(*ms)[0].Target]
 										if !ok {
 											checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
 										}
 										taxids = append(taxids, taxid1)
 									}
-								}
-
-								if mappingTaxids {
 									// LCA
 									theSameSpecies = false
 									taxid1 = taxids[0]
 									for _, taxid2 = range taxids[1:] {
 										taxid1 = taxdb.LCA(taxid1, taxid2)
 									}
-
-									if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+									if taxdb.AtOrBelowRank(taxid1, "species") {
 										theSameSpecies = true
-									}
-
-									if outputBinningResult {
-										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-										nB++
 									}
 								}
 
 								for h, ms = range matches {
 									floatMsSize = float64(len(*ms))
 									first = true
-									t1 = profile[h]
 									for _, m = range *ms {
 										if t, ok = profile2[h]; !ok {
 											t0 := Target{
@@ -1102,38 +1108,29 @@ Taxonomic binning formats:
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
 												RelCoverage:  make([]float64, m.IdxNum),
-												Stats:        stats.NewQuantiler(),
+												// Stats:        stats.NewQuantiler(),
 											}
 											profile2[h] = &t0
 											t = &t0
 										}
 
-										// TODO: did not consider unique sequence proportion of references.
-										prop = t1.SumUniqMatch / sumUReads
-										switch h {
-										case 18035176030307346372:
-											prop = prop / 0.13
-										case 14046586069746084300:
-											prop = prop / 0.31
-										case 14521390220062575897:
-										}
-
 										if first { // count once
-											t.QLen[m.FragIdx] += float64(m.QLen) * prop
 											if levelSpecies && theSameSpecies {
-												t.Stats.Add(m.QCov) // the best match on a subject
+												t.UniqMatch[m.FragIdx] += floatOne / floatMsSize
+												if m.QCov >= hicUreadsMinQcov {
+													t.UniqMatchHic[m.FragIdx] += floatOne / floatMsSize
+												}
+
+												// t.Stats.Add(m.QCov) // the best match on a subject
 											}
+											t.QLen[m.FragIdx] += float64(m.QLen)
+
 											first = false
 										}
 
-										t.Match[m.FragIdx] += prop / floatMsSize
-
-										if levelSpecies && theSameSpecies {
-											t.UniqMatch[m.FragIdx] += prop / floatMsSize
-											if m.QCov >= hicUreadsMinQcov {
-												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-											}
-										}
+										// for a read matching multiple regions of a reference, distribute count to multiple regions,
+										// the sum is still the one.
+										t.Match[m.FragIdx] += floatOne / floatMsSize
 									}
 									poolMatchResults.Put(ms)
 								}
@@ -1142,12 +1139,9 @@ Taxonomic binning formats:
 							}
 						} else if len(matches) == 1 {
 							uniqMatch = true
-						} else {
-							nUnassignedReads++
 						}
 
 						if uniqMatch {
-
 							for h, ms = range matches {
 								floatMsSize = float64(len(*ms))
 								first = true
@@ -1161,7 +1155,7 @@ Taxonomic binning formats:
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
 											RelCoverage:  make([]float64, m.IdxNum),
-											Stats:        stats.NewQuantiler(),
+											// Stats:        stats.NewQuantiler(),
 										}
 										profile2[h] = &t0
 										t = &t0
@@ -1173,18 +1167,16 @@ Taxonomic binning formats:
 											if m.QCov >= hicUreadsMinQcov {
 												t.UniqMatchHic[m.FragIdx]++
 											}
-											t.Stats.Add(m.QCov) // the best match on a subject
-										}
 
+											//	t.Stats.Add(m.QCov) // the best match on a subject
+										}
 										t.QLen[m.FragIdx] += float64(m.QLen)
-										first = false
 
-										if outputBinningResult {
-											outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
-											nB++
-										}
+										first = false
 									}
 
+									// for a read matching multiple regions of a reference, distribute count to multiple regions,
+									// the sum is still the one.
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
 								poolMatchResults.Put(ms)
@@ -1282,10 +1274,12 @@ Taxonomic binning formats:
 							profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
 							// remove hss[j]
 							hsm[j] = true
+							// fmt.Println(matches[hss[i]], matches[hss[j]])
 						} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
 							profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
 							// remove hss[i]
 							hsm[i] = true
+							// fmt.Println(matches[hss[j]], matches[hss[i]])
 						}
 					}
 				}
@@ -1296,43 +1290,29 @@ Taxonomic binning formats:
 				}
 
 				if len(matches) > 1 { // redistribute matches
-					sumUReads = 0
-
 					taxids = taxids[:0]
-					for h, ms = range matches {
-						sumUReads += profile[h].SumUniqMatch
-
-						if mappingTaxids {
+					if levelSpecies {
+						for h, ms = range matches {
 							taxid1, ok = taxidMap[(*ms)[0].Target]
 							if !ok {
 								checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
 							}
 							taxids = append(taxids, taxid1)
 						}
-					}
-
-					if mappingTaxids {
 						// LCA
 						theSameSpecies = false
 						taxid1 = taxids[0]
 						for _, taxid2 = range taxids[1:] {
 							taxid1 = taxdb.LCA(taxid1, taxid2)
 						}
-
-						if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+						if taxdb.AtOrBelowRank(taxid1, "species") {
 							theSameSpecies = true
-						}
-
-						if outputBinningResult {
-							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-							nB++
 						}
 					}
 
 					for h, ms = range matches {
 						floatMsSize = float64(len(*ms))
 						first = true
-						t1 = profile[h]
 						for _, m = range *ms {
 							if t, ok = profile2[h]; !ok {
 								t0 := Target{
@@ -1343,30 +1323,29 @@ Taxonomic binning formats:
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
 									RelCoverage:  make([]float64, m.IdxNum),
-									Stats:        stats.NewQuantiler(),
+									// Stats:        stats.NewQuantiler(),
 								}
 								profile2[h] = &t0
 								t = &t0
 							}
 
-							prop = t1.SumUniqMatch / sumUReads
-
 							if first { // count once
-								t.QLen[m.FragIdx] += float64(m.QLen) * prop
 								if levelSpecies && theSameSpecies {
-									t.Stats.Add(m.QCov) // the best match on a subject
+									t.UniqMatch[m.FragIdx] += floatOne / floatMsSize
+									if m.QCov >= hicUreadsMinQcov {
+										t.UniqMatchHic[m.FragIdx] += floatOne / floatMsSize
+									}
+
+									// t.Stats.Add(m.QCov) // the best match on a subject
 								}
+								t.QLen[m.FragIdx] += float64(m.QLen)
+
 								first = false
 							}
 
-							t.Match[m.FragIdx] += prop / floatMsSize
-
-							if levelSpecies && theSameSpecies {
-								t.UniqMatch[m.FragIdx] += prop / floatMsSize
-								if m.QCov >= hicUreadsMinQcov {
-									t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-								}
-							}
+							// for a read matching multiple regions of a reference, distribute count to multiple regions,
+							// the sum is still the one.
+							t.Match[m.FragIdx] += floatOne / floatMsSize
 						}
 						poolMatchResults.Put(ms)
 					}
@@ -1375,8 +1354,6 @@ Taxonomic binning formats:
 				}
 			} else if len(matches) == 1 {
 				uniqMatch = true
-			} else {
-				nUnassignedReads++
 			}
 
 			if uniqMatch {
@@ -1393,9 +1370,511 @@ Taxonomic binning formats:
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
 								RelCoverage:  make([]float64, m.IdxNum),
-								Stats:        stats.NewQuantiler(),
+								// Stats:        stats.NewQuantiler(),
 							}
 							profile2[h] = &t0
+							t = &t0
+						}
+
+						if first { // count once
+							if len(matches) == 1 {
+								t.UniqMatch[m.FragIdx]++
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx]++
+								}
+
+								// t.Stats.Add(m.QCov) // the best match on a subject
+							}
+							t.QLen[m.FragIdx] += float64(m.QLen)
+
+							first = false
+						}
+
+						// for a read matching multiple regions of a reference, distribute count to multiple regions,
+						// the sum is still the one.
+						t.Match[m.FragIdx] += floatOne / floatMsSize
+					}
+					poolMatchResults.Put(ms)
+				}
+			}
+		}
+
+		// --------------------
+		// sum up
+
+		hs = make([]uint64, 0, len(profile)) // list to delete
+		for h, t := range profile2 {
+			for _, c1 = range t.UniqMatch {
+				t.SumUniqMatch += c1
+			}
+			if t.SumUniqMatch < minUReads {
+				hs = append(hs, h)
+				continue
+			}
+
+			for _, c1 = range t.UniqMatchHic {
+				t.SumUniqMatchHic += c1
+			}
+			if t.SumUniqMatchHic < minHicUreads {
+				hs = append(hs, h)
+				continue
+			}
+
+			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
+				hs = append(hs, h)
+				continue
+			}
+
+			// ----------------------
+
+			for _, c = range t.Match {
+				if c > minReads {
+					t.FragsProp++
+				}
+				t.SumMatch += c
+			}
+			t.FragsProp = t.FragsProp / float64(len(t.Match))
+			if t.FragsProp < minFragsProp {
+				hs = append(hs, h)
+				continue
+			}
+
+			t.Qlens = 0
+			for _, c2 = range t.QLen {
+				t.Qlens += c2
+			}
+			for i, c2 := range t.QLen {
+				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
+			}
+
+			_, t.RelCovStd = MeanStdev(t.RelCoverage)
+			if t.RelCovStd > maxFragsCovStdev {
+				hs = append(hs, h)
+				continue
+			}
+
+		}
+
+		for _, h := range hs {
+			delete(profile2, h)
+		}
+
+		if opt.Verbose || opt.Log2File {
+			log.Infof("  number of estimated references: %d", len(profile2))
+			log.Infof("  elapsed time: %s", time.Since(timeStart1))
+			log.Info()
+		}
+
+		// ---------------------------------------------------------------
+		// stage 4/4
+		if opt.Verbose || opt.Log2File {
+			log.Infof("stage 4/4: computing profile")
+		}
+		timeStart1 = time.Now()
+
+		var outfhB *bufio.Writer
+		var gwB io.WriteCloser
+		var wB *os.File
+		var nB uint64
+		if outputBinningResult {
+			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfhB.Flush()
+				if gwB != nil {
+					gwB.Close()
+				}
+				wB.Close()
+			}()
+
+			outfhB.WriteString("# This is the bioboxes.org binning output format at\n")
+			outfhB.WriteString("# https://github.com/bioboxes/rfc/tree/master/data-format\n")
+			outfhB.WriteString("@Version:0.10.0\n")
+			outfhB.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
+			outfhB.WriteString("@@SEQUENCEID	TAXID\n")
+		}
+
+		profile3 := make(map[uint64]*Target, len(profile2))
+
+		var nUnassignedReads float64
+
+		for _, file := range files {
+			if opt.Verbose || opt.Log2File {
+				log.Infof("  parsing file: %s", file)
+			}
+
+			var matches map[uint64]*[]*MatchResult // target -> match result
+			var m *MatchResult
+			var ms *[]*MatchResult
+			var t, t1 *Target
+			var ok bool
+			var hTarget, h uint64
+			var prevQuery string
+			var floatMsSize float64
+			var uniqMatch bool
+			var first bool
+			var sumUReads, prop float64
+			var uregionProp float64
+			var match *MatchResult
+
+			onlyTopNScore := topNScore > 0
+			var nScore int
+			var pScore float64
+			var processThisMatch bool
+
+			taxids := make([]uint32, 0, 128)
+			var taxid1, taxid2 uint32
+			var theSameSpecies bool
+
+			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
+			checkError(err)
+			var data interface{}
+
+			matches = make(map[uint64]*[]*MatchResult)
+			pScore = 1024
+			nScore = 0
+			processThisMatch = true
+			for chunk := range reader.Ch {
+				checkError(chunk.Err)
+
+				for _, data = range chunk.Data {
+					match = data.(*MatchResult)
+
+					hTarget = wyhash.HashString(match.Target, 1)
+					if _, ok = profile2[hTarget]; !ok { // skip matches of unwanted targets
+						continue
+					}
+
+					if prevQuery != match.Query {
+						uniqMatch = false
+						if len(matches) > 1 { // redistribute matches
+							sumUReads = 0
+
+							taxids = taxids[:0]
+							for h, ms = range matches {
+								// consider unique sequence proportion of references.
+								if considerUregionProp {
+									if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
+										sumUReads += profile2[h].SumUniqMatch / uregionProp
+									} else {
+										sumUReads += profile2[h].SumUniqMatch
+									}
+								} else {
+									sumUReads += profile2[h].SumUniqMatch
+								}
+
+								if mappingTaxids {
+									taxid1, ok = taxidMap[(*ms)[0].Target]
+									if !ok {
+										checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+									}
+									taxids = append(taxids, taxid1)
+								}
+							}
+
+							if mappingTaxids {
+								// LCA
+								theSameSpecies = false
+								taxid1 = taxids[0]
+								for _, taxid2 = range taxids[1:] {
+									taxid1 = taxdb.LCA(taxid1, taxid2)
+								}
+
+								if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+									theSameSpecies = true
+								}
+
+								if outputBinningResult {
+									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+									nB++
+								}
+							}
+
+							for h, ms = range matches {
+								floatMsSize = float64(len(*ms))
+								first = true
+								t1 = profile2[h]
+
+								// consider unique sequence proportion of references.
+								if considerUregionProp {
+									if uregionProp, ok = uregionPropMap[t1.Name]; ok {
+										prop = t1.SumUniqMatch / uregionProp / sumUReads
+									} else {
+										prop = t1.SumUniqMatch / sumUReads
+									}
+								} else {
+									prop = t1.SumUniqMatch / sumUReads
+								}
+
+								for _, m = range *ms {
+									if t, ok = profile3[h]; !ok {
+										t0 := Target{
+											Name:         m.Target,
+											GenomeSize:   m.GSize,
+											Match:        make([]float64, m.IdxNum),
+											UniqMatch:    make([]float64, m.IdxNum),
+											UniqMatchHic: make([]float64, m.IdxNum),
+											QLen:         make([]float64, m.IdxNum),
+											RelCoverage:  make([]float64, m.IdxNum),
+											Stats:        stats.NewQuantiler(),
+										}
+										profile3[h] = &t0
+										t = &t0
+									}
+
+									if first { // count once
+										t.QLen[m.FragIdx] += float64(m.QLen) * prop
+										if levelSpecies && theSameSpecies {
+											t.Stats.Add(m.QCov) // the best match on a subject
+										}
+										first = false
+									}
+
+									t.Match[m.FragIdx] += prop / floatMsSize
+
+									if levelSpecies && theSameSpecies {
+										t.UniqMatch[m.FragIdx] += prop / floatMsSize
+										if m.QCov >= hicUreadsMinQcov {
+											t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+										}
+									}
+								}
+								poolMatchResults.Put(ms)
+							}
+
+							uniqMatch = false
+						} else if len(matches) == 1 {
+							uniqMatch = true
+						} else {
+							nUnassignedReads++
+						}
+
+						if uniqMatch {
+							for h, ms = range matches {
+								floatMsSize = float64(len(*ms))
+								first = true
+								for _, m = range *ms {
+									if t, ok = profile3[h]; !ok {
+										t0 := Target{
+											Name:         m.Target,
+											GenomeSize:   m.GSize,
+											Match:        make([]float64, m.IdxNum),
+											UniqMatch:    make([]float64, m.IdxNum),
+											UniqMatchHic: make([]float64, m.IdxNum),
+											QLen:         make([]float64, m.IdxNum),
+											RelCoverage:  make([]float64, m.IdxNum),
+											Stats:        stats.NewQuantiler(),
+										}
+										profile3[h] = &t0
+										t = &t0
+									}
+
+									if first { // count once
+										if len(matches) == 1 {
+											t.UniqMatch[m.FragIdx]++
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx]++
+											}
+											t.Stats.Add(m.QCov) // the best match on a subject
+										}
+
+										t.QLen[m.FragIdx] += float64(m.QLen)
+										first = false
+
+										if outputBinningResult {
+											outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
+											nB++
+										}
+									}
+
+									t.Match[m.FragIdx] += floatOne / floatMsSize
+								}
+								poolMatchResults.Put(ms)
+							}
+						}
+
+						matches = make(map[uint64]*[]*MatchResult)
+						pScore = 1024
+						nScore = 0
+						processThisMatch = true
+					} else if keepFullMatch {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore == 1 && match.QCov < 1 {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
+					} else if keepMainMatch && pScore <= 1 {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if pScore-match.QCov > maxScoreGap {
+							processThisMatch = false
+
+							prevQuery = match.Query
+							continue
+						}
+					}
+
+					if onlyTopNScore {
+						if !processThisMatch {
+							prevQuery = match.Query
+							continue
+						}
+
+						if match.QCov < pScore { // match with a smaller score
+							nScore++
+							if nScore > topNScore {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+						}
+					}
+
+					if ms, ok = matches[hTarget]; !ok {
+						// tmp := []*MatchResult{match}
+						tmp := poolMatchResults.Get().(*[]*MatchResult)
+						*tmp = (*tmp)[:0]
+						*tmp = append(*tmp, match)
+						matches[hTarget] = tmp
+					} else {
+						*ms = append(*ms, match)
+					}
+
+					prevQuery = match.Query
+					pScore = match.QCov
+				}
+			}
+
+			uniqMatch = false
+			if len(matches) > 1 { // redistribute matches
+				sumUReads = 0
+
+				taxids = taxids[:0]
+				for h, ms = range matches {
+					// consider unique sequence proportion of references.
+					if considerUregionProp {
+						if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
+							sumUReads += profile2[h].SumUniqMatch / uregionProp
+						} else {
+							sumUReads += profile2[h].SumUniqMatch
+						}
+					} else {
+						sumUReads += profile2[h].SumUniqMatch
+					}
+
+					if mappingTaxids {
+						taxid1, ok = taxidMap[(*ms)[0].Target]
+						if !ok {
+							checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+						}
+						taxids = append(taxids, taxid1)
+					}
+				}
+
+				if mappingTaxids {
+					// LCA
+					theSameSpecies = false
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+
+					if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+						theSameSpecies = true
+					}
+
+					if outputBinningResult {
+						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+						nB++
+					}
+				}
+
+				for h, ms = range matches {
+					floatMsSize = float64(len(*ms))
+					first = true
+					t1 = profile2[h]
+
+					// consider unique sequence proportion of references.
+					if considerUregionProp {
+						if uregionProp, ok = uregionPropMap[t1.Name]; ok {
+							prop = t1.SumUniqMatch / uregionProp / sumUReads
+						} else {
+							prop = t1.SumUniqMatch / sumUReads
+						}
+					} else {
+						prop = t1.SumUniqMatch / sumUReads
+					}
+
+					for _, m = range *ms {
+						if t, ok = profile3[h]; !ok {
+							t0 := Target{
+								Name:         m.Target,
+								GenomeSize:   m.GSize,
+								Match:        make([]float64, m.IdxNum),
+								UniqMatch:    make([]float64, m.IdxNum),
+								UniqMatchHic: make([]float64, m.IdxNum),
+								QLen:         make([]float64, m.IdxNum),
+								RelCoverage:  make([]float64, m.IdxNum),
+								Stats:        stats.NewQuantiler(),
+							}
+							profile3[h] = &t0
+							t = &t0
+						}
+
+						if first { // count once
+							t.QLen[m.FragIdx] += float64(m.QLen) * prop
+							if levelSpecies && theSameSpecies {
+								t.Stats.Add(m.QCov) // the best match on a subject
+							}
+							first = false
+						}
+
+						t.Match[m.FragIdx] += prop / floatMsSize
+
+						if levelSpecies && theSameSpecies {
+							t.UniqMatch[m.FragIdx] += prop / floatMsSize
+							if m.QCov >= hicUreadsMinQcov {
+								t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+							}
+						}
+					}
+					poolMatchResults.Put(ms)
+				}
+
+				uniqMatch = false
+			} else if len(matches) == 1 {
+				uniqMatch = true
+			} else {
+				nUnassignedReads++
+			}
+
+			if uniqMatch {
+				for h, ms = range matches {
+					floatMsSize = float64(len(*ms))
+					first = true
+					for _, m = range *ms {
+						if t, ok = profile3[h]; !ok {
+							t0 := Target{
+								Name:         m.Target,
+								GenomeSize:   m.GSize,
+								Match:        make([]float64, m.IdxNum),
+								UniqMatch:    make([]float64, m.IdxNum),
+								UniqMatchHic: make([]float64, m.IdxNum),
+								QLen:         make([]float64, m.IdxNum),
+								RelCoverage:  make([]float64, m.IdxNum),
+								Stats:        stats.NewQuantiler(),
+							}
+							profile3[h] = &t0
 							t = &t0
 						}
 
@@ -1430,7 +1909,7 @@ Taxonomic binning formats:
 
 		targets := make([]*Target, 0, 256)
 
-		for _, t := range profile2 {
+		for _, t := range profile3 {
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
@@ -1513,6 +1992,7 @@ Taxonomic binning formats:
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(targets))
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
+			log.Info()
 			if outputBinningResult {
 				log.Infof("%d binning results are save to %s", nB, binningFile)
 			}
@@ -1520,6 +2000,7 @@ Taxonomic binning formats:
 			log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
 				nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
 		}
+
 		// ---------------------------------------------------------------
 		// output
 
@@ -1628,14 +2109,14 @@ Taxonomic binning formats:
 		// ---------------------------------------------------------------
 		// more output
 
-		var profile3 map[uint32]*ProfileNode
+		var profile4 map[uint32]*ProfileNode
 		var nodes []*ProfileNode
 
 		if outputCamiReport || outputMetaphlanReport {
-			profile3 = generateProfile(taxdb, targets)
+			profile4 = generateProfile(taxdb, targets)
 
-			nodes = make([]*ProfileNode, 0, len(profile3))
-			for _, node := range profile3 {
+			nodes = make([]*ProfileNode, 0, len(profile4))
+			for _, node := range profile4 {
 				nodes = append(nodes, node)
 			}
 
@@ -1799,6 +2280,9 @@ func init() {
 	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
 
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
+
+	profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
+
 }
 
 // s = lambda qcov: 87.456 + 26.410*qcov - 22.008*qcov*qcov + 7.325*qcov*qcov*qcov

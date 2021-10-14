@@ -53,6 +53,7 @@ Generating mock dataset of three references with abundance 100:10:1.
 
     # generating mock dataset
     (seqkit sliding -s 10 -W 150 refs/NC_000913.3.fasta.gz | seqkit sample -p 0.6 ; \
+            seqkit sliding -s 10 -W 150 refs/NC_013654.1.fasta.gz | seqkit sample -p 0.6; \
             seqkit sliding -s 10 -W 150 refs/NC_002695.2.fasta.gz | seqkit sample -p 0.06 ;  \
             seqkit sliding -s 10 -W 150 refs/NC_010655.1.fasta.gz | seqkit sample -p 0.006 ) \
         | seqkit shuffle -o mock.fastq.gz
@@ -63,7 +64,7 @@ Searching
     for f in *.fastq.gz; do
         kmcp search \
             --db-dir refs-k31-n10.kmcp/ \
-            --min-query-cov 0.8 \
+            --min-query-cov 0.55 \
             $f \
             --out-file $f.kmcp.gz
     done
@@ -71,13 +72,15 @@ Searching
 Profiling
 
     # profiling
+    # use a high --min-query-cov for strain level profiling
     for f in *.kmcp.gz; do
         kmcp profile \
             --taxid-map taxid.map \
             --taxdump taxdump \
             $f \
             --level strain \
-            --min-reads 20 \
+            --min-query-cov 0.8 \
+            --min-frags-reads 20 \
             --min-uniq-reads 5 \
             --out-prefix $f.kmcp.profile \
             --metaphlan-report $f.metaphlan.profile \
@@ -91,9 +94,10 @@ Profiling
     
 |ref        |percentage|taxname                                  |
 |:----------|:---------|:----------------------------------------|
-|NC_000913.3|87.231001 |Escherichia coli str. K-12 substr. MG1655|
-|NC_002695.2|11.872107 |Escherichia coli O157:H7 str. Sakai      |
-|NC_010655.1|0.896892  |Akkermansia muciniphila ATCC BAA-835     |
+|NC_013654.1|48.317327 |Escherichia coli SE15                    |
+|NC_000913.3|46.190840 |Escherichia coli str. K-12 substr. MG1655|
+|NC_002695.2|5.022244  |Escherichia coli O157:H7 str. Sakai      |
+|NC_010655.1|0.469589  |Akkermansia muciniphila ATCC BAA-835     |
 
 ## Genome similarity estimation
 

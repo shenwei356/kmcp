@@ -23,6 +23,7 @@
     - fix bug of incorrect order.
     - support one input file.
 - `profile`:
+    - change analysis workflow, using 4 stage.
     - output format change: new column `fragsRelCov` and `fragsRelCovStd`.
     - check if the taxid of a target is given by taxid mapping file.
     - change computation of `score`.
