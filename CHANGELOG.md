@@ -23,11 +23,11 @@
     - fix bug of incorrect order.
     - support one input file.
 - `profile`:
-    - change analysis workflow, using 4 stage.
+    - change analysis workflow, using 4 stages.
     - output format change: new column `fragsRelCov` and `fragsRelCovStd`.
     - check if the taxid of a target is given by taxid mapping file.
     - change computation of `score`.
-    - new flag `-d/--max-frags-cov-stdev`.
+    - new flag `-d/--max-frags-depth-stdev`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.

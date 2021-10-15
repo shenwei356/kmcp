@@ -147,8 +147,8 @@ type Target struct {
 	FragsProp   float64 // coverage
 	Coverage    float64
 	Qlens       float64
-	RelCoverage []float64
-	RelCovStd   float64
+	RelDepth    []float64
+	RelDepthStd float64
 
 	//
 	RefName string

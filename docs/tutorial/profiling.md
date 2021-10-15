@@ -129,7 +129,9 @@ Merging searching results on multiple database:
     to reduce the false positive of ambiguous matches.
 4. Multi-aligned queries are proportionally assigned to references
     with a similar strategy in [Metalign](https://doi.org/10.1186/s13059-020-02159-0).
-5. Input files are parsed three times, therefore STDIN is not supported.
+5. Input files are parsed 4 times, therefore STDIN is not supported.
+
+<img src="/tutorial/profiling-steps.png" alt="" width="500"/>
 
 **Accuracy notes**:
 

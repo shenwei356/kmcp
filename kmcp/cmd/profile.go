@@ -54,7 +54,7 @@ Methods:
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
      (-p/--min-frags-prop). (***highly recommended***)
-     Another flag -d/--max-frags-cov-stdev further reduces false positives.
+     Another flag -d/--max-frags-depth-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
@@ -138,7 +138,7 @@ Taxonomic binning formats:
 		minReads := float64(getFlagPositiveInt(cmd, "min-frags-reads"))
 		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
 		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
-		maxFragsCovStdev := getFlagPositiveFloat64(cmd, "max-frags-cov-stdev")
+		maxFragsDepthStdev := getFlagPositiveFloat64(cmd, "max-frags-depth-stdev")
 
 		minHicUreads := float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
 		if minHicUreads > minUReads {
@@ -447,7 +447,7 @@ Taxonomic binning formats:
 			log.Infof("  minimal number of reads per reference fragment: %.0f", minReads)
 			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
 			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
-			log.Infof("  maximal standard deviation of relative coverages of all fragments: %f", maxFragsCovStdev)
+			log.Infof("  maximal standard deviation of relative depths of all fragments: %f", maxFragsDepthStdev)
 			log.Info()
 
 			log.Infof("  minimal number of high-confidence uniquely matched reads: %.0f", minHicUreads)
@@ -600,7 +600,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											// QLen:         make([]float64, m.IdxNum),
-											// RelCoverage:  make([]float64, m.IdxNum),
+											// RelDepth:  make([]float64, m.IdxNum),
 										}
 										profile[h] = &t0
 										t = &t0
@@ -724,7 +724,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								// QLen:         make([]float64, m.IdxNum),
-								// RelCoverage:  make([]float64, m.IdxNum),
+								// RelDepth:  make([]float64, m.IdxNum),
 							}
 							profile[h] = &t0
 							t = &t0
@@ -1107,7 +1107,7 @@ Taxonomic binning formats:
 												UniqMatch:    make([]float64, m.IdxNum),
 												UniqMatchHic: make([]float64, m.IdxNum),
 												QLen:         make([]float64, m.IdxNum),
-												RelCoverage:  make([]float64, m.IdxNum),
+												RelDepth:     make([]float64, m.IdxNum),
 												// Stats:        stats.NewQuantiler(),
 											}
 											profile2[h] = &t0
@@ -1154,7 +1154,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
-											RelCoverage:  make([]float64, m.IdxNum),
+											RelDepth:     make([]float64, m.IdxNum),
 											// Stats:        stats.NewQuantiler(),
 										}
 										profile2[h] = &t0
@@ -1322,7 +1322,7 @@ Taxonomic binning formats:
 									UniqMatch:    make([]float64, m.IdxNum),
 									UniqMatchHic: make([]float64, m.IdxNum),
 									QLen:         make([]float64, m.IdxNum),
-									RelCoverage:  make([]float64, m.IdxNum),
+									RelDepth:     make([]float64, m.IdxNum),
 									// Stats:        stats.NewQuantiler(),
 								}
 								profile2[h] = &t0
@@ -1369,7 +1369,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
-								RelCoverage:  make([]float64, m.IdxNum),
+								RelDepth:     make([]float64, m.IdxNum),
 								// Stats:        stats.NewQuantiler(),
 							}
 							profile2[h] = &t0
@@ -1444,11 +1444,11 @@ Taxonomic binning formats:
 				t.Qlens += c2
 			}
 			for i, c2 := range t.QLen {
-				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
+				t.RelDepth[i] = c2 / t.Qlens * float64(len(t.QLen))
 			}
 
-			_, t.RelCovStd = MeanStdev(t.RelCoverage)
-			if t.RelCovStd > maxFragsCovStdev {
+			_, t.RelDepthStd = MeanStdev(t.RelDepth)
+			if t.RelDepthStd > maxFragsDepthStdev {
 				hs = append(hs, h)
 				continue
 			}
@@ -1615,7 +1615,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
-											RelCoverage:  make([]float64, m.IdxNum),
+											RelDepth:     make([]float64, m.IdxNum),
 											Stats:        stats.NewQuantiler(),
 										}
 										profile3[h] = &t0
@@ -1662,7 +1662,7 @@ Taxonomic binning formats:
 											UniqMatch:    make([]float64, m.IdxNum),
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
-											RelCoverage:  make([]float64, m.IdxNum),
+											RelDepth:     make([]float64, m.IdxNum),
 											Stats:        stats.NewQuantiler(),
 										}
 										profile3[h] = &t0
@@ -1824,7 +1824,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
-								RelCoverage:  make([]float64, m.IdxNum),
+								RelDepth:     make([]float64, m.IdxNum),
 								Stats:        stats.NewQuantiler(),
 							}
 							profile3[h] = &t0
@@ -1871,7 +1871,7 @@ Taxonomic binning formats:
 								UniqMatch:    make([]float64, m.IdxNum),
 								UniqMatchHic: make([]float64, m.IdxNum),
 								QLen:         make([]float64, m.IdxNum),
-								RelCoverage:  make([]float64, m.IdxNum),
+								RelDepth:     make([]float64, m.IdxNum),
 								Stats:        stats.NewQuantiler(),
 							}
 							profile3[h] = &t0
@@ -1946,11 +1946,11 @@ Taxonomic binning formats:
 				t.Qlens += c2
 			}
 			for i, c2 := range t.QLen {
-				t.RelCoverage[i] = c2 / t.Qlens * float64(len(t.QLen))
+				t.RelDepth[i] = c2 / t.Qlens * float64(len(t.QLen))
 			}
 
-			_, t.RelCovStd = MeanStdev(t.RelCoverage)
-			if t.RelCovStd > maxFragsCovStdev {
+			_, t.RelDepthStd = MeanStdev(t.RelDepth)
+			if t.RelDepthStd > maxFragsDepthStdev {
 				continue
 			}
 
@@ -2077,7 +2077,7 @@ Taxonomic binning formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString("ref\tpercentage\tscore\tfragsProp\tfragsRelCov\tfragsRelCovStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
+		outfh.WriteString("ref\tpercentage\tscore\tfragsCov\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {
@@ -2092,13 +2092,13 @@ Taxonomic binning formats:
 				}
 			}
 			covs := make([]string, len(t.QLen))
-			for i, v := range t.RelCoverage {
+			for i, v := range t.RelDepth {
 				covs[i] = fmt.Sprintf("%.2f", v)
 			}
 
 			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
 				t.Name, t.Percentage, t.Score,
-				t.FragsProp, strings.Join(covs, ";"), t.RelCovStd,
+				t.FragsProp, strings.Join(covs, ";"), t.RelDepthStd,
 				t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
 				taxid, t.Rank, t.TaxonName,
@@ -2248,7 +2248,7 @@ func init() {
 	profileCmd.Flags().IntP("min-frags-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads`)
-	profileCmd.Flags().Float64P("max-frags-cov-stdev", "d", 2, `maximal standard deviation of relative coverages of all fragments`)
+	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2, `maximal standard deviation of relative depths of all fragments`)
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference`)
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75, `minimal query coverage of high-confidence uniquely matched reads`)
