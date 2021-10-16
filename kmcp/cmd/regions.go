@@ -49,7 +49,7 @@ Steps:
   
   # 2. Merging and filtering searching results
   kmcp merge ref.fna.gz.kmcp@*.tsv.gz \
-      | kmcp filter -X taxdump -T taxid.map \
+      | kmcp utils filter -X taxdump -T taxid.map \
             -o ref.fna.gz.kmcp.uniq.tsv.gz
   
   # 3. Merging regions.

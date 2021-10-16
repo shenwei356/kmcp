@@ -9,9 +9,9 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 |kingdoms                |source     |# species|# assembly|file                                    |size     |
 |:-----------------------|:----------|:--------|:---------|:---------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (37.13 GB)         |55.12 GB |
-|**Viruses**             |Refseq r207|7300     |11618     |[refseq-viruses.kmcp.tar.gz]() (1.09 GB)|4.14 GB  |
-|**Fungi**               |Refseq r207|148      |390       |[refseq-fungi.kmcp.tar.gz]() (8.79GB)   |11.12 GB |
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (37.13 GB)         |58.02 GB |
+|**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz]() (1.09 GB)  |2.00 GB  |
+|**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz]() (8.79GB)   |4.18 GB |
 
 
 **Taxonomy data**: [taxdump.tar.gz]().
@@ -20,8 +20,8 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 - Prebuilt databases above were built for computers with >= 32 CPU cores
 in consideration of better parallelization,
-and computers should have at least 64 GB (> 55.12GB). 
-- By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
+and computers should have at least 64 GB. 
+- By default, `kmcp search` loads the whole database into main memory (via `mmap`) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
 - To reduce memory requirements on computers without enough memory,
@@ -42,9 +42,11 @@ Check [tutorial](/tutorial/searching).
 |kingdoms                |source     |sketch         |parameters          |file                                           |size     |
 |:-----------------------|:----------|:--------------|:-------------------|:----------------------------------------------|:--------|
 |**Bacteria and Archaea**|GTDB r202  |Scaled MinHash |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]() (710 MB)          |1.52 GB  |
-|**Bacteria and Archaea**|GTDB r202  |Closed Syncmers|k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.04 GB)         |2.28 GB  |
-|**Viruses**             |Refseq r207|Scaled MinHash |K=31, scale=10      |[refseq-viruses.minhash.kmcp.tar.gz]() (181 MB)|407 MB   |
-|**Viruses**             |Refseq r207|Closed Syncmers|k=31, s=21          |[refseq-viruses.syncmer.kmcp.tar.gz]() (142 MB)|312 MB   |
+|**Bacteria and Archaea**|GTDB r202  |Closed Syncmers|k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.03 GB)         |2.28 GB  |
+|**Fungi**               |Refseq r208|Scaled MinHash |k=31, scale=1000    |[refseq-fungi.minhash.kmcp.tar.gz]() (49 MB)   |98 MB    |
+|**Fungi**               |Refseq r208|Closed Syncmers|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz]() (73 MB)   |145 MB   |
+|**Viruses**             |Refseq r208|Scaled MinHash |K=31, scale=10      |[refseq-viruses.minhash.kmcp.tar.gz]() (205 MB)|555 MB   |
+|**Viruses**             |Refseq r208|Closed Syncmers|k=31, s=21          |[refseq-viruses.syncmer.kmcp.tar.gz]() (162 MB)|441 MB   |
 
 ## Building databases
 
@@ -168,7 +170,7 @@ Downloading viral and fungi sequences:
         -t 12 \
         -m -a -p
 
-    # cd to 2021-07-30_21-54-19
+    # cd to 2021-09-30_19-35-19
         
     # taxdump
     mkdir -p taxdump
@@ -345,7 +347,7 @@ Building database:
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments
     #   k = 21
-    kmcp compute -I humgut/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 --force
+    kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 --force
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
@@ -473,57 +475,58 @@ is good enough.
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments,
     #   k = 21
-    kmcp compute --in-dir sequences-dir/ \
+    kmcp compute --in-dir refs/ \
         --kmer 21 \
         --split-number 10 \
         --seq-name-filter plasmid \
+        --ref-name-regexp '(.+).fasta.gz' \
         --out-dir refs-k21-n10
 
     # demo output
-    16:01:56.269 [INFO] kmcp v0.6.0
-    16:01:56.269 [INFO]   https://github.com/shenwei356/kmcp
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] checking input files ...
-    16:01:56.269 [INFO]   9 input file(s) given
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] -------------------- [main parameters] --------------------
-    16:01:56.269 [INFO] input and output:
-    16:01:56.269 [INFO]   input directory: refs
-    16:01:56.269 [INFO]     regular expression of input files: (?i)\.(f[aq](st[aq])?|fna)(.gz)?$
-    16:01:56.269 [INFO]     *regular expression for extracting reference name from file name: 
-    16:01:56.269 [INFO]     *regular expressions for filtering out sequences: [plasmid]
-    16:01:56.269 [INFO]   output directory: refs-k21-n10
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] sequences splitting: true
-    16:01:56.269 [INFO]   split parts: 10, overlap: 0 bp
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] k-mer (sketches) computing:
-    16:01:56.269 [INFO]   k-mer size(s): 21
-    16:01:56.269 [INFO]   circular genome: false
-    16:01:56.269 [INFO]   saving exact number of k-mers: true
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] -------------------- [main parameters] --------------------
-    16:01:56.269 [INFO] 
-    16:01:56.269 [INFO] computing ...
+    22:33:10.685 [INFO] kmcp v0.7.0
+    22:33:10.685 [INFO]   https://github.com/shenwei356/kmcp
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] checking input files ...
+    22:33:10.685 [INFO]   9 input file(s) given
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] -------------------- [main parameters] --------------------
+    22:33:10.685 [INFO] input and output:
+    22:33:10.685 [INFO]   input directory: refs/
+    22:33:10.685 [INFO]     regular expression of input files: (?i)\.(f[aq](st[aq])?|fna)(.gz)?$
+    22:33:10.685 [INFO]     *regular expression for extracting reference name from file name: 
+    22:33:10.685 [INFO]     *regular expressions for filtering out sequences: [plasmid]
+    22:33:10.685 [INFO]   output directory: refs-k21-n10
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] sequences splitting: true
+    22:33:10.685 [INFO]   split parts: 10, overlap: 0 bp
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] k-mer (sketches) computing:
+    22:33:10.685 [INFO]   k-mer size(s): 21
+    22:33:10.685 [INFO]   circular genome: false
+    22:33:10.685 [INFO]   saving exact number of k-mers: true
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] -------------------- [main parameters] --------------------
+    22:33:10.685 [INFO] 
+    22:33:10.685 [INFO] computing ...
     processed files:  9 / 9 [======================================] ETA: 0s. done
-    16:01:56.706 [INFO] 
-    16:01:56.706 [INFO] elapsed time: 437.515931ms
-    16:01:56.706 [INFO]
+    22:33:11.121 [INFO] 
+    22:33:11.121 [INFO] elapsed time: 436.367564ms
+    22:33:11.121 [INFO]
 
 A summary file (`_info.txt`) is generated for later use.
 **Users needs check if the reference IDs (column `name`) are what supposed to be**.
 
-|#path                                                              |name     |fragIdx|idxNum|genomeSize|kmers |
-|:------------------------------------------------------------------|:--------|:------|:-----|:---------|:-----|
-|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655-frag_0.unik|NC_010655|0      |10    |2664102   |264229|
-|refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913-frag_0.unik|NC_000913|0      |10    |4641652   |459259|
-|refs-k21-n10/414/159/414/NC_011750.1.fasta.gz/NC_011750-frag_0.unik|NC_011750|0      |10    |5132068   |505905|
-|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655-frag_1.unik|NC_010655|1      |10    |2664102   |266219|
-|refs-k21-n10/744/528/744/NC_018658.1.fasta.gz/NC_018658-frag_0.unik|NC_018658|0      |10    |5273097   |523691|
+|#path                                                                |name       |fragIdx|idxNum|genomeSize|kmers |
+|:--------------------------------------------------------------------|:----------|:------|:-----|:---------|:-----|
+|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_0.unik|NC_010655.1|0      |10    |2664102   |264247|
+|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_1.unik|NC_010655.1|1      |10    |2664102   |266237|
+|refs-k21-n10/595/162/595/NC_012971.2.fasta.gz/NC_012971.2-frag_0.unik|NC_012971.2|0      |10    |4558953   |450494|
+|refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913.3-frag_0.unik|NC_000913.3|0      |10    |4641652   |459277|
+|refs-k21-n10/934/859/934/NC_013654.1.fasta.gz/NC_013654.1-frag_0.unik|NC_013654.1|0      |10    |4717338   |470575|
 
 Meta data in the `.unik` file can be showed using [unikmer](https://github.com/shenwei356/unikmer/releases):
 
-    unikmer info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116-frag_0.unik -a
+    unikmer info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-frag_0.unik -a
 
 
 ### Step 2. Building databases
@@ -564,7 +567,7 @@ and have improved the indexing and searching speed
 
 **Performance tips**:
 
-1. Number of blocks (.uniki files) better be smaller than or equal
+1. Number of blocks (`.uniki` files) better be smaller than or equal
    to number of CPU cores for faster searching speed. 
    **We can set `-j/--threads` to control blocks number**.
 2. `#threads` files are simultaneously opened, and the max number
@@ -589,49 +592,49 @@ and have improved the indexing and searching speed
         --out-dir refs.kmcp 
 
     # demo output
-    16:55:06.758 [INFO] kmcp v0.6.0
-    16:55:06.758 [INFO]   https://github.com/shenwei356/kmcp
-    16:55:06.758 [INFO] 
-    16:55:06.758 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt
-    16:55:06.767 [INFO]   90 cached file infos loaded
-    16:55:06.767 [INFO] 
-    16:55:06.767 [INFO] -------------------- [main parameters] --------------------
-    16:55:06.767 [INFO]   number of hashes: 1
-    16:55:06.767 [INFO]   false positive rate: 0.300000
-    16:55:06.767 [INFO]   k-mer size(s): 21
-    16:55:06.767 [INFO]   split seqequence size: 0, overlap: 0
-    16:55:06.767 [INFO]   block-sizeX-kmers-t: 10.00 M
-    16:55:06.767 [INFO]   block-sizeX        : 256.00
-    16:55:06.767 [INFO]   block-size8-kmers-t: 20.00 M
-    16:55:06.767 [INFO]   block-size1-kmers-t: 200.00 M
-    16:55:06.767 [INFO] -------------------- [main parameters] --------------------
-    16:55:06.767 [INFO] 
-    16:55:06.767 [INFO] building index ...
-    16:55:06.778 [WARN] ignore -X/--block-size (256) which is >= -b/--block-size (8)
-    16:55:06.778 [INFO] 
-    16:55:06.778 [INFO]   block size: 8
-    16:55:06.778 [INFO]   number of index files: 32 (may be more)
-    16:55:06.778 [INFO] 
-    16:55:06.778 [block #001]   1 / 1  100 %
-    16:55:06.778 [block #002]   1 / 1  100 %
-    16:55:06.778 [block #003]   1 / 1  100 %
-    16:55:06.778 [block #004]   1 / 1  100 %
-    16:55:06.778 [block #005]   1 / 1  100 %
-    16:55:06.778 [block #006]   1 / 1  100 %
-    16:55:06.778 [block #007]   1 / 1  100 %
-    16:55:06.778 [block #008]   1 / 1  100 %
-    16:55:06.779 [block #009]   1 / 1  100 %
-    16:55:06.779 [block #010]   1 / 1  100 %
-    16:55:06.779 [block #011]   1 / 1  100 %
-    16:55:06.779 [block #012]   1 / 1  100 %
+    22:44:17.710 [INFO] kmcp v0.7.0
+    22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
+    22:44:17.710 [INFO] 
+    22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt
+    22:44:17.716 [INFO]   90 cached file infos loaded
+    22:44:17.716 [INFO] 
+    22:44:17.716 [INFO] -------------------- [main parameters] --------------------
+    22:44:17.716 [INFO]   number of hashes: 1
+    22:44:17.716 [INFO]   false positive rate: 0.300000
+    22:44:17.717 [INFO]   k-mer size(s): 21
+    22:44:17.717 [INFO]   split seqequence size: 0, overlap: 0
+    22:44:17.717 [INFO]   block-sizeX-kmers-t: 10.00 M
+    22:44:17.717 [INFO]   block-sizeX        : 256.00
+    22:44:17.717 [INFO]   block-size8-kmers-t: 20.00 M
+    22:44:17.717 [INFO]   block-size1-kmers-t: 200.00 M
+    22:44:17.717 [INFO] -------------------- [main parameters] --------------------
+    22:44:17.717 [INFO] 
+    22:44:17.717 [INFO] building index ...
+    22:44:17.726 [WARN] ignore -X/--block-size (256) which is >= -b/--block-size (8)
+    22:44:17.726 [INFO] 
+    22:44:17.726 [INFO]   block size: 8
+    22:44:17.726 [INFO]   number of index files: 32 (may be more)
+    22:44:17.726 [INFO] 
+    22:44:17.726 [block #001]   1 / 1  100 %
+    22:44:17.726 [block #002]   1 / 1  100 %
+    22:44:17.726 [block #003]   1 / 1  100 %
+    22:44:17.726 [block #004]   1 / 1  100 %
+    22:44:17.726 [block #005]   1 / 1  100 %
+    22:44:17.726 [block #006]   1 / 1  100 %
+    22:44:17.726 [block #007]   1 / 1  100 %
+    22:44:17.726 [block #008]   1 / 1  100 %
+    22:44:17.726 [block #009]   1 / 1  100 %
+    22:44:17.727 [block #010]   1 / 1  100 %
+    22:44:17.727 [block #011]   1 / 1  100 %
+    22:44:17.727 [block #012]   1 / 1  100 %
     [saved index files] 12 / 12  ETA: 0s. done
-    16:55:06.979 [INFO] 
-    16:55:06.979 [INFO] kmcp database with 42713234 k-mers saved to refs.kmcp
-    16:55:06.979 [INFO] total file size: 15.66 MB
-    16:55:06.979 [INFO] total index files: 12
-    16:55:06.979 [INFO] 
-    16:55:06.979 [INFO] elapsed time: 221.79845ms
-    16:55:06.979 [INFO]
+    22:44:17.933 [INFO] 
+    22:44:17.933 [INFO] kmcp database with 42713316 k-mers saved to refs.kmcp
+    22:44:17.933 [INFO] total file size: 15.66 MB
+    22:44:17.933 [INFO] total index files: 12
+    22:44:17.933 [INFO] 
+    22:44:17.933 [INFO] elapsed time: 223.524128ms
+    22:44:17.933 [INFO]
 
 Output:
 
@@ -655,10 +658,10 @@ Output:
 `__db.yml` contains configuration of the database, and `_blockXXX.uniki` are index files.
 `kmcp info` could show the basic information of index files:
 
-    kmcp info  refs.kmcp/R001/_block001.uniki
+    kmcp utils index-info  refs.kmcp/R001/_block001.uniki
 
 |file                          |k  |canonical|num-hashes|num-sigs|num-names|
 |:-----------------------------|:--|:--------|:---------|:-------|:--------|
-|refs.kmcp/R001/_block001.uniki|21 |true     |1         |746392  |8        |
+|refs.kmcp/R001/_block001.uniki|21 |true     |1         |746442  |8        |
 
 What's next? Check the [tutorials](/tutorial).

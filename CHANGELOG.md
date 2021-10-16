@@ -3,7 +3,7 @@
 ### v0.7.0 - 2021-10
 
 - commands:
-    - new command `filter`: Filter search results and find species-specific queries.
+    - new command `utils filter`: Filter search results and find species-specific queries.
     - new command `utils merge-regions`: Merge species/assembly-specific regions.
     - rename `info` to `utils index-info`.
 - `compute`:
@@ -11,6 +11,7 @@
     - when splitting genome into fragments, sequences are concatenated with k-1 'N's
      instead of directly concatenation.
      It eliminates fake k-mers at the concatenation position.
+    - set default value for flag `-N/--ref-name-regexp`: `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`.
 - `search`:
     - better log.
     - fix matches order of a query.
@@ -25,6 +26,7 @@
 - `profile`:
     - change analysis workflow, using 4 stages.
     - output format change: new column `fragsRelCov` and `fragsRelCovStd`.
+    - change default file extension of binning file.
     - check if the taxid of a target is given by taxid mapping file.
     - change computation of `score`.
     - new flag `-d/--max-frags-depth-stdev`.

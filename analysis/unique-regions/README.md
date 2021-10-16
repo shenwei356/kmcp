@@ -80,7 +80,7 @@ Refseq-viral
     kmcp merge $file.kmcp@*.tsv.gz -o $file.kmcp.tsv.gz
     
     # filtering searching results
-    kmcp filter -T taxid.map -X ~/.taxonkit \
+    kmcp utils filter -T taxid.map -X ~/.taxonkit \
         $file.kmcp.tsv.gz -o $file.kmcp.uniq.tsv.gz
         
     # merge regions
@@ -135,7 +135,7 @@ Refseq-viral
                     | kmcp search -q -j {j} -d $db -o {}.kmcp@$db.tsv.gz; \
             done; \
             kmcp merge -q {}.kmcp@*.tsv.gz \
-                | kmcp filter -q -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; \
+                | kmcp utils filter -q -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; \
             /bin/rm {}.kmcp@*.tsv.gz; ' -c -C search.rush
     
     # merge regions

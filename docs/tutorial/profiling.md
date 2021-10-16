@@ -72,10 +72,8 @@ Databases can be built with different parameters.
 can use stricter criteria in `kmcp profile`.
 
 1. `-t/--min-query-cov`, minimal query coverage, i.e., 
-   proportion of matched k-mers and unique k-mers of a query (default `0.6`)
-2. `-n/--keep-top-scores`, keep matches with the top N score for a query, 0 for all (default `5`),
-   here it can reduce the output size, while     it does not effect the speed.
-3. `-N/--name-map`, tabular two-column file(s) mapping names to user-defined values.
+   proportion of matched k-mers and unique k-mers of a query (default `0.55`)
+2. `-N/--name-map`, tabular two-column file(s) mapping names to user-defined values.
 
 **Performance tips**:
 
@@ -97,7 +95,6 @@ can use stricter criteria in `kmcp profile`.
             --min-kmers          30 \
             --min-query-len      70 \
             --min-query-cov    0.55 \
-            --keep-top-scores     0 \
             $file                   \
             --out-file $file.kmcp@$dbname.tsv.gz \
             --log      $file.kmcp@$dbname.tsv.gz.log
@@ -106,6 +103,21 @@ can use stricter criteria in `kmcp profile`.
 Merging searching results on multiple database:
 
     kmcp merge $file.kmcp@*.tsv.gz --out-file $file.kmcp.tsv.gz
+    
+Format:
+
+|#query                             |qLen|qKmers|FPR       |hits|target       |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:----------------------------------|:---|:-----|:---------|:---|:------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_012971.2  |2      |10   |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_000913.3  |2      |10   |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_018658.1  |5      |10   |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP028116.1|2      |10   |5648177|31   |79    |0.6583|0.0002|0.0002|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP007592.1|3      |10   |5104557|31   |69    |0.5750|0.0001|0.0001|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_002695.2  |3      |10   |5498578|31   |69    |0.5750|0.0001|0.0001|0       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_012971.2  |0      |10   |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_000913.3  |0      |10   |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_013654.1  |0      |10   |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
+
 
 ### Step 4. Profiling
 
@@ -193,22 +205,23 @@ Taxonomic binning formats:
         --max-frags-cov-stdev     2 \
         --min-uniq-reads         10 \
         --min-hic-ureads          1 \
-        --min-hic-ureads-qcov  0.75 \
+        --min-hic-ureads-qcov   0.8 \
         --min-hic-ureads-prop   0.1 \
         $sfile                      \
         --out-prefix       $sfile.kmcp.profile \
         --metaphlan-report $sfile.metaphlan.profile \
         --cami-report      $sfile.cami.profile \
         --sample-id        "0" \
-        --binning-result   $sfile.binning
+        --binning-result   $sfile.binning.gz
 
 Default output:
 
-|ref        |percentage|score |fragsProp|fragsRelCov                                      |fragsRelCovStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
-|:----------|:---------|:-----|:--------|:------------------------------------------------|:-------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
-|NC_000913.3|87.231001 |100.00|1.00     |1.04;0.99;0.99;1.00;0.99;0.99;0.99;0.97;1.04;0.99|0.02          |267738|191287|191287   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
-|NC_002695.2|11.872107 |100.00|1.00     |0.97;0.99;0.86;1.06;1.02;0.93;1.04;1.05;1.08;1.01|0.06          |43166 |24210 |24210    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
-|NC_010655.1|0.896892  |100.00|1.00     |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10          |1580  |1580  |1580     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
+|ref        |percentage|score |fragsCov|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
+|:----------|:---------|:-----|:-------|:------------------------------------------------|:---------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
+|NC_013654.1|48.321535 |100.00|1.00    |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02            |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
+|NC_000913.3|46.194629 |100.00|1.00    |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02            |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
+|NC_002695.2|5.014025  |100.00|1.00    |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05            |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
+|NC_010655.1|0.469811  |100.00|1.00    |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10            |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 
@@ -218,42 +231,43 @@ Default output:
     @TaxonomyID:ncbi-taxonomy
     @@TAXID	RANK	TAXPATH	TAXPATHSN	PERCENTAGE
     2	superkingdom	2	Bacteria	100.000000
-    1224	phylum	2|1224	Bacteria|Proteobacteria	99.103108
-    74201	phylum	2|74201	Bacteria|Verrucomicrobia	0.896892
-    1236	class	2|1224|1236	Bacteria|Proteobacteria|Gammaproteobacteria	99.103108
-    203494	class	2|74201|203494	Bacteria|Verrucomicrobia|Verrucomicrobiae	0.896892
-    91347	order	2|1224|1236|91347	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales	99.103108
-    48461	order	2|74201|203494|48461	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales	0.896892
-    543	family	2|1224|1236|91347|543	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae	99.103108
-    1647988	family	2|74201|203494|48461|1647988	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae	0.896892
-    561	genus	2|1224|1236|91347|543|561	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia	99.103108
-    239934	genus	2|74201|203494|48461|1647988|239934	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia	0.896892
-    562	species	2|1224|1236|91347|543|561|562	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli	99.103108
-    239935	species	2|74201|203494|48461|1647988|239934|239935	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila	0.896892
-    83333	strain	2|1224|1236|91347|543|561|562|83333	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli K-12	87.230945
-    386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	11.872163
-    349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.896892
-
+    1224	phylum	2|1224	Bacteria|Proteobacteria	99.530189
+    74201	phylum	2|74201	Bacteria|Verrucomicrobia	0.469811
+    1236	class	2|1224|1236	Bacteria|Proteobacteria|Gammaproteobacteria	99.530189
+    203494	class	2|74201|203494	Bacteria|Verrucomicrobia|Verrucomicrobiae	0.469811
+    91347	order	2|1224|1236|91347	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales	99.530189
+    48461	order	2|74201|203494|48461	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales	0.469811
+    543	family	2|1224|1236|91347|543	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae	99.530189
+    1647988	family	2|74201|203494|48461|1647988	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae	0.469811
+    561	genus	2|1224|1236|91347|543|561	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia	99.530189
+    239934	genus	2|74201|203494|48461|1647988|239934	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia	0.469811
+    562	species	2|1224|1236|91347|543|561|562	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli	99.530189
+    239935	species	2|74201|203494|48461|1647988|239934|239935	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila	0.469811
+    431946	strain	2|1224|1236|91347|543|561|562|431946	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli SE15	48.321535
+    83333	strain	2|1224|1236|91347|543|561|562|83333	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli K-12	46.194629
+    386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	5.014025
+    349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.469811
 
 Metaphlan format:
 
     #SampleID	
     k__Bacteria	100.000000
-    k__Bacteria|p__Proteobacteria	99.103108
-    k__Bacteria|p__Verrucomicrobia	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	99.103108
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales	99.103108
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae	99.103108
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia	99.103108
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli	99.103108
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila	0.896892
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli K-12	87.230945
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli O157:H7 str. Sakai	11.872163
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila|t__Akkermansia muciniphila ATCC BAA-835	0.896892
+    k__Bacteria|p__Proteobacteria	99.530189
+    k__Bacteria|p__Verrucomicrobia	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	99.530189
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales	99.530189
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae	99.530189
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia	99.530189
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli	99.530189
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila	0.469811
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli SE15	48.321535
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli K-12	46.194629
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli O157:H7 str. Sakai	5.014025
+    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila|t__Akkermansia muciniphila ATCC BAA-835	0.469811
 
 [Binning result](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_B_specification.mkd):
 
@@ -261,14 +275,14 @@ Metaphlan format:
     # https://github.com/bioboxes/rfc/tree/master/data-format
     @Version:0.10.0
     @SampleID:
-    @@SEQUENCEID	TAXID
-    NC_000913.3_sliding:1244941-1245090	511145
-    NC_002695.2_sliding:3465891-3466040	562
-    NC_000913.3_sliding:3801041-3801190	511145
-    NC_002695.2_sliding:3230881-3231030	562
-    NC_000913.3_sliding:4080871-4081020	562
-    NC_000913.3_sliding:3588091-3588240	511145
-    NC_000913.3_sliding:2249621-2249770	562
-    NC_000913.3_sliding:109271-109420	562
-    NC_000913.3_sliding:2354841-2354990	511145
-    NC_002695.2_sliding:4376441-4376590	386585
+    @@SEQUENCEID    TAXID
+    NC_000913.3_sliding:1244941-1245090     511145
+    NC_013654.1_sliding:344871-345020       562
+    NC_000913.3_sliding:3801041-3801190     511145
+    NC_013654.1_sliding:752751-752900       562
+    NC_000913.3_sliding:4080871-4081020     562
+    NC_000913.3_sliding:3588091-3588240     511145
+    NC_000913.3_sliding:2249621-2249770     562
+    NC_013654.1_sliding:2080171-2080320     431946
+    NC_000913.3_sliding:2354841-2354990     511145
+    NC_013654.1_sliding:437671-437820       431946

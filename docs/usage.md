@@ -3,8 +3,9 @@
 KMCP is a command-line tool consisting of several subcommands.
 
 ```text
+
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.6.0
+    Version: v0.7.0
   Documents: https://shenwei356.github.io/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -14,15 +15,14 @@ Usage:
   kmcp [command]
 
 Available Commands:
-  autocomplete Generate shell autocompletion script
-  compute      Generate k-mers (sketch) from FASTA/Q sequences
-  help         Help about any command
-  index        Construct database from k-mer files
-  info         Print information of index file
-  merge        Merge search results from multiple databases
-  profile      Generate taxonomic profile from search results
-  search       Search sequence against a database
-  version      Print version information and check for update
+  autocompletion Generate shell autocompletion script
+  compute        Generate k-mers (sketch) from FASTA/Q sequences
+  index          Construct database from k-mer files
+  merge          Merge search results from multiple databases
+  profile        Generate taxonomic profile from search results
+  search         Search sequence against a database
+  utils          Some utilities
+  version        Print version information and check for update
 
 Flags:
   -h, --help                 help for kmcp
@@ -70,7 +70,7 @@ Splitting sequences:
      with overlap (-l/--split-overlap).
   2. When splitting by number of fragments, all sequences (except for
      these mathching any regular expression given by -B/--seq-name-filter)
-     in a sequence file are concatenated before splitting.
+     in a sequence file are concatenated with k-1 'N's before splitting.
   3. Both sequence IDs and fragments indices are saved for later use,
      in form of meta/description data in .unik files.
 
@@ -157,7 +157,6 @@ Taxonomy data:
   2. Taxonomy information are only needed in "profile" command.
   
 Performance tips:
-
   1. Number of blocks (.uniki files) better be smaller than or equal
      to number of CPU cores for faster searching speed. 
      We can set -j/--threads to control blocks number.
@@ -197,21 +196,26 @@ Flags:
 Search sequence against a database
 
 Attentions:
-  1. A long query sequences may contain duplicated k-mers, which are
+  1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+  2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
-  2. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
-  3. Increase value of -j/--threads for acceleratation, but values larger
-     than number of CPU cores won't bring extra speedup.
+  3. For long reads or contigs, you should split them in to short reads
+     using "seqkit sliding", e.g.,
+         seqkit sliding -s 100 -W 300
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
-  2. -n/--keep-top-scores, here it can reduce the output size, while
-     it does not effect the speed.
   3. -N/--name-map.
 
 Special attentions:
-  1. The values of tCov and jacc only apply for single size of k-mer.
+  1. The values of tCov and jacc in result only apply for single size of k-mer.
+
+Performance tips:
+  1. Increase value of -j/--threads for acceleratation, but values larger
+     than number of CPU cores won't bring extra speedup.
+  2. Use --low-mem for database larger than RAM, but the searching would be
+     very very slow for a large number of queries.
 
 Usage:
   kmcp search [flags]
@@ -221,19 +225,21 @@ Flags:
   -D, --default-name-map           load ${db}/__name_mapping.tsv for mapping name first
   -S, --do-not-sort                do not sort matches of a query
   -h, --help                       help for search
-  -n, --keep-top-scores int        keep matches with the top N score for a query, 0 for all (default 5)
+  -n, --keep-top-scores int        keep matches with the top N score for a query, 0 for all
   -K, --keep-unmatched             keep unmatched query sequence information
   -u, --kmer-dedup-threshold int   remove duplicated kmers for a query with >= N k-mers (default 256)
-      --low-mem                    do not load all index files into memory, the searching would be very very slow
+      --low-mem                    do not load all index files into memory, the searching would be very very slow for a large number of queries
   -c, --min-kmers int              minimal number of matched k-mers (sketches) (default 30)
-  -t, --min-query-cov float        minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query (default 0.6)
+  -t, --min-query-cov float        minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query (default 0.55)
   -m, --min-query-len int          minimal query length (default 70)
   -T, --min-target-cov float       minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target
   -N, --name-map strings           tabular two-column file(s) mapping names to user-defined values
   -H, --no-header-row              do not print header row
   -o, --out-file string            out file, supports and recommends a ".gz" suffix ("-" for stdout) (default "-")
-  -g, --query-whole-file           use the whole file as query
+      --query-id string            custom query Id when using the whole file as a query
+  -g, --query-whole-file           use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database
   -s, --sort-by string             sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index) (default "qcov")
+  -G, --use-filename               use file name as query ID when using the whole file as a query
 
 ```
 
@@ -242,18 +248,20 @@ Flags:
 ```text
 Merge search results from multiple databases
 
-Attentions
-  0. Input files should contain queryIdx field.
-  1. Referene IDs should be distinct accross all databases.
+Input:
+  *. Searching results of the same reads on different databases.
+  *. When only one input given, we just copy and write to the input file.
+     This is friendly to workflows which assume multiple inputs are given.
 
 Usage:
   kmcp merge [flags]
 
 Flags:
+  -n, --field-hits int       field of hits (default 5)
+  -f, --field-queryIdx int   field of queryIdx (default 15)
   -h, --help                 help for merge
   -H, --no-header-row        do not print header row
   -o, --out-file string      out file, supports and recommends a ".gz" suffix ("-" for stdout) (default "-")
-  -f, --queryIdx-field int   field of queryIdx (default 15)
   -s, --sort-by string       sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index) (default "qcov")
 
 ```
@@ -265,16 +273,19 @@ Flags:
 Generate taxonomic profile from search results
 
 Methods:
-  1. We use the two-stage taxonomy assignment algorithm in MegaPath
-     to reduce the false positive of ambiguous matches.
-  2. Multi-aligned queries are proportionally assigned to references
-     with the strategy in Metalign.
-  3. More strategies are adopted to increase accuracy.
-  4. Reference genomes can be splitted into fragments when computing
+  1. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-prop).
-  5. Input files are parsed 3 times, therefore STDIN is not supported.
+     (-p/--min-frags-prop). (***highly recommended***)
+     Another flag -d/--max-frags-depth-stdev further reduces false positives.
+  2. We require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
+  3. We also use the two-stage taxonomy assignment algorithm in MegaPath
+     to reduce the false positive of ambiguous matches.
+  4. Multi-aligned queries are proportionally assigned to references
+     with a similar strategy in Metalign.
+  5. Input files are parsed fours times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
@@ -283,19 +294,21 @@ Reference:
 Accuracy notes:
   *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
      positive rate (-f/--max-fpr) of a query.
-  *. And we require part of the uniquely matched reads of a reference
-     having high similarity, i.e., with high confidence to decrease
-     the false positive.
+  *. We require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
      *. -U/--min-hic-ureads,      minimal number, >= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
-  *. -n/--keep-top-qcovs could increase the speed, while too small value
-     could decrease the sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
-  *. --keep-perfect-match is not recommended, which decreases sensitivity.  
+  *. --keep-perfect-match is not recommended, which decreases sensitivity. 
+  *. -m/--keep-main-match is not recommended, which affects accuracy of
+     abundance estimation.
+  *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
+     abundance estimation.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -308,62 +321,167 @@ Performance notes:
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
 Profiling output formats:
-  1. kmcp      (-o/--out-prefix)
+  1. KMCP      (-o/--out-prefix)
   2. CAMI      (-M/--metaphlan-report)
   3. MetaPhlAn (-C/--cami-report)
+
+Taxonomic binning formats:
+  1. CAMI      (-B/--binning-result)
 
 Usage:
   kmcp profile [flags]
 
 Flags:
-  -B, --binning-result string       save extra binning result in CAMI report
-  -C, --cami-report string          save extra CAMI-like report
-      --chunk-size int              number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
-  -F, --filter-low-pct float        filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)
-  -h, --help                        help for profile
-  -m, --keep-main-match             only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)
-      --keep-perfect-match          only keep the perfect matches (qcov == 1) if there are
-  -n, --keep-top-qcovs int          keep matches with the top N qcovs for a query, 0 for all (default 5)
-      --level string                level to estimate abundance at. available values: species, strain (default "species")
-  -f, --max-fpr float               maximal false positive rate of a read in search result (default 0.01)
-  -R, --max-mismatch-err float      maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
-      --max-qcov-gap float          max qcov gap between adjacent matches (default 0.2)
-  -M, --metaphlan-report string     save extra metaphlan-like report
-  -D, --min-dreads-prop float       minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
-  -p, --min-frags-prop float        minimal proportion of matched reference fragments (default 0.8)
-  -U, --min-hic-ureads int          minimal number of high-confidence uniquely matched reads for a reference (default 1)
-  -P, --min-hic-ureads-prop float   minimal proportion of high-confidence uniquely matched reads (default 0.1)
-  -H, --min-hic-ureads-qcov float   minimal query coverage of high-confidence uniquely matched reads (default 0.8)
-  -t, --min-query-cov float         minimal query coverage of a read in search result (default 0.6)
-  -r, --min-reads int               minimal number of reads for a reference fragment (default 50)
-  -u, --min-uniq-reads int          minimal number of uniquely matched reads for a reference fragment (default 10)
-  -N, --name-map strings            tabular two-column file(s) mapping reference IDs to reference names
-      --norm-abund string           method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max (default "mean")
-  -o, --out-prefix string           out file prefix ("-" for stdout) (default "-")
-      --rank-prefix strings         prefixes of taxon name in certain ranks, used with --metaphlan-report  (default [k__,p__,c__,o__,f__,g__,s__,t__])
-  -s, --sample-id string            sample ID in result file
-  -S, --separator string            separator of TaxIds and taxonomy names (default ";")
-      --show-rank strings           only show TaxIds and names of these ranks (default [superkingdom,phylum,class,order,family,genus,species,strain])
-  -X, --taxdump string              directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
-  -T, --taxid-map strings           tabular two-column file(s) mapping reference IDs to TaxIds
+  -B, --binning-result string         save extra binning result in CAMI report
+  -C, --cami-report string            save extra CAMI-like report
+      --chunk-size int                number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
+  -F, --filter-low-pct float          filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)
+  -h, --help                          help for profile
+  -m, --keep-main-match               only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)
+      --keep-perfect-match            only keep the perfect matches (qcov == 1) if there are
+  -n, --keep-top-qcovs int            keep matches with the top N qcovs for a query, 0 for all
+      --level string                  level to estimate abundance at. available values: species, strain/assembly (default "species")
+  -f, --max-fpr float                 maximal false positive rate of a read in search result (default 0.05)
+  -d, --max-frags-depth-stdev float   maximal standard deviation of relative depths of all fragments (default 2)
+  -R, --max-mismatch-err float        maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
+      --max-qcov-gap float            max qcov gap between adjacent matches (default 0.2)
+  -M, --metaphlan-report string       save extra metaphlan-like report
+  -D, --min-dreads-prop float         minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
+  -p, --min-frags-prop float          minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads (default 0.8)
+  -r, --min-frags-reads int           minimal number of reads for a reference fragment (default 50)
+  -U, --min-hic-ureads int            minimal number of high-confidence uniquely matched reads for a reference (default 1)
+  -P, --min-hic-ureads-prop float     minimal proportion of high-confidence uniquely matched reads (default 0.1)
+  -H, --min-hic-ureads-qcov float     minimal query coverage of high-confidence uniquely matched reads (default 0.75)
+  -t, --min-query-cov float           minimal query coverage of a read in search result (default 0.55)
+  -u, --min-uniq-reads int            minimal number of uniquely matched reads for a reference (default 10)
+  -N, --name-map strings              tabular two-column file(s) mapping reference IDs to reference names
+      --norm-abund string             method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max (default "mean")
+  -o, --out-prefix string             out file prefix ("-" for stdout) (default "-")
+      --rank-prefix strings           prefixes of taxon name in certain ranks, used with --metaphlan-report  (default [k__,p__,c__,o__,f__,g__,s__,t__])
+  -s, --sample-id string              sample ID in result file
+  -S, --separator string              separator of TaxIds and taxonomy names (default ";")
+      --show-rank strings             only show TaxIds and names of these ranks (default [superkingdom,phylum,class,order,family,genus,species,strain])
+  -X, --taxdump string                directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
+  -T, --taxid-map strings             tabular two-column file(s) mapping reference IDs to TaxIds
+  -Y, --uregion-prop-map strings      tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)
 
 ```
 
-## info
+## utils
+
+```text
+Some utilities
+
+Usage:
+  kmcp utils [command]
+
+Available Commands:
+  filter        Filter search results and find species/assembly-specific queries
+  index-info    Print information of index file
+  merge-regions Merge species/assembly-specific regions
+
+```
+
+## filter
+
+```text
+Filter search results and find species/assembly-specific queries
+
+Taxonomy data:
+  1. Mapping references IDs to TaxIds: -T/--taxid-map
+  2. NCBI taxonomy dump files: -X/--taxdump
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
+
+Usage:
+  kmcp utils filter [flags]
+
+Flags:
+      --chunk-size int        number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
+  -h, --help                  help for filter
+      --level string          level to filter. available values: species, strain/assembly (default "species")
+  -f, --max-fpr float         maximal false positive rate of a read in search result (default 0.05)
+  -t, --min-query-cov float   minimal query coverage of a read in search result (default 0.55)
+  -H, --no-header-row         do not print header row
+  -o, --out-prefix string     out file prefix ("-" for stdout) (default "-")
+  -X, --taxdump string        directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
+  -T, --taxid-map strings     tabular two-column file(s) mapping reference IDs to TaxIds
+
+```
+
+## index-info
 
 ```text
 Print information of index file
 
 Usage:
-  kmcp info [flags]
+  kmcp utils index-info [flags]
 
 Flags:
   -a, --all                 all information
   -b, --basename            only output basenames of files
-  -h, --help                help for info
+  -h, --help                help for index-info
   -o, --out-prefix string   out file prefix ("-" for stdout) (default "-")
 
 ```
+
+## merge-regions
+
+```text
+Merge species/assembly-specific regions
+
+Steps:
+  # 1. Simulating reads and searching on one or more databases.
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
+      | kmcp search -d db1.kmcp -o ref.fna.gz.kmcp@db1.tsv.gz
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
+      | kmcp search -d db2.kmcp -o ref.fna.gz.kmcp@db2.tsv.gz
+  
+  # 2. Merging and filtering searching results
+  kmcp merge ref.fna.gz.kmcp@*.tsv.gz \
+      | kmcp utils filter -X taxdump -T taxid.map \
+            -o ref.fna.gz.kmcp.uniq.tsv.gz
+  
+  # 3. Merging regions.
+  # Here the value of --min-overlap should be k-1.
+  kmcp utils merge-regions --min-overlap 20 ref.fna.gz.kmcp.uniq.tsv.gz \
+      -o ref.fna.gz.kmcp.uniq.tsv.gz.bed
+
+Output (BED6 format):
+  1. chrom      - chromosome name
+  2. chromStart - starting position (0-based)
+  3. chromEnd   - ending position (0-based)
+  4. name       - "species-specific" or "assembly-specific"
+  5. score      - 0-1000, 1000 for "assembly-specific", others for ""species-specific"
+  6. strand     - "."
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
+
+Usage:
+  kmcp utils merge-regions [flags]
+
+Flags:
+      --chunk-size int         number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
+  -h, --help                   help for merge-regions
+  -I, --ignore-type            merge species and assembly-specific regions
+  -f, --max-fpr float          maximal false positive rate of a read in search result (default 0.05)
+  -g, --max-gap int            maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging
+  -l, --min-overlap int        minimal overlap of two adjacent regions, recommend K-1 (default 1)
+  -t, --min-query-cov float    minimal query coverage of a read in search result (default 0.55)
+  -a, --name-assembly string   name of assembly-specific regions (default "assembly-specific")
+  -s, --name-species string    name of species-specific regions (default "species-specific")
+  -o, --out-prefix string      out file prefix ("-" for stdout) (default "-")
+  -r, --regexp string          regular expression for extract reference name and query locations (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
+```
+
 
 ## autocomplete
 
@@ -375,7 +493,7 @@ Supported shell: bash|zsh|fish|powershell
 Bash:
 
     # generate completion shell
-    kmcp genautocomplete --shell bash
+    kmcp autocompletion --shell bash
 
     # configure if never did.
     # install bash-completion if the "complete" command is not found.
@@ -385,7 +503,7 @@ Bash:
 Zsh:
 
     # generate completion shell
-    kmcp genautocomplete --shell zsh --file ~/.zfunc/_kmcp
+    kmcp autocompletion --shell zsh --file ~/.zfunc/_kmcp
 
     # configure if never did
     echo 'fpath=( ~/.zfunc "${fpath[@]}" )' >> ~/.zshrc
@@ -393,14 +511,14 @@ Zsh:
 
 fish:
 
-    kmcp genautocomplete --shell fish --file ~/.config/fish/completions/kmcp.fish
+    kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 Usage:
-  kmcp autocomplete [flags]
+  kmcp autocompletion [flags]
 
 Flags:
       --file string    autocompletion file (default "/home/shenwei/.bash_completion.d/kmcp.sh")
-  -h, --help           help for autocomplete
+  -h, --help           help for autocompletion
       --shell string   autocompletion type (bash|zsh|fish|powershell) (default "bash")
 
 ```

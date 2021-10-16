@@ -52,7 +52,7 @@ propose new functions or ask for help.
 
 [MIT License](https://github.com/shenwei356/kmcp/blob/master/LICENSE)
 
-## Credits
+## Acknowledgements
 
 - [Zhi-Luo Deng](https://dawnmy.github.io/CV/) (Helmholtz Centre for Infection Research, Germany)
   gave many valuable advice on metagenomic profiling and benchmarking.
@@ -60,4 +60,4 @@ propose new functions or ask for help.
   wrote the high-performance vectorized positional popcount package 
   ([pospop](https://github.com/clausecker/pospop)) 
   [during my development of KMCP](https://stackoverflow.com/questions/63248047/),
-  which greatly accelerated bit-matrix searching.
+  which greatly accelerated the bit-matrix searching.

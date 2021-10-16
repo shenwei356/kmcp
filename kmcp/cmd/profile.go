@@ -222,8 +222,8 @@ Taxonomic binning formats:
 		sampleID := getFlagString(cmd, "sample-id")
 		binningFile := getFlagString(cmd, "binning-result")
 		outputBinningResult := binningFile != ""
-		if outputBinningResult && !strings.HasSuffix(binningFile, ".binning") {
-			binningFile = binningFile + ".binning"
+		if outputBinningResult && !(strings.HasSuffix(binningFile, ".binning") || strings.HasSuffix(binningFile, ".binning.gz")) {
+			binningFile = binningFile + ".binning.gz"
 		}
 		if outputBinningResult && (len(taxidMappingFiles) == 0 || taxonomyDataDir == "") {
 			checkError(fmt.Errorf("flag -T/--taxid-map and -T/--taxid-map needed when -B/--binning-result given"))
@@ -1477,7 +1477,7 @@ Taxonomic binning formats:
 		var wB *os.File
 		var nB uint64
 		if outputBinningResult {
-			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(binningFile), ".gz"), opt.CompressionLevel)
 			checkError(err)
 			defer func() {
 				outfhB.Flush()
@@ -1496,7 +1496,7 @@ Taxonomic binning formats:
 
 		profile3 := make(map[uint64]*Target, len(profile2))
 
-		var nUnassignedReads float64
+		var nAssignedReads float64
 
 		for _, file := range files {
 			if opt.Verbose || opt.Log2File {
@@ -1546,6 +1546,7 @@ Taxonomic binning formats:
 					}
 
 					if prevQuery != match.Query {
+						nAssignedReads++
 						uniqMatch = false
 						if len(matches) > 1 { // redistribute matches
 							sumUReads = 0
@@ -1646,7 +1647,7 @@ Taxonomic binning formats:
 						} else if len(matches) == 1 {
 							uniqMatch = true
 						} else {
-							nUnassignedReads++
+							// should not happen here, but it may happen out the main loop
 						}
 
 						if uniqMatch {
@@ -1755,6 +1756,7 @@ Taxonomic binning formats:
 				}
 			}
 
+			nAssignedReads++
 			uniqMatch = false
 			if len(matches) > 1 { // redistribute matches
 				sumUReads = 0
@@ -1855,7 +1857,7 @@ Taxonomic binning formats:
 			} else if len(matches) == 1 {
 				uniqMatch = true
 			} else {
-				nUnassignedReads++
+				// should not happen here, but it may happen out the main loop
 			}
 
 			if uniqMatch {
@@ -1997,8 +1999,8 @@ Taxonomic binning formats:
 				log.Infof("%d binning results are save to %s", nB, binningFile)
 			}
 			log.Info()
-			log.Infof("#input reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
-				nReads, (nReads - nUnassignedReads), (nReads-nUnassignedReads)/nReads*100)
+			log.Infof("#input matched reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
+				nReads, nAssignedReads, nAssignedReads/nReads*100)
 		}
 
 		// ---------------------------------------------------------------

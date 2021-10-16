@@ -399,7 +399,7 @@ Performance notes:
 }
 
 func init() {
-	RootCmd.AddCommand(filterCmd)
+	utilsCmd.AddCommand(filterCmd)
 
 	filterCmd.Flags().IntP("chunk-size", "", 5000, `number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details`)
 	filterCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)

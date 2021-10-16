@@ -44,7 +44,7 @@ refs-*
 *.unik
 _info.txt
 t.gz
-*.binning
+*.binning.gz
 
 analysis/kmer-similarity/*/all.n*
 analysis/kmer-similarity/*/*.fasta

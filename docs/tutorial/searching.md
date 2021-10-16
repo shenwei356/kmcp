@@ -104,7 +104,7 @@ Reference IDs (column `target`) can be optionally mapped to their names, let's p
 |S0R0/1|3.0168e-03|0.5692|GCF_001434585.1|
 |S0R0/2|3.0168e-03|0.6231|GCF_002872255.1|
 |S0R0/2|3.0168e-03|0.6154|GCF_001434585.1|
-|S0R0/2|3.0168e-03|0.5923|GCF_001437405.1
+|S0R0/2|3.0168e-03|0.5923|GCF_001437405.1|
 
 ## Genome similarity estimation
 
@@ -147,7 +147,7 @@ Taken GTDB for example:
     # compute Scaled MinHash with scale 1000
     #   sequence containing "plasmid" in name are ignored,
     #   k = 31
-    kmcp compute -I gtdb.masked/ -k 31 -D 1000 -B plasmid -O gtdb-r202-minhash
+    kmcp compute -I gtdb/ -k 31 -D 1000 -B plasmid -O gtdb-r202-minhash
 
     # build database
     #   number of index files: 8, for server with >= 8 CPU cores
@@ -157,7 +157,7 @@ Taken GTDB for example:
     kmcp index -j 8 -I gtdb-r202-minhash -O gtdb.minhash.kmcp -n 3 -f 0.001
     
     # cp name mapping file to database directory
-    cp name.map gtdb.minhash.kmcp/
+    cp taxid.map name.map gtdb.minhash.kmcp/
 
 Attention:
 

@@ -56,7 +56,7 @@ Attentions:
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
-  3. -N/--name-map.
+  2. -N/--name-map.
 
 Special attentions:
   1. The values of tCov and jacc in result only apply for single size of k-mer.

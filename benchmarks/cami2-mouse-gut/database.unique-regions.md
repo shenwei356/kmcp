@@ -44,7 +44,7 @@
             'seqkit grep -n -i -v -r -p plasmid {} \
                 | seqkit sliding --greedy --step {step} --window {len} -w 0 \
                 | kmcp search -j {j} -d {db} \
-                | kmcp filter -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz;' \
+                | kmcp utils filter -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz;' \
           -c -C $input.search.rush
     
     # merge regions
@@ -90,5 +90,5 @@
             'seqkit grep -n -i -v -r -p plasmid {} \
                 | seqkit sliding --greedy --step {step} --window {len} -w 0 \
                 | kmcp search -j {j} -d {db} -o {}.kmcp.tsv.gz; \
-             kmcp filter -T {taxidmap} -X {taxdump} {}.kmcp.tsv.gz -o {}.kmcp.uniq.tsv.gz;' \
+             kmcp utils filter -T {taxidmap} -X {taxdump} {}.kmcp.tsv.gz -o {}.kmcp.uniq.tsv.gz;' \
           -c -C $input.search.rush

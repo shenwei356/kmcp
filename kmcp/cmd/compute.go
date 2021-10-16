@@ -926,7 +926,7 @@ func init() {
 
 	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
 
-	computeCmd.Flags().StringP("ref-name-regexp", "N", "", `regular expression (must contains "(" and ")") for extracting reference name from file name`)
+	computeCmd.Flags().StringP("ref-name-regexp", "N", `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`, `regular expression (must contains "(" and ")") for extracting reference name from file name`)
 	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{}, `list of regular expressions for filtering out sequences by header/name, case ignored`)
 }
 
