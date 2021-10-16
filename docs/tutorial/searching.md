@@ -2,7 +2,7 @@
 
 ## Sequence search
 
-KMCP can be used for fast sequence search from large scales of genomic dataset
+KMCP can be used for fast sequence search from large scales of genomic datasets
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 
 KMCP reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,

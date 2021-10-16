@@ -12,6 +12,9 @@ database can be loaded into RAM. After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
 for downstream analysis.
 
+Buiding small databases can also accelerate searching on a *computer cluster*,
+where every node searches a part of the database.
+
 ## What k-mer size should I use to build the database?
 
 Multiple k-mer sizes are supported, but one value is good enough.
@@ -20,3 +23,8 @@ Bigger k-mer sizes bring high specificity in cost of decrease
 of sensitivity. `k = 21` is recommended for metagenomic profiling.
 
 ## How to add new genomes to the database?
+
+KMCP builds database very fast,
+you can eigher rebuilt the database after adding new genomes,
+or create a separate database with the new genomes
+, search against these databases, and merge results.

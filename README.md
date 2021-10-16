@@ -2,6 +2,38 @@
 
 <img src="kmcp.png" alt="" width="800"/>
 
+## What can we do?
+
+### 1. Accurate metagenomic profiling and binning
+
+xxx
+
+(check the [benchmark](/benchmark/profiling))
+
+
+### 2. Fast sequence search from large scales of genomic datasets
+
+KMCP can be used for fast sequence search from large scales of genomic dataset
+as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
+We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
+bringing a small database size and much faster searching speed
+ (check the [tutorial](/tutorial/searching) and [benchmark](/benchmark/searching)).
+ 
+### 3. Fast genome similarity estimation
+
+KMCP can be used for fast similarity estimation of newly assembled genome against known reference genomes.
+
+Genome sketching is a method of utilizing small and approximate summaries of
+genomic data for fast searching and comparison.
+[Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
+provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (Sourmash).
+Here KMCP utilizes multiple sketches 
+([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
+[Scaled MinHash](https://f1000research.com/articles/8-1006) and
+[Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
+ (check the [tutorial](/tutorial/searching) and [benchmark](/benchmark/searching)).
+
+
 Tutorials and resources:
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
@@ -35,13 +67,14 @@ or install using conda:
     # search    
     kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.tsv.gz
 
-    # profile
+    # profile and binning
     kmcp profile search.tsv.gz \
         --taxid-map        taxid.map \
         --taxdump          taxdump/ \
         --out-prefix       search.tsv.gz.k.profile \
         --metaphlan-report search.tsv.gz.m.profile \
-        --cami-report      search.tsv.gz.c.profile
+        --cami-report      search.tsv.gz.c.profile \
+        --binning-result   search.tsv.gz.binning.gz
 
 ## Support
 

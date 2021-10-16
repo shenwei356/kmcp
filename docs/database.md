@@ -21,13 +21,15 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 - Prebuilt databases above were built for computers with >= 32 CPU cores
 in consideration of better parallelization,
 and computers should have at least 64 GB. 
-- By default, `kmcp search` loads the whole database into main memory (via `mmap`) for fast searching.
+- By default, `kmcp search` loads the whole database into main memory (via [mmap](https://en.wikipedia.org/wiki/Mmap)) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
 - To reduce memory requirements on computers without enough memory,
 users can divide the reference genomes into several parts
 and build smaller databases for all parts, so that the biggest
-database can be loaded into RAM. After performing database searching,
+database can be loaded into RAM. 
+This can also accelerate searching on a *computer cluster*, where every node searches a part of the database.
+After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
 for downstream analysis.
 
@@ -39,14 +41,22 @@ for downstream analysis.
 
 Check [tutorial](/tutorial/searching).
 
-|kingdoms                |source     |sketch         |parameters          |file                                           |size     |
-|:-----------------------|:----------|:--------------|:-------------------|:----------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |Scaled MinHash |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]() (710 MB)          |1.52 GB  |
-|**Bacteria and Archaea**|GTDB r202  |Closed Syncmers|k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.03 GB)         |2.28 GB  |
-|**Fungi**               |Refseq r208|Scaled MinHash |k=31, scale=1000    |[refseq-fungi.minhash.kmcp.tar.gz]() (49 MB)   |98 MB    |
-|**Fungi**               |Refseq r208|Closed Syncmers|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz]() (73 MB)   |145 MB   |
-|**Viruses**             |Refseq r208|Scaled MinHash |K=31, scale=10      |[refseq-viruses.minhash.kmcp.tar.gz]() (205 MB)|555 MB   |
-|**Viruses**             |Refseq r208|Closed Syncmers|k=31, s=21          |[refseq-viruses.syncmer.kmcp.tar.gz]() (162 MB)|441 MB   |
+Scaled MinHash:
+
+|kingdoms                |source     |parameters          |file                                           |size     |
+|:-----------------------|:----------|:-------------------|:----------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]() (710 MB)          |1.52 GB  |
+|**Fungi**               |Refseq r208|k=31, scale=1000    |[refseq-fungi.minhash.kmcp.tar.gz]() (49 MB)   |98 MB    |
+|**Viruses**             |Refseq r208|K=31, scale=10      |[refseq-viral.minhash.kmcp.tar.gz]() (205 MB)|555 MB   |
+
+Closed Syncmers:
+
+|kingdoms                |source     |parameters          |file                                           |size     |
+|:-----------------------|:----------|:-------------------|:----------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.03 GB)         |2.28 GB  |
+|**Fungi**               |Refseq r208|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz]() (73 MB)   |145 MB   |
+|**Viruses**             |Refseq r208|k=31, s=21          |[refseq-viral.syncmer.kmcp.tar.gz]() (162 MB)|441 MB   |
+
 
 ## Building databases
 
@@ -391,6 +401,9 @@ database can be loaded into RAM. After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
 for downstream analysis.
 
+Buiding small databases can also accelerate searching on a *computer cluster*,
+where every node searches a part of the database.
+
 
 ### Step 1. Computing k-mers
 
@@ -535,7 +548,7 @@ KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
 Signature Index ([COBS](https://arxiv.org/abs/1905.09624)). 
 We totally rewrite the algorithms, data structure and file format,
 and have improved the indexing and searching speed
-(check [benchmark](/benchmark)).
+(check [benchmark](/benchmark/searching)).
 
 **Input**:
 

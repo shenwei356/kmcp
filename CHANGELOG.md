@@ -34,7 +34,7 @@
     - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
     - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
-    - 20% faster.
+    - faster search result parsing speed.
     
 ### v0.6.0 - 2021-08-13
 
