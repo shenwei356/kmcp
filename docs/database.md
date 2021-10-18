@@ -9,9 +9,9 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 |kingdoms                |source     |# species|# assembly|file                                    |size     |
 |:-----------------------|:----------|:--------|:---------|:---------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (37.13 GB)         |58.02 GB |
-|**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz]() (1.09 GB)  |2.00 GB  |
-|**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz]() (8.79GB)   |4.18 GB |
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (50.16 GB)         |58.02 GB |
+|**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz]() (967 MB)   |2.00 GB  |
+|**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz]() (3.67GB)   |4.18 GB |
 
 
 **Taxonomy data**: [taxdump.tar.gz]().

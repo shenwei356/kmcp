@@ -2079,7 +2079,7 @@ Taxonomic binning formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString("ref\tpercentage\tscore\tfragsCov\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
+		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tfragsCov\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {
@@ -2098,8 +2098,8 @@ Taxonomic binning formats:
 				covs[i] = fmt.Sprintf("%.2f", v)
 			}
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-				t.Name, t.Percentage, t.Score,
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+				t.Name, t.Percentage, t.Coverage, t.Score,
 				t.FragsProp, strings.Join(covs, ";"), t.RelDepthStd,
 				t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
