@@ -477,7 +477,7 @@ Taxonomic binning formats:
 				log.Infof("  MetaPhlan format: %s", metaphlanReportFile)
 			}
 			if outputBinningResult {
-				log.Infof("  Binning result: %s", binningFile)
+				log.Infof("  Binning result  : %s", binningFile)
 			}
 
 			log.Infof("-------------------- [main parameters] --------------------")

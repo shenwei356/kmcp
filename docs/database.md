@@ -2,19 +2,26 @@
 
 ## Prebuilt databases
 
+All prebuilt database are hosted on OneDrive ([link](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC)).
+
+**Meta data**:
+
+- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRROG6I7_SkqPzQN?e=OeDfpq) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78))
+- Taxid mapping file: [taxid.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRa2STDU8ZCq3PEk?e=DhUeOd))
+- Name mapping file: [name.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4))
+
 ### A). Databases for metagenomic profiling
 
 These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
-|kingdoms                |source     |# species|# assembly|file                                    |size     |
+|kingdoms                |source     |# species|# assembly|archive file                                   |size     |
 |:-----------------------|:----------|:--------|:---------|:---------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (50.16 GB)         |58.02 GB |
-|**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz]() (967 MB)   |2.00 GB  |
-|**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz]() (3.67GB)   |4.18 GB |
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))         |58.02 GB |
+|**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))   |4.18 GB  |
+|**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))   |2.00 GB  |
 
 
-**Taxonomy data**: [taxdump.tar.gz]().
 
 **Hardware requirements**:
 
@@ -45,17 +52,17 @@ Scaled MinHash:
 
 |kingdoms                |source     |parameters          |file                                           |size     |
 |:-----------------------|:----------|:-------------------|:----------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz]() (710 MB)          |1.52 GB  |
-|**Fungi**               |Refseq r208|k=31, scale=1000    |[refseq-fungi.minhash.kmcp.tar.gz]() (49 MB)   |98 MB    |
-|**Viruses**             |Refseq r208|K=31, scale=10      |[refseq-viral.minhash.kmcp.tar.gz]() (205 MB)|555 MB   |
+|**Bacteria and Archaea**|GTDB r202  |k=31, scale=1000    |[gtdb.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q) (710 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r))          |1.52 GB  |
+|**Fungi**               |Refseq r208|k=31, scale=1000    |[refseq-fungi.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8) (49 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1))   |98 MB    |
+|**Viruses**             |Refseq r208|K=31, scale=10      |[refseq-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B) (205 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl))  |555 MB   |
 
 Closed Syncmers:
 
 |kingdoms                |source     |parameters          |file                                           |size     |
 |:-----------------------|:----------|:-------------------|:----------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz]() (1.03 GB)         |2.28 GB  |
-|**Fungi**               |Refseq r208|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz]() (73 MB)   |145 MB   |
-|**Viruses**             |Refseq r208|k=31, s=21          |[refseq-viral.syncmer.kmcp.tar.gz]() (162 MB)|441 MB   |
+|**Bacteria and Archaea**|GTDB r202  |k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r) (1.03 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk))         |2.28 GB  |
+|**Fungi**               |Refseq r208|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQZqTZrnLyiEJ0IX?e=aORH7a) (73 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQdqsq1rGf0YuCdz?e=g0gOtx))   |145 MB   |
+|**Viruses**             |Refseq r208|k=31, s=21          |[refseq-viral.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl) (162 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQKyoa8lcPTO5yt_?e=e7Ki65))  |441 MB   |
 
 
 ## Building databases
