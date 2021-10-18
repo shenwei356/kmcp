@@ -46,9 +46,10 @@ import (
 
 // Query strands for a query sequence.
 type Query struct {
-	Idx uint64 // id for keep output in order
-	ID  []byte
-	Seq *seq.Seq
+	Idx  uint64 // id for keep output in order
+	ID   []byte
+	Seq  *seq.Seq
+	Seq2 *seq.Seq
 
 	Ch chan *QueryResult // result chanel
 }
@@ -324,6 +325,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				sg.OutCh <- _queryResult
 
 				poolSeq.Put(query.Seq)
+				if query.Seq2 != nil {
+					poolSeq.Put(query.Seq2)
+				}
 				poolQuery.Put(query)
 
 				wg.Done()
@@ -463,6 +467,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 				sg.OutCh <- queryResult
 
 				poolSeq.Put(query.Seq)
+				if query.Seq2 != nil {
+					poolSeq.Put(query.Seq2)
+				}
 				poolQuery.Put(query)
 
 				wg.Done()
@@ -541,6 +548,9 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 			sg.OutCh <- queryResult
 
 			poolSeq.Put(query.Seq)
+			if query.Seq2 != nil {
+				poolSeq.Put(query.Seq2)
+			}
 			poolQuery.Put(query)
 
 			wg.Done()
@@ -759,6 +769,19 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				if err != nil {
 					checkError(err)
 				}
+
+				if query.Seq2 != nil {
+					kmers2 := poolKmers.Get().(*[]uint64)
+					kmers2, err = db.generateKmers(query.Seq2, k, kmers2)
+					if err != nil {
+						checkError(err)
+					}
+					*kmers = append(*kmers, *kmers2...)
+
+					*kmers2 = (*kmers2)[:0]
+					poolKmers.Put(kmers2)
+				}
+
 				nKmers := len(*kmers)
 
 				queryResult.NumKmers = nKmers
@@ -796,13 +819,14 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 							p = v
 						}
 					}
+
 					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 					kmers = _kmers
-				}
 
-				// update nKmers
-				nKmers = len(*kmers)
+					// update nKmers
+					nKmers = len(*kmers)
+				}
 
 				queryResult.NumKmers = nKmers
 

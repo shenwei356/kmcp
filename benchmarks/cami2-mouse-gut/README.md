@@ -56,11 +56,22 @@ https://data.cami-challenge.org/participate
     reads=19122017_mousegut_scaffolds
     
     
+    # single end
     j=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j 4 -v j=$j \
             'kmcp search -d {db} {} -o {}.kmcp@{dbname}.tsv.gz --log {}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+            
+    # merge end
+    reads=paired
+    j=40
+    fd _1.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -j 4 -v j=$j \
+            'kmcp search -d {db} -1 {} -2 {@(.+)_1.fq.gz}_2.fq.gz -o {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz \
+            --log {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
 
     X=taxdump

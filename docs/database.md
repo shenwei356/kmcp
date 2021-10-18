@@ -16,8 +16,8 @@ These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
 |kingdoms                |source     |# species|# assembly|archive file                                   |size     |
-|:-----------------------|:----------|:--------|:---------|:---------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz]() (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))         |58.02 GB |
+|:-----------------------|:----------|:--------|:---------|:----------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))         |58.02 GB |
 |**Fungi**               |Refseq r208|161      |403       |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))   |4.18 GB  |
 |**Viruses**             |Refseq r208|7189     |11618     |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))   |2.00 GB  |
 

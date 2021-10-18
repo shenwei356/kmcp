@@ -13,6 +13,7 @@
      It eliminates fake k-mers at the concatenation position.
     - set default value for flag `-N/--ref-name-regexp`: `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`.
 - `search`:
+    - support paired-end reads.
     - better log.
     - fix matches order of a query.
     - fix queries with many Ns.

@@ -47,6 +47,7 @@ var searchCmd = &cobra.Command{
 
 Attentions:
   1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+     Paired-End reads should be given via -1/--read1 and -2/--read2.
   2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
@@ -142,6 +143,70 @@ Performance tips:
 		}
 
 		// ---------------------------------------------------------------
+		// input files
+
+		if outputLog {
+			log.Info("checking input files ...")
+		}
+
+		var pairedEnd bool
+		read1 := getFlagString(cmd, "read1")
+		read2 := getFlagString(cmd, "read2")
+
+		files := make([]string, 0, 8)
+
+		if read1 == "" {
+			if read2 != "" {
+				if !opt.Verbose {
+					log.Warningf("only flag -2/--read2 given, it's treated as single-end: %s")
+				}
+				files = append(files, read2)
+			}
+		} else {
+			if read2 == "" {
+				if !opt.Verbose {
+					log.Warningf("only flag -1/--read1 given, it's treated as single-end: %s")
+				}
+				files = append(files, read1)
+			} else {
+				if !opt.Verbose {
+					log.Infof("paired end files given: %s, %s", read1, read2)
+					log.Infof("other input files via positional arguments are ignored")
+				}
+				pairedEnd = true
+			}
+		}
+
+		if !pairedEnd {
+			files1 := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
+			if outputLog {
+				if len(files) == 1 && isStdin(files[0]) {
+					log.Info("  no files given, reading from stdin")
+				} else {
+					log.Infof("  %d input file(s) given", len(files))
+				}
+			}
+
+			if read1 != "" || read2 != "" {
+				for _, file := range files1 {
+					if isStdin(file) {
+						continue
+					}
+					files = append(files, file)
+				}
+			} else {
+				files = append(files, files1...)
+			}
+		}
+
+		outFileClean := filepath.Clean(outFile)
+		for _, file := range files {
+			if !isStdin(file) && filepath.Clean(file) == outFileClean {
+				checkError(fmt.Errorf("out file should not be one of the input file"))
+			}
+		}
+
+		// ---------------------------------------------------------------
 		// check Database
 
 		subFiles, err := ioutil.ReadDir(dbDir)
@@ -209,28 +274,6 @@ Performance tips:
 			}
 
 			// mappingNames = len(namesMap) > 0
-		}
-
-		// ---------------------------------------------------------------
-		// input files
-
-		if outputLog {
-			log.Info("checking input files ...")
-		}
-		files := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-		if outputLog {
-			if len(files) == 1 && isStdin(files[0]) {
-				log.Info("  no files given, reading from stdin")
-			} else {
-				log.Infof("  %d input file(s) given", len(files))
-			}
-		}
-
-		outFileClean := filepath.Clean(outFile)
-		for _, file := range files {
-			if !isStdin(file) && filepath.Clean(file) == outFileClean {
-				checkError(fmt.Errorf("out file should not be one of the input file"))
-			}
 		}
 
 		// ---------------------------------------------------------------
@@ -302,9 +345,6 @@ Performance tips:
 		if !noHeaderRow {
 			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
-
-		var fastxReader *fastx.Reader
-		var record *fastx.Record
 
 		// ---------------------------------------------------------------
 		// receive result and output
@@ -648,18 +688,144 @@ Performance tips:
 		// ---------------------------------------------------------------
 		// send query
 
-		var id uint64
-		for _, file := range files {
-			if outputLog {
-				log.Infof("reading sequence file: %s", file)
-			}
-			fastxReader, err = fastx.NewDefaultReader(file)
-			checkError(errors.Wrap(err, file))
+		if pairedEnd {
+			var id uint64
 
-			if wholeFile {
-				var recordID []byte
-				var sequence *seq.Seq
-				first := true
+			if outputLog {
+				log.Infof("reading from paired-end files: %s, %s", read1, read2)
+			}
+			fastxReader1, err := fastx.NewDefaultReader(read1)
+			checkError(errors.Wrap(err, read1))
+
+			fastxReader2, err := fastx.NewDefaultReader(read2)
+			checkError(errors.Wrap(err, read2))
+
+			var record1, record2 *fastx.Record
+			var n, ns, nt int
+
+			for {
+				record1, err = fastxReader1.Read()
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+					errors.Wrap(err, read1)
+					break
+				}
+
+				record2, err = fastxReader2.Read()
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+					errors.Wrap(err, read2)
+					break
+				}
+
+				recordID := make([]byte, len(record1.ID))
+				copy(recordID, record1.ID)
+
+				query := poolQuery.Get().(*Query)
+				query.Idx = id
+				query.ID = recordID
+
+				clone := poolSeq.Get().(*seq.Seq)
+				clone.Alphabet = record1.Seq.Alphabet
+				ns = len(record1.Seq.Seq)
+				nt = len(clone.Seq)
+				n = ns - nt
+				if n > 0 {
+					copy(clone.Seq, record1.Seq.Seq)
+					clone.Seq = append(clone.Seq, record1.Seq.Seq[nt:]...)
+				} else if n == 0 {
+					copy(clone.Seq, record1.Seq.Seq)
+				} else {
+					clone.Seq = clone.Seq[0:ns]
+					copy(clone.Seq, record1.Seq.Seq)
+				}
+				query.Seq = clone
+
+				clone2 := poolSeq.Get().(*seq.Seq)
+				clone2.Alphabet = record2.Seq.Alphabet
+				ns = len(record2.Seq.Seq)
+				nt = len(clone2.Seq)
+				n = ns - nt
+				if n > 0 {
+					copy(clone2.Seq, record2.Seq.Seq)
+					clone2.Seq = append(clone2.Seq, record2.Seq.Seq[nt:]...)
+				} else if n == 0 {
+					copy(clone2.Seq, record2.Seq.Seq)
+				} else {
+					clone2.Seq = clone2.Seq[0:ns]
+					copy(clone2.Seq, record2.Seq.Seq)
+				}
+				query.Seq2 = clone2
+
+				sg.InCh <- query
+
+				id++
+			}
+		} else {
+			var fastxReader *fastx.Reader
+			var record *fastx.Record
+
+			var id uint64
+			for _, file := range files {
+				if outputLog {
+					log.Infof("reading sequence file: %s", file)
+				}
+				fastxReader, err = fastx.NewDefaultReader(file)
+				checkError(errors.Wrap(err, file))
+
+				if wholeFile {
+					var recordID []byte
+					var sequence *seq.Seq
+					first := true
+					for {
+						record, err = fastxReader.Read()
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							errors.Wrap(err, file)
+							break
+						}
+
+						if first {
+							if useFileName {
+								filename, _ := filepathTrimExtension(file)
+								recordID = []byte(filename)
+							} else if queryID != "" {
+								recordID = []byte(queryID)
+							} else {
+								recordID = make([]byte, len(record.ID))
+								copy(recordID, record.ID)
+							}
+							sequence = record.Seq.Clone2()
+							first = false
+						} else {
+							sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
+						}
+					}
+
+					query := poolQuery.Get().(*Query)
+					query.Idx = id
+					query.ID = recordID
+					query.Seq = sequence
+					sg.InCh <- query
+
+					// sg.InCh <- &Query{
+					// 	Idx: id,
+					// 	ID:  recordID,
+					// 	Seq: sequence,
+					// }
+
+					id++
+
+					continue
+				}
+
+				var n, ns, nt int
 				for {
 					record, err = fastxReader.Read()
 					if err != nil {
@@ -670,69 +836,53 @@ Performance tips:
 						break
 					}
 
-					if first {
-						if useFileName {
-							filename, _ := filepathTrimExtension(file)
-							recordID = []byte(filename)
-						} else if queryID != "" {
-							recordID = []byte(queryID)
-						} else {
-							recordID = make([]byte, len(record.ID))
-							copy(recordID, record.ID)
-						}
-						sequence = record.Seq.Clone2()
-						first = false
+					recordID := make([]byte, len(record.ID))
+					copy(recordID, record.ID)
+
+					query := poolQuery.Get().(*Query)
+					query.Idx = id
+					query.ID = recordID
+
+					// query.Seq = record.Seq.Clone2()
+					// query.Seq = cloneFastx(record.Seq)
+					clone := poolSeq.Get().(*seq.Seq)
+					clone.Alphabet = record.Seq.Alphabet
+
+					// slower
+					// clone.Seq = make([]byte, len(record.Seq.Seq))
+					// copy(clone.Seq, record.Seq.Seq)
+
+					// much slower
+					// clone.Seq = clone.Seq[:0]
+					// clone.Seq = append(clone.Seq, record.Seq.Seq...)
+
+					ns = len(record.Seq.Seq)
+					nt = len(clone.Seq)
+					n = ns - nt
+					if n > 0 {
+						copy(clone.Seq, record.Seq.Seq)
+						clone.Seq = append(clone.Seq, record.Seq.Seq[nt:]...)
+					} else if n == 0 {
+						copy(clone.Seq, record.Seq.Seq)
 					} else {
-						sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
+						clone.Seq = clone.Seq[0:ns]
+						copy(clone.Seq, record.Seq.Seq)
 					}
+					query.Seq = clone
+
+					sg.InCh <- query
+
+					// sg.InCh <- &Query{
+					// 	Idx: id,
+					// 	ID:  recordID,
+					// 	Seq: record.Seq.Clone2(),
+					// }
+
+					id++
 				}
-
-				query := poolQuery.Get().(*Query)
-				query.Idx = id
-				query.ID = recordID
-				query.Seq = sequence
-				sg.InCh <- query
-
-				// sg.InCh <- &Query{
-				// 	Idx: id,
-				// 	ID:  recordID,
-				// 	Seq: sequence,
-				// }
-
-				id++
-
-				continue
-			}
-
-			for {
-				record, err = fastxReader.Read()
-				if err != nil {
-					if err == io.EOF {
-						break
-					}
-					errors.Wrap(err, file)
-					break
-				}
-
-				recordID := make([]byte, len(record.ID))
-				copy(recordID, record.ID)
-
-				query := poolQuery.Get().(*Query)
-				query.Idx = id
-				query.ID = recordID
-				// query.Seq = record.Seq.Clone2()
-				query.Seq = cloneFastx(record.Seq)
-				sg.InCh <- query
-
-				// sg.InCh <- &Query{
-				// 	Idx: id,
-				// 	ID:  recordID,
-				// 	Seq: record.Seq.Clone2(),
-				// }
-
-				id++
 			}
 		}
+
 		close(sg.InCh) // close Inch
 
 		sg.Wait() // wait all searching finished
@@ -755,6 +905,9 @@ Performance tips:
 
 func init() {
 	RootCmd.AddCommand(searchCmd)
+
+	searchCmd.Flags().StringP("read1", "1", "", "(gzipped) read1 file")
+	searchCmd.Flags().StringP("read2", "2", "", "(gzipped) read2 file")
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
@@ -787,14 +940,14 @@ func init() {
 }
 
 func cloneFastx(sequence *seq.Seq) *seq.Seq {
-	s := make([]byte, len(sequence.Seq))
-	copy(s, sequence.Seq)
+	// s := make([]byte, len(sequence.Seq))
+	// copy(s, sequence.Seq)
 
-	q := make([]byte, len(sequence.Qual))
-	copy(q, sequence.Qual)
+	// q := make([]byte, len(sequence.Qual))
+	// copy(q, sequence.Qual)
 
-	qv := make([]int, len(sequence.QualValue))
-	copy(qv, sequence.QualValue)
+	// qv := make([]int, len(sequence.QualValue))
+	// copy(qv, sequence.QualValue)
 
 	// return &seq.Seq{
 	// 	Alphabet:  sequence.Alphabet,
@@ -805,9 +958,10 @@ func cloneFastx(sequence *seq.Seq) *seq.Seq {
 
 	clone := poolSeq.Get().(*seq.Seq)
 	clone.Alphabet = sequence.Alphabet
-	clone.Seq = s
-	clone.Qual = q
-	clone.QualValue = qv
+	clone.Seq = clone.Seq[:0]
+	clone.Seq = append(clone.Seq, sequence.Seq...)
+	// clone.Qual = q
+	// clone.QualValue = qv
 	return clone
 }
 
