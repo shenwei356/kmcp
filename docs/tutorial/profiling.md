@@ -11,7 +11,7 @@
 
 ## Datasets
 
-- Short reads, single or paired end, but **paired information is not used** in current version.
+- Short reads, single or paired end.
 - Long reads (PacBio HIFI).
 
 ## Steps
@@ -54,18 +54,28 @@ Mapping and removing mapped reads:
 
 ### Step 3. Searching
 
-**Reads can be searched on different databases and then merged**.
-Databases can be built with different parameters.
+**Reads can be searched on different databases and then merged**,
+where the databases can be built with different parameters.
 
 **Attentions**:
 
 1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+   Paired-End reads should be given via `-1/--read1` and `-2/--read2`.
+
+        kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
+
+    Single-end can be given as positional arguments or `-1`/`-2`.
+
+        kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+
 2. A long query sequences may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
     value of `-u/--kmer-dedup-threshold` (default `256`) to remove duplicates.
 3. For long reads or contigs, you should split them in to short reads
     using "seqkit sliding", e.g.,
-        `seqkit sliding -s 100 -W 300`
+
+        seqkit sliding -s 100 -W 300
+
 4. The values of `tCov` and `jacc` in result only apply for single size of k-mer.
 
 **`kmcp search` and `kmcp profile` share some flags**, therefore users
@@ -82,9 +92,11 @@ can use stricter criteria in `kmcp profile`.
 
 **Commands**:
 
-    # paired-ends: 
-    #   file="sample_1.fq.gz sample_2.fq.gz"
+    # ---------------------------------------------------
+    # single-end
+
     file=sample.fq.gz
+    sample=sample
 
     for db in refseq-viruses.kmcp gtdb.kmcp ; do
         dbname=$(basename $db)
@@ -96,13 +108,36 @@ can use stricter criteria in `kmcp profile`.
             --min-query-len      70 \
             --min-query-cov    0.55 \
             $file                   \
-            --out-file $file.kmcp@$dbname.tsv.gz \
-            --log      $file.kmcp@$dbname.tsv.gz.log
+            --out-file          $sample.kmcp@$dbname.tsv.gz \
+            --log               $sample.kmcp@$dbname.tsv.gz.log
     done
 
+    # ---------------------------------------------------
+    # paired-end
+    
+    read1=sample_1.fq.gz
+    read2=sample_2.fq.gz
+    sample=sample
+    
+    for db in refseq-viruses.kmcp gtdb.kmcp ; do
+        dbname=$(basename $db)
+
+        kmcp search \
+            --threads            32 \
+            --db-dir            $db \
+            --min-kmers          30 \
+            --min-query-len      70 \
+            --min-query-cov    0.55 \
+            --read1          $read1 \
+            --read2          $read2 \
+            --out-file       $sample.kmcp@$dbname.tsv.gz \
+            --log            $sample.kmcp@$dbname.tsv.gz.log
+    done
+    
+    
 Merging searching results on multiple database:
 
-    kmcp merge $file.kmcp@*.tsv.gz --out-file $file.kmcp.tsv.gz
+    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
     
 Format:
 
@@ -182,12 +217,13 @@ Profiling output formats:
 - MetaPhlAn (`-C/--cami-report`)
 
 Taxonomic binning formats:
+
 - CAMI      (`-B/--binning-result`)
 
 **Commands**:
 
     # taxid mapping files, multiple files supported.
-    taxid_map=refseq-viruses.kmcp/taxid.map,gtdb.kmcp/taxid.map
+    taxid_map=gtdb.kmcp/taxid.map,refseq-viral.kmcp/taxid.map,refseq-fungi.kmcp
 
     # taxdump directory
     taxdump=taxdump/
@@ -199,13 +235,12 @@ Taxonomic binning formats:
         --taxdump          $taxdump \
         --level             species \
         --min-query-cov        0.55 \
-        --keep-top-qcovs          0 \
         --min-frags-reads        50 \
         --min-frags-prop        0.8 \
         --max-frags-depth-stdev   2 \
         --min-uniq-reads         10 \
         --min-hic-ureads          1 \
-        --min-hic-ureads-qcov   0.75 \
+        --min-hic-ureads-qcov  0.75 \
         --min-hic-ureads-prop   0.1 \
         $sfile                      \
         --out-prefix       $sfile.kmcp.profile \

@@ -56,7 +56,7 @@ https://data.cami-challenge.org/participate
     reads=19122017_mousegut_scaffolds
     
     
-    # single end
+    # single-end
     j=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -64,7 +64,13 @@ https://data.cami-challenge.org/participate
             'kmcp search -d {db} {} -o {}.kmcp@{dbname}.tsv.gz --log {}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
             
-    # merge end
+    # paired-end
+    # # split merged paired-end reads.
+    # mkdir paired
+    # cd paired
+    # fd .fq.gz$ ../$reads | rush -j 12 'seqkit split2 -p 2 {} -O .'
+    # brename -p .part00 -r _
+    # cd ..
     reads=paired
     j=40
     fd _1.fq.gz$ $reads/ \

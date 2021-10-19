@@ -197,6 +197,10 @@ Search sequence against a database
 
 Attentions:
   1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+     - Paired-end files should be given via -1/--read1 and -2/--read2.
+        kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
+     - Single-end can be given as positional arguments or -1/-2.
+        kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
   2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
