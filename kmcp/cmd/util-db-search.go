@@ -750,7 +750,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				queryResult.QueryIdx = query.Idx
 				queryResult.QueryID = query.ID
-				queryResult.QueryLen = query.Seq.Length()
+				queryResult.QueryLen = len(query.Seq.Seq)
+				if query.Seq2 != nil {
+					queryResult.QueryLen += len(query.Seq2.Seq)
+				}
 				queryResult.K = k
 				queryResult.Matches = nil
 
