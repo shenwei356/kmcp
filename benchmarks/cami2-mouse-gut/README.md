@@ -53,10 +53,10 @@ https://data.cami-challenge.org/participate
     db=refseq-cami2-k21-n10.db
     dbname=refseq-cami2-k21-n10
     
+    
+    # ------------------------------------------------------------------------
+    # single-end    
     reads=19122017_mousegut_scaffolds
-    
-    
-    # single-end
     j=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -64,12 +64,13 @@ https://data.cami-challenge.org/participate
             'kmcp search -d {db} {} -o {}.kmcp@{dbname}.tsv.gz --log {}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
             
+    # ------------------------------------------------------------------------           
     # paired-end
     # # split merged paired-end reads.
     # mkdir paired
     # cd paired
     # fd .fq.gz$ ../$reads | rush -j 12 'seqkit split2 -p 2 {} -O .'
-    # brename -p .part00 -r _
+    # brename -p .part_00 -r _
     # cd ..
     reads=paired
     j=40
@@ -79,13 +80,14 @@ https://data.cami-challenge.org/participate
             'kmcp search -d {db} -1 {} -2 {@(.+)_1.fq.gz}_2.fq.gz -o {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz \
             --log {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
-
+    # ------------------------------------------------------------------------
+            
     X=taxdump
     T=ref2taxid.tsv
     fd kmcp@$dbname.tsv.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T \
-            'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {@sample_(\d+)}' 
+            'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {@sample_(\d+)} --log {}.k.profile.log' 
     
     profile=$reads@$dbname.c.profile
     fd kmcp@$dbname.tsv.gz.c.profile$ $reads/ \
