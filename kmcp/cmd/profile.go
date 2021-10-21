@@ -180,7 +180,8 @@ Taxonomic binning formats:
 
 		// -----
 
-		UregionPropFiles := getFlagStringSlice(cmd, "uregion-prop-map")
+		// UregionPropFiles := getFlagStringSlice(cmd, "uregion-prop-map")
+		UregionPropFiles := []string{}
 		considerUregionProp := len(UregionPropFiles) > 0
 
 		// -----
@@ -2283,7 +2284,7 @@ func init() {
 
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 
-	profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
+	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
 
 }
 
