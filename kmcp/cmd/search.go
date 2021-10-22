@@ -127,6 +127,10 @@ Performance tips:
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
 		// immediateOutput := getFlagBool(cmd, "immediate-output")
 
+		// make it default
+		trySE := getFlagBool(cmd, "try-se")
+		// trySE := true
+
 		if doNotSort && topNScore > 0 {
 			log.Warningf("flag -n/--keep-top-scores ignored when -S/--do-not-sort given")
 		}
@@ -178,6 +182,11 @@ Performance tips:
 				}
 				pairedEnd = true
 			}
+		}
+
+		if trySE && !pairedEnd {
+			log.Warningf("flag --try-se ignored for single-end input(s)")
+			trySE = false
 		}
 
 		if !pairedEnd {
@@ -308,6 +317,8 @@ Performance tips:
 
 			LoadDefaultNameMap: loadDefaultNameMap,
 			NameMap:            namesMap,
+
+			TrySingleEnd: trySE,
 		}
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
@@ -932,7 +943,9 @@ func init() {
 	searchCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
 	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
 	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
+	// making it default
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
+	// do not use
 	// searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
 	searchCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
 	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
@@ -940,6 +953,8 @@ func init() {
 	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches of a query`)
 	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
 
+	// making it default
+	searchCmd.Flags().BoolP("try-se", "", false, `if paired-end reads have no hits, research with read1, if still fails, try read2`)
 }
 
 func cloneFastx(sequence *seq.Seq) *seq.Seq {

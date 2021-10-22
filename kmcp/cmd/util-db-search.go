@@ -26,6 +26,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 
 	"github.com/clausecker/pospop"
@@ -176,6 +177,8 @@ type SearchOptions struct {
 
 	LoadDefaultNameMap bool
 	NameMap            map[string]string
+
+	TrySingleEnd bool // when no target found for paired end reads, retry searching with Single Ends.
 }
 
 // UnikIndexDBSearchEngine search sequence on multiple database
@@ -744,6 +747,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		}
 		lastIk := len(ks) - 1
 
+		trySE := db.Options.TrySingleEnd
+
 		handleQuery := func(query *Query) {
 			for _ik, k := range ks {
 				queryResult := poolQueryResult.Get().(*QueryResult)
@@ -753,6 +758,8 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				queryResult.QueryLen = len(query.Seq.Seq)
 				if query.Seq2 != nil {
 					queryResult.QueryLen += len(query.Seq2.Seq)
+				} else {
+					trySE = false // just ensure
 				}
 				queryResult.K = k
 				queryResult.Matches = nil
@@ -767,68 +774,104 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// compute kmers
 				// reuse []uint64 object, to reduce GC
-				kmers := poolKmers.Get().(*[]uint64)
+				var kmers *[]uint64
+				kmers = poolKmers.Get().(*[]uint64)
+				*kmers = (*kmers)[:0]
 				kmers, err = db.generateKmers(query.Seq, k, kmers)
 				if err != nil {
 					checkError(err)
 				}
 
-				if query.Seq2 != nil {
-					kmers2 := poolKmers.Get().(*[]uint64)
-					kmers2, err = db.generateKmers(query.Seq2, k, kmers2)
-					if err != nil {
-						checkError(err)
-					}
-					*kmers = append(*kmers, *kmers2...)
+				// -------------- only for TrySingleEnd --------------
+				tries := 0
+				var kmers1 *[]uint64 // copy of kmers1
 
-					*kmers2 = (*kmers2)[:0]
-					poolKmers.Put(kmers2)
+				if trySE { // copy kmers for later use
+					// it's unsafe to use sync.Pool
+					tmp := make([]uint64, len(*kmers))
+					copy(tmp, *kmers)
+					kmers1 = &tmp
+				}
+				//  --------------------------------------------------
+
+				var kmers2 *[]uint64
+				if query.Seq2 != nil {
+					if trySE {
+						tmp := make([]uint64, 0, len(query.Seq2.Seq))
+						kmers2 = &tmp
+
+						kmers2, err = db.generateKmers(query.Seq2, k, kmers2)
+						if err != nil {
+							checkError(err)
+						}
+						*kmers = append(*kmers, *kmers2...)
+					} else { // just append to kmers
+						kmers, err = db.generateKmers(query.Seq2, k, kmers)
+						if err != nil {
+							checkError(err)
+						}
+					}
 				}
 
-				nKmers := len(*kmers)
-
-				queryResult.NumKmers = nKmers
+			RETRY:
+				if trySE {
+					switch tries {
+					case 0:
+					case 1: // read1
+						kmers = kmers1
+						queryResult.QueryLen = len(query.Seq.Seq)
+					case 2: // read2
+						kmers = kmers2
+						queryResult.QueryLen = len(query.Seq2.Seq)
+					}
+				}
+				//  --------------------------------------------------
 
 				// sequence shorter than k, or too few k-mer sketchs.
-				if kmers == nil || nKmers < db.Options.MinMatched {
+				if kmers == nil || len(*kmers) < db.Options.MinMatched {
+					poolKmers.Put(kmers)
+
 					query.Ch <- queryResult // still send result!
 					<-tokens
 					return
 				}
 
+				nKmers := len(*kmers)
+				queryResult.NumKmers = nKmers
+
 				if nKmers > opt.DeduplicateThreshold {
 					// map is slower than sorting
 
-					// m := make(map[uint64]interface{}, nKmers)
-					// i := 0
-					// var ok bool
-					// for _, v := range kmers {
-					// 	if _, ok = m[v]; !ok {
-					// 		m[v] = struct{}{}
-					// 		kmers[i] = v
-					// 		i++
-					// 	}
-					// }
-					// kmers = kmers[:i]
+					// sortutil.Uint64s(*kmers)
+					sort.Sort(Uint64Slice(*kmers))
 
-					sortutil.Uint64s(*kmers)
-					_kmers := poolKmers.Get().(*[]uint64)
-					var p uint64 = math.MaxUint64
-					i := 0
-					for _, v := range *kmers {
-						if p != v {
-							*_kmers = append(*_kmers, v)
-							i++
-							p = v
+					var i, j int
+					var p, v uint64
+					var flag bool
+					p = (*kmers)[0]
+					for i = 1; i < len(*kmers); i++ {
+						v = (*kmers)[i]
+						if v == p {
+							if !flag {
+								j = i // mark insertion position
+								flag = true
+							}
+							continue
 						}
+
+						if flag { // need to insert to previous position
+							(*kmers)[j] = v
+							j++
+						}
+						p = v
+					}
+					if j > 0 {
+						*kmers = (*kmers)[:j]
+
+						// update nKmers
+						nKmers = j
 					}
 
-					*kmers = (*kmers)[:0]
-					poolKmers.Put(kmers)
-					kmers = _kmers
-
-					// update nKmers
-					nKmers = len(*kmers)
 				}
 
 				queryResult.NumKmers = nKmers
@@ -839,12 +882,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				if !singleHash {
 					hashes = poolHashes.Get().(*[][]uint64)
 					for _, kmer := range *kmers {
-						// for kmer := range kmers {
 						*hashes = append(*hashes, hashValues(kmer, numHashes))
 					}
 
 					// recycle kmer-sketch ([]uint64) object
-					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 				}
 
@@ -895,7 +936,6 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					*hashes = (*hashes)[:0]
 					poolHashes.Put(hashes)
 				} else {
-					*kmers = (*kmers)[:0]
 					poolKmers.Put(kmers)
 				}
 
@@ -910,6 +950,16 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					<-tokens
 					return
 				}
+
+				// -------------- only for TrySingleEnd --------------
+				if trySE {
+					if tries < 2 {
+						tries++
+						goto RETRY
+					}
+				}
+
+				//  --------------------------------------------------
 
 				// not found, try smaller k
 				if _ik == lastIk { // already the smallest k, give up
@@ -7540,7 +7590,7 @@ func (idx *UnikIndex) Close() error {
 }
 
 var poolKmers = &sync.Pool{New: func() interface{} {
-	tmp := make([]uint64, 0, 256)
+	tmp := make([]uint64, 0, 512)
 	return &tmp
 }}
 
