@@ -823,13 +823,14 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 						// kmers = &[]uint64{}
 						kmers = poolKmers2.Get().(*[]uint64)
 
-						// not that here kmers shares memory of kmers1,
+						// note that here kmers shares memory of kmers1,
 						// so we must not recycle kmers until the end.
 						*kmers = (*kmers1)[:n1]
 						queryResult.QueryLen = len(query.Seq.Seq)
 					case 2: // read2
 						// kmers = &[]uint64{}
 						kmers = poolKmers2.Get().(*[]uint64)
+
 						*kmers = (*kmers1)[n1:]
 						queryResult.QueryLen = len(query.Seq2.Seq)
 					}
