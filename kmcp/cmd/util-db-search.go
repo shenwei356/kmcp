@@ -782,46 +782,55 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					checkError(err)
 				}
 
+				n1 := len(*kmers) //  only for TrySingleEnd
+
+				if query.Seq2 != nil { // append to kmers of Seq2
+					kmers, err = db.generateKmers(query.Seq2, k, kmers)
+					if err != nil {
+						checkError(err)
+					}
+				}
+
 				// -------------- only for TrySingleEnd --------------
 				tries := 0
 				var kmers1 *[]uint64 // copy of kmers1
 
 				if trySE { // copy kmers for later use
-					// it's unsafe to use sync.Pool
-					tmp := make([]uint64, len(*kmers))
-					copy(tmp, *kmers)
-					kmers1 = &tmp
-				}
-				//  --------------------------------------------------
+					kmers1 = poolKmers.Get().(*[]uint64)
+					// *kmers1 = (*kmers1)[:0]
+					// *kmers1 = append(*kmers1, *kmers...)
 
-				var kmers2 *[]uint64
-				if query.Seq2 != nil {
-					if trySE {
-						tmp := make([]uint64, 0, len(query.Seq2.Seq))
-						kmers2 = &tmp
-
-						kmers2, err = db.generateKmers(query.Seq2, k, kmers2)
-						if err != nil {
-							checkError(err)
-						}
-						*kmers = append(*kmers, *kmers2...)
-					} else { // just append to kmers
-						kmers, err = db.generateKmers(query.Seq2, k, kmers)
-						if err != nil {
-							checkError(err)
-						}
+					// should be slight faster
+					l, l1 := len(*kmers), len(*kmers1)
+					d := l - l1
+					if d == 0 {
+						copy(*kmers1, *kmers)
+					} else if d < 0 {
+						*kmers1 = (*kmers1)[:l]
+						copy(*kmers1, *kmers)
+					} else {
+						copy(*kmers1, (*kmers)[:l1])
+						*kmers1 = append(*kmers1, (*kmers)[l1:]...)
 					}
 				}
+				//  --------------------------------------------------
 
 			RETRY:
 				if trySE {
 					switch tries {
 					case 0:
 					case 1: // read1
-						kmers = kmers1
+						// kmers = &[]uint64{}
+						kmers = poolKmers2.Get().(*[]uint64)
+
+						// not that here kmers shares memory of kmers1,
+						// so we must not recycle kmers until the end.
+						*kmers = (*kmers1)[:n1]
 						queryResult.QueryLen = len(query.Seq.Seq)
 					case 2: // read2
-						kmers = kmers2
+						// kmers = &[]uint64{}
+						kmers = poolKmers2.Get().(*[]uint64)
+						*kmers = (*kmers1)[n1:]
 						queryResult.QueryLen = len(query.Seq2.Seq)
 					}
 				}
@@ -829,7 +838,16 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// sequence shorter than k, or too few k-mer sketchs.
 				if kmers == nil || len(*kmers) < db.Options.MinMatched {
-					poolKmers.Put(kmers)
+					if !trySE {
+						poolKmers.Put(kmers)
+					} else {
+						if tries == 0 {
+							poolKmers.Put(kmers)
+						} else {
+							poolKmers2.Put(kmers)
+						}
+						poolKmers.Put(kmers1)
+					}
 
 					query.Ch <- queryResult // still send result!
 					<-tokens
@@ -845,6 +863,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					// sortutil.Uint64s(*kmers)
 					sort.Sort(Uint64Slice(*kmers))
 
+					// compute unique values in place
 					var i, j int
 					var p, v uint64
 					var flag bool
@@ -886,7 +905,9 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					}
 
 					// recycle kmer-sketch ([]uint64) object
-					poolKmers.Put(kmers)
+					if !trySE {
+						poolKmers.Put(kmers)
+					}
 				}
 
 				// send queries
@@ -936,11 +957,22 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					*hashes = (*hashes)[:0]
 					poolHashes.Put(hashes)
 				} else {
-					poolKmers.Put(kmers)
+					if !trySE {
+						poolKmers.Put(kmers)
+					}
 				}
 
 				// found
 				if matches != nil {
+					if trySE {
+						if tries == 0 {
+							poolKmers.Put(kmers)
+						} else {
+							poolKmers2.Put(kmers)
+						}
+						poolKmers.Put(kmers1)
+					}
+
 					// send result
 					queryResult.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
 					queryResult.DBId = db.DBId
@@ -953,10 +985,18 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 
 				// -------------- only for TrySingleEnd --------------
 				if trySE {
+					if tries == 0 {
+						poolKmers.Put(kmers)
+					} else {
+						poolKmers2.Put(kmers)
+					}
+
 					if tries < 2 {
 						tries++
 						goto RETRY
 					}
+
+					poolKmers.Put(kmers1)
 				}
 
 				//  --------------------------------------------------
@@ -7590,6 +7630,11 @@ func (idx *UnikIndex) Close() error {
 }
 
 var poolKmers = &sync.Pool{New: func() interface{} {
+	tmp := make([]uint64, 0, 512)
+	return &tmp
+}}
+
+var poolKmers2 = &sync.Pool{New: func() interface{} {
 	tmp := make([]uint64, 0, 512)
 	return &tmp
 }}
