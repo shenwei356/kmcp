@@ -753,7 +753,7 @@ Taxonomic binning formats:
 		}
 
 		// --------------------
-		// sum up
+		// sum up #1
 
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of references in search result: %d", len(profile))
@@ -768,7 +768,7 @@ Taxonomic binning formats:
 			for _, c1 = range t.UniqMatch {
 				t.SumUniqMatch += c1
 			}
-			if t.SumUniqMatch < minUReads { // no enough unique match
+			if t.SumUniqMatch < 1 { // no enough unique match
 				hs = append(hs, h)
 				continue
 			}
@@ -776,12 +776,12 @@ Taxonomic binning formats:
 			for _, c1 = range t.UniqMatchHic {
 				t.SumUniqMatchHic += c1
 			}
-			if t.SumUniqMatchHic < minHicUreads { // no enough high-confidence unique match
+			if t.SumUniqMatchHic < 1 { // no enough high-confidence unique match
 				hs = append(hs, h)
 				continue
 			}
 
-			// the SumUniqMatchHic may inrease later
+			// the SumUniqMatchHic may increase later
 
 			// if t.SumUniqMatchHic < t.SumUniqMatch*HicUreadsMinProp {
 			// 	hs = append(hs, h)
@@ -791,7 +791,7 @@ Taxonomic binning formats:
 			// ---------------
 
 			for _, c = range t.Match {
-				if c > minReads {
+				if c > 1 {
 					t.FragsProp++
 				}
 				t.SumMatch += c
@@ -1401,7 +1401,7 @@ Taxonomic binning formats:
 		}
 
 		// --------------------
-		// sum up
+		// sum up #3
 
 		hs = make([]uint64, 0, len(profile)) // list to delete
 		for h, t := range profile2 {
@@ -1908,7 +1908,7 @@ Taxonomic binning formats:
 		}
 
 		// --------------------
-		// sum up
+		// sum up #4
 
 		targets := make([]*Target, 0, 256)
 
