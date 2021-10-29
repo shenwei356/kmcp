@@ -122,7 +122,8 @@ Simplified database
         | csvtk grep -Ht -f 2 -P <(cut -f 1 ../ref2taxid.slim.tsv) \
         | cut -f 1 \
         | rush 'ln -s ../refseq-cami2/{}'
-        
+    
+    cd ..
     # rename files
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' refseq-cami2-slim       
 

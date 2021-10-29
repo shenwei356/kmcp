@@ -954,7 +954,7 @@ func init() {
 	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
 
 	// making it default
-	searchCmd.Flags().BoolP("try-se", "", false, `if paired-end reads have no hits, research with read1, if still fails, try read2`)
+	searchCmd.Flags().BoolP("try-se", "", false, `if paired-end reads have no hits, re-search with read1, if still fails, try read2`)
 }
 
 func cloneFastx(sequence *seq.Seq) *seq.Seq {
