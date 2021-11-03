@@ -20,7 +20,7 @@ theme:
         accent: blue grey
     icon:
         logo: material/school
-    favicon: files/favicon.ico
+    favicon: favicon.ico
     feature:
         navigation.tabs: false
 extra:

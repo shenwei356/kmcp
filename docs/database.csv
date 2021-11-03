@@ -1,4 +1,0 @@
-kingdoms,source,# species,# assembly,file,size
-**Bacteria and Archaea**,GTDB r202,43252,47894,[gtdb.kmcp.tar.gz]() (37.13 GB),55.12 GB
-**Viruses**,Refseq r207,7300,11618,[refseq-viruses.kmcp.tar.gz]() (1.09 GB),4.14 GB
-**Fungi**,Refseq r207,148,390,[refseq-fungi.kmcp.tar.gz]() (8.79GB),11.12 GB

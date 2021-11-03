@@ -1,0 +1,4 @@
+source	# assembly	type	parameters	file	size
+Refseq r208	37318	All k-mers	k=21	[refseq-plasmid.kmcp.tar.gz]() (5.29 GB, [md5]())	7.80 GB
+Refseq r208	37318	Scaled MinHash	K=31, scale=10	[refseq-plasmid.minhash.kmcp.tar.gz]() (1.01 GB, [md5]())	2.00 GB
+Refseq r208	37318	Closed Syncmer	K=31, s=21	[refseq-plasmid.syncmer.kmcp.tar.gz]() (806 MB, [md5]())	1.54 GB

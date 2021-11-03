@@ -8,7 +8,7 @@
 
 xxx
 
-(check the [benchmark](/benchmark/profiling))
+(check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling))
 
 
 ### 2. Fast sequence search from large scales of genomic datasets
@@ -17,7 +17,7 @@ KMCP can be used for fast sequence search from large scales of genomic dataset
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a small database size and much faster searching speed
- (check the [tutorial](/tutorial/searching) and [benchmark](/benchmark/searching)).
+ (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
  
 ### 3. Fast genome similarity estimation
 
@@ -31,10 +31,10 @@ Here KMCP utilizes multiple sketches
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [Scaled MinHash](https://f1000research.com/articles/8-1006) and
 [Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
- (check the [tutorial](/tutorial/searching) and [benchmark](/benchmark/searching)).
+ (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
-Tutorials and resources:
+## Tutorials and resources:
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Databases](https://bioinf.shenwei.me/kmcp/database)
