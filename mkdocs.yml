@@ -1,4 +1,4 @@
-site_name: KMCP - metagenomic profiling
+site_name: KMCP - metagenomic profiling and sequence search
 nav:
 - Home: index.md
 - Download: download.md
@@ -27,6 +27,6 @@ extra:
   manifest: manifest.webmanifest
 
 repo_url: https://github.com/shenwei356/kmcp
-site_description: kmcp - K-mer-based Metagenomic Classification and Profiling
+site_description: KMCP - K-mer-based Metagenomic Classification and Profiling
 site_author: Wei Shen
 # google_analytics: ['UA-28948626-9', 'bioinf.shenwei.me/kmcp']
