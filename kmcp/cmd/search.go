@@ -150,6 +150,14 @@ Performance tips:
 		}
 
 		// ---------------------------------------------------------------
+
+		if outputLog {
+			log.Infof("kmcp v%s", VERSION)
+			log.Info("  https://github.com/shenwei356/kmcp")
+			log.Info()
+		}
+
+		// ---------------------------------------------------------------
 		// input files
 
 		if outputLog {
@@ -191,13 +199,6 @@ Performance tips:
 
 		if !pairedEnd {
 			files1 := getFileListFromArgsAndFile(cmd, args, true, "infile-list", true)
-			if outputLog {
-				if len(files) == 1 && isStdin(files[0]) {
-					log.Info("  no files given, reading from stdin")
-				} else {
-					log.Infof("  %d input file(s) given", len(files))
-				}
-			}
 
 			if read1 != "" || read2 != "" {
 				for _, file := range files1 {
@@ -208,6 +209,14 @@ Performance tips:
 				}
 			} else {
 				files = append(files, files1...)
+			}
+
+			if outputLog {
+				if len(files) == 1 && isStdin(files[0]) {
+					log.Info("  no files given, reading from stdin")
+				} else {
+					log.Infof("  %d input file(s) given", len(files))
+				}
 			}
 		}
 
@@ -246,12 +255,6 @@ Performance tips:
 		}
 		if len(dbDirs) == 0 {
 			checkError(fmt.Errorf("invalid kmcp database: %s", dbDir))
-		}
-
-		if outputLog {
-			log.Infof("kmcp v%s", VERSION)
-			log.Info("  https://github.com/shenwei356/kmcp")
-			log.Info()
 		}
 
 		// ---------------------------------------------------------------

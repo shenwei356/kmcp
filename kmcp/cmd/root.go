@@ -31,14 +31,20 @@ import (
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "kmcp",
-	Short: "Kmer-based Metagenomics Classification and Profilling",
+	Short: "K-mer-based Metagenomic Classification and Profilling",
 	Long: fmt.Sprintf(`
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
     Version: v%s
-  Documents: https://shenwei356.github.io/kmcp
+  Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
-kmcp is a tool for metagenomic classification and profiling.
+KMCP is a tool for metagenomic classification and profiling.
+
+KMCP can also be used for:
+  1. Fast sequence search against large scales of genomic datasets
+     as BIGSI and COBS do.
+  2. Fast assembly/genome similarity estimation as Mash and sourmash do,
+     by utilizing Minimizer, Scaled MinHash, or Closed Syncmers.
 
 `, VERSION),
 }

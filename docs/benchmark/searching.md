@@ -37,7 +37,7 @@ Database size and building time:
 |               |mash   |sourmash  |kmcp    |
 |:--------------|:------|:---------|:-------|
 |database size  |743MB  | 5.19GB   | 1.52GB |
-|buiding time   |11m39s | 89m59s   | 7min02s|
+|building time  |11m39s | 89m59s   | 7min02s|
 |temporary files|-      |-         | 3.41GB |
 
 

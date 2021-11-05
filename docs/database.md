@@ -66,11 +66,11 @@ Closed Syncmers:
 
 ### C). Databases of plasmid
 
-|source     |# assembly|type          |parameters    |file                                                     |size   |
-|:----------|:---------|:-------------|:-------------|:--------------------------------------------------------|:------|
-|Refseq r208|37318     |All k-mers    |k=21          |[refseq-plasmid.kmcp.tar.gz]() (5.29 GB, [md5]())        |7.80 GB|
-|Refseq r208|37318     |Scaled MinHash|K=31, scale=10|[refseq-plasmid.minhash.kmcp.tar.gz]() (1.01 GB, [md5]())|2.00 GB|
-|Refseq r208|37318     |Closed Syncmer|K=31, s=21    |[refseq-plasmid.syncmer.kmcp.tar.gz]() (806 MB, [md5]()) |1.54 GB|
+|source     |# assembly|type          |parameters    |file                                                                                                                                                                       |size   |
+|:----------|:---------|:-------------|:-------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------|
+|Refseq r208|37318     |All k-mers    |k=21          |[refseq-plasmid.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUQpIuKC5ju2TIdD?e=yKdRs2) (5.29 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjT-TO94gsfpUpe8_?e=1RAvr1))        |7.80 GB|
+|Refseq r208|37318     |Scaled MinHash|K=31, scale=10|[refseq-plasmid.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8) (1.01 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp))|2.00 GB|
+|Refseq r208|37318     |Closed Syncmer|K=31, s=21    |[refseq-plasmid.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUPv9o2SA4kiSxwU?e=UvkSDV) (806 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUKt3A_p7Q7BE7qT?e=dApTX8)) |1.54 GB|
 
 ## Building databases
 

@@ -1,4 +1,4 @@
-# KMCP - K-mer-based Metagenomics Classification and Profiling
+# KMCP - K-mer-based Metagenomic Classification and Profiling
 
 <img src="kmcp.png" alt="" width="800"/>
 
@@ -21,7 +21,7 @@ bringing a small database size and much faster searching speed
  
 ### 3. Fast genome similarity estimation
 
-KMCP can be used for fast similarity estimation of newly assembled genome against known reference genomes.
+KMCP can be used for fast similarity estimation of newly assembled genomes against known reference genomes.
 
 Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
@@ -30,7 +30,7 @@ provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (
 Here KMCP utilizes multiple sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [Scaled MinHash](https://f1000research.com/articles/8-1006) and
-[Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
+[Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 

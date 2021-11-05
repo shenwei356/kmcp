@@ -9,7 +9,13 @@ KMCP is a command-line tool consisting of several subcommands.
   Documents: https://shenwei356.github.io/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
-kmcp is a tool for metagenomic classification and profiling.
+KMCP is a tool for metagenomic classification and profiling.
+
+KMCP can also be used for:
+  1. Fast sequence search from large scales of genomic datasets
+     as BIGSI and COBS do.
+  2. Fast assembly/genome similarity estimation as Mash and sourmash do,
+     by utilizing Minimizer, Scaled MinHash, or Closed Syncmers.
 
 Usage:
   kmcp [command]

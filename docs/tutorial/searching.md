@@ -1,14 +1,29 @@
 # Sequence and genome searching
 
+## Using cases
+
+- Searching sequences against raws reads.
+    - For checking existence:
+        - Building database with raws reads and searching with query sequences,
+          optionally using k-mer sketches for long query sequences.
+    - For abundance estimation:
+        - For long sequences (similar with taxonomic profiling):
+            - Building database with query sequences, and searching with raws reads.
+        - For short (shorter than reads length) sequences:
+            - Not capable.
+- Searching sequences against assemblies/genomes.
+    - Building database with assemblies/genomes, 
+      optionally using k-mer sketches for long query sequences
+      (see [genome similarity estimation](#genome-similarity-estimation)).
+
 ## Sequence search
 
-KMCP can be used for fast sequence search from large scales of genomic datasets
+KMCP can be used for fast sequence search against large scales of genomic datasets
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 
 KMCP reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a small database size and much faster searching speed
  (check the [benchmark](/benchmark/searching)).
-
 
 ### Step 1. Building databases
 
