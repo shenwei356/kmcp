@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/bio/taxdump"
 	"github.com/shenwei356/util/stats"
 )
 
@@ -170,10 +170,10 @@ type Target struct {
 	Score float64
 }
 
-func (t *Target) AddTaxonomy(taxdb *unikmer.Taxonomy, showRanksMap map[string]interface{}, taxid uint32) {
-	t.Taxid = taxid
+func (t *Target) AddTaxonomy(taxdb *taxdump.Taxonomy, showRanksMap map[string]interface{}, taxid uint32) {
+	t.Taxid, _ = taxdb.TaxId(taxid)
 	t.Rank = taxdb.Rank(taxid)
-	t.TaxonName = taxdb.Names[taxid]
+	t.TaxonName = taxdb.Name(taxid)
 
 	_taxids := taxdb.LineageTaxIds(taxid)
 
@@ -240,7 +240,7 @@ type ProfileNode struct {
 	Percentage    float64
 }
 
-func generateProfile(taxdb *unikmer.Taxonomy, targets []*Target) map[uint32]*ProfileNode {
+func generateProfile(taxdb *taxdump.Taxonomy, targets []*Target) map[uint32]*ProfileNode {
 
 	profile := make(map[uint32]*ProfileNode, len(targets))
 

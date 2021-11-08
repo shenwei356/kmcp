@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.7.0 - 2021-10
+### v0.7.0 - 2021-11-08
 
 - commands:
     - new command `utils filter`: Filter search results and find species-specific queries.
@@ -13,13 +13,14 @@
      It eliminates fake k-mers at the concatenation position.
     - set default value for flag `-N/--ref-name-regexp`: `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`.
 - `search`:
-    - support searching with paired-end reads which has higher specificity while lower sensitivity.
-    - better log.
+    - support searching with paired-end reads which has a higher specificity and a lower sensitivity.
+      A flag `--try-se` is added for search read1/read2 when the paired end reads have no hits.
     - fix matches order of a query.
     - fix queries with many Ns.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
-    - change default value of flag `-n/--keep-top-scores` from `5` to `0`.
+    - change default value of flag `-n/--keep-top-scores` from `5` to `0`, i.e., keep all matches by default.
     - 10-25% faster.
+    - better log.
 - `merge`:
     - fix adding up `hits`, does not affect `profile`.
     - fix bug of incorrect order.

@@ -35,8 +35,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/shenwei356/bio/taxdump"
 	"github.com/shenwei356/breader"
-	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/stats"
 	"github.com/spf13/cobra"
@@ -328,7 +328,7 @@ Taxonomic binning formats:
 		// ---------------------------------------------------------------
 		// taxid mapping files
 
-		var taxdb *unikmer.Taxonomy
+		var taxdb *taxdump.Taxonomy
 		var taxidMap map[string]uint32
 
 		if mappingTaxids {
@@ -2104,7 +2104,7 @@ Taxonomic binning formats:
 				t.FragsProp, strings.Join(covs, ";"), t.RelDepthStd,
 				t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
 				t.RefName,
-				taxid, t.Rank, t.TaxonName,
+				t.Taxid, t.Rank, t.TaxonName,
 				strings.Join(t.LineageNames, separator),
 				strings.Join(t.LineageTaxids, separator)))
 		}

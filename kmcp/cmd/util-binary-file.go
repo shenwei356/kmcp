@@ -25,12 +25,12 @@ import (
 	"io"
 
 	"github.com/pkg/errors"
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/unik/v5"
 )
 
 const extDataFile = ".unik"
 
-func checkCompatibility(reader0 *unikmer.Reader, reader *unikmer.Reader, file string, meta0 *Meta, meta *Meta) {
+func checkCompatibility(reader0 *unik.Reader, reader *unik.Reader, file string, meta0 *Meta, meta *Meta) {
 	if reader0.K != reader.K {
 		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "unikmer info": %s`, reader0.K, reader.K, file))
 	}
@@ -63,7 +63,7 @@ func readKmers(file string) ([]uint64, error) {
 	}
 	defer r.Close()
 
-	reader, err := unikmer.NewReader(infh)
+	reader, err := unik.NewReader(infh)
 	if err != nil {
 		return nil, err
 	}

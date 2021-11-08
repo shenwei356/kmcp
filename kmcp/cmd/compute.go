@@ -35,7 +35,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/bio/sketches"
+	"github.com/shenwei356/unik/v5"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/spf13/cobra"
 	"github.com/twotwotwo/sorts/sortutil"
@@ -447,8 +448,8 @@ Performance tips:
 				var fastxReader *fastx.Reader
 				var ok bool
 				var code uint64
-				var iter *unikmer.Iterator
-				var sketch *unikmer.Sketch
+				var iter *sketches.Iterator
+				var sketch *sketches.Sketch
 				var n int
 
 				var slider func() (*seq.Seq, bool)
@@ -634,14 +635,14 @@ Performance tips:
 
 						for _, k = range ks {
 							if syncmer {
-								sketch, err = unikmer.NewSyncmerSketch(_seq, k, syncmerS, circular)
+								sketch, err = sketches.NewSyncmerSketch(_seq, k, syncmerS, circular)
 							} else if minimizer {
-								sketch, err = unikmer.NewMinimizerSketch(_seq, k, minimizerW, circular)
+								sketch, err = sketches.NewMinimizerSketch(_seq, k, minimizerW, circular)
 							} else {
-								iter, err = unikmer.NewHashIterator(_seq, k, true, circular)
+								iter, err = sketches.NewHashIterator(_seq, k, true, circular)
 							}
 							if err != nil {
-								if err == unikmer.ErrShortSeq {
+								if err == sketches.ErrShortSeq {
 									continue
 								} else {
 									checkError(errors.Wrapf(err, "seq: %s", record.Name))
@@ -869,13 +870,13 @@ func writeKmers(k int, codes []uint64, n uint64,
 		checkError(w.Close())
 	}()
 
-	var writer *unikmer.Writer
+	var writer *unik.Writer
 	var mode uint32
 
-	mode |= unikmer.UnikCanonical
-	mode |= unikmer.UnikHashed
+	mode |= unik.UnikCanonical
+	mode |= unik.UnikHashed
 
-	writer, err = unikmer.NewWriter(outfh, k, mode)
+	writer, err = unik.NewWriter(outfh, k, mode)
 	if err != nil {
 		checkError(errors.Wrap(err, outFile))
 	}

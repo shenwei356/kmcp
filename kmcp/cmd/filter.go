@@ -31,8 +31,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/shenwei356/bio/taxdump"
 	"github.com/shenwei356/breader"
-	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/spf13/cobra"
 	"github.com/zeebo/wyhash"
@@ -152,7 +152,7 @@ Performance notes:
 		// ---------------------------------------------------------------
 		// taxid mapping files
 
-		var taxdb *unikmer.Taxonomy
+		var taxdb *taxdump.Taxonomy
 		var taxidMap map[string]uint32
 
 		if mappingTaxids {

@@ -32,10 +32,10 @@ import (
 	"github.com/clausecker/pospop"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
+	"github.com/shenwei356/bio/sketches"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/mmap-go"
 	"github.com/shenwei356/pand"
-	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/util/cliutil"
 	"github.com/shenwei356/util/pathutil"
 	"github.com/twotwotwo/sorts"
@@ -1030,21 +1030,21 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 	}
 
 	var err error
-	var iter *unikmer.Iterator
-	var sketch *unikmer.Sketch
+	var iter *sketches.Iterator
+	var sketch *sketches.Sketch
 	var code uint64
 	var ok bool
 
 	// using ntHash
 	if db.Info.Syncmer {
-		sketch, err = unikmer.NewSyncmerSketch(sequence, k, int(db.Info.SyncmerS), false)
+		sketch, err = sketches.NewSyncmerSketch(sequence, k, int(db.Info.SyncmerS), false)
 	} else if db.Info.Minimizer {
-		sketch, err = unikmer.NewMinimizerSketch(sequence, k, int(db.Info.MinimizerW), false)
+		sketch, err = sketches.NewMinimizerSketch(sequence, k, int(db.Info.MinimizerW), false)
 	} else {
-		iter, err = unikmer.NewHashIterator(sequence, k, db.Header.Canonical, false)
+		iter, err = sketches.NewHashIterator(sequence, k, db.Header.Canonical, false)
 	}
 	if err != nil {
-		if err == unikmer.ErrShortSeq {
+		if err == sketches.ErrShortSeq {
 			return nil, nil
 		}
 		return nil, err

@@ -406,6 +406,7 @@ Mapping file:
     
 Stats:
 
+    # -------------------------------------------------------------
     # NCBI taxonomy
 
     # number of species/strains
@@ -435,6 +436,7 @@ Stats:
     no rank      1
     serotype     1
     
+    # -------------------------------------------------------------
     # GTDB taxonomy
     
     cat HumGut.tsv \
@@ -469,6 +471,8 @@ Building database:
     #     number of hash function: 1
     #     false positive rate: 0.3
     kmcp index -j 32 -I humgut-k21-n10 -O humgut.kmcp -n 1 -f 0.3
+    
+    cp taxid.map taxid-gtdb.map humgut.kmcp/
 
 
 ## Building custom databases

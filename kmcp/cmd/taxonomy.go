@@ -25,18 +25,18 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/bio/taxdump"
 	"github.com/shenwei356/util/pathutil"
 )
 
-func loadTaxonomy(opt *Options, path string) *unikmer.Taxonomy {
+func loadTaxonomy(opt *Options, path string) *taxdump.Taxonomy {
 	if opt.Verbose {
 		log.Infof("loading Taxonomy from: %s", path)
 	}
-	var t *unikmer.Taxonomy
+	var t *taxdump.Taxonomy
 	var err error
 
-	t, err = unikmer.NewTaxonomyWithRankFromNCBI(filepath.Join(path, "nodes.dmp"))
+	t, err = taxdump.NewTaxonomyWithRankFromNCBI(filepath.Join(path, "nodes.dmp"))
 	if err != nil {
 		checkError(fmt.Errorf("err on loading Taxonomy nodes: %s", err))
 	}

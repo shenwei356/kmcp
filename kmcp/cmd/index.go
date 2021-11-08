@@ -36,7 +36,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/unik/v5"
 	"github.com/shenwei356/util/bytesize"
 	"github.com/shenwei356/util/math"
 	"github.com/shenwei356/util/pathutil"
@@ -292,13 +292,13 @@ Performance tips:
 		var n uint64
 		var namesMap0 map[string]interface{}
 
-		var reader0 *unikmer.Reader
+		var reader0 *unik.Reader
 
 		getInfo := func(file string, first bool) UnikFileInfo {
 			infh, r, _, err := inStream(file)
 			checkError(err)
 
-			reader, err := unikmer.NewReader(infh)
+			reader, err := unik.NewReader(infh)
 			checkError(errors.Wrap(err, file))
 
 			var meta Meta
@@ -1075,7 +1075,7 @@ Performance tips:
 
 									var infh *bufio.Reader
 									var r *os.File
-									var reader *unikmer.Reader
+									var reader *unik.Reader
 									var err error
 									var code uint64
 									var loc int
@@ -1083,7 +1083,7 @@ Performance tips:
 									infh, r, _, err = inStream(info.Path)
 									checkError(errors.Wrap(err, info.Path))
 
-									reader, err = unikmer.NewReader(infh)
+									reader, err = unik.NewReader(infh)
 									checkError(errors.Wrap(err, info.Path))
 									singleHash := numHashes == 1
 
@@ -1458,7 +1458,7 @@ func maxElements(opt Options, tokensOpenFiles chan int, batch [][]UnikFileInfo) 
 				}
 				defer r.Close()
 
-				reader, err := unikmer.NewReader(infh)
+				reader, err := unik.NewReader(infh)
 				if err != nil {
 					checkError(err)
 				}
