@@ -98,6 +98,9 @@ Output:
   2. For splitting sequence mode (--split-size > 0 or --split-number > 0),
      output files are:
      ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+  3. A summary file ("${outdir}/_info.txt") is generated for later use.
+     Users need to check if the reference IDs (column "name") are what
+     supposed to be.
 
 Performance tips:
   1. Decrease value of -j/--threads for data in hard disk drives to
@@ -553,6 +556,7 @@ Performance tips:
 						return
 					}
 					record1.Seq.Seq = bigSeq
+					record1.Seq.Qual = nil
 					record = record1
 
 					genomeSize = uint64(len(record.Seq.Seq))

@@ -7,7 +7,7 @@
     - Or [build custom databases](/database/#custom-database).
 - Hardware.
     - CPU: ≥ 32 cores preferred.
-    - RAM: ≥ 64 GB, depends on file size of the maximum database.
+    - RAM: ≥ 64 GB, depends on file size of the maximal database.
 
 ## Datasets
 
@@ -36,8 +36,6 @@ Tools:
 Host reference genomes:
 
 - Human: [CHM13](https://github.com/marbl/CHM13)
-- Mouse: []()
-- Rat: []()
 
 Building the index:
     
@@ -72,17 +70,17 @@ where the databases can be built with different parameters.
     not removed for short sequences by default. You may modify the
     value of `-u/--kmer-dedup-threshold` (default `256`) to remove duplicates.
 3. For long reads or contigs, you should split them in to short reads
-    using "seqkit sliding", e.g.,
+    using `seqkit sliding`, e.g.,
 
         seqkit sliding -s 100 -W 300
 
-4. The values of `tCov` and `jacc` in result only apply for single size of k-mer.
+4. The values of `tCov` and `jacc` in results only apply for single size of k-mer.
 
 **`kmcp search` and `kmcp profile` share some flags**, therefore users
 can use stricter criteria in `kmcp profile`.
 
 1. `-t/--min-query-cov`, minimal query coverage, i.e., 
-   proportion of matched k-mers and unique k-mers of a query (default `0.55`)
+   proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity))
 2. `-N/--name-map`, tabular two-column file(s) mapping names to user-defined values.
 
 **Performance tips**:
@@ -139,7 +137,7 @@ Merging searching results on multiple database:
 
     kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
     
-Format:
+Result format:
 
 |#query                             |qLen|qKmers|FPR       |hits|target       |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
 |:----------------------------------|:---|:-----|:---------|:---|:------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
@@ -167,7 +165,7 @@ Format:
 1. Reference genomes can be splitted into fragments when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimal proportion of matched fragments
-    (`-p`/--min-frags-prop). (***highly recommended***)
+    (`-p/--min-frags-prop`). (***highly recommended***)
     Another flag `-d/--max-frags-cov-stdev` further reduces false positives.
 2. We require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
@@ -177,6 +175,8 @@ Format:
 4. Multi-aligned queries are proportionally assigned to references
     with a similar strategy in [Metalign](https://doi.org/10.1186/s13059-020-02159-0).
 5. Input files are parsed 4 times, therefore STDIN is not supported.
+
+Three-rounds profiling:
 
 <img src="/tutorial/profiling-steps.png" alt="" width="500"/>
 
@@ -210,13 +210,13 @@ Format:
 2. However using a lot of threads does not always accelerate
     processing, 4 threads with chunk size of 500-5000 is fast enough.
 
-Profiling output formats:
+**Profiling output formats**:
 
 - KMCP      (`-o/--out-prefix`)
-- CAMI      (`-M/--metaphlan-report`)
-- MetaPhlAn (`-C/--cami-report`)
+- CAMI      (`-M/--metaphlan-report`, sampe name: `-s/--sample-id`)
+- MetaPhlAn (`-C/--cami-report`, sampe name: `-s/--sample-id`))
 
-Taxonomic binning formats:
+**Taxonomic binning formats**:
 
 - CAMI      (`-B/--binning-result`)
 

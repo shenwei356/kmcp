@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.7.0 - 2021-11-08
+### v0.7.0 - 2021-11-11
 
 - commands:
     - new command `utils filter`: Filter search results and find species-specific queries.
@@ -12,6 +12,7 @@
      instead of directly concatenation.
      It eliminates fake k-mers at the concatenation position.
     - set default value for flag `-N/--ref-name-regexp`: `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`.
+    - fix a rare bug when splitting FASTQ files.
 - `search`:
     - support searching with paired-end reads which has a higher specificity and a lower sensitivity.
       A flag `--try-se` is added for search read1/read2 when the paired end reads have no hits.
@@ -30,13 +31,14 @@
     - output format change: new column `coverage`, `fragsRelDepth` and `fragsRelDepthStd`.
     - change default file extension of binning file.
     - check if the taxid of a target is given by taxid mapping file.
+    - automatically switch to new taxid for merged one.
     - change computation of `score`.
     - new flag `-d/--max-frags-depth-stdev`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
     - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
-    - faster search result parsing speed.
+    - faster search result parsing.
     
 ### v0.6.0 - 2021-08-13
 

@@ -13,6 +13,7 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 |kingdoms                |source     |# species|# assembly|parameters    |archive file                                                                                                                                                    |size     |
 |:-----------------------|:----------|:--------|:---------|:-------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
 |**Bacteria and Archaea**|GTDB r202  |43252    |47894     |k=21, frags=10|[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))      |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |23604    |30691     |k=21, frags=10|[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))    |21.52 GB |
 |**Fungi**               |Refseq r208|161      |403       |k=21, frags=10|[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))|4.18 GB  |
 |**Viruses**             |Refseq r208|7189     |11618     |k=21, frags=5 |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))|2.00 GB  |
 
@@ -22,6 +23,11 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 - Taxid mapping file: [taxid.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRa2STDU8ZCq3PEk?e=DhUeOd))
 - Name mapping file: [name.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4))
 
+**Meta data for HumGut**:
+
+- Taxonomy dump file: [taxdump-humgut.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf))
+- Taxid mapping file: [taxid-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2))
+- Name mapping file: [name-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman))
 
 **Hardware requirements**
 
@@ -546,7 +552,7 @@ of slower searching speed**.
     with overlap (-`l/--split-overlap`).
 2. When splitting by number of fragments, **all sequences (except for
     these mathching any regular expression given by `-B/--seq-name-filter`)
-    in a sequence file are concatenated before splitting**.
+    in a sequence file are concatenated with k-1 Ns before splitting**.
 3. Both sequence/reference IDs and fragments indices are saved for later use,
     in form of meta/description data in `.unik` files, and will
     be reported in `kmcp search` results.
@@ -584,6 +590,10 @@ is good enough.
     output files are:
     
         ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+        
+3. A summary file (`${outdir}/_info.txt`) is generated for later use.
+     Users need to check if the reference IDs (column `name`) are what
+     supposed to be.
 
 **Performance tips**:
 
@@ -635,7 +645,7 @@ is good enough.
     22:33:11.121 [INFO]
 
 A summary file (`_info.txt`) is generated for later use.
-**Users needs check if the reference IDs (column `name`) are what supposed to be**.
+**Users need to check if the reference IDs (column `name`) are what supposed to be**.
 
 |#path                                                                |name       |fragIdx|idxNum|genomeSize|kmers |
 |:--------------------------------------------------------------------|:----------|:------|:-----|:---------|:-----|
@@ -645,9 +655,9 @@ A summary file (`_info.txt`) is generated for later use.
 |refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913.3-frag_0.unik|NC_000913.3|0      |10    |4641652   |459277|
 |refs-k21-n10/934/859/934/NC_013654.1.fasta.gz/NC_013654.1-frag_0.unik|NC_013654.1|0      |10    |4717338   |470575|
 
-Meta data in the `.unik` file can be showed using [unikmer](https://github.com/shenwei356/unikmer/releases):
+Meta data in the `.unik` file can be showed using `kmcp utils unik-info`:
 
-    unikmer info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-frag_0.unik -a
+    kmcp utils unik-info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-frag_0.unik -a
 
 
 ### Step 2. Building databases
@@ -777,7 +787,7 @@ Output:
         └── __name_mapping.tsv
 
 `__db.yml` contains configuration of the database, and `_blockXXX.uniki` are index files.
-`kmcp info` could show the basic information of index files:
+`kmcp utils index-info` could show the basic information of index files:
 
     kmcp utils index-info  refs.kmcp/R001/_block001.uniki
 

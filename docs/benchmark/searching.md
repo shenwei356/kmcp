@@ -6,7 +6,7 @@ Softwares
 
 - [cobs](https://github.com/bingmann/cobs) ([1915fc0](https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15))
 - [sourmash](https://github.com/dib-lab/sourmash) (v4.2.2)
-- kmcp ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
+- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
 
 [GTDB r202 representative genomes](https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz) are used for tests:
 
@@ -30,7 +30,7 @@ Searching with bacterial genomes or short reads (~200K reads).
 
 ## KMCP vs Mash and Sourmash
 
-Only Scaled MinHash (scale=1000 for Sourmash and kmcp) or MinHash (scale=3400 fo Mash) are indexed and searched.
+Only Scaled MinHash (scale=1000 for Sourmash and KMCP) or MinHash (scale=3400 fo Mash) are indexed and searched.
 
 Database size and building time:
 
@@ -45,4 +45,4 @@ Searching with bacterial genomes.
 
 ## Result
 
-<img src="bench.searching.jpg" alt="" width="600"/>
+<img src="/benchmark/bench.searching.jpg" alt="" width="600"/>

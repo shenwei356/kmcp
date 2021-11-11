@@ -63,7 +63,7 @@ Shared flags between "search" and "profile":
   2. -N/--name-map.
 
 Special attentions:
-  1. The values of tCov and jacc in result only apply for single size of k-mer.
+  1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger

@@ -106,7 +106,15 @@ The result is tab-delimited.
 |S0R0/2|150 |130   |3.0168e-03|5   |GCF_001434585.1|0      |1    |2219511|21   |80    |0.6154|0.0000|0.0000|1       |
 |S0R0/2|150 |130   |3.0168e-03|5   |GCF_001437405.1|0      |1    |2260906|21   |77    |0.5923|0.0000|0.0000|1       |
 
-Reference IDs (column `target`) can be optionally mapped to their names, let's print the main columns only:
+Reference IDs (column `target`) can be optionally mapped to their names when searching:
+
+    kmcp search -d gtdb-r202-k21.kmcp/ -N name.map test.fq.gz -o result.tsv.gz
+    
+Or after searching using `csvtk`:
+
+    csvtk replace -t -C $ -f target -k name.map -p '(.+)' -r '{kv}' result.tsv.gz
+
+Print the main columns only:
 
     csvtk head -t -C $ -n 5 result.tsv.gz \
         | csvtk rename -t -C $ -f 1 -n query \

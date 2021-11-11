@@ -95,6 +95,9 @@ Output:
   2. For splitting sequence mode (--split-size > 0 or --split-number > 0),
      output files are:
      ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+  3. A summary file ("${outdir}/_info.txt") is generated for later use.
+     Users need to check if the reference IDs (column "name") are what
+     supposed to be.
 
 Performance tips:
   1. Decrease value of -j/--threads for data in hard disk drives to
@@ -114,7 +117,7 @@ Flags:
   -k, --kmer ints                 k-mer size(s) (default [21])
   -W, --minimizer-w int           minimizer window size
   -O, --out-dir string            output directory
-  -N, --ref-name-regexp string    regular expression (must contains "(" and ")") for extracting reference name from file name
+  -N, --ref-name-regexp string    regular expression (must contains "(" and ")") for extracting reference name from file name (default "(?i)(.+)\\.(f[aq](st[aq])?|fna)(.gz)?$")
   -D, --scale int                 scale/down-sample factor (default 1)
   -B, --seq-name-filter strings   list of regular expressions for filtering out sequences by header/name, case ignored
   -m, --split-min-ref int         only splitting sequences >= M bp (default 1000)
@@ -124,8 +127,6 @@ Flags:
   -S, --syncmer-s int             closed syncmer length
 
 ```
-
-Example
 
 
 ## index
@@ -190,7 +191,7 @@ Flags:
       --force                        overwrite output directory
   -h, --help                         help for index
   -I, --in-dir string                directory containing .unik files. directory symlinks are followed
-  -F, --max-open-files int           maximum number of opened files, please use a small value for hard disk drive storage (default 256)
+  -F, --max-open-files int           maximal number of opened files, please use a small value for hard disk drive storage (default 256)
   -n, --num-hash int                 number of hashes of bloom filters (default 1)
   -O, --out-dir string               output directory. default: ${indir}.kmcp-db
 
@@ -216,10 +217,10 @@ Attentions:
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
-  3. -N/--name-map.
+  2. -N/--name-map.
 
 Special attentions:
-  1. The values of tCov and jacc in result only apply for single size of k-mer.
+  1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger
@@ -248,7 +249,10 @@ Flags:
   -o, --out-file string            out file, supports and recommends a ".gz" suffix ("-" for stdout) (default "-")
       --query-id string            custom query Id when using the whole file as a query
   -g, --query-whole-file           use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database
+  -1, --read1 string               (gzipped) read1 file
+  -2, --read2 string               (gzipped) read2 file
   -s, --sort-by string             sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index) (default "qcov")
+      --try-se                     if paired-end reads have no hits, re-search with read1, if still fails, try read2
   -G, --use-filename               use file name as query ID when using the whole file as a query
 
 ```
@@ -373,7 +377,6 @@ Flags:
       --show-rank strings             only show TaxIds and names of these ranks (default [superkingdom,phylum,class,order,family,genus,species,strain])
   -X, --taxdump string                directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
   -T, --taxid-map strings             tabular two-column file(s) mapping reference IDs to TaxIds
-  -Y, --uregion-prop-map strings      tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)
 
 ```
 
@@ -389,6 +392,7 @@ Available Commands:
   filter        Filter search results and find species/assembly-specific queries
   index-info    Print information of index file
   merge-regions Merge species/assembly-specific regions
+  unik-info     Print information of .unik file
 
 ```
 
@@ -490,6 +494,30 @@ Flags:
   -s, --name-species string    name of species-specific regions (default "species-specific")
   -o, --out-prefix string      out file prefix ("-" for stdout) (default "-")
   -r, --regexp string          regular expression for extract reference name and query locations (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
+```
+
+## unik-info
+
+```text
+Print information of .unik file
+
+Tips:
+  1. For lots of small files (especially on SDD), use big value of '-j' to
+     parallelize counting.
+
+Usage:
+  kmcp utils unik-info [flags]
+
+Flags:
+  -a, --all                   all information, including number of k-mers
+  -b, --basename              only output basename of files
+  -h, --help                  help for unik-info
+  -o, --out-file string       out file ("-" for stdout, suffix .gz for gzipped out) (default "-")
+  -e, --skip-err              skip error, only show warning message
+      --symbol-false string   smybol for false (default "✕")
+      --symbol-true string    smybol for true (default "✓")
+  -T, --tabular               output in machine-friendly tabular format
+
 ```
 
 

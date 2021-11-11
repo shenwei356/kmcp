@@ -1404,8 +1404,8 @@ func init() {
 	// indexCmd.Flags().IntP("seed", "", 1, `[RAMBO] seed for randomly assigning names to buckets`)
 
 	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
-	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximum number of opened files, please use a small value for hard disk drive storage`)
-	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximum number of writing files, please use a small value for hard disk drive storage`)
+	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximal number of opened files, please use a small value for hard disk drive storage`)
+	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximal number of writing files, please use a small value for hard disk drive storage`)
 	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
 }
 
