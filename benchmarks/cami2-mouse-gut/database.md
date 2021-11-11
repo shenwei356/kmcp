@@ -164,6 +164,12 @@ prokaryotic data.
     cat assembly_summary.tsv \
         | csvtk filter2 -t -f '$seq_rel_date < "2019/01/10"' \
         | csvtk grep -t -f ftp_path -i -p na -v \
+        > assembly_summary.2019.tsv
+
+    # filter by taxid from acc2taxid.microbe.tsv (2019/01/10)
+    # 8242
+    cat assembly_summary.2019.tsv \
+        | csvtk grep -t -f taxid -P <(cut -f 2 acc2taxid.microbe.tsv) \
         > assembly_summary.cami2.tsv
     
     # -------------------------------------------------------------
@@ -182,6 +188,9 @@ prokaryotic data.
     find $genomes -name "*.gz" \
         | rush 'seqkit seq -w 0 {} > /dev/null; if [ $? -ne 0 ]; then echo {}; fi' \
         > failed.txt
+
+    # empty files
+    find $genomes -name "*.gz" -size 0 >> failed.txt
     
     # delete these files
     cat failed.txt | rush '/bin/rm {}'
@@ -205,30 +214,13 @@ prokaryotic data.
     # rename files
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $outdir 
 
-    
     # -------------------------------------------------------------
-    # mapping new TaxId to old taxId, using https://github.com/shenwei356/taxid-changelog
 
-    # the version of 'taxid-changelog.csv.gz' should be equal to or after the date
-    # when downloading the taxdump.tar.gz
- 
     # id -> taxid
     cat assembly_summary.cami2.tsv \
         | csvtk cut -t -f assembly_accession,taxid \
         | csvtk del-header -t \
-        > taxid-viral.map.new
-
-    # extract logs
-    pigz -cd taxid-changelog.csv.gz \
-        | csvtk grep -f taxid -P <(cut -f 2 taxid-viral.map.new) \
-        > taxid-viral.map.new.changelog
-    
-    # filter logs between 2019-01-10 and 2021-11-01
-    cat taxid-viral.map.new.changelog \
-        | csvtk filter2 -f ' ( $version >= "2019-01-10" ) && ( $version <= "2021-11-01" ) ' \
-        > taxid-viral.map.new.changelog.tsv
-    
-    # -------------------------------------------------------------
+        > taxid-viral.map
 
     # stats
     cat taxid-viral.map \
@@ -247,8 +239,10 @@ prokaryotic data.
         | csvtk del-header -t \
         > name-viral.map
         
+    # -------------------------------------------------------------
     # create kmcp database
-    kmcp compute -k 21 -e -n 5 -l 100 -I viral/ -O refseq-cami2-viral-k21-n5 \
+    
+    kmcp compute -j 40 -k 21 -n 5 -l 100 -I viral/ -O refseq-cami2-viral-k21-n5 \
         --log refseq-cami2-viral-k21-n5.log
     
     kmcp index -I refseq-cami2-viral-k21-n5/ -O refseq-cami2-viral-k21-n5.db \

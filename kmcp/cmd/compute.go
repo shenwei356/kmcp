@@ -537,6 +537,13 @@ Performance tips:
 						allSeqs = append(allSeqs, aseq)
 						lenSum += len(aseq)
 					}
+
+					if lenSum == 0 {
+						log.Warningf("skipping %s: no invalid sequences", file)
+						log.Info()
+						return
+					}
+
 					if len(allSeqs) == 1 {
 						bigSeq = allSeqs[0]
 					} else {
@@ -550,11 +557,7 @@ Performance tips:
 							i += len(aseq) + kMax - 1
 						}
 					}
-					if lenSum == 0 {
-						log.Warningf("skipping %s: no invalid sequences", file)
-						log.Info()
-						return
-					}
+
 					record1.Seq.Seq = bigSeq
 					record1.Seq.Qual = nil
 					record = record1

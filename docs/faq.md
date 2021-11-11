@@ -40,6 +40,9 @@ my tests).
         find $genomes -name "*.gz" \
             | rush 'seqkit seq -w 0 {} > /dev/null; if [ $? -ne 0 ]; then echo {}; fi' \
             > failed.txt
+
+        # empty files
+        find $genomes -name "*.gz" -size 0 >> failed.txt
     
 2. Delete these files:
 
