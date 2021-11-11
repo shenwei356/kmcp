@@ -22,7 +22,7 @@ In short, we need to use taxonomy data to get mapping relationship between TaxId
     taxid <- sequence accession <-> file
 
 
-TaxIds and accessions of archaea (2157), bacteria (2), viral (10239), fungi (4751)
+TaxIds and accessions of archaea (2157), bacteria (2), viral (10239), fungi (4751):
 
     # taxids
     taxonkit list --ids 2157,2,10239,4751 --indent "" \
@@ -32,10 +32,10 @@ TaxIds and accessions of archaea (2157), bacteria (2), viral (10239), fungi (475
     csvtk grep -Ht -f 3 -P microbe.taxids.txt ncbi_taxonomy_accession2taxid/nucl_gb.accession2taxid.gz \
         | csvtk cut -Ht -f 2,3 -o acc2taxid.microbe.tsv
 
-Extract sequences of microbes
+Extract sequences of microbes:
 
     # file2acc
-    fd fna.gz refseq/ \
+    fd fna.gz$ refseq/ \
         | rush -k 'echo -ne "{%}\t$(seqkit head -n 1 {} | seqkit seq -ni)\n"' \
         > file2acc.tsv
 
@@ -60,7 +60,7 @@ Extract sequences of microbes
         > ref2taxid.tsv
         
 
-Stats (optional)
+Stats (optional):
 
     cat ref2taxid.tsv \
         | taxonkit lineage -i 2 -r -n -L --data-dir taxdump/ \
@@ -88,7 +88,7 @@ Stats (optional)
     Pseudomonas aeruginosa       338
     Streptococcus pyogenes       242
 
-Simplified database
+**Simplified database**:
 
     # keep at most 5 assemblies for a species
     cat ref2taxid.tsv \
@@ -98,6 +98,7 @@ Simplified database
         | csvtk cut -Ht -f 1,2 \
         > ref2taxid.slim.tsv
     
+    # stats
     cat ref2taxid.slim.tsv \
         | taxonkit lineage -i 2 -r -n -L --data-dir taxdump/ \
         | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
@@ -127,7 +128,7 @@ Simplified database
     # rename files
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' refseq-cami2-slim       
 
-Building database
+Building database:
 
     genomes=refseq-cami2-slim
     
@@ -149,21 +150,25 @@ Building database
 
 ## Viruses
 
-    # download
+The database of viruses was not used because the mouse gut toy dataset only contain
+prokaryotic data.
+
+    # download assembly summary file from NCBI (2021-11-11)
     wget ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/viral/assembly_summary.txt
     
     # convert to TSV
     cat assembly_summary.txt | sed 1d | sed '1s/^# //' \
         | sed 's/"/$/g' > assembly_summary.tsv
     
-    # filter by date
-    # 8228
+    # filter by the date of CAMI2 refseq
     cat assembly_summary.tsv \
         | csvtk filter2 -t -f '$seq_rel_date < "2019/01/10"' \
+        | csvtk grep -t -f ftp_path -i -p na -v \
         > assembly_summary.cami2.tsv
     
-    # download
-    genomes=virus
+    # -------------------------------------------------------------
+    # download genomes
+    genomes=viral
     
     mkdir -p $genomes
     cat assembly_summary.cami2.tsv \
@@ -172,39 +177,81 @@ Building database
         | rush -v 'prefix={}/{%}' -v outdir=$genomes \
             ' wget -c {prefix}_genomic.fna.gz -O {outdir}/{%}_genomic.fna.gz' \
             -j 10 -c -C download.rush
-   
+
+    # check sequence file integrity using seqkit, gzip -t would fail some times.
+    find $genomes -name "*.gz" \
+        | rush 'seqkit seq -w 0 {} > /dev/null; if [ $? -ne 0 ]; then echo {}; fi' \
+        > failed.txt
     
-    TODO: mapping new TaxId to old taxId
+    # delete these files
+    cat failed.txt | rush '/bin/rm {}'
     
+    # re-download
+    grep -f failed.txt download.rush \
+            | sed 's/__CMD__//g' \
+            | rush '{}'
+
+    # check again
+    
+    # -------------------------------------------------------------
+    # use another directory with soft links linked to original files
+
+    outdir=refseq-viral-cami2
+    mkdir $outdir
+    cd $outdir
+    find ../viral -name "*.fna.gz" | rush 'ln -s {}'
+    cd ..
+
+    # rename files
+    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $outdir 
+
+    
+    # -------------------------------------------------------------
+    # mapping new TaxId to old taxId, using https://github.com/shenwei356/taxid-changelog
+
+    # the version of 'taxid-changelog.csv.gz' should be equal to or after the date
+    # when downloading the taxdump.tar.gz
+ 
     # id -> taxid
-    cat assembly_summary.tsv \
-        | csvtk grep -t -f assembly_accession -P <(ls $outdir | sed 's/.fna.gz//') \
+    cat assembly_summary.cami2.tsv \
         | csvtk cut -t -f assembly_accession,taxid \
         | csvtk del-header -t \
-        > taxid-virus.map.new
-        
+        > taxid-viral.map.new
+
+    # extract logs
+    pigz -cd taxid-changelog.csv.gz \
+        | csvtk grep -f taxid -P <(cut -f 2 taxid-viral.map.new) \
+        > taxid-viral.map.new.changelog
+    
+    # filter logs between 2019-01-10 and 2021-11-01
+    cat taxid-viral.map.new.changelog \
+        | csvtk filter2 -f ' ( $version >= "2019-01-10" ) && ( $version <= "2021-11-01" ) ' \
+        > taxid-viral.map.new.changelog.tsv
+    
+    # -------------------------------------------------------------
+
     # stats
-    cat taxid-virus.map \
+    cat taxid-viral.map \
         | taxonkit lineage -i 2 -r -n -L --data-dir taxdump/ \
         | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
         | csvtk add-header -t -n 'accession,taxid,name,rank,superkindom,phylum,class,order,family,genus,species' \
-        > taxid-virus.map.lineage.tsv
-    cat taxid-virus.map.lineage.tsv \
+        > taxid-viral.map.lineage.tsv
+    cat taxid-viral.map.lineage.tsv \
         | csvtk freq -t -f species -nr \
-        > taxid-virus.map.lineage.tsv.n-species.txt
+        > taxid-viral.map.lineage.tsv.n-species.txt
     
     # id -> name
     cat assembly_summary.tsv \
         | csvtk grep -t -f assembly_accession -P <(ls $outdir | sed 's/.fna.gz//') \
         | csvtk cut -t -f assembly_accession,organism_name \
         | csvtk del-header -t \
-        > name-virus.map
+        > name-viral.map
         
     # create kmcp database
-    kmcp compute -k 21 -e -n 5 -l 100 -I virus/ -O refseq-cami2-virus-k21-n5 \
-        --log refseq-cami2-virus-k21-n5.log
+    kmcp compute -k 21 -e -n 5 -l 100 -I viral/ -O refseq-cami2-viral-k21-n5 \
+        --log refseq-cami2-viral-k21-n5.log
     
-    kmcp index -I refseq-cami2-virus-k21-n5/ -O refseq-cami2-virus-k21-n5.db \
+    kmcp index -I refseq-cami2-viral-k21-n5/ -O refseq-cami2-viral-k21-n5.db \
         -j 40 -n 3 -f 0.001 -x 100k \
-        --log refseq-cami2-virus-k21-n5.db.log
+        --log refseq-cami2-viral-k21-n5.db.log
     

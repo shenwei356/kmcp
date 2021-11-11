@@ -28,3 +28,26 @@ KMCP builds database very fast,
 you can eigher rebuilt the database after adding new genomes,
 or create a separate database with the new genomes,
 search against these databases, and merge the results.
+
+## unexpected EOF error
+
+Some files could corrupt during downloading, we recommend checking
+sequence file integrity using seqkit (`gzip -t` failed for some files in
+my tests).
+
+1. List corrupted files
+
+        find $genomes -name "*.gz" \
+            | rush 'seqkit seq -w 0 {} > /dev/null; if [ $? -ne 0 ]; then echo {}; fi' \
+            > failed.txt
+    
+2. Delete these files:
+
+        cat failed.txt | rush '/bin/rm {}'
+
+3. Redownload these files. For example, from `rush` cache file `download.rush` (list of succeed commands), where the commands are in one line.
+
+        grep -f failed.txt download.rush \
+            | sed 's/__CMD__//g' \
+            | rush '{}'
+
