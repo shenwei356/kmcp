@@ -4,31 +4,6 @@
 
 All prebuilt database are available on [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC).
 
-
-### A). Databases for metagenomic profiling
-
-These databases are created following [steps below](#building-databases).
-Users can also [build custom databases](#building-custom-databases), it's simple and fast.
-
-|kingdoms                |source     |# species|# assembly|parameters    |archive file                                                                                                                                                    |size     |
-|:-----------------------|:----------|:--------|:---------|:-------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |k=21, frags=10|[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))      |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |23604    |30691     |k=21, frags=10|[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))    |21.52 GB |
-|**Fungi**               |Refseq r208|161      |403       |k=21, frags=10|[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))|4.18 GB  |
-|**Viruses**             |Refseq r208|7189     |11618     |k=21, frags=5 |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))|2.00 GB  |
-
-**Meta data**:
-
-- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRROG6I7_SkqPzQN?e=OeDfpq) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78))
-- Taxid mapping file: [taxid.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRa2STDU8ZCq3PEk?e=DhUeOd))
-- Name mapping file: [name.map](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjRXU6KS3bq0EmMOM?e=MKIMp4))
-
-**Meta data for HumGut**:
-
-- Taxonomy dump file: [taxdump-humgut.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf))
-- Taxid mapping file: [taxid-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2))
-- Name mapping file: [name-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman))
-
 **Hardware requirements**
 
 - Prebuilt databases above were built for computers with >= 32 CPU cores
@@ -37,14 +12,43 @@ and computers should have at least 64 GB.
 - By default, `kmcp search` loads the whole database into main memory (via [mmap](https://en.wikipedia.org/wiki/Mmap)) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
-- To reduce memory requirements on computers without enough memory,
+- ***To reduce memory requirements on computers without enough memory,
 users can divide the reference genomes into several parts
 and build smaller databases for all parts, so that the biggest
-database can be loaded into RAM. 
-This can also accelerate searching on a *computer cluster*, where every node searches a part of the database.
+database can be loaded into RAM***. 
+This can also accelerate searching on a **computer cluster**, where every node searches a part of the database.
 After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
 for downstream analysis.
+
+
+
+### A). Databases for metagenomic profiling
+
+These databases are created following [steps below](#building-databases).
+Users can also [build custom databases](#building-custom-databases), it's simple and fast.
+
+
+|DB                      |source     |# species|# assembly|parameters      |archive file                                                                                                                                                    |size     |
+|:-----------------------|:----------|:--------|:---------|:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |k=21, frags=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))      |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |23604    |30691     |k=21, frags=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))    |21.52 GB |
+|**Fungi**               |Refseq r208|161      |403       |k=21, frags=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))|4.18 GB  |
+|**Viruses**             |Refseq r208|7189     |11618     |k=21, frags=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))|2.00 GB  |
+|**Human**               |CHM13      |1        |1         |k=21, frags=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U)(818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))  |946 MB   |
+
+**Meta data**:
+
+- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRROG6I7_SkqPzQN?e=OeDfpq) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78))
+- Taxid mapping file: [taxid.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVJUuy6tvV4pIRjy?e=lPPM4w) ([md5](https://1drv.ms/u/s!Ag89cZ8NYcqtjVOM0Fpc7NRwgSgH?e=VuuKhm))
+- Name mapping file: [name.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVDxFQr3Be-rEUOy?e=yrVDIG) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU9mPOLQKTkJ6ydm?e=bO0mdb))
+
+**Meta data for HumGut**:
+
+- Taxonomy dump file: [taxdump-humgut.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf))
+- Taxid mapping file: [taxid-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2))
+- Name mapping file: [name-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman))
+
 
 
 
@@ -77,6 +81,7 @@ Closed Syncmers:
 |Refseq r208|37318     |All k-mers    |k=21          |[refseq-plasmid.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUQpIuKC5ju2TIdD?e=yKdRs2) (5.29 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjT-TO94gsfpUpe8_?e=1RAvr1))        |7.80 GB|
 |Refseq r208|37318     |Scaled MinHash|K=31, scale=10|[refseq-plasmid.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8) (1.01 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp))|2.00 GB|
 |Refseq r208|37318     |Closed Syncmer|K=31, s=21    |[refseq-plasmid.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUPv9o2SA4kiSxwU?e=UvkSDV) (806 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUKt3A_p7Q7BE7qT?e=dApTX8)) |1.54 GB|
+
 
 ## Building databases
 
@@ -279,6 +284,40 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-fungi.kmcp/
 
+### Human genome
+
+
+Downloading human genome file from [CHM13](https://github.com/marbl/CHM13):
+
+    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.3_CHM13_T2T_v1.1/GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    
+Building database (all k-mers, < 6min):
+
+    input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    
+    # splitting human genome into 1024 fragments.
+    # The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.3' from the file name.
+    kmcp compute $input -O human-chm13-k21-n1024 \
+        --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
+        -k 21 \
+        --split-number 1024 --split-overlap 100 \
+        --log human-chm13-k21-n1024.log --force
+    
+    #   using small false positive rate: 0.3
+    #   using more hash functions: 1
+    kmcp index -I human-chm13-k21-n1024/ -O human-chm13.kmcp \
+        -j 8 -f 0.3 -n 1 \
+        --log human-chm13.kmcp.log --force
+    
+    # taxid.map
+    echo -ne "GCA_009914755.3\t9606\n" > taxid.map
+    
+    # name.mapp
+    echo -ne "GCA_009914755.3\tHomo sapiens isolate CHM13\n" > name.map
+    
+    # cp name mapping file to database directory
+    cp taxid.map name.map human-chm13.kmcp/
+    
 ### Refseq plasmid
 
 Downloading plasmid sequences:
@@ -700,7 +739,9 @@ and have improved the indexing and searching speed
 
 1. Number of blocks (`.uniki` files) better be smaller than or equal
    to number of CPU cores for faster searching speed. 
-   **We can set `-j/--threads` to control blocks number**.
+   **We can set `-j/--threads` to control the blocks number**.
+   When more threads (>= 1.5 * #blocks) are given, extra workers are
+   automatically created.
 2. `#threads` files are simultaneously opened, and the max number
     of opened files is limited by the flag `-F/--max-open-files`.
     You may use a small value of `-F/--max-open-files` for 

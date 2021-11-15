@@ -35,11 +35,11 @@ Tools:
 
 Host reference genomes:
 
-- Human: [CHM13](https://github.com/marbl/CHM13)
+- Human: [CHM13](https://github.com/marbl/CHM13). We also provide a database of CHM13 for fast removing human reads.
 
-Building the index:
+Building the index (~60min):
     
-    bowtie2-build --threads 32 chm13.draft_v1.1.fasta.gz chm13
+    bowtie2-build --threads 32 GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz chm13
 
 Mapping and removing mapped reads:
 
@@ -69,7 +69,7 @@ where the databases can be built with different parameters.
 2. A long query sequences may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
     value of `-u/--kmer-dedup-threshold` (default `256`) to remove duplicates.
-3. For long reads or contigs, you should split them in to short reads
+3. For long reads or contigs, you should split them into short reads
     using `seqkit sliding`, e.g.,
 
         seqkit sliding -s 100 -W 300

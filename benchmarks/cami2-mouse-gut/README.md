@@ -9,10 +9,10 @@
 
 Prebuilt databases
 
-- DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz](http://app.shenwei.me/data/tmp/refseq-cami2-k21-n10.db.tar.gz)
-- DB for virus: [refseq-cami2-virus-k21-n5.db.tar.gz](http://app.shenwei.me/data/tmp/refseq-cami2-virus-k21-n5.db.tar.gz)
-- TaxId mapping: [taxid.map](http://app.shenwei.me/data/tmp/taxid-virus.map), and [taxid-virus.map](http://app.shenwei.me/data/tmp/taxid-virus.map)
-- [taxdump.tar.gz](http://app.shenwei.me/data/tmp/taxdump.tar.gz)
+- DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz]()
+- DB for viruses: [refseq-cami2-viral-k21-n5.db.tar.gz]()
+- TaxId mapping: [taxid.map](), and [taxid-viral.map]()
+- [taxdump.tar.gz]()
 
 **Attention**: the CAMI2 RefSeq snapshot did not include viruses,
 and CAMI2 toy mouse gut dataset did not contain viral reads either.
@@ -43,6 +43,7 @@ https://data.cami-challenge.org/participate
 
     # rename and re-organizing files
     # ...
+
     $ tree 19122017_mousegut_scaffolds
     19122017_mousegut_scaffolds
     ├── sample_0.fq.gz
@@ -55,8 +56,11 @@ https://data.cami-challenge.org/participate
     
     
     # ------------------------------------------------------------------------
-    # single-end    
-    reads=19122017_mousegut_scaffolds
+    # single-end mode
+
+    ln -s 19122017_mousegut_scaffolds single
+
+    reads=single
     j=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -65,13 +69,15 @@ https://data.cami-challenge.org/participate
             -c -C $reads@$dbname.rush
             
     # ------------------------------------------------------------------------           
-    # paired-end
+    # paired-end mode
+
     # # split merged paired-end reads.
     # mkdir paired
     # cd paired
     # fd .fq.gz$ ../$reads | rush -j 12 'seqkit split2 -p 2 {} -O .'
     # brename -p .part_00 -r _
     # cd ..
+
     reads=paired
     j=40
     fd _1.fq.gz$ $reads/ \
@@ -80,10 +86,11 @@ https://data.cami-challenge.org/participate
             'kmcp search -d {db} --try-se -1 {} -2 {@(.+)_1.fq.gz}_2.fq.gz -o {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz \
             --log {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
+
     # ------------------------------------------------------------------------
             
     X=taxdump
-    T=ref2taxid.tsv
+    T=taxid.map
     fd kmcp@$dbname.tsv.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T \
@@ -102,7 +109,7 @@ Searching
     # search on multiple database
     file=sample_0.fq.gz
     sampleId=0
-    for db in refseq-cami2-k21-n10.db refseq-cami2-virus-k21-n5.db; do
+    for db in refseq-cami2-k21-n10.db refseq-cami2-viral-k21-n5.db; do
         kmcp search -j 40 -d $db $file -o $file.kmcp@$db.tsv.gz
     done
     

@@ -92,35 +92,34 @@ Stats (optional):
 
     # keep at most 5 assemblies for a species
     cat ref2taxid.tsv \
-        | csvtk uniq -Ht -f 2 \
         | taxonkit reformat -I 2 -t -f '{s}' --data-dir taxdump/ \
         | csvtk uniq -Ht -f 4 -n 5 \
         | csvtk cut -Ht -f 1,2 \
-        > ref2taxid.slim.tsv
+        > taxid.map
     
     # stats
-    cat ref2taxid.slim.tsv \
+    cat taxid.map \
         | taxonkit lineage -i 2 -r -n -L --data-dir taxdump/ \
         | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
         | csvtk add-header -t -n 'accession,taxid,name,rank,superkindom,phylum,class,order,family,genus,species' \
-        > ref2taxid.slim.lineage.tsv
-    cat ref2taxid.slim.lineage.tsv \
+        > taxid.map.lineage.tsv
+    cat taxid.map.lineage.tsv \
         | csvtk freq -t -f species -nr \
         | csvtk head -t -n 10 \
         | csvtk pretty -t \
-        | tee ref2taxid.slim.lineage.tsv.top10-species.txt
-    cat ref2taxid.slim.lineage.tsv \
+        | tee taxid.map.lineage.tsv.top10-species.txt
+    cat taxid.map.lineage.tsv \
         | csvtk freq -t -f species -nr \
-        > ref2taxid.slim.lineage.tsv.n-species.txt
+        > taxid.map.lineage.tsv.n-species.txt
         
     
-    mkdir refseq-cami2-slim
+    mkdir -p refseq-cami2-slim
     cd refseq-cami2-slim
     
     cat ../file2acc.microbe.tsv \
         | cut -f 1 \
         | csvtk mutate -Ht -p "^(\w{3}_\d{9}\.\d+)" \
-        | csvtk grep -Ht -f 2 -P <(cut -f 1 ../ref2taxid.slim.tsv) \
+        | csvtk grep -Ht -f 2 -P <(cut -f 1 ../taxid.map) \
         | cut -f 1 \
         | rush 'ln -s ../refseq-cami2/{}'
     
@@ -139,7 +138,7 @@ Building database:
     
     # for short reads
     k=21
-    kmcp compute -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
+    kmcp compute -j $j -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
         --log $prefix-k$k-n10.log
         
     n=1
@@ -147,6 +146,8 @@ Building database:
     kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k-n10.db -j $j -n $n -f $f \
         --log $prefix-k$k-n10.db.log
 
+    cp taxid.map $prefix-k$k-n10.db
+    
 
 ## Viruses
 
@@ -241,7 +242,7 @@ prokaryotic data.
         
     # -------------------------------------------------------------
     # create kmcp database
-    
+
     kmcp compute -j 40 -k 21 -n 5 -l 100 -I viral/ -O refseq-cami2-viral-k21-n5 \
         --log refseq-cami2-viral-k21-n5.log
     

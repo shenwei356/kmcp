@@ -7,14 +7,23 @@
         - Building database with raws reads and searching with query sequences,
           optionally using k-mer sketches for long query sequences.
     - For abundance estimation:
-        - For long sequences (similar with taxonomic profiling):
-            - Building database with query sequences, and searching with raws reads.
+        - For long sequences (similar to taxonomic profiling):
+            - Building database with query sequences, searching with raws reads, and profiling.
         - For short (shorter than reads length) sequences:
             - Not capable.
 - Searching sequences against assemblies/genomes.
-    - Building database with assemblies/genomes, 
-      optionally using k-mer sketches for long query sequences
-      (see [genome similarity estimation](#genome-similarity-estimation)).
+    - For checking existence:
+        - For short sequences (short reads, e.g., detecting host contamination):
+            - Building database with assemblies/genomes and searching with raws reads.
+        - For long sequences:
+            - Building database with assemblies/genomes using k-mer sketches.
+    - For genome similarity estimation:
+        - Building database with assemblies/genomes using k-mer sketches.
+    - For taxonomic profiling:
+        - For short reads:
+            - Building database with assemblies/genomes, searching with raws reads, and profiling.
+        - For long reads:
+            - Split long reads into short reads before searching.
 
 ## Sequence search
 
