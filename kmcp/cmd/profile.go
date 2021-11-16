@@ -126,6 +126,28 @@ Taxonomic binning formats:
 
 		var err error
 
+		// ---------------- debug ---------
+
+		// 		debugFile := getFlagString(cmd, "debug")
+		debugFile := ""
+
+		debug := debugFile != ""
+		var outfhD *bufio.Writer
+		var gwD io.WriteCloser
+		var wD *os.File
+		if debug {
+			outfhD, gwD, wD, err = outStream(debugFile, strings.HasSuffix(strings.ToLower(debugFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfhD.Flush()
+				if gwD != nil {
+					gwD.Close()
+				}
+				wD.Close()
+			}()
+		}
+		// ---------------- debug ---------
+
 		outFile := getFlagString(cmd, "out-prefix")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
@@ -755,6 +777,10 @@ Taxonomic binning formats:
 		// --------------------
 		// sum up #1
 
+		if debug {
+			outfhD.WriteString("#------------------ round 1 ------------------\n")
+		}
+
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of references in search result: %d", len(profile))
 		}
@@ -770,6 +796,10 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatch < 1 { // no enough unique match
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed1: %s, %s: %.0f\n",
+						t.Name, "no enough unique match", t.SumUniqMatch)
+				}
 				continue
 			}
 
@@ -778,6 +808,10 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatchHic < 1 { // no enough high-confidence unique match
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed1: %s, %s: %.0f\n",
+						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+				}
 				continue
 			}
 
@@ -799,6 +833,10 @@ Taxonomic binning formats:
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp { // low coverage
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed1: %s, %s: %.1f %v\n",
+						t.Name, "low coverage", t.FragsProp, t.Match)
+				}
 				continue
 			}
 		}
@@ -1403,6 +1441,11 @@ Taxonomic binning formats:
 		// --------------------
 		// sum up #3
 
+		if debug {
+			outfhD.WriteString("\n\n")
+			outfhD.WriteString("#------------------ round 2 ------------------\n")
+		}
+
 		hs = make([]uint64, 0, len(profile)) // list to delete
 		for h, t := range profile2 {
 			for _, c1 = range t.UniqMatch {
@@ -1410,6 +1453,10 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatch < minUReads {
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed2: %s, %s: %.0f\n",
+						t.Name, "no enough unique match", t.SumUniqMatch)
+				}
 				continue
 			}
 
@@ -1418,11 +1465,19 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatchHic < minHicUreads {
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed2: %s, %s: %.0f\n",
+						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+				}
 				continue
 			}
 
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed2: %s, %s: %.4f (%.0f/%.0f)\n",
+						t.Name, "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+				}
 				continue
 			}
 
@@ -1437,6 +1492,10 @@ Taxonomic binning formats:
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed2: %s, %s: %.1f %v\n",
+						t.Name, "low coverage", t.FragsProp, t.Match)
+				}
 				continue
 			}
 
@@ -1451,6 +1510,10 @@ Taxonomic binning formats:
 			_, t.RelDepthStd = MeanStdev(t.RelDepth)
 			if t.RelDepthStd > maxFragsDepthStdev {
 				hs = append(hs, h)
+				if debug {
+					fmt.Fprintf(outfhD, "failed2: %s, %s: %f\n",
+						t.Name, "high FragsDepthStdev", t.RelDepthStd)
+				}
 				continue
 			}
 
@@ -1910,6 +1973,11 @@ Taxonomic binning formats:
 		// --------------------
 		// sum up #4
 
+		if debug {
+			outfhD.WriteString("\n\n")
+			outfhD.WriteString("#------------------ round 3 ------------------\n")
+		}
+
 		targets := make([]*Target, 0, 256)
 
 		for _, t := range profile3 {
@@ -1917,6 +1985,10 @@ Taxonomic binning formats:
 				t.SumUniqMatch += c1
 			}
 			if t.SumUniqMatch < minUReads {
+				if debug {
+					fmt.Fprintf(outfhD, "failed3: %s, %s: %.0f\n",
+						t.Name, "no enough unique match", t.SumUniqMatch)
+				}
 				continue
 			}
 
@@ -1924,10 +1996,18 @@ Taxonomic binning formats:
 				t.SumUniqMatchHic += c1
 			}
 			if t.SumUniqMatchHic < minHicUreads {
+				if debug {
+					fmt.Fprintf(outfhD, "failed3: %s, %s: %.0f\n",
+						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+				}
 				continue
 			}
 
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
+				if debug {
+					fmt.Fprintf(outfhD, "failed3: %s, %s: %.4f (%.0f/%.0f)\n",
+						t.Name, "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+				}
 				continue
 			}
 
@@ -1941,6 +2021,10 @@ Taxonomic binning formats:
 			}
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
+				if debug {
+					fmt.Fprintf(outfhD, "failed3: %s, %s: %.1f %v\n",
+						t.Name, "low coverage", t.FragsProp, t.Match)
+				}
 				continue
 			}
 
@@ -1954,6 +2038,10 @@ Taxonomic binning formats:
 
 			_, t.RelDepthStd = MeanStdev(t.RelDepth)
 			if t.RelDepthStd > maxFragsDepthStdev {
+				if debug {
+					fmt.Fprintf(outfhD, "failed3: %s, %s: %f\n",
+						t.Name, "high FragsDepthStdev", t.RelDepthStd)
+				}
 				continue
 			}
 
@@ -2285,6 +2373,8 @@ func init() {
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
+
+	// profileCmd.Flags().StringP("debug", "", "", `debug output file`)
 
 }
 

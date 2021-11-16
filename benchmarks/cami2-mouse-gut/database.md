@@ -96,6 +96,11 @@ Stats (optional):
         | csvtk uniq -Ht -f 4 -n 5 \
         | csvtk cut -Ht -f 1,2 \
         > taxid.map
+        
+    cat taxid.map \
+        | taxonkit lineage --data-dir taxdump/ -L -n -i 2 \
+        | cut -f 1,3 \
+        > name.map
     
     # stats
     cat taxid.map \
@@ -146,7 +151,7 @@ Building database:
     kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k-n10.db -j $j -n $n -f $f \
         --log $prefix-k$k-n10.db.log
 
-    cp taxid.map $prefix-k$k-n10.db
+    cp taxid.map name.map $prefix-k$k-n10.db
     
 
 ## Viruses

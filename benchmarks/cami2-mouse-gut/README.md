@@ -58,7 +58,7 @@ https://data.cami-challenge.org/participate
     # ------------------------------------------------------------------------
     # single-end mode
 
-    ln -s 19122017_mousegut_scaffolds single
+    # ln -s 19122017_mousegut_scaffolds single
 
     reads=single
     j=40
