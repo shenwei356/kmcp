@@ -27,7 +27,7 @@ Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 [Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
 provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (Sourmash).
-KMCP utilizes multiple sketches 
+KMCP utilizes multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [Scaled MinHash](https://f1000research.com/articles/8-1006) and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
