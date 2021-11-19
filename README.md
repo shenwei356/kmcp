@@ -4,11 +4,12 @@
 
 ## What can we do?
 
-### 1. Accurate metagenomic profiling and binning
+### 1. Accurate metagenomic profiling
 
-xxx
-
-(check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling))
+KMCP adopts a novol metagenomic profiling strategy,
+by splitting reference genomes into 10 fragments and mappings reads to these
+fragments by fast k-mer matching. 
+(check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
 
 ### 2. Fast sequence search against large scales of genomic datasets
@@ -34,7 +35,7 @@ KMCP utilizes multiple k-mer sketches
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
-## Tutorials and resources:
+## Documents and resources
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Databases](https://bioinf.shenwei.me/kmcp/database)

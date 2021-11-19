@@ -52,10 +52,10 @@ Mapping and removing mapped reads:
 
 ### Step 3. Searching
 
-**Reads can be searched on different databases and then merged**,
-where the databases can be built with different parameters.
+**Reads can be searched against multiple databases which can be built with different parameters**,
+and the results can be fastly merged for downstream analysis.
 
-**Attentions**:
+#### **Attentions**
 
 1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
    Paired-End reads should be given via `-1/--read1` and `-2/--read2`.
@@ -65,6 +65,9 @@ where the databases can be built with different parameters.
     Single-end can be given as positional arguments or `-1`/`-2`.
 
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+
+    **Single-end mode is recommended for pair-end reads, for higher sensitivity**.
+    See [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
 
 2. A long query sequences may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
@@ -88,7 +91,7 @@ can use stricter criteria in `kmcp profile`.
 1. Increase value of `-j/--threads` for acceleratation, but values larger
   than the number of CPU cores won't bring extra speedup.
 
-**Commands**:
+#### **Commands**
 
     # ---------------------------------------------------
     # single-end
@@ -137,7 +140,34 @@ Merging searching results on multiple database:
 
     kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
     
-Result format:
+#### Searching result format
+
+
+```
+ 1. query,    Identifier of query sequence
+ 2. qLen,     Query length
+ 3. qKmers,   K-mer number of query sequence
+ 4. FPR,      False positive rate
+ 5. hits,     Number of matches
+ 6. target,   Identifier of target sequence
+ 7. fragIdx,  Index of reference fragment
+ 8. frags,    Number of reference fragments
+ 9. tLen,     Reference length
+10. kSize,    K-mer size
+11. mKmers,   Number of matched k-mers
+12. qCov,     Query coverage,  equals to: mKmers / qKmers
+13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference fragment
+14. jacc,     Jaccard index
+15. queryIdx, Index of query sequence, only for merging
+```
+
+Note: The header line starts with `#`, you need to assign another comment charactor
+if using `csvtk` for analysis. e.g.,
+
+    csvtk filter2 -C '$' -t -f '$qCov > 0.7' mock.fastq.gz.kmcp.gz
+
+Demo result:
+
 
 |#query                             |qLen|qKmers|FPR       |hits|target       |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
 |:----------------------------------|:---|:-----|:---------|:---|:------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
@@ -154,13 +184,13 @@ Result format:
 
 ### Step 4. Profiling
 
-**Input**:
+#### **Input**
 
 - TaxId mapping file(s).
 - Taxdump files.
 - KMCP search results.
 
-**Methods**
+#### **Methods**
 
 1. Reference genomes can be splitted into fragments when computing
     k-mers (sketches), which could help to increase the specificity
@@ -210,17 +240,9 @@ Three-rounds profiling:
 2. However using a lot of threads does not always accelerate
     processing, 4 threads with chunk size of 500-5000 is fast enough.
 
-**Profiling output formats**:
 
-- KMCP      (`-o/--out-prefix`)
-- CAMI      (`-M/--metaphlan-report`, sampe name: `-s/--sample-id`)
-- MetaPhlAn (`-C/--cami-report`, sampe name: `-s/--sample-id`))
 
-**Taxonomic binning formats**:
-
-- CAMI      (`-B/--binning-result`)
-
-**Commands**:
+#### **Commands**
 
     # taxid mapping files, multiple files supported.
     taxid_map=gtdb.kmcp/taxid.map,refseq-viral.kmcp/taxid.map,refseq-fungi.kmcp
@@ -249,14 +271,48 @@ Three-rounds profiling:
         --sample-id        "0" \
         --binning-result   $sfile.binning.gz
 
-Default output:
+#### Profiling result formats
 
-|ref        |percentage|coverage|score |fragsCov|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
-|:----------|:---------|:-------|:-----|:-------|:------------------------------------------------|:---------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
-|NC_013654.1|48.321535 |9.16    |100.00|1.00    |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02            |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
-|NC_000913.3|46.194629 |8.75    |100.00|1.00    |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02            |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
-|NC_002695.2|5.014025  |0.95    |100.00|1.00    |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05            |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
-|NC_010655.1|0.469811  |0.09    |100.00|1.00    |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10            |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
+**Supported profiling output formats**:
+
+- KMCP      (`-o/--out-prefix`)
+- CAMI      (`-M/--metaphlan-report`, sampe name: `-s/--sample-id`)
+- MetaPhlAn (`-C/--cami-report`, sampe name: `-s/--sample-id`))
+
+**Supported taxonomic binning formats**:
+
+- CAMI      (`-B/--binning-result`)
+
+
+KMCP format:
+
+```
+ 1. ref,                Identifier of the reference genome
+ 2. percentage,         Relative abundance of a reference
+ 3. score,              The 90th percentile of qCov of uniquely matched reads
+ 4. fragsCov,           Fragments coverage
+ 5. fragsRelDepth,      Relative depths of reference fragments
+ 6. fragsRelDepthStd,   The strandard deviation of fragsRelDepth
+ 7. reads,              Total number of matched reads of this reference
+ 8. ureads,             Number of uniquely matched reads
+ 9. hicureads,          Number of uniquely matched reads with high-confidence
+10. refsize,            Reference size
+11. refname,            Reference name, optional via name mapping file
+12. taxid,              TaxId of the reference
+13. rank,               Taxonomic rank
+14. taxname,            Taxonomic name
+15. taxpath,            Complete lineage
+16. taxpathsn,          Corresponding TaxIds of taxons in the complete lineage
+```
+
+Demo output:
+
+|ref        |percentage|score |fragsCov|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
+|:----------|:---------|:-----|:-------|:------------------------------------------------|:---------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
+|NC_013654.1|48.321535 |100.00|1.00    |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02            |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
+|NC_000913.3|46.194629 |100.00|1.00    |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02            |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
+|NC_002695.2|5.014025  |100.00|1.00    |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05            |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
+|NC_010655.1|0.469811  |100.00|1.00    |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10            |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 

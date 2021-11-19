@@ -6,6 +6,8 @@ Dataset homepage: https://data.cami-challenge.org/participate
 - [CAMI 2 Challenge NCBI RefSeq database](https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/CAMI_2_DATABASES/RefSeq_genomic_20190108.tar)
 - [CAMI 2 Challenge Accession to Taxid Mapping](https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/CAMI_2_DATABASES/ncbi_taxonomy_accession2taxid.tar)
 
+Prebuilt KMCP databases and corresponding genomes are available at [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=mAgObd).
+
 ## Tools
 
 - [seqkit](https://github.com/shenwei356/seqkit)
