@@ -34,6 +34,7 @@
     - automatically switch to new taxid for merged one.
     - change computation of `score`.
     - new flag `-d/--max-frags-depth-stdev`.
+    - new option `-m/--mode`.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
     - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.

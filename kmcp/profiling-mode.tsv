@@ -1,0 +1,8 @@
+options	1	2	3	4	5
+-r/--min-frags-reads	1	20	50	50	50
+-p/--min-frags-prop	0	0.7	0.8	1	1
+-d/--max-frags-depth-stdev	10	2	2	2	1.5
+-u/--min-uniq-reads	1	10	10	20	50
+-U/--min-hic-ureads	1	1	1	5	5
+-H/--min-hic-ureads-qcov	0.7	0.7	0.75	0.8	0.85
+-P/--min-hic-ureads-prop	0.1	0.2	0.1	0.1	0.1

@@ -82,10 +82,25 @@ Accuracy notes:
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
   *. --keep-perfect-match is not recommended, which decreases sensitivity. 
-  *. -m/--keep-main-match is not recommended, which affects accuracy of
+  *. --keep-main-match is not recommended, which affects accuracy of
      abundance estimation.
   *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
      abundance estimation.
+
+Profiling modes:
+  We preset five profiling modes, availabe with flag -m/--mode.
+  Mode 1 (highest recall), 2 (high recall), 4 (higher precision),
+  5 (higher precision) will overide the relevant options.
+
+    options                        1       2       3        4       5
+    --------------------------     ---     ---     ----     ---     ----
+    -r/--min-frags-reads           1       20      50       50      50
+    -p/--min-frags-prop            0       0.7     0.8      1       1
+    -d/--max-frags-depth-stdev     10      2       2        2       1.5
+    -u/--min-uniq-reads            1       10      10       20      50
+    -U/--min-hic-ureads            1       1       1        5       5
+    -H/--min-hic-ureads-qcov       0.7     0.7     0.75     0.8     0.85
+    -P/--min-hic-ureads-prop       0.1     0.2     0.1      0.1     0.1
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -157,20 +172,28 @@ Taxonomic binning formats:
 		keepMainMatch := getFlagBool(cmd, "keep-main-match")
 		maxScoreGap := getFlagFloat64(cmd, "max-qcov-gap")
 
-		minReads := float64(getFlagPositiveInt(cmd, "min-frags-reads"))
-		minUReads := float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
-		minFragsProp := getFlagPositiveFloat64(cmd, "min-frags-prop")
-		maxFragsDepthStdev := getFlagPositiveFloat64(cmd, "max-frags-depth-stdev")
+		var minReads float64
+		var minFragsProp float64
+		var maxFragsDepthStdev float64
+		var minUReads float64
+		var minHicUreads float64
+		var hicUreadsMinQcov float64
+		var HicUreadsMinProp float64
 
-		minHicUreads := float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
+		minReads = float64(getFlagPositiveInt(cmd, "min-frags-reads"))
+		minUReads = float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
+		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-frags-prop")
+		maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-frags-depth-stdev")
+
+		minHicUreads = float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
 		if minHicUreads > minUReads {
 			minUReads = minHicUreads
 		}
-		hicUreadsMinQcov := getFlagPositiveFloat64(cmd, "min-hic-ureads-qcov")
+		hicUreadsMinQcov = getFlagPositiveFloat64(cmd, "min-hic-ureads-qcov")
 		if hicUreadsMinQcov < minQcov {
 			hicUreadsMinQcov = minQcov
 		}
-		HicUreadsMinProp := getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
+		HicUreadsMinProp = getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		if minDReadsProp > 1 {
@@ -179,6 +202,45 @@ Taxonomic binning formats:
 		maxMismatchErr := getFlagPositiveFloat64(cmd, "max-mismatch-err")
 		if maxMismatchErr >= 1 {
 			checkError(fmt.Errorf("the value of -R/--max-mismatch-err (%f) should be in range of (0, 1)", maxMismatchErr))
+		}
+
+		mode := getFlagPositiveInt(cmd, "mode")
+		switch mode {
+		case 1:
+			minReads = 1
+			minFragsProp = 0
+			maxFragsDepthStdev = 10
+			minUReads = 1
+			minHicUreads = 1
+			hicUreadsMinQcov = 0.7
+			HicUreadsMinProp = 0.1
+		case 2:
+			minReads = 20
+			minFragsProp = 0.7
+			maxFragsDepthStdev = 2
+			minUReads = 10
+			minHicUreads = 1
+			hicUreadsMinQcov = 0.7
+			HicUreadsMinProp = 0.2
+		case 3:
+		case 4:
+			minReads = 50
+			minFragsProp = 1
+			maxFragsDepthStdev = 2
+			minUReads = 20
+			minHicUreads = 5
+			hicUreadsMinQcov = 0.8
+			HicUreadsMinProp = 0.1
+		case 5:
+			minReads = 50
+			minFragsProp = 1
+			maxFragsDepthStdev = 1.5
+			minUReads = 50
+			minHicUreads = 5
+			hicUreadsMinQcov = 0.85
+			HicUreadsMinProp = 0.1
+		default:
+			checkError(fmt.Errorf("invalid mode: %d", mode))
 		}
 
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
@@ -283,7 +345,7 @@ Taxonomic binning formats:
 		switch normAbund {
 		case "mean", "min", "max":
 		default:
-			checkError(fmt.Errorf("invalid value of -m/--norm-abund: %s. available: mean, min, max", normAbund))
+			checkError(fmt.Errorf("invalid value of --norm-abund: %s. available: mean, min, max", normAbund))
 		}
 
 		// ---------------------------------------------------------------
@@ -2333,7 +2395,7 @@ func init() {
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
 	profileCmd.Flags().IntP("keep-top-qcovs", "n", 0, `keep matches with the top N qcovs for a query, 0 for all`)
 	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
-	profileCmd.Flags().BoolP("keep-main-match", "m", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)`)
+	profileCmd.Flags().BoolP("keep-main-match", "", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)`)
 	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.2, `max qcov gap between adjacent matches`)
 
 	// for matches against a reference
@@ -2377,6 +2439,8 @@ func init() {
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
 
 	// profileCmd.Flags().StringP("debug", "", "", `debug output file`)
+
+	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (higher precision)`)
 
 }
 
