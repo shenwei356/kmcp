@@ -243,6 +243,7 @@ Taxonomic binning formats:
 		}
 
 		sampleID := getFlagString(cmd, "sample-id")
+		taxonomyID := getFlagString(cmd, "taxonomy-id")
 		binningFile := getFlagString(cmd, "binning-result")
 		outputBinningResult := binningFile != ""
 		if outputBinningResult && !(strings.HasSuffix(binningFile, ".binning") || strings.HasSuffix(binningFile, ".binning.gz")) {
@@ -2280,7 +2281,7 @@ Taxonomic binning formats:
 			outfh3.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
 			outfh3.WriteString("@Version:0.10.0\n")
 			outfh3.WriteString("@Ranks:superkingdom|phylum|class|order|family|genus|species|strain\n")
-			outfh3.WriteString("@TaxonomyID:ncbi-taxonomy\n")
+			outfh3.WriteString(fmt.Sprintf("@TaxonomyID:%s\n", taxonomyID))
 			outfh3.WriteString("@@TAXID\tRANK\tTAXPATH\tTAXPATHSN\tPERCENTAGE\n")
 
 			var lineageTaxids, lineageNames string
@@ -2361,6 +2362,7 @@ func init() {
 
 	// other output formats
 	profileCmd.Flags().StringP("sample-id", "s", "", `sample ID in result file`)
+	profileCmd.Flags().StringP("taxonomy-id", "", "", `taxonomy ID in result file`)
 	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
 	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
 	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)

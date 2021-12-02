@@ -37,6 +37,7 @@ my tests).
 
 1. List corrupted files
 
+        # corrupted files
         find $genomes -name "*.gz" \
             | rush 'seqkit seq -w 0 {} > /dev/null; if [ $? -ne 0 ]; then echo {}; fi' \
             > failed.txt
@@ -54,3 +55,6 @@ my tests).
             | sed 's/__CMD__//g' \
             | rush '{}'
 
+    For `genome_updater`, URLs of genomes can be found in files like `2021-09-30_13-32-30_url_downloaded.txt`, 
+    you can extract URLs using `grep -f failed.txt -v *url_downloaded.txt` or some other ways,
+    and batch redownload them using `parallel`.

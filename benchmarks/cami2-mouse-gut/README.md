@@ -61,10 +61,11 @@ https://data.cami-challenge.org/participate
     # ln -s 19122017_mousegut_scaffolds single
 
     reads=single
-    j=40
+    j=4
+    J=40
     fd fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -v db=$db -v dbname=$dbname -j 4 -v j=$j \
+        | rush -v db=$db -v dbname=$dbname -j $j -v j=$J \
             'kmcp search -d {db} {} -o {}.kmcp@{dbname}.tsv.gz --log {}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
             
@@ -79,12 +80,13 @@ https://data.cami-challenge.org/participate
     # cd ..
 
     reads=paired
-    j=40
+    j=4
+    J=40
     fd _1.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -v db=$db -v dbname=$dbname -j 4 -v j=$j \
-            'kmcp search -d {db} --try-se -1 {} -2 {@(.+)_1.fq.gz}_2.fq.gz -o {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz \
-            --log {@(.+)_1.fq.gz}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+        | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@(.+)_1.fq.gz}' \
+            'kmcp search -d {db} --try-se -1 {} -2 {p}_2.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
+            --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
 
     # ------------------------------------------------------------------------

@@ -7,10 +7,9 @@
 ### 1. Accurate metagenomic profiling
 
 KMCP adopts a novol metagenomic profiling strategy,
-by splitting reference genomes into 10 fragments and mappings reads to these
+splitting reference genomes into 10 fragments and mappings reads to these
 fragments by fast k-mer matching. 
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
-
 
 ### 2. Fast sequence search against large scales of genomic datasets
 
@@ -35,6 +34,20 @@ KMCP utilizes multiple k-mer sketches
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
+## Features
+
+- **Building database is easy and fast**.
+- **Fast searching speed**.
+    - Searching time is linearly related to the number of reference genomes.
+- **Scalable searching**. Searching results against multiple databases can be fast merged.
+    This brings multiple benifits:
+    - There's no need to re-built the database with newly added reference genomes. 
+    - HPC cluster could accerlerate searching with each computation node hosting a database built with a part of reference genomes.
+    - Computers with limited main memory would also support searching by building small databases.
+- **Accurate taxonomic profiling**. Some k-mer based taxonomic profilers suffers high false positive rates,
+   while KMCP adopts multiple strategies improve specificity.
+    
+ 
 ## Documents and resources
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
