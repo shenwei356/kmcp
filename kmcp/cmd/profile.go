@@ -88,19 +88,19 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset five profiling modes, availabe with flag -m/--mode.
+  We preset five profiling modes, availabe with the flag -m/--mode.
   Mode 1 (highest recall), 2 (high recall), 4 (higher precision),
   5 (higher precision) will overide the relevant options.
 
-    options                        1       2       3        4       5
-    --------------------------     ---     ---     ----     ---     ----
-    -r/--min-frags-reads           1       20      50       50      50
-    -p/--min-frags-prop            0       0.7     0.8      1       1
-    -d/--max-frags-depth-stdev     10      2       2        2       1.5
-    -u/--min-uniq-reads            1       10      10       20      50
-    -U/--min-hic-ureads            1       1       1        5       5
-    -H/--min-hic-ureads-qcov       0.7     0.7     0.75     0.8     0.85
-    -P/--min-hic-ureads-prop       0.1     0.2     0.1      0.1     0.1
+    options                       m=1    m=2    m=3     m=4    m=5
+    --------------------------    ---    ---    ----    ---    ----
+    -r/--min-frags-reads          20     30     50      100    100
+    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -d/--max-frags-depth-stdev    10     3      2       2      1.5
+    -u/--min-uniq-reads           20     20     20      50     50
+    -U/--min-hic-ureads           5      5      5       10     10
+    -H/--min-hic-ureads-qcov      0.7    0.7    0.75    0.8    0.8
+    -P/--min-hic-ureads-prop      0.1    0.2    0.1     0.1    0.15
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -207,38 +207,38 @@ Taxonomic binning formats:
 		mode := getFlagPositiveInt(cmd, "mode")
 		switch mode {
 		case 1:
-			minReads = 1
-			minFragsProp = 0
+			minReads = 20
+			minFragsProp = 0.5
 			maxFragsDepthStdev = 10
-			minUReads = 1
-			minHicUreads = 1
+			minUReads = 20
+			minHicUreads = 5
 			hicUreadsMinQcov = 0.7
 			HicUreadsMinProp = 0.1
 		case 2:
-			minReads = 20
+			minReads = 30
 			minFragsProp = 0.7
-			maxFragsDepthStdev = 2
-			minUReads = 10
-			minHicUreads = 1
+			maxFragsDepthStdev = 3
+			minUReads = 20
+			minHicUreads = 5
 			hicUreadsMinQcov = 0.7
 			HicUreadsMinProp = 0.2
 		case 3:
 		case 4:
-			minReads = 50
+			minReads = 100
 			minFragsProp = 1
 			maxFragsDepthStdev = 2
-			minUReads = 20
-			minHicUreads = 5
+			minUReads = 50
+			minHicUreads = 10
 			hicUreadsMinQcov = 0.8
 			HicUreadsMinProp = 0.1
 		case 5:
-			minReads = 50
+			minReads = 100
 			minFragsProp = 1
 			maxFragsDepthStdev = 1.5
 			minUReads = 50
-			minHicUreads = 5
-			hicUreadsMinQcov = 0.85
-			HicUreadsMinProp = 0.1
+			minHicUreads = 10
+			hicUreadsMinQcov = 0.8
+			HicUreadsMinProp = 0.15
 		default:
 			checkError(fmt.Errorf("invalid mode: %d", mode))
 		}
@@ -558,9 +558,12 @@ Taxonomic binning formats:
 			log.Infof("  default format  : %s", outFile)
 			if outputCamiReport {
 				log.Infof("  CAMI format     : %s", camiReportFile)
+				log.Infof("    Sample ID     : %s", sampleID)
 			}
 			if outputMetaphlanReport {
 				log.Infof("  MetaPhlan format: %s", metaphlanReportFile)
+				log.Infof("    Sample ID     : %s", sampleID)
+				log.Infof("    Taxonomy ID   : %s", taxonomyID)
 			}
 			if outputBinningResult {
 				log.Infof("  Binning result  : %s", binningFile)
@@ -2400,11 +2403,11 @@ func init() {
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-frags-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 10, `minimal number of uniquely matched reads for a reference`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 20, `minimal number of uniquely matched reads for a reference`)
 	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads`)
 	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2, `maximal standard deviation of relative depths of all fragments`)
 
-	profileCmd.Flags().IntP("min-hic-ureads", "U", 1, `minimal number of high-confidence uniquely matched reads for a reference`)
+	profileCmd.Flags().IntP("min-hic-ureads", "U", 5, `minimal number of high-confidence uniquely matched reads for a reference`)
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75, `minimal query coverage of high-confidence uniquely matched reads`)
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
 

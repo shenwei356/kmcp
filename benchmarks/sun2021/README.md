@@ -105,6 +105,22 @@ All fastq file are downloaded and saved in one directory `reads`.
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $profile
+        
+    # ------------------------------------------------------------------------
+    # profiling modes
+        
+    for m in $(seq 1 5); do
+        fd kmcp@$dbname.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads@$dbname.c-m$m.profile
+        fd kmcp@$dbname.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
     
 ## mOTUs
     
