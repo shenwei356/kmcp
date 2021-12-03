@@ -321,10 +321,25 @@ Accuracy notes:
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambigous reads.
   *. --keep-perfect-match is not recommended, which decreases sensitivity. 
-  *. -m/--keep-main-match is not recommended, which affects accuracy of
+  *. --keep-main-match is not recommended, which affects accuracy of
      abundance estimation.
   *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
      abundance estimation.
+
+Profiling modes:
+  We preset five profiling modes, availabe with the flag -m/--mode.
+  Mode 1 (highest recall), 2 (high recall), 4 (higher precision),
+  5 (higher precision) will overide the relevant options.
+
+    options                       m=1    m=2    m=3     m=4    m=5
+    --------------------------    ---    ---    ----    ---    ----
+    -r/--min-frags-reads          20     30     50      100    100
+    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -d/--max-frags-depth-stdev    10     3      2       2      1.5
+    -u/--min-uniq-reads           20     20     20      50     50
+    -U/--min-hic-ureads           5      5      5       10     10
+    -H/--min-hic-ureads-qcov      0.7    0.7    0.75    0.8    0.8
+    -P/--min-hic-ureads-prop      0.1    0.2    0.1     0.1    0.15
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -353,7 +368,7 @@ Flags:
       --chunk-size int                number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
   -F, --filter-low-pct float          filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)
   -h, --help                          help for profile
-  -m, --keep-main-match               only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)
+      --keep-main-match               only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)
       --keep-perfect-match            only keep the perfect matches (qcov == 1) if there are
   -n, --keep-top-qcovs int            keep matches with the top N qcovs for a query, 0 for all
       --level string                  level to estimate abundance at. available values: species, strain/assembly (default "species")
@@ -365,11 +380,12 @@ Flags:
   -D, --min-dreads-prop float         minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
   -p, --min-frags-prop float          minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads (default 0.8)
   -r, --min-frags-reads int           minimal number of reads for a reference fragment (default 50)
-  -U, --min-hic-ureads int            minimal number of high-confidence uniquely matched reads for a reference (default 1)
+  -U, --min-hic-ureads int            minimal number of high-confidence uniquely matched reads for a reference (default 5)
   -P, --min-hic-ureads-prop float     minimal proportion of high-confidence uniquely matched reads (default 0.1)
   -H, --min-hic-ureads-qcov float     minimal query coverage of high-confidence uniquely matched reads (default 0.75)
   -t, --min-query-cov float           minimal query coverage of a read in search result (default 0.55)
-  -u, --min-uniq-reads int            minimal number of uniquely matched reads for a reference (default 10)
+  -u, --min-uniq-reads int            minimal number of uniquely matched reads for a reference (default 20)
+  -m, --mode int                      profiling mode, type "kmcp profile -h" for details. available values: 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (higher precision) (default 3)
   -N, --name-map strings              tabular two-column file(s) mapping reference IDs to reference names
       --norm-abund string             method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max (default "mean")
   -o, --out-prefix string             out file prefix ("-" for stdout) (default "-")
@@ -379,6 +395,7 @@ Flags:
       --show-rank strings             only show TaxIds and names of these ranks (default [superkingdom,phylum,class,order,family,genus,species,strain])
   -X, --taxdump string                directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
   -T, --taxid-map strings             tabular two-column file(s) mapping reference IDs to TaxIds
+      --taxonomy-id string            taxonomy ID in result file
 
 ```
 
