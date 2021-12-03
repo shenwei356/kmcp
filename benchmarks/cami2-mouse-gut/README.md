@@ -1,18 +1,26 @@
 # Benchmarks on CAMI2 toy mouse gut short reads dataset
 
+We created KMCP databaes with the RefSeq and Taxonomy snapshot provided by CAMI2 (2019-01-08).
+
+Gold standard was downloaded from: https://zenodo.org/record/3632528#.YJY6NaIzZD8 .
+Benchmark results of other tools are downloaded from: https://zenodo.org/search?page=1&size=20&q=keywords:%22CAMI%202%20Mouse%20Gut%20Toy%20data%20set%22&keywords=taxonomic%20profiling .
 
 ## Softwares
 
-- kmcp ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- kmcp [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- motus 2.5.1
+- metaphlan 2.9.21
+- bracken 2.5
 
 ## Databases
 
-Prebuilt databases
+[Prebuilt databases](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=ivNZNK):
 
-- DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz]()
-- DB for viruses: [refseq-cami2-viral-k21-n5.db.tar.gz]()
-- TaxId mapping: [taxid.map](), and [taxid-viral.map]()
-- [taxdump.tar.gz]()
+- DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjV62KmQmOojxwBRr?e=lp5a9F), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWISqJGcxQD39FCv?e=CQ0E8d)
+- DB for viruses: [refseq-cami2-viral-k21-n5.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVyYFIHY01PtDMcx?e=AO7xkY), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWDTIXL4eMpZNVA0?e=1YXKkk)
+- TaxId mapping: [taxid.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVvZBPDumqTp0LLX?e=2OGhTe), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWXOc2bP9cmE2H9C?e=yyZnaB);
+  [taxid-viral.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVclRm9-rd-K2MA3?e=6aOgqm), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWZR9Zfs7m33k_lV?e=ALSUe0)
+- [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVjXKnxzq-sUb8Cw?e=7AwTnG), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWQf06gXeM0rLHJ9?e=dxSW9g)
 
 **Attention**: the CAMI2 RefSeq snapshot did not include viruses,
 and CAMI2 toy mouse gut dataset did not contain viral reads either.
@@ -122,26 +130,4 @@ https://data.cami-challenge.org/participate
             | rush -j 1 'cat {}' \
             > $profile
     done
-    
-## Test with prebuilt database
-
-Searching
-
-    # search on multiple database
-    file=sample_0.fq.gz
-    sampleId=0
-    for db in refseq-cami2-k21-n10.db refseq-cami2-viral-k21-n5.db; do
-        kmcp search -j 40 -d $db $file -o $file.kmcp@$db.tsv.gz
-    done
-    
-    # merge search result
-    kmcp merge $file.kmcp@*.tsv.gz -o $file.kmcp.tsv.gz
-    
-Profiling
-
-    # profile
-    kmcp profile -T taxid.map -T taxid-virus.map -X taxdump/ \
-        $file.kmcp.tsv.gz \
-        -o $file.kmcp.tsv.gz.k.profile \
-        -C $file.kmcp.tsv.gz.cami.profile -s $sampleId        
     

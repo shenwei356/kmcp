@@ -3,6 +3,12 @@
 KMCP is implemented in [Go](https://golang.org/) programming language,
 statically-linked executable binary files are [freely available](https://github.com/shenwei356/kmcp/releases).
 
+## Current Version
+
+- [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0) - 2021-11-11
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+
+### Links
 
 OS     |Arch      |File, 中国镜像                                                                                                                                                                                  |Download Count
 :------|:---------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
