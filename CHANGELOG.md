@@ -31,7 +31,7 @@
     - output format change: new column `coverage`, `fragsRelDepth` and `fragsRelDepthStd`.
     - change default file extension of binning file.
     - check if the taxid of a target is given by taxid mapping file.
-    - automatically switch to new taxid for merged one.
+    - automatically switch to the new taxid for a merged one.
     - change computation of `score`.
     - new flag `-d/--max-frags-depth-stdev`.
     - new option `-m/--mode`.

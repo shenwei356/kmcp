@@ -36,16 +36,22 @@ KMCP utilizes multiple k-mer sketches
 
 ## Features
 
+- **Easy to use, no dependencies, no configurations**.
 - **Building database is easy and fast**.
+    - ~25min for 47894 genomes from GTDB-r202 on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**.
     - Searching time is linearly related to the number of reference genomes.
+    - Automatically scales to utilize all available CPU cores.
 - **Scalable searching**. Searching results against multiple databases can be fast merged.
-    This brings multiple benifits:
+    This brings multiple benefits:
     - There's no need to re-built the database with newly added reference genomes. 
     - HPC cluster could accerlerate searching with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
-- **Accurate taxonomic profiling**. Some k-mer based taxonomic profilers suffers high false positive rates,
-   while KMCP adopts multiple strategies improve specificity.
+- **Accurate taxonomic profiling**. 
+    - Some k-mer based taxonomic profilers suffers high false positive rates,
+      while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
+    - Preset five modes for multiple scenarios.
+    - Supports CAMI profiling format.
     
  
 ## Documents and resources
@@ -65,6 +71,20 @@ Download [executable binaries](https://github.com/shenwei356/kmcp/releases),
 or install using conda:
 
     conda install -c bioconda kmcp
+
+## Commands
+
+|subcommand                                                                |function                                                        |
+|:-------------------------------------------------------------------------|:---------------------------------------------------------------|
+|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketch) from FASTA/Q sequences                 |
+|[index](https://bioinf.shenwei.me/kmcp/usage/#index)                      |Construct database from k-mer files                             |
+|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequence against a database                              |
+|[merge](https://bioinf.shenwei.me/kmcp/usage/#merge)                      |Merge search results from multiple databases                    |
+|[profile](https://bioinf.shenwei.me/kmcp/usage/#profile)                  |Generate taxonomic profile from search results                  |
+|[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
+|[utils merge-regions](https://bioinf.shenwei.me/kmcp/usage/#merge-regions)|Merge species/assembly-specific regions                         |
+|[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |
+|[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index file                                 |
 
 ## Quick Start
 

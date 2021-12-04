@@ -243,7 +243,6 @@ Steps
     
     db=/home/shenwei/ws/db/kraken/
     readlen=150
-    level=S
     threshold=10
     
     fd left.fq.gz$ $reads/ \
@@ -252,14 +251,17 @@ Steps
             'memusg -t -s \
                 "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed --paired  \
                     {p}.left.fq.gz {p}.right.fq.gz --report {p}.kreport > /dev/null; \
-                est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l {level} -t {threshold} \
-                    -i {p}.kreport -o {p}.bracken" \
+                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\"; do \
+                    est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l \$r -t {threshold} \
+                    -i {p}.kreport -o {p}.bracken.level-\$r ; \
+                done; \
+                cat {p}.bracken.level-* > {p}.bracken " \
                 >{p}.log 2>&1 '
 
     # ------------------------------------------------------
     # convert to CAMI format
     fd .bracken$ $reads/ \
-        | rush './tocami.py -d ./ -f bracken {} -s {%:} -o {}.profile'
+        | rush 'python3 ./tocami.py -d ./ -f bracken {} -s {%:} -o {}.profile'
     
     profile=$reads.profile
     fd bracken.profile$ $reads/ \

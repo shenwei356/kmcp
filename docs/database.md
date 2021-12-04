@@ -519,7 +519,85 @@ Building database:
     
     cp taxid.map taxid-gtdb.map humgut.kmcp/
 
+## proGenomes2
 
+[proGenomes](https://progenomes.embl.de/) v2.1 provides 84,096 consistently annotated bacterial
+and archaeal genomes from over 12000 species
+
+Dataset:
+
+- Representative genomes: [contigs.representatives.fasta.gz](https://progenomes.embl.de/data/repGenomes/freeze12.contigs.representatives.fasta.gz)
+- NCBI taxonomy: [proGenomes2.1_specI_lineageNCBI.tab](https://progenomes.embl.de/data/proGenomes2.1_specI_lineageNCBI.tab)
+    
+Organize sequences:
+    
+    # download
+    wget https://progenomes.embl.de/data/repGenomes/freeze12.contigs.representatives.fasta.gz
+    
+    # unzip for splitting by genome ID
+    time seqkit seq freeze12.contigs.representatives.fasta.gz -o freeze12.contigs.representatives.fasta
+    
+    # split by genome ID
+    seqkit split --by-id --two-pass --id-regexp '(^\d+\.\w+)\.' freeze12.contigs.representatives.fasta --out-dir genomes
+    
+    # batch rename
+    brename -p '^.+id_' genomes
+    
+    # compress genomes for saving space
+    find genomes/ -name "*.fasta" | rush 'gzip {}'
+
+Mapping file:
+
+    # download
+    wget https://progenomes.embl.de/data/proGenomes2.1_specI_lineageNCBI.tab
+    
+    ls genomes/ | sed 's/.fasta.gz//' > id.txt
+    
+    # id -> taxid
+    cut -f 1 proGenomes2.1_specI_lineageNCBI.tab \
+        | awk -F . '{print $0"\t"$1}' \
+        | csvtk grep -Ht -P id.txt \
+        > taxid.map
+    
+    cat taxid.map \
+        | csvtk uniq -Ht -f 2 \
+        | taxonkit lineage --data-dir taxdump -i 2 -r -n -L \
+        | csvtk freq -Ht -f 4 -nr \
+        | csvtk pretty -H -t \
+        | tee taxid.map.uniq.stats
+    species           8088
+    strain            3262
+    subspecies        37
+    isolate           25
+    no rank           16
+    forma specialis   14
+    biotype           1
+    
+    
+    # use the taxonomy verion of the refseq-virus: 2021-10-01
+    # id -> name
+    cat taxid.map \
+        | taxonkit lineage --data-dir taxdump -i 2 -n -L \
+        | cut -f 1,3 \
+        > name.map
+
+Building database:
+    
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments
+    #   k = 21
+    kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
+
+    # build database
+    #   number of index files: 32, for server with >= 32 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.3
+    kmcp index -j 32 -I progenomes-k21-n10 -O progenomes.kmcp -n 1 -f 0.3
+    
+    cp taxid.map name.map progenomes.kmcp/
+        
 ## Building custom databases
 
 Files:
