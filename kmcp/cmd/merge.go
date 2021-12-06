@@ -43,6 +43,7 @@ var mergeCmd = &cobra.Command{
 
 Input:
   *. Searching results of the same reads on different databases.
+  *. THe order of multiple input reads files should be the same during searching.
   *. When only one input given, we just copy and write to the input file.
      This is friendly to workflows which assume multiple inputs are given.
 
@@ -173,6 +174,7 @@ Input:
 		done := make(chan int)
 		go func() {
 			var preId uint64
+			var preSeqId string
 			first := true
 			var match *_Match
 			buf0 := make([]*_Match, 0, 1024)
@@ -185,6 +187,7 @@ Input:
 					// poolMatches.Put(r.Matches)
 
 					preId = r.QueryIdx
+					preSeqId = r.QuerySeqId
 					first = false
 					continue
 				}
@@ -211,6 +214,11 @@ Input:
 
 					preId = r.QueryIdx
 					continue
+				}
+
+				if (*r).QuerySeqId != preSeqId {
+					checkError(fmt.Errorf(`[queryIdx: %d] unmatched sequence Ids detected: idx '%s' != '%s'. please make sure the search results coming from same query files`,
+						r.QueryIdx, (*r).QuerySeqId, preSeqId))
 				}
 
 				buf0 = append(buf0, *r.Matches...)
@@ -353,8 +361,9 @@ func (s _Matches) Less(i, j int) bool { return s[i].Score > s[j].Score }
 func (s _Matches) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 type SearchResult struct {
-	QueryIdx uint64
-	Matches  *[]*_Match
+	QueryIdx   uint64 // sequence idx
+	QuerySeqId string // sequence id, for double checking
+	Matches    *[]*_Match
 }
 
 func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
@@ -419,8 +428,9 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 
 			if i != idx { // new
 				ch <- &SearchResult{
-					QueryIdx: idx,
-					Matches:  matches,
+					QueryIdx:   idx,
+					QuerySeqId: (*items)[0],
+					Matches:    matches,
 				}
 				tmp := make([]*_Match, 0, 32)
 				matches = &tmp
@@ -440,9 +450,11 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		checkError(scanner.Err())
 		r.Close()
 
-		ch <- &SearchResult{
-			QueryIdx: idx,
-			Matches:  matches,
+		if len(*matches) > 0 {
+			ch <- &SearchResult{
+				QueryIdx: idx,
+				Matches:  matches,
+			}
 		}
 		close(ch)
 	}()

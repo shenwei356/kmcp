@@ -266,6 +266,7 @@ Merge search results from multiple databases
 
 Input:
   *. Searching results of the same reads on different databases.
+  *. THe order of multiple input reads files should be the same during searching.
   *. When only one input given, we just copy and write to the input file.
      This is friendly to workflows which assume multiple inputs are given.
 

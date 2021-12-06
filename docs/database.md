@@ -181,6 +181,28 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
 
+### Genbank viral
+
+
+Tools
+
+- [genome_updater](https://github.com/pirovc/genome_updater) for downloading genomes from NCBI.
+
+Downloading viral sequences:
+
+    name=viral
+
+    # -k for dry-run
+    # -i for fix
+    time genome_updater.sh \
+        -d "genbank"\
+        -g $name \
+        -c "all" \
+        -l "all" \
+        -f "genomic.fna.gz" \
+        -o "genbank-$name" \
+        -t 12 \
+        -m -a -p -k
 
 ### RefSeq
 
