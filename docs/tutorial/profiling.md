@@ -195,7 +195,7 @@ Demo result:
 1. Reference genomes can be splitted into fragments when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimal proportion of matched fragments
-    (`-p/--min-frags-prop`). (***highly recommended***)
+    (`-p/--min-frags-fraction`). (***highly recommended***)
     Another flag `-d/--max-frags-cov-stdev` further reduces false positives.
 2. We require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
@@ -237,7 +237,7 @@ Three-rounds profiling:
     options                       m=1    m=2    m=3     m=4    m=5
     --------------------------    ---    ---    ----    ---    ----
     -r/--min-frags-reads          20     30     50      100    100
-    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -p/--min-frags-fraction       0.5    0.7    0.8     1      1
     -d/--max-frags-depth-stdev    10     3      2       2      1.5
     -u/--min-uniq-reads           20     20     20      50     50
     -U/--min-hic-ureads           5      5      5       10     10
@@ -275,7 +275,7 @@ Three-rounds profiling:
         --level             species \
         --min-query-cov        0.55 \
         --min-frags-reads        50 \
-        --min-frags-prop        0.8 \
+        --min-frags-fraction     0.8 \
         --max-frags-depth-stdev   2 \
         --min-uniq-reads         10 \
         --min-hic-ureads          1 \
@@ -307,7 +307,7 @@ KMCP format:
  1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of a reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
- 4. fragsCov,           Fragments coverage
+ 4. fragsFrac,          Genome fragments fraction
  5. fragsRelDepth,      Relative depths of reference fragments
  6. fragsRelDepthStd,   The strandard deviation of fragsRelDepth
  7. reads,              Total number of matched reads of this reference
@@ -324,7 +324,7 @@ KMCP format:
 
 Demo output:
 
-|ref        |percentage|score |fragsCov|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
+|ref        |percentage|score |fragsFrac|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
 |:----------|:---------|:-----|:-------|:------------------------------------------------|:---------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
 |NC_013654.1|48.321535 |100.00|1.00    |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02            |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
 |NC_000913.3|46.194629 |100.00|1.00    |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02            |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |

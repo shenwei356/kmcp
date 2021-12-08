@@ -293,7 +293,7 @@ Methods:
   1. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-prop). (***highly recommended***)
+     (-p/--min-frags-fraction). (***highly recommended***)
      Another flag -d/--max-frags-depth-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
@@ -335,7 +335,7 @@ Profiling modes:
     options                       m=1    m=2    m=3     m=4    m=5
     --------------------------    ---    ---    ----    ---    ----
     -r/--min-frags-reads          20     30     50      100    100
-    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -p/--min-frags-fraction       0.5    0.7    0.8     1      1
     -d/--max-frags-depth-stdev    10     3      2       2      1.5
     -u/--min-uniq-reads           20     20     20      50     50
     -U/--min-hic-ureads           5      5      5       10     10
@@ -379,7 +379,7 @@ Flags:
       --max-qcov-gap float            max qcov gap between adjacent matches (default 0.2)
   -M, --metaphlan-report string       save extra metaphlan-like report
   -D, --min-dreads-prop float         minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
-  -p, --min-frags-prop float          minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads (default 0.8)
+  -p, --min-frags-fraction float      minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads (default 0.8)
   -r, --min-frags-reads int           minimal number of reads for a reference fragment (default 50)
   -U, --min-hic-ureads int            minimal number of high-confidence uniquely matched reads for a reference (default 5)
   -P, --min-hic-ureads-prop float     minimal proportion of high-confidence uniquely matched reads (default 0.1)

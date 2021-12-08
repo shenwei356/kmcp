@@ -53,7 +53,7 @@ Methods:
   1. Reference genomes can be splitted into fragments when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-prop). (***highly recommended***)
+     (-p/--min-frags-fraction). (***highly recommended***)
      Another flag -d/--max-frags-depth-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
@@ -95,7 +95,7 @@ Profiling modes:
     options                       m=1    m=2    m=3     m=4    m=5
     --------------------------    ---    ---    ----    ---    ----
     -r/--min-frags-reads          20     30     50      100    100
-    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -p/--min-frags-fraction       0.5    0.7    0.8     1      1
     -d/--max-frags-depth-stdev    10     3      2       2      1.5
     -u/--min-uniq-reads           20     20     20      50     50
     -U/--min-hic-ureads           5      5      5       10     10
@@ -182,7 +182,7 @@ Taxonomic binning formats:
 
 		minReads = float64(getFlagPositiveInt(cmd, "min-frags-reads"))
 		minUReads = float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
-		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-frags-prop")
+		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-frags-fraction")
 		maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-frags-depth-stdev")
 
 		minHicUreads = float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
@@ -2234,7 +2234,7 @@ Taxonomic binning formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tfragsCov\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
+		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tfragsFrac\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {
@@ -2404,7 +2404,7 @@ func init() {
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-frags-reads", "r", 50, `minimal number of reads for a reference fragment`)
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 20, `minimal number of uniquely matched reads for a reference`)
-	profileCmd.Flags().Float64P("min-frags-prop", "p", 0.8, `minimal proportion of matched reference fragments with reads >= -r/--min-frags-reads`)
+	profileCmd.Flags().Float64P("min-frags-fraction", "p", 0.8, `minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads`)
 	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2, `maximal standard deviation of relative depths of all fragments`)
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 5, `minimal number of high-confidence uniquely matched reads for a reference`)
