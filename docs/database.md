@@ -6,7 +6,7 @@ All prebuilt database are available on [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYc
 
 **Hardware requirements**
 
-- Prebuilt databases above were built for computers with >= 32 CPU cores
+- Prebuilt databases were built for computers with >= 32 CPU cores
 in consideration of better parallelization,
 and computers should have at least 64 GB. 
 - By default, `kmcp search` loads the whole database into main memory (via [mmap](https://en.wikipedia.org/wiki/Mmap)) for fast searching.
@@ -29,50 +29,48 @@ These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
 
-|DB                      |source     |# species|# assembly|parameters      |archive file                                                                                                                                                    |size     |
-|:-----------------------|:----------|:--------|:---------|:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252    |47894     |k=21, frags=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))      |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |23604    |30691     |k=21, frags=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))    |21.52 GB |
-|**Fungi**               |Refseq r208|161      |403       |k=21, frags=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E))|4.18 GB  |
-|**Viruses**             |Refseq r208|7189     |11618     |k=21, frags=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))|2.00 GB  |
-|**Human**               |CHM13      |1        |1         |k=21, frags=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U)(818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))  |946 MB   |
+|DB                      |source     |#species|#assemblies|parameters      |archive file                                                                                                                                                      |size     |
+|:-----------------------|:----------|:-------|:----------|:---------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |43252   |47894      |k=21, frags=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |23604   |30691      |k=21, frags=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
+|**Fungi**               |Refseq r208|161     |403        |k=21, frags=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
+|**Viruses**             |GenBank 246|19584   |27936      |k=21, frags=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjg0hls35Ak3sPIoD?e=ApnUEW) (2.49 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjg-a1pMCiTeJwTue?e=NkYUUb))|4.97 GB  |
+|**Viruses**             |Refseq r208|7189    |11618      |k=21, frags=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
+|**Human**               |CHM13      |1       |1          |k=21, frags=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
-**Meta data**:
 
-- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRROG6I7_SkqPzQN?e=OeDfpq) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78))
-- Taxid mapping file: [taxid.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVJUuy6tvV4pIRjy?e=lPPM4w) ([md5](https://1drv.ms/u/s!Ag89cZ8NYcqtjVOM0Fpc7NRwgSgH?e=VuuKhm))
-- Name mapping file: [name.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVDxFQr3Be-rEUOy?e=yrVDIG) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU9mPOLQKTkJ6ydm?e=bO0mdb))
+**Taxonomy data**:
 
-**Meta data for HumGut**:
+- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ) (2021-12-06, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU))
+
+**Taxonomy data for HumGut**:
 
 - Taxonomy dump file: [taxdump-humgut.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf))
 - Taxid mapping file: [taxid-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2))
 - Name mapping file: [name-humgut.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec) ([md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman))
 
 
-
-
 ### B). Databases for genome similarity estimation
 
-Check [tutorial](/tutorial/searching).
+Check the [tutorial](/tutorial/searching).
 
 Scaled MinHash:
 
-|kingdoms                |source     |parameters      |file                                                                                                                                                                    |size     |
-|:-----------------------|:----------|:---------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |k=31, scale=1000|[gtdb.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q) (710 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r))        |1.52 GB  |
-|**Fungi**               |Refseq r208|k=31, scale=1000|[refseq-fungi.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8) (49 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1)) |98 MB    |
-|**Viruses**             |Refseq r208|K=31, scale=10  |[refseq-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B) (205 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl))|555 MB   |
-
+|kingdoms                |source     |parameters      |file                                                                                                                                                                     |size     |
+|:-----------------------|:----------|:---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |k=31, scale=1000|[gtdb.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q) (710 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r))         |1.52 GB  |
+|**Fungi**               |Refseq r208|k=31, scale=1000|[refseq-fungi.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8) (49 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1))  |98 MB    |
+|**Viruses**             |Genbank 246|k=31, scale=10  |[genbank-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhNMoB2v8OcXPwlB?e=dOCBL3) (580 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjhH5MRvKtbb-OW4v?e=dY6Yh9))|1.19 GB  |
+|**Viruses**             |Refseq r208|k=31, scale=10  |[refseq-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B) (205 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl)) |555 MB   |
 
 Closed Syncmers:
 
-|kingdoms                |source     |parameters          |file                                                                                                                                                                    |size     |
-|:-----------------------|:----------|:-------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r) (1.03 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk))       |2.28 GB  |
-|**Fungi**               |Refseq r208|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQZqTZrnLyiEJ0IX?e=aORH7a) (73 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQdqsq1rGf0YuCdz?e=g0gOtx)) |145 MB   |
-|**Viruses**             |Refseq r208|k=31, s=21          |[refseq-viral.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl) (162 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQKyoa8lcPTO5yt_?e=e7Ki65))|441 MB   |
-
+|kingdoms                |source     |parameters          |file                                                                                                                                                                     |size     |
+|:-----------------------|:----------|:-------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |k=31, s=15, scale=60|[gtdb.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r) (1.03 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk))        |2.28 GB  |
+|**Fungi**               |Refseq r208|k=31, s=15, scale=60|[refseq-fungi.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQZqTZrnLyiEJ0IX?e=aORH7a) (73 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQdqsq1rGf0YuCdz?e=g0gOtx))  |145 MB   |
+|**Viruses**             |Genbank 246|k=31, s=10          |[genbank-viral.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhQiHSTYQNFUgqPx?e=xlJm35) (473 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjhL1YSXJGeBmI_c7?e=lWVkON))|1.06 GB  |
+|**Viruses**             |Refseq r208|k=31, s=21          |[refseq-viral.syncmer.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl) (162 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQKyoa8lcPTO5yt_?e=e7Ki65)) |441 MB   |
 
 ### C). Databases of plasmid
 
@@ -181,30 +179,7 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
 
-### Genbank viral
-
-
-Tools
-
-- [genome_updater](https://github.com/pirovc/genome_updater) for downloading genomes from NCBI.
-
-Downloading viral sequences:
-
-    name=viral
-
-    # -k for dry-run
-    # -i for fix
-    time genome_updater.sh \
-        -d "genbank"\
-        -g $name \
-        -c "all" \
-        -l "all" \
-        -f "genomic.fna.gz" \
-        -o "genbank-$name" \
-        -t 12 \
-        -m -a -p -k
-
-### RefSeq
+### RefSeq viral or fungi
 
 Tools
 
@@ -305,6 +280,124 @@ Building database:
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-fungi.kmcp/
+    
+### Genbank viral
+
+
+Tools
+
+- [genome_updater](https://github.com/pirovc/genome_updater) for downloading genomes from NCBI.
+
+Downloading viral sequences:
+
+    name=viral
+
+    # -k for dry-run
+    # -i for fix
+    time genome_updater.sh \
+        -d "genbank"\
+        -g $name \
+        -c "all" \
+        -l "all" \
+        -f "genomic.fna.gz" \
+        -o "genbank-$name" \
+        -t 12 \
+        -m -a -p
+
+    # cd genbank-viral/2021-12-06_15-27-37/
+        
+    # taxdump
+    mkdir -p taxdump
+    tar -zxvf taxdump.tar.gz -C taxdump
+    
+    # assembly accesion -> taxid
+    cut -f 1,6 assembly_summary.txt > taxid.map    
+    # assembly accesion -> name
+    cut -f 1,8 assembly_summary.txt > name.map
+    
+    
+    # stats (optional)
+    cat taxid.map  \
+        | csvtk freq -Ht -f 2 -nr \
+        | taxonkit lineage -r -n -L --data-dir taxdump/ \
+        | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
+        | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
+        > taxid.map.stats.tsv
+    
+    seqkit stats -T -j 12 --infile-list <(find files -name "*.fna.gz") > files.stats.tsv
+    
+    
+    
+    # ------------------------------------------------------ 
+    # create another directory linking to genome files
+    
+    input=files.renamed    
+    
+    mkdir -p $input
+    # create soft links
+    cd $input
+    find ../files -name "*.fna.gz" \
+        | rush 'ln -s {}'
+    cd ..    
+    # rename
+    brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
+        
+Building database:
+
+    # -----------------------------------------------------------------
+    # keep at most 5 genomes for a taxid
+    
+    # backup
+    cat taxid.map > taxid.all.map
+    cat name.map > name.all.map
+    
+    # keep at most 5 ids for a taxid
+    cat taxid.all.map \
+        | csvtk sort -Ht -k 2:n -k 1:n \
+        | csvtk uniq -Ht -f 2 -n 5 \
+        > taxid.map
+    
+    cat name.all.map \
+        | csvtk grep -Ht -P <(cut -f 1 taxid.map) \
+        > name.map
+        
+    # organize files
+    input=files.renamed
+    output=files.renamed.slim
+    mkdir -p $output 
+    cd $output
+    find ../$input -name "*.fna.gz" \
+        | csvtk mutate -Ht -p '/([^\/]+).fna.gz' \
+        | csvtk grep -Ht -f 2 -P <(cut -f 1 ../taxid.map) \
+        | rush 'ln -s {1}'
+    cd ..
+        
+    # check number of genomes
+    ls $output | wc -l
+    wc -l taxid.map
+
+        
+    # -----------------------------------------------------------------
+    # for viral, only splitting into 5 fragments
+    name=viral
+    
+    input=files.renamed.slim
+    
+    kmcp compute -I $input -O genbank-$name-k21-n5 \
+        -k 21 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log genbank-$name-k21-n5.log --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I genbank-$name-k21-n5/ -O genbank-viral.kmcp \
+        -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+        --log genbank-viral.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map genbank-viral.kmcp/
+
 
 ### Human genome
 
@@ -541,7 +634,7 @@ Building database:
     
     cp taxid.map taxid-gtdb.map humgut.kmcp/
 
-## proGenomes2
+### proGenomes2
 
 [proGenomes](https://progenomes.embl.de/) v2.1 provides 84,096 consistently annotated bacterial
 and archaeal genomes from over 12000 species

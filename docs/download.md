@@ -46,7 +46,7 @@ And then:
 
             mkdir -p $HOME/bin/; cp kmcp $HOME/bin/
 
-- **For windows**, just copy `kmcp.exe` to `C:\WINDOWS\system32`.
+- **For Windows**, just copy `kmcp.exe` to `C:\WINDOWS\system32`.
 
 
 ## Shell-completion

@@ -227,6 +227,23 @@ Three-rounds profiling:
 - `--keep-perfect-match` is not recommended, which decreases sensitivity.
 - `-n/--keep-top-qcovs`  is not recommended, which affects accuracy of
      abundance estimation.
+     
+**Profiling modes:**
+
+  We preset five profiling modes, availabe with the flag `-m/--mode`.
+  Mode 1 (highest recall), 2 (high recall), 4 (higher precision),
+  5 (higher precision) will overide the relevant options.
+
+    options                       m=1    m=2    m=3     m=4    m=5
+    --------------------------    ---    ---    ----    ---    ----
+    -r/--min-frags-reads          20     30     50      100    100
+    -p/--min-frags-prop           0.5    0.7    0.8     1      1
+    -d/--max-frags-depth-stdev    10     3      2       2      1.5
+    -u/--min-uniq-reads           20     20     20      50     50
+    -U/--min-hic-ureads           5      5      5       10     10
+    -H/--min-hic-ureads-qcov      0.7    0.7    0.75    0.8    0.8
+    -P/--min-hic-ureads-prop      0.1    0.2    0.1     0.1    0.15
+
 
 **Taxonomy data**:
 
@@ -276,8 +293,8 @@ Three-rounds profiling:
 **Supported profiling output formats**:
 
 - KMCP      (`-o/--out-prefix`)
-- CAMI      (`-M/--metaphlan-report`, sampe name: `-s/--sample-id`)
-- MetaPhlAn (`-C/--cami-report`, sampe name: `-s/--sample-id`))
+- CAMI      (`-M/--metaphlan-report`, sample name: `-s/--sample-id`)
+- MetaPhlAn (`-C/--cami-report`, sample name: `-s/--sample-id`))
 
 **Supported taxonomic binning formats**:
 
@@ -339,7 +356,7 @@ Demo output:
     386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	5.014025
     349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.469811
 
-Metaphlan format:
+Metaphlan format ([`taxonkit profile2cami`](https://bioinf.shenwei.me/taxonkit/usage/#profile2cami) can also converts any metagenomic profile table with TaxIds to CAMI format):
 
     #SampleID	
     k__Bacteria	100.000000

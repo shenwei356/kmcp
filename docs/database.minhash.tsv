@@ -1,4 +1,5 @@
 kingdoms	source	parameters	file	size     
 **Bacteria and Archaea**	GTDB r202	k=31, scale=1000	[gtdb.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q) (710 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r))	1.52 GB  
 **Fungi**	Refseq r208	k=31, scale=1000	[refseq-fungi.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8) (49 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1))	98 MB    
-**Viruses**	Refseq r208	K=31, scale=10	[refseq-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B) (205 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl))	555 MB   
+**Viruses**	Genbank 246	k=31, scale=10	[genbank-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhNMoB2v8OcXPwlB?e=dOCBL3) (580 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjhH5MRvKtbb-OW4v?e=dY6Yh9))	1.19 GB
+**Viruses**	Refseq r208	k=31, scale=10	[refseq-viral.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B) (205 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl))	555 MB   

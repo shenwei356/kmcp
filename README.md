@@ -76,7 +76,7 @@ or install using conda:
 
 |subcommand                                                                |function                                                        |
 |:-------------------------------------------------------------------------|:---------------------------------------------------------------|
-|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketch) from FASTA/Q sequences                 |
+|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketches) from FASTA/Q sequences               |
 |[index](https://bioinf.shenwei.me/kmcp/usage/#index)                      |Construct database from k-mer files                             |
 |[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequence against a database                              |
 |[merge](https://bioinf.shenwei.me/kmcp/usage/#merge)                      |Merge search results from multiple databases                    |

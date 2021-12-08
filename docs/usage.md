@@ -22,7 +22,7 @@ Usage:
 
 Available Commands:
   autocompletion Generate shell autocompletion script
-  compute        Generate k-mers (sketch) from FASTA/Q sequences
+  compute        Generate k-mers (sketches) from FASTA/Q sequences
   index          Construct database from k-mer files
   merge          Merge search results from multiple databases
   profile        Generate taxonomic profile from search results
@@ -45,7 +45,7 @@ Use "kmcp [command] --help" for more information about a command.
 ## compute
 
 ```text
-Generate k-mers (sketchs) from FASTA/Q sequences
+Generate k-mers (sketches) from FASTA/Q sequences
 
 Attentions:
   1. Input files can be given as list of FASTA/Q files via

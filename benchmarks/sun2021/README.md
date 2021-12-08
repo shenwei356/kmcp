@@ -1,9 +1,8 @@
 # Benchmarks on 25 simulated communities from Sun et al
 
-
 ## Softwares
 
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
 - mOTUs [3.0.1 (Jul 28, 2021)](https://github.com/motu-tool/mOTUs/releases/tag/3.0.1)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
@@ -16,7 +15,7 @@
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 
-In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-10-01,
+In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
 
 ## Datasets
@@ -35,10 +34,10 @@ including the gold-standard profiles.
 Sun *et al.* simulated [25 metagenomic reads](https://figshare.com/projects/Pitfalls_and_Opportunities_in_Benchmarking_Metagenomic_Classifiers/79916) for benchmarking metagenomic profilers,
 while the ground truth profiles format is not convenient for interpretation
 with tools like [opal](https://github.com/CAMI-challenge/OPAL).
-I've convert the ground truth profiles to CAMI format with Taxonomy version 2021-10-01,
-available [here](https://github.com/shenwei356/sun2021-cami-profiles).
+I've convert the ground truth profiles to CAMI format with Taxonomy version 2021-10-06,
+available [here](https://github.com/shenwei356/sun2021-cami-profiles/releases/tag/v2021-12-06).
 
-All fastq file are downloaded and saved in one directory `reads`.
+All FASTQ files were downloaded and saved in one directory `reads`.
         
 ## KMCP
 
@@ -94,7 +93,8 @@ All fastq file are downloaded and saved in one directory `reads`.
     
     
     # ------------------------------------------------------------------------
-            
+    # default profiling mode
+    
     fd kmcp@$dbname.tsv.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T \
@@ -107,7 +107,7 @@ All fastq file are downloaded and saved in one directory `reads`.
         > $profile
         
     # ------------------------------------------------------------------------
-    # profiling modes
+    # multiple profiling modes
         
     for m in $(seq 1 5); do
         fd kmcp@$dbname.tsv.gz$ $reads/ \
@@ -227,7 +227,7 @@ Preparing tocami.py which convert Bracken output to CAMI format
     tar -zcvf taxdump.tar.gz taxdump/*
     
     # creating database for ete3 (don't worry the error reports, just ignore):
-    tocami.py -t taxdump.tar.gz -f bracken -s 1 -d . bracken-pe/Build_sample1.bracken
+    ./tocami.py -t taxdump.tar.gz -f bracken -s 1 -d . bracken-pe/Build_sample1.bracken
 
 Steps
 

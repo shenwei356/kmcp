@@ -47,8 +47,8 @@ import (
 
 var computeCmd = &cobra.Command{
 	Use:   "compute",
-	Short: "Generate k-mers (sketch) from FASTA/Q sequences",
-	Long: `Generate k-mers (sketchs) from FASTA/Q sequences
+	Short: "Generate k-mers (sketches) from FASTA/Q sequences",
+	Long: `Generate k-mers (sketches) from FASTA/Q sequences
 
 Attentions:
   1. Input files can be given as list of FASTA/Q files via
