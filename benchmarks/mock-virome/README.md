@@ -1,4 +1,4 @@
-# Benchmarks on 25 simulated communities from Sun et al
+# Benchmarks on 16 mock virome communities from Roux et al
 
 ## Softwares
 
@@ -155,11 +155,14 @@ We search against GTDB and Genbank-viral respectively, and merge the results.
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
     
+    
+    
+    
     # ------------------------------------------------------------------------
     # merge results
     
     reads=kmcp-se
-    j=4
+    j=16
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v 'p={@^(.+)_R1_}' \
@@ -168,7 +171,7 @@ We search against GTDB and Genbank-viral respectively, and merge the results.
     
     
     # ------------------------------------------------------------------------
-    # default profiling mode
+    # [for search results on ONE database] default profiling mode
             
     fd kmcp@$dbname.tsv.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -182,7 +185,7 @@ We search against GTDB and Genbank-viral respectively, and merge the results.
         > $profile
         
     # ------------------------------------------------------------------------
-    # multiple profiling modes
+    # [for search results on ONE database] multiple profiling modes
         
     for m in $(seq 1 5); do
         fd kmcp@$dbname.tsv.gz$ $reads/ \
@@ -196,9 +199,31 @@ We search against GTDB and Genbank-viral respectively, and merge the results.
             | rush -j 1 'cat {}' \
             > $profile
     done
+    
+    
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes
+        
+    
+    X=taxdump/
+    cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map > taxid.map
+    T=taxid.map
+    
+    for m in $(seq 1 5); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%@(^......)} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
 
     
-## MetaPHlAn
+## MetaPhlAn
 
     # prepare folder and files.
     mkdir -p mpa3-pe
@@ -284,7 +309,7 @@ Steps
             'memusg -t -s \
                 "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed --paired  \
                     {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz --report {p}.kreport > /dev/null; \
-                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\"; do \
+                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\" \"D\"; do \
                     est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l \$r -t {threshold} \
                     -i {p}.kreport -o {p}.bracken.level-\$r ; \
                 done; \

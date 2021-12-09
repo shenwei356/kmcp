@@ -7,8 +7,8 @@
 ### 1. Accurate metagenomic profiling
 
 KMCP adopts a novol metagenomic profiling strategy,
-splitting reference genomes into 10 fragments and mappings reads to these
-fragments by fast k-mer matching. 
+by splitting reference genomes into 10 fragments and mappings reads to these
+fragments via fast k-mer matching. 
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
 ### 2. Fast sequence search against large scales of genomic datasets
@@ -50,6 +50,7 @@ KMCP utilizes multiple k-mer sketches
 - **Accurate taxonomic profiling**. 
     - Some k-mer based taxonomic profilers suffers high false positive rates,
       while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
+    - Except for bacteria, KMCP performed well on virus/phages.
     - Preset five modes for multiple scenarios.
     - Supports CAMI profiling format.
     

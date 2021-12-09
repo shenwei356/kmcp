@@ -78,9 +78,22 @@ including the gold-standard profiles.
 
 **Databases and taxonomy version:**
 
-- KMCP,  genbank-viral (2021-12-06), 2021-12-06
+- KMCP,  genbank-viral (2021-12-06) + GTDB-RS202 (2021-04-27), 2021-12-06
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
+
+**Rankings**
+
+![](roux2016-rankings.png)
+
+
+**Relative performance**
+
+![](roux2016-spider_plot_relative.png)
+
+**Metrics table**
+
+![](roux2016-metrics.png)

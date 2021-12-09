@@ -1,4 +1,4 @@
-# Benchmarks on 25 simulated communities from Sun et al
+# Benchmarks on 25 simulated bacterial communities from Sun et al
 
 ## Softwares
 

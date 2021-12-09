@@ -1,4 +1,4 @@
-# Benchmarks on CAMI2 toy mouse gut short reads dataset
+# Benchmarks on 64 simulated mouse gut short-read datasets from CAMI2 challenge
 
 We created KMCP databaes with the RefSeq and Taxonomy snapshot provided by CAMI2 (2019-01-08).
 
