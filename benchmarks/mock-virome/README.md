@@ -91,7 +91,10 @@ We manually download the paired and unpaired reads for every sample, for example
 
 ## KMCP
 
-    
+We search against GTDB and Genbank-viral respectively, and merge the results.
+
+    # ------------------------------------------------------------------------
+    # using gtdb or genbank-viral
 
     # genbank-viral
     db=genbank-viral.kmcp/
@@ -131,7 +134,7 @@ We manually download the paired and unpaired reads for every sample, for example
             
             
     # ------------------------------------------------------------------------           
-    # paired-end mode
+    # paired-end mode (optional)
     
     # prepare folder and files.
     mkdir -p kmcp-pe
@@ -151,6 +154,17 @@ We manually download the paired and unpaired reads for every sample, for example
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
+    
+    # ------------------------------------------------------------------------
+    # merge results
+    
+    reads=kmcp-se
+    j=4
+    fd R1_001_t_paired.fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v 'p={@^(.+)_R1_}' \
+            'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
+    
     
     
     # ------------------------------------------------------------------------

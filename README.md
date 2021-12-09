@@ -86,7 +86,7 @@ or install using conda:
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |
 |[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index file                                 |
 
-## Quick Start
+## Quickstart
 
     # compute k-mers
     kmcp compute -k 21 --split-number 10 --split-overlap 100 \

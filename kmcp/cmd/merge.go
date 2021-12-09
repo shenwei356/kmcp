@@ -213,6 +213,7 @@ Input:
 					// poolMatches.Put(r.Matches)
 
 					preId = r.QueryIdx
+					preSeqId = r.QuerySeqId
 					continue
 				}
 
@@ -385,6 +386,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		var idx, i uint64
 		var score float64
 		var line string
+		var preSeqId string
 		first := true
 		for scanner.Scan() {
 			line = scanner.Text()
@@ -415,6 +417,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 
 			if first {
 				idx = i
+				preSeqId = (*items)[0]
 				first = false
 				*matches = append(*matches, &_Match{Data: items, Score: score})
 
@@ -429,7 +432,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 			if i != idx { // new
 				ch <- &SearchResult{
 					QueryIdx:   idx,
-					QuerySeqId: (*items)[0],
+					QuerySeqId: preSeqId,
 					Matches:    matches,
 				}
 				tmp := make([]*_Match, 0, 32)
@@ -437,6 +440,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 				// matches = poolMatches.Get().(*[]*_Match)
 				// *matches = (*matches)[:0]
 				idx = i
+				preSeqId = (*items)[0]
 			}
 			*matches = append(*matches, &_Match{Data: items, Score: score})
 
@@ -452,8 +456,9 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 
 		if len(*matches) > 0 {
 			ch <- &SearchResult{
-				QueryIdx: idx,
-				Matches:  matches,
+				QueryIdx:   idx,
+				QuerySeqId: preSeqId,
+				Matches:    matches,
 			}
 		}
 		close(ch)
