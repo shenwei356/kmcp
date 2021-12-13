@@ -8,7 +8,9 @@
 
 KMCP adopts a novol metagenomic profiling strategy,
 by splitting reference genomes into 10 fragments and mappings reads to these
-fragments via fast k-mer matching. 
+fragments via fast k-mer matching.
+KMCP performs well on both prokaryotic and viral organisms, with higher
+sensitivity and specificity than other k-mer-based tools
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
 ### 2. Fast sequence search against large scales of genomic datasets
@@ -30,7 +32,8 @@ provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (
 KMCP utilizes multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [Scaled MinHash](https://f1000research.com/articles/8-1006) and
-[Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation
+[Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
+KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
@@ -48,7 +51,7 @@ KMCP utilizes multiple k-mer sketches
     - HPC cluster could accerlerate searching with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
 - **Accurate taxonomic profiling**. 
-    - Some k-mer based taxonomic profilers suffers high false positive rates,
+    - Some k-mer based taxonomic profilers suffers from high false positive rates,
       while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
     - Except for bacteria, KMCP performed well on virus/phages.
     - Preset five modes for multiple scenarios.

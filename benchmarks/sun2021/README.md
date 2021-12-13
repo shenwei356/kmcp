@@ -74,8 +74,9 @@ All FASTQ files were downloaded and saved in one directory `reads`.
     # paired-end mode
     
     # prepare folder and files.
-    mkdir -p kmcp-pe
-    cd kmcp-pe
+    reads=kmcp-pe
+    mkdir -p $reads
+    cd $reads
     fd fq.gz$ ../reads | rush 'ln -s {}'
     cd ..
     
@@ -125,8 +126,10 @@ All FASTQ files were downloaded and saved in one directory `reads`.
 ## mOTUs
     
     # prepare folder and files.
-    mkdir -p motus-pe
-    cd motus-pe
+    reads=motus-pe
+    
+    mkdir -p $reads
+    cd $reads
     fd fq.gz$ ../reads | rush 'ln -s {}'
     cd ..
     
@@ -169,6 +172,7 @@ All FASTQ files were downloaded and saved in one directory `reads`.
 
     # prepare folder and files.
     mkdir -p mpa3-pe
+    
     cd mpa3-pe
     fd fq.gz$ ../reads | rush 'ln -s {}'
     cd ..
@@ -231,23 +235,49 @@ Preparing tocami.py which convert Bracken output to CAMI format
 
 Steps
 
+    # --------------------------------------------------
+    # using kraken's PLUSPF database
+
+    reads=bracken-pe
+    
     # prepare folder and files.
-    mkdir -p bracken-pe
-    cd bracken-pe
+    mkdir -p $reads
+    cd $reads
     fd fq.gz$ ../reads | rush 'ln -s {}'
     cd ..
-    
-    reads=bracken-pe
+
+    reads=bracken-pe    
     j=4
     J=40
     
-    db=/home/shenwei/ws/db/kraken/
+    db=/home/shenwei/ws/db/kraken/pluspf    
     readlen=150
     threshold=10
     
+    
+    # --------------------------------------------------
+    # using kraken database built with GTDB, Genbank-viral, Refseq-fungi
+    
+    reads = bracken-kmcp
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=bracken-kmcp    
+    j=4
+    J=40
+    
+    db=/home/shenwei/ws/db/kraken/kmcp/kmcp
+    readlen=150
+    threshold=10
+    
+    
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v db=$db -v readlen=$readlen -v level=$level -v threshold=$threshold \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v db=$db -v readlen=$readlen -v threshold=$threshold \
             'memusg -t -s \
                 "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed --paired  \
                     {p}.left.fq.gz {p}.right.fq.gz --report {p}.kreport > /dev/null; \

@@ -299,7 +299,7 @@ Steps
     j=4
     J=40
     
-    db=/home/shenwei/ws/db/kraken/
+    db=/home/shenwei/ws/db/kraken/pluspf
     readlen=150
     threshold=10
     
