@@ -2,7 +2,7 @@
 
 ## Softwares
 
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)

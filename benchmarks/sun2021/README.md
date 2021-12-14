@@ -2,7 +2,7 @@
 
 ## Softwares
 
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
+- KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
 - mOTUs [3.0.1 (Jul 28, 2021)](https://github.com/motu-tool/mOTUs/releases/tag/3.0.1)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
