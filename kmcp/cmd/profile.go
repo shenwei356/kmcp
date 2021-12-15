@@ -104,7 +104,7 @@ Profiling modes:
     -d/--max-frags-depth-stdev   100    10    3     2      2     1.5
     -u/--min-uniq-reads          1      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
-    -H/--min-hic-ureads-qcov     0.6    0.7   0.7   0.75   0.8   0.8
+    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
 
 
@@ -149,7 +149,7 @@ Taxonomic binning formats:
 
 		// ---------------- debug ---------
 
-		// 		debugFile := getFlagString(cmd, "debug")
+		// debugFile := getFlagString(cmd, "debug")
 		debugFile := ""
 
 		debug := debugFile != ""
@@ -219,7 +219,7 @@ Taxonomic binning formats:
 			maxFragsDepthStdev = 100
 			minUReads = 1
 			minHicUreads = 1
-			hicUreadsMinQcov = 0.6
+			hicUreadsMinQcov = 0.55
 			HicUreadsMinProp = 0.01
 		case 1:
 			minReads = 20
@@ -905,7 +905,7 @@ Taxonomic binning formats:
 			// ---------------
 
 			for _, c = range t.Match {
-				if c > 1 {
+				if c > 0 {
 					t.FragsProp++
 				}
 				t.SumMatch += c
@@ -915,7 +915,7 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				if debug {
 					fmt.Fprintf(outfhD, "failed1: %s, %s: %.1f %v\n",
-						t.Name, "low coverage", t.FragsProp, t.Match)
+						t.Name, "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1564,7 +1564,7 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if c > minReads {
+				if c >= minReads {
 					t.FragsProp++
 				}
 				t.SumMatch += c
@@ -1574,7 +1574,7 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				if debug {
 					fmt.Fprintf(outfhD, "failed2: %s, %s: %.1f %v\n",
-						t.Name, "low coverage", t.FragsProp, t.Match)
+						t.Name, "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -2094,7 +2094,7 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if c > minReads {
+				if c >= minReads {
 					t.FragsProp++
 				}
 				t.SumMatch += c
@@ -2103,7 +2103,7 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp {
 				if debug {
 					fmt.Fprintf(outfhD, "failed3: %s, %s: %.1f %v\n",
-						t.Name, "low coverage", t.FragsProp, t.Match)
+						t.Name, "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}

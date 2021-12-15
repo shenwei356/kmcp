@@ -328,19 +328,24 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset five profiling modes, availabe with the flag -m/--mode.
-  Mode 1 (highest recall), 2 (high recall), 4 (higher precision),
-  5 (higher precision) will overide the relevant options.
+  We preset five profiling modes, availabe with the flag -m/--mode:
+    - 0 (for pathogen detection)
+    - 1 (highest recall)
+    - 2 (high recall)
+    - 3 (default)
+    - 4 (higher precision)
+    - 5 (highest precision)
+  Using this flag will overide the relevant options.
 
-    options                       m=1    m=2    m=3     m=4    m=5
-    --------------------------    ---    ---    ----    ---    ----
-    -r/--min-frags-reads          20     30     50      100    100
-    -p/--min-frags-fraction       0.5    0.7    0.8     1      1
-    -d/--max-frags-depth-stdev    10     3      2       2      1.5
-    -u/--min-uniq-reads           20     20     20      50     50
-    -U/--min-hic-ureads           5      5      5       10     10
-    -H/--min-hic-ureads-qcov      0.7    0.7    0.75    0.8    0.8
-    -P/--min-hic-ureads-prop      0.1    0.2    0.1     0.1    0.15
+    options                      m=0    m=1   m=2   m=3    m=4   m=5
+    --------------------------   ----   ---   ---   ----   ---   ----
+    -r/--min-frags-reads         1      20    30    50     100   100
+    -p/--min-frags-fraction      0.01   0.5   0.7   0.8    1     1
+    -d/--max-frags-depth-stdev   100    10    3     2      2     1.5
+    -u/--min-uniq-reads          1      20    20    20     50    50
+    -U/--min-hic-ureads          1      5     5     5      10    10
+    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
+    -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map

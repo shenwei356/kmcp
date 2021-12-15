@@ -53,3 +53,7 @@ analysis/kmer-similarity/*/*.gz
 analysis/*/tool-*
 
 kmer-similarity
+
+taxdump
+taxid.map
+name.map
