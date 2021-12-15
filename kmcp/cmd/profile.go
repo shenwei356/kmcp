@@ -99,13 +99,13 @@ Profiling modes:
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-frags-reads         1      20    30    50     100   100
+    -r/--min-frags-reads         2      20    30    50     100   100
     -p/--min-frags-fraction      0.01   0.5   0.7   0.8    1     1
-    -d/--max-frags-depth-stdev   100    10    3     2      2     1.5
-    -u/--min-uniq-reads          1      20    20    20     50    50
+    -d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+    -u/--min-uniq-reads          2      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
-    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
-    -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
+    -H/--min-hic-ureads-qcov     0.6    0.7   0.7   0.75   0.8   0.8
+    -P/--min-hic-ureads-prop     0.1    0.1   0.2   0.1    0.1   0.15
 
 
 Taxonomy data:
@@ -149,8 +149,8 @@ Taxonomic binning formats:
 
 		// ---------------- debug ---------
 
-		// debugFile := getFlagString(cmd, "debug")
-		debugFile := ""
+		debugFile := getFlagString(cmd, "debug")
+		// debugFile := ""
 
 		debug := debugFile != ""
 		var outfhD *bufio.Writer
@@ -214,13 +214,13 @@ Taxonomic binning formats:
 		switch mode {
 		case 3:
 		case 0:
-			minReads = 1
+			minReads = 2
 			minFragsProp = 0.01
-			maxFragsDepthStdev = 100
-			minUReads = 1
+			maxFragsDepthStdev = 10
+			minUReads = 2
 			minHicUreads = 1
-			hicUreadsMinQcov = 0.55
-			HicUreadsMinProp = 0.01
+			hicUreadsMinQcov = 0.6
+			HicUreadsMinProp = 0.1
 		case 1:
 			minReads = 20
 			minFragsProp = 0.5
@@ -2185,7 +2185,26 @@ Taxonomic binning formats:
 			w.Close()
 		}()
 
-		sorts.Quicksort(Targets(targets))
+		if mode == 0 {
+			sort.Slice(targets, func(i, j int) bool {
+				d := targets[i].Score - targets[j].Score
+				if d < 0 {
+					return false
+				} else if d > 0 {
+					return true
+				}
+
+				d = targets[i].FragsProp - targets[j].FragsProp
+				if d < 0 {
+					return false
+				} else if d > 0 {
+					return true
+				}
+				return targets[i].SumMatch > targets[j].SumMatch
+			})
+		} else {
+			sorts.Quicksort(Targets(targets))
+		}
 
 		var totalCoverage float64
 		for _, t := range targets {
@@ -2455,7 +2474,7 @@ func init() {
 
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
 
-	// profileCmd.Flags().StringP("debug", "", "", `debug output file`)
+	profileCmd.Flags().StringP("debug", "", "", `debug output file`)
 
 	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (highest precision)`)
 
