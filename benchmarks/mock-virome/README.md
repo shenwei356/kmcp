@@ -319,7 +319,7 @@ Steps
     # ------------------------------------------------------
     # convert to CAMI format
     fd .bracken$ $reads/ \
-        | rush 'python3 ./tocami.py -d ./ -f bracken {} -s {%@(^......)} -o {}.profile'
+        | rush -j 12 'python3 ./tocami.py -d ./ -f bracken {} -s {%@(^......)} -o {}.profile'
     
     profile=$reads.profile
     fd bracken.profile$ $reads/ \
