@@ -877,8 +877,8 @@ Taxonomic binning formats:
 			if t.SumUniqMatch < 1 { // no enough unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s, %s: %.0f\n",
-						t.Name, "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -889,8 +889,8 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < 1 { // no enough high-confidence unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s, %s: %.0f\n",
-						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
@@ -914,8 +914,8 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp { // low coverage
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s, %s: %.1f %v\n",
-						t.Name, "low fragments fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1534,8 +1534,8 @@ Taxonomic binning formats:
 			if t.SumUniqMatch < minUReads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s, %s: %.0f\n",
-						t.Name, "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -1546,8 +1546,8 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < minHicUreads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s, %s: %.0f\n",
-						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
@@ -1555,8 +1555,8 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s, %s: %.4f (%.0f/%.0f)\n",
-						t.Name, "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.4f (%.0f/%.0f)\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
 				}
 				continue
 			}
@@ -1573,8 +1573,8 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s, %s: %.1f %v\n",
-						t.Name, "low fragments fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1591,8 +1591,8 @@ Taxonomic binning formats:
 			if t.RelDepthStd > maxFragsDepthStdev {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s, %s: %f\n",
-						t.Name, "high FragsDepthStdev", t.RelDepthStd)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "high FragsDepthStdev", t.RelDepthStd)
 				}
 				continue
 			}
@@ -2066,8 +2066,8 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatch < minUReads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s, %s: %.0f\n",
-						t.Name, "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -2077,16 +2077,16 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatchHic < minHicUreads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s, %s: %.0f\n",
-						t.Name, "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
 
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s, %s: %.4f (%.0f/%.0f)\n",
-						t.Name, "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.4f (%.0f/%.0f)\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
 				}
 				continue
 			}
@@ -2102,8 +2102,8 @@ Taxonomic binning formats:
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s, %s: %.1f %v\n",
-						t.Name, "low fragments fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -2119,8 +2119,8 @@ Taxonomic binning formats:
 			_, t.RelDepthStd = MeanStdev(t.RelDepth)
 			if t.RelDepthStd > maxFragsDepthStdev {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s, %s: %f\n",
-						t.Name, "high FragsDepthStdev", t.RelDepthStd)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]), "high FragsDepthStdev", t.RelDepthStd)
 				}
 				continue
 			}
