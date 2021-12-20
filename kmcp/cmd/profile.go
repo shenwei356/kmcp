@@ -80,7 +80,7 @@ Accuracy notes:
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
-     the right reference for ambigous reads.
+     the right reference for ambiguous reads.
   *. --keep-perfect-match is not recommended, which decreases sensitivity. 
   *. --keep-main-match is not recommended, which affects accuracy of
      abundance estimation.
@@ -88,7 +88,7 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset five profiling modes, availabe with the flag -m/--mode:
+  We preset six profiling modes, availabe with the flag -m/--mode:
     - 0 (for pathogen detection)
     - 1 (highest recall)
     - 2 (high recall)
@@ -168,6 +168,8 @@ Taxonomic binning formats:
 			}()
 		}
 		// ---------------- debug ---------
+
+		noAmbCorr := getFlagBool(cmd, "no-amb-corr")
 
 		outFile := getFlagString(cmd, "out-prefix")
 
@@ -254,7 +256,7 @@ Taxonomic binning formats:
 			hicUreadsMinQcov = 0.8
 			HicUreadsMinProp = 0.15
 		default:
-			checkError(fmt.Errorf("invalid mode: %d", mode))
+			checkError(fmt.Errorf("invalid profiling mode: %d", mode))
 		}
 
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
@@ -480,6 +482,7 @@ Taxonomic binning formats:
 		}
 
 		// ---------------------------------------------------------------
+		// unique region proportion (experimental, not used)
 
 		var uregionPropMap map[string]float64
 
@@ -544,6 +547,7 @@ Taxonomic binning formats:
 			log.Info()
 
 			log.Infof("deciding the existence of a reference:")
+			log.Infof("  preset profiling mode: %d", mode)
 			log.Infof("  minimal number of reads per reference fragment: %.0f", minReads)
 			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
 			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
@@ -722,7 +726,7 @@ Taxonomic binning formats:
 									}
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
-									// the sum is still the one.
+									// the sum is still one.
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
 								poolMatchResults.Put(ms)
@@ -846,7 +850,7 @@ Taxonomic binning formats:
 						}
 
 						// for a read matching multiple regions of a reference, distribute count to multiple regions,
-						// the sum is still the one.
+						// the sum is still one.
 						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
 					poolMatchResults.Put(ms)
@@ -941,149 +945,153 @@ Taxonomic binning formats:
 		// hashA -> hashB -> count
 		ambMatch := make(map[uint64]map[uint64]float64, len(profile))
 
-		for _, file := range files {
-			if opt.Verbose || opt.Log2File {
-				log.Infof("  parsing file: %s", file)
-			}
+		if !noAmbCorr {
+			for _, file := range files {
+				if opt.Verbose || opt.Log2File {
+					log.Infof("  parsing file: %s", file)
+				}
 
-			var matches map[uint64]*[]*MatchResult // target -> match result
-			var ok bool
-			// var ms *[]*MatchResult
-			var hTarget, h, h1, h2 uint64
-			var prevQuery string
-			hs := make([]uint64, 0, 256)
-			var match *MatchResult
-			var amb map[uint64]float64
-			var i, j int
-			var n, np1 int
+				var matches map[uint64]*[]*MatchResult // target -> match result
+				var ok bool
+				// var ms *[]*MatchResult
+				var hTarget, h, h1, h2 uint64
+				var prevQuery string
+				hs := make([]uint64, 0, 256)
+				var match *MatchResult
+				var amb map[uint64]float64
+				var i, j int
+				var n, np1 int
 
-			onlyTopNScore := topNScore > 0
-			var nScore int
-			var pScore float64
-			var processThisMatch bool
+				onlyTopNScore := topNScore > 0
+				var nScore int
+				var pScore float64
+				var processThisMatch bool
 
-			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
-			checkError(err)
-			var data interface{}
+				reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
+				checkError(err)
+				var data interface{}
 
-			matches = make(map[uint64]*[]*MatchResult)
-			pScore = 1024
-			nScore = 0
-			processThisMatch = true
-			for chunk := range reader.Ch {
-				checkError(chunk.Err)
+				matches = make(map[uint64]*[]*MatchResult)
+				pScore = 1024
+				nScore = 0
+				processThisMatch = true
+				for chunk := range reader.Ch {
+					checkError(chunk.Err)
 
-				for _, data = range chunk.Data {
-					match = data.(*MatchResult)
+					for _, data = range chunk.Data {
+						match = data.(*MatchResult)
 
-					hTarget = wyhash.HashString(match.Target, 1)
-					if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
-						continue
-					}
+						hTarget = wyhash.HashString(match.Target, 1)
+						if _, ok = profile[hTarget]; !ok { // skip matches of unwanted targets
+							continue
+						}
 
-					if prevQuery != match.Query { // new query
-						if len(matches) > 1 { // skip uniq match
-							hs = hs[:0]
-							for h = range matches {
-								hs = append(hs, h)
-							}
+						if prevQuery != match.Query { // new query
+							if len(matches) > 1 { // skip uniq match
+								hs = hs[:0]
+								for h = range matches {
+									hs = append(hs, h)
+								}
 
-							sorts.Quicksort(Uint64Slice(hs))
+								sorts.Quicksort(Uint64Slice(hs))
 
-							n = len(hs)
-							np1 = len(hs) - 1
-							for i = 0; i < np1; i++ {
-								for j = i + 1; j < n; j++ {
-									h1, h2 = hs[i], hs[j]
-									if amb, ok = ambMatch[h1]; !ok {
-										tmp := make(map[uint64]float64, 128)
-										tmp[h2]++ // count of cooccurence
-										ambMatch[h1] = tmp
-									} else {
-										amb[h2]++
+								n = len(hs)
+								np1 = len(hs) - 1
+								for i = 0; i < np1; i++ {
+									for j = i + 1; j < n; j++ {
+										h1, h2 = hs[i], hs[j]
+										if amb, ok = ambMatch[h1]; !ok {
+											tmp := make(map[uint64]float64, 128)
+											tmp[h2]++ // count of cooccurence
+											ambMatch[h1] = tmp
+										} else {
+											amb[h2]++
+										}
 									}
 								}
 							}
-						}
 
-						matches = make(map[uint64]*[]*MatchResult)
-						pScore = 1024
-						nScore = 0
-						processThisMatch = true
-					} else if keepFullMatch {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
+							matches = make(map[uint64]*[]*MatchResult)
+							pScore = 1024
+							nScore = 0
+							processThisMatch = true
+						} else if keepFullMatch {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
 
-						if pScore == 1 && match.QCov < 1 {
-							processThisMatch = false
+							if pScore == 1 && match.QCov < 1 {
+								processThisMatch = false
 
-							prevQuery = match.Query
-							continue
-						}
-					} else if keepMainMatch && pScore <= 1 {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
+								prevQuery = match.Query
+								continue
+							}
+						} else if keepMainMatch && pScore <= 1 {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
 
-						if pScore-match.QCov > maxScoreGap {
-							processThisMatch = false
-
-							prevQuery = match.Query
-							continue
-						}
-					}
-
-					if onlyTopNScore {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
-
-						if match.QCov < pScore { // match with a smaller score
-							nScore++
-							if nScore > topNScore {
+							if pScore-match.QCov > maxScoreGap {
 								processThisMatch = false
 
 								prevQuery = match.Query
 								continue
 							}
 						}
+
+						if onlyTopNScore {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if match.QCov < pScore { // match with a smaller score
+								nScore++
+								if nScore > topNScore {
+									processThisMatch = false
+
+									prevQuery = match.Query
+									continue
+								}
+							}
+						}
+
+						// just need to collect keys
+						matches[hTarget] = nil
+
+						prevQuery = match.Query
+						pScore = match.QCov
+					}
+				}
+
+				if len(matches) > 1 {
+					hs = hs[:0]
+					for h = range matches {
+						hs = append(hs, h)
 					}
 
-					// just need to collect keys
-					matches[hTarget] = nil
+					sorts.Quicksort(Uint64Slice(hs))
 
-					prevQuery = match.Query
-					pScore = match.QCov
-				}
-			}
-
-			if len(matches) > 1 {
-				hs = hs[:0]
-				for h = range matches {
-					hs = append(hs, h)
-				}
-
-				sorts.Quicksort(Uint64Slice(hs))
-
-				n = len(hs)
-				np1 = len(hs) - 1
-				for i = 0; i < np1; i++ {
-					for j = i + 1; j < n; j++ {
-						h1, h2 = hs[i], hs[j]
-						if amb, ok = ambMatch[h1]; !ok {
-							tmp := make(map[uint64]float64, 128)
-							tmp[h2]++ // count of cooccurence
-							ambMatch[h1] = tmp
-						} else {
-							amb[h2]++
+					n = len(hs)
+					np1 = len(hs) - 1
+					for i = 0; i < np1; i++ {
+						for j = i + 1; j < n; j++ {
+							h1, h2 = hs[i], hs[j]
+							if amb, ok = ambMatch[h1]; !ok {
+								tmp := make(map[uint64]float64, 128)
+								tmp[h2]++ // count of cooccurence
+								ambMatch[h1] = tmp
+							} else {
+								amb[h2]++
+							}
 						}
 					}
 				}
 			}
+		} else if opt.Verbose || opt.Log2File {
+			log.Infof("  skipped by user with flag --no-amb-corr")
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -1151,45 +1159,47 @@ Taxonomic binning formats:
 					if prevQuery != match.Query {
 						uniqMatch = false
 						if len(matches) > 1 {
-							hss = hss[:0]
-							hsm = hsm[:0]
-							for h = range matches {
-								hss = append(hss, h)
-								hsm = append(hsm, false)
-							}
-							sort.Slice(hss, func(i, j int) bool {
-								return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
-							})
-
-							n = len(hss)
-							np1 = len(hss) - 1
-							for i = 0; i < np1; i++ {
-								if hsm[i] { // deleted
-									continue
+							if !noAmbCorr {
+								hss = hss[:0]
+								hsm = hsm[:0]
+								for h = range matches {
+									hss = append(hss, h)
+									hsm = append(hsm, false)
 								}
-								for j = i + 1; j < n; j++ {
-									if hsm[j] { // deleted
+								sort.Slice(hss, func(i, j int) bool {
+									return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+								})
+
+								n = len(hss)
+								np1 = len(hss) - 1
+								for i = 0; i < np1; i++ {
+									if hsm[i] { // deleted
 										continue
 									}
+									for j = i + 1; j < n; j++ {
+										if hsm[j] { // deleted
+											continue
+										}
 
-									h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+										h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
 
-									if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-										profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
-										// remove hss[j]
-										hsm[j] = true
-										// fmt.Println(matches[hss[i]], matches[hss[j]])
-									} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-										profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
-										// remove hss[i]
-										hsm[i] = true
-										// fmt.Println(matches[hss[j]], matches[hss[i]])
+										if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+											profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+											// remove hss[j]
+											hsm[j] = true
+											// fmt.Println(matches[hss[i]], matches[hss[j]])
+										} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+											profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+											// remove hss[i]
+											hsm[i] = true
+											// fmt.Println(matches[hss[j]], matches[hss[i]])
+										}
 									}
 								}
-							}
-							for i, h = range hss {
-								if hsm[i] {
-									delete(matches, h)
+								for i, h = range hss {
+									if hsm[i] {
+										delete(matches, h)
+									}
 								}
 							}
 
@@ -1248,7 +1258,7 @@ Taxonomic binning formats:
 										}
 
 										// for a read matching multiple regions of a reference, distribute count to multiple regions,
-										// the sum is still the one.
+										// the sum is still one.
 										t.Match[m.FragIdx] += floatOne / floatMsSize
 									}
 									poolMatchResults.Put(ms)
@@ -1295,7 +1305,7 @@ Taxonomic binning formats:
 									}
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
-									// the sum is still the one.
+									// the sum is still one.
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
 								poolMatchResults.Put(ms)
@@ -1366,45 +1376,47 @@ Taxonomic binning formats:
 
 			uniqMatch = false
 			if len(matches) > 1 {
-				hss = hss[:0]
-				hsm = hsm[:0]
-				for h = range matches {
-					hss = append(hss, h)
-					hsm = append(hsm, false)
-				}
-				sort.Slice(hss, func(i, j int) bool {
-					return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
-				})
-
-				n = len(hss)
-				np1 = len(hss) - 1
-				for i = 0; i < np1; i++ {
-					if hsm[i] { // deleted
-						continue
+				if !noAmbCorr {
+					hss = hss[:0]
+					hsm = hsm[:0]
+					for h = range matches {
+						hss = append(hss, h)
+						hsm = append(hsm, false)
 					}
-					for j = i + 1; j < n; j++ {
-						if hsm[j] { // deleted
+					sort.Slice(hss, func(i, j int) bool {
+						return (*matches[hss[i]])[0].QCov > (*matches[hss[j]])[0].QCov
+					})
+
+					n = len(hss)
+					np1 = len(hss) - 1
+					for i = 0; i < np1; i++ {
+						if hsm[i] { // deleted
 							continue
 						}
+						for j = i + 1; j < n; j++ {
+							if hsm[j] { // deleted
+								continue
+							}
 
-						h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+							h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
 
-						if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-							profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
-							// remove hss[j]
-							hsm[j] = true
-							// fmt.Println(matches[hss[i]], matches[hss[j]])
-						} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-							profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
-							// remove hss[i]
-							hsm[i] = true
-							// fmt.Println(matches[hss[j]], matches[hss[i]])
+							if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+								profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+								// remove hss[j]
+								hsm[j] = true
+								// fmt.Println(matches[hss[i]], matches[hss[j]])
+							} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
+								profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+								// remove hss[i]
+								hsm[i] = true
+								// fmt.Println(matches[hss[j]], matches[hss[i]])
+							}
 						}
 					}
-				}
-				for i, h = range hss {
-					if hsm[i] {
-						delete(matches, h)
+					for i, h = range hss {
+						if hsm[i] {
+							delete(matches, h)
+						}
 					}
 				}
 
@@ -1463,7 +1475,7 @@ Taxonomic binning formats:
 							}
 
 							// for a read matching multiple regions of a reference, distribute count to multiple regions,
-							// the sum is still the one.
+							// the sum is still one.
 							t.Match[m.FragIdx] += floatOne / floatMsSize
 						}
 						poolMatchResults.Put(ms)
@@ -1510,7 +1522,7 @@ Taxonomic binning formats:
 						}
 
 						// for a read matching multiple regions of a reference, distribute count to multiple regions,
-						// the sum is still the one.
+						// the sum is still one.
 						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
 					poolMatchResults.Put(ms)
@@ -2479,10 +2491,14 @@ func init() {
 
 	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
 
+	// not used
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
 
+	// debug
 	profileCmd.Flags().StringP("debug", "", "", `debug output file`)
+	profileCmd.Flags().BoolP("no-amb-corr", "", false, `do not correct ambiguous reads (just for benchmark)`)
 
+	// modes
 	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (highest precision)`)
 
 }

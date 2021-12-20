@@ -320,7 +320,7 @@ Accuracy notes:
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
-     the right reference for ambigous reads.
+     the right reference for ambiguous reads.
   *. --keep-perfect-match is not recommended, which decreases sensitivity. 
   *. --keep-main-match is not recommended, which affects accuracy of
      abundance estimation.
@@ -328,7 +328,7 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset five profiling modes, availabe with the flag -m/--mode:
+  We preset six profiling modes, availabe with the flag -m/--mode:
     - 0 (for pathogen detection)
     - 1 (highest recall)
     - 2 (high recall)
