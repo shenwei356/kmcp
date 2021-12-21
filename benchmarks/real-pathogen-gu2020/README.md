@@ -1,0 +1,246 @@
+# Benchmarks on 87 metagenomic samples of infected body fluids
+
+## Softwares
+
+- KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
+  Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+
+## Databases and taxonomy version
+
+- KMCP,  genbank-viral (2021-12-06), 2021-12-06
+- Kraken, PlusPF (2021-05-17), 2021-05-17
+
+In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
+including the gold-standard profiles.
+
+## Datasets
+
+> Gu, W., Deng, X., Lee, M. et al. Rapid pathogen detection by metagenomic next-generation 
+> sequencing of infected body fluids.
+> Nat Med 27, 115–124 (2021). https://doi.org/10.1038/s41591-020-1105-z
+
+> A total of 182 body fluid samples from
+> 160 patients, including 25 abscess, 21 joint, 32 pleural, 27 peritoneal,
+> 35 cerebrospinal, 13 bronchoalveolar lavage (BAL) and 29 other
+> body fluids (Table 1 and Supplementary Table 1), were collected as
+> residual samples after routine clinical testing in the microbiology
+> laboratory. Among these 182 samples, 170 were used to evaluate
+> the accuracy of mNGS testing by Illumina sequencing (Fig. 1a and
+> Supplementary Table 1). These accuracy samples included 127 posi-
+> tive by culture (with pathogen(s) identified to genus or species
+> level), nine culture negative but positive by 16S or 28S–ITS PCR
+> and 34 negative controls from patients with alternative noninfec-
+> tious diagnoses (for example, cancer, trauma) (Fig. 1b).
+
+We download the 99 Illumina short-reads datasets from [PRJNA558701](https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA558701),
+in which 92 samples has detailed information in the supplementary table 1.
+And 87 samples are culture-positive.
+
+Run accession and corresponding sample names are listed in [acc2sample.tsv](https://github.com/shenwei356/kmcp/blob/main/benchmarks/pathogen-gu2020/acc2sample.tsv).
+
+Download reads using SRAtoolkit:
+
+    # download
+    rush -j 12 'prefetch {1}' acc2sample.tsv
+    
+    # dump fastq
+    ls SRR* | rush 'fasterq-dump -p {}'
+
+    # compress fastq
+    ls *.fastq | rush 'pigz {}'
+    
+    # brename
+    brename -f ".fastq.gz$" -p '^(\w+)' -r '{kv}' -k acc2sample.tsv 
+    
+    mkdir reads
+    mv *.fastq.gz reads/
+    
+    mkdir sra
+    mv SRR* sra/
+    
+The files look like:
+
+    ls reads/ | head -n 10
+    P10.fastq.gz
+    P42.fastq.gz
+    P62.fastq.gz
+    P78.fastq.gz
+    P86.fastq.gz
+    P87.fastq.gz
+    P92.fastq.gz
+    S10.fastq.gz
+    S11.fastq.gz
+    S12.fastq.gz
+
+## KMCP
+
+We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge the results.
+
+    # ------------------------------------------------------------------------
+    # using gtdb or genbank-viral
+
+    # genbank-viral
+    db=genbank-viral.kmcp/
+    X=taxdump/
+    T=genbank-viral.kmcp/taxid.map    
+    dbname=genbank-viral
+    
+    
+    # refseq-fungi
+    db=refseq-fungi.kmcp/
+    X=taxdump/
+    T=refseq-fungi.kmcp/taxid.map    
+    dbname=refseq-fungi
+    
+    
+    # gtdb
+    db=gtdb.kmcp/
+    X=taxdump/
+    T=gtdb.kmcp/taxid.map    
+    dbname=gtdb
+    
+    
+    
+    # ------------------------------------------------------------------------
+    # single-end mode    
+    
+    # prepare folder and files.
+    mkdir -p kmcp-se
+    cd kmcp-se
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    
+    reads=kmcp-se
+    j=4
+    J=40
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
+            'kmcp search -d {db} {} \
+                -o {p}.kmcp@{dbname}.tsv.gz \
+                --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+ 
+    
+    # ------------------------------------------------------------------------
+    # merge results
+    
+    reads=kmcp-se
+    j=16
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v 'p={:}' \
+            'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
+    
+    
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes
+        
+    
+    X=taxdump/
+    # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    # cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    T=taxid.map
+    
+    for m in $(seq 0 0); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%@(^......)} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
+
+
+## Bracken
+
+Preparing tocami.py which convert Bracken output to CAMI format
+
+    # wget https://raw.githubusercontent.com/hzi-bifo/cami2_pipelines/master/bin/tocami.py
+    chmod a+x tocami.py
+
+    # install pacakge ete3
+    pip install ete3
+    
+    # preparing taxdump.tar.gz for tocami.py
+    tar -zcvf taxdump.tar.gz taxdump/*
+    
+    # creating database for ete3 (don't worry the error reports, just ignore):
+    tocami.py -t taxdump.tar.gz -f bracken -s 1 -d . bracken-pe/Build_sample1.bracken
+
+Steps
+
+    # --------------------------------------------------
+    # using kraken's PLUSPF database
+
+    reads=bracken-se
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=bracken-se    
+    j=4
+    J=40
+    
+    db=/home/shenwei/ws/db/kraken/pluspf    
+    readlen=150
+    threshold=2
+    
+    
+    # --------------------------------------------------
+    # using kraken database built with GTDB, Genbank-viral, Refseq-fungi
+    
+    reads = bracken-kmcp
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=bracken-kmcp    
+    j=4
+    J=40
+    
+    db=/home/shenwei/ws/db/kraken/kmcp/kmcp
+    readlen=150
+    threshold=2
+    
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v db=$db -v readlen=$readlen -v threshold=$threshold \
+            'memusg -t -s \
+                "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed  \
+                    {} --report {p}.kreport > /dev/null; \
+                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\"; do \
+                    est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l \$r -t {threshold} \
+                    -i {p}.kreport -o {p}.bracken.level-\$r ; \
+                done; \
+                cat {p}.bracken.level-* > {p}.bracken " \
+                >{p}.log 2>&1 '
+
+    # ------------------------------------------------------
+    # convert to CAMI format
+    fd .bracken$ $reads/ \
+        | rush -j 12 'python3 ./tocami.py -d ./ -f bracken {} -s {%:} -o {}.profile'
+    
+    profile=$reads.profile
+    fd bracken.profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $profile
+        
+    # sort by reads number
+    fd level-S$ $reads/ \
+        | rush 'csvtk sort -t -k new_est_reads:nr {} | csvtk pretty -t > {}.txt'

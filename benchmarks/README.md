@@ -1,8 +1,10 @@
 # Benchmarks
 
 - [Benchmarks on 64 simulated mouse gut short-read datasets from CAMI2 challenge](cami2-mouse-gut)
-- [Benchmarks on 25 simulated bacterial communities from Sun et al](sun2021)
-- [Benchmarks on 16 mock virome communities from Roux et al](mock-virome)
+- [Benchmarks on 25 simulated bacterial communities from Sun et al](sim-bact-sun2021)
+- [Benchmarks on 16 mock virome communities from Roux et al](mock-virome-roux2016)
+- [Benchmarks on 87 metagenomic samples of infected body fluids](real-pathogen-gu2020)
+- 
 
 ## Custom database for Kraken and Bracken
 
