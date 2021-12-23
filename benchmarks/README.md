@@ -4,7 +4,7 @@
 - [Benchmarks on 25 simulated bacterial communities from Sun et al](sim-bact-sun2021)
 - [Benchmarks on 16 mock virome communities from Roux et al](mock-virome-roux2016)
 - [Benchmarks on 87 metagenomic samples of infected body fluids](real-pathogen-gu2020)
-- 
+- [Benchmarks on the ZymoBIOMICS Gut Microbiome Standard D6331](mock-hifi-zymo)
 
 ## Custom database for Kraken and Bracken
 

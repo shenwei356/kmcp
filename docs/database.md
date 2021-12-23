@@ -157,7 +157,7 @@ Mapping file:
     serotype          1
   
         
-Building database:
+Building database (all k-mers for profiling):
     
     input=gtdb
     
@@ -166,7 +166,7 @@ Building database:
     #   reference genomes are splitted into 10 fragments with 100bp overlap
     #   k = 21
     kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
-        --log gtdb-r202-k21-n10.log --force
+        --log gtdb-r202-k21-n10.log -j 32 --force
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
@@ -178,6 +178,31 @@ Building database:
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
+    
+Building database (k-mer sketches for profiling):
+    
+    # here we compute Closed Syncmers with s=16
+    
+    input=gtdb
+    
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   k = 21
+    #   s = 16 # Closed Syncmers
+    kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
+        --log gtdb-r202-k21-n10-S16.log -j 32 --force
+
+    # build database
+    #   number of index files: 32, for server with >= 32 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.2
+    kmcp index -j 32 -I gtdb-r202-k21-n10-S16 -O gtdb.sync16.kmcp -n 1 -f 0.2 \
+        --log gtdb.sync16.kmcp.log
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map gtdb.sync16.kmcp/
 
 ### RefSeq viral or fungi
 
@@ -248,10 +273,13 @@ Building database:
     
     input=files.renamed
     
+    # -------------
+    # all kmers
+    
     kmcp compute -I $input -O refseq-$name-k21-n5 \
         -k 21 --seq-name-filter plasmid \
         --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5.log --force
+        --log refseq-$name-k21-n5.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
@@ -263,16 +291,41 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-viral.kmcp/
 
+    
+    # ---------------
+    # kmer sketches
+    # here we compute Closed Syncmers with s=16
+    
+    kmcp compute -I $input -O refseq-$name-k21-n5-S16 \
+        -k 21 -S 16 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log refseq-$name-k21-n5-S16.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I refseq-$name-k21-n5-S16/ -O refseq-viral.sync16.kmcp \
+        -j 32 -f 0.001 -n 3 -x 100K \
+        --log refseq-viral.sync16.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-viral.sync16.kmcp/
+    
+    
     # -----------------------------------------------------------------
     # for fungi
     name=fungi
     
     input=files.renamed
     
+    
+    # -------------
+    # all kmers
+    
     kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
         --split-number 10 --split-overlap 100 \
-        --log refseq-$name-k21-n10.log --force
+        --log refseq-$name-k21-n10.log -j 32 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
         -j 32 -f 0.3 -n 1 \
@@ -280,6 +333,23 @@ Building database:
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-fungi.kmcp/
+    
+    
+    # ---------------
+    # kmer sketches
+    # here we compute Closed Syncmers with s=16
+    
+    kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
+        -k 21 -S 16 --seq-name-filter plasmid \
+        --split-number 10 --split-overlap 100 \
+        --log refseq-$name-k21-n10-S16.log -j 32 --force
+      
+    kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-fungi.sync16.kmcp \
+        -j 32 -f 0.2 -n 1 \
+        --log refseq-fungi.sync16.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-fungi.sync16.kmcp/
     
 ### Genbank viral
 
@@ -383,10 +453,14 @@ Building database:
     
     input=files.renamed.slim
     
+    
+    # ----------------
+    # all kmers
+    
     kmcp compute -I $input -O genbank-$name-k21-n5 \
         -k 21 --seq-name-filter plasmid \
         --split-number 5 --split-overlap 100 \
-        --log genbank-$name-k21-n5.log --force
+        --log genbank-$name-k21-n5.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
@@ -398,6 +472,26 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.kmcp/
 
+    
+    # ---------------
+    # kmer sketches
+    # here we compute Closed Syncmers with s=16
+    
+    kmcp compute -I $input -O genbank-$name-k21-n5-S16 \
+        -k 21 -S 16 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log genbank-$name-k21-n5-S16.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I genbank-$name-k21-n5-S16/ -O genbank-viral.sync16.kmcp \
+        -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+        --log genbank-viral.sync16.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map genbank-viral.sync16.kmcp/
+    
 
 ### Human genome
 
@@ -416,7 +510,7 @@ Building database (all k-mers, < 6min):
         --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
         -k 21 \
         --split-number 1024 --split-overlap 100 \
-        --log human-chm13-k21-n1024.log --force
+        --log human-chm13-k21-n1024.log -j 32 --force
     
     #   using small false positive rate: 0.3
     #   using more hash functions: 1
@@ -474,7 +568,7 @@ Building database (all k-mers):
     kmcp compute -I $input -O refseq-$name-k21-n5 \
         -k 21 --circular \
         --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5.log --force
+        --log refseq-$name-k21-n5.log -j 32 --force
     
     #   using small false positive rate: 0.01
     #   using more hash functions: 3
@@ -493,7 +587,7 @@ Building database (Scaled MinHash):
     
     kmcp compute -I $input -O refseq-$name-k31-D10 \
         -k 31 --circular --scale 10 \
-        --log refseq-$name-k31-D10.log --force
+        --log refseq-$name-k31-D10.log -j 32 --force
     
     #   using small false positive rate: 0.01
     #   using more hash functions: 3
@@ -512,7 +606,7 @@ Building database (Closed Syncmer):
     
     kmcp compute -I $input -O refseq-$name-k31-S21 \
         -k 31 --circular --syncmer-s 21 \
-        --log refseq-$name-k31-S21.log --force
+        --log refseq-$name-k31-S21.log -j 32 --force
     
     #   using small false positive rate: 0.01
     #   using more hash functions: 3
@@ -623,7 +717,7 @@ Building database:
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are splitted into 10 fragments
     #   k = 21
-    kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 --force
+    kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 -j 32 --force
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
