@@ -1,6 +1,7 @@
 # KMCP - K-mer-based Metagenomic Classification and Profiling
 
-<img src="kmcp.png" alt="" width="800"/>
+![](kmcp-logo.png)
+
 
 ## What can we do?
 
@@ -43,10 +44,11 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
 - **Building database is easy and fast**.
     - ~25 min for 47894 genomes from GTDB-r202 on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**.
-    - Searching time is linearly related to the number of reference genomes.
+    - The database structure is modified from COBS, while KMCP is 4x-10x faster.
     - Automatically scales to exploit all available CPU cores.
+    - Searching time is linearly related to the number of reference genomes.
 - **Scalable searching**. Searching results against multiple databases can be fast merged.
-    This brings multiple benefits:
+    This brings many benefits:
     - There's no need to re-built the database with newly added reference genomes. 
     - HPC cluster could accerlerate searching with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
@@ -57,6 +59,8 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
     - Preset five modes for multiple scenarios.
     - Supports CAMI profiling format.
     
+
+<img src="kmcp.png" alt="" width="800"/>
  
 ## Documents and resources
 
@@ -68,6 +72,7 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
 - [Usage](https://bioinf.shenwei.me/kmcp/usage)
 - [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
 - [FAQs](https://bioinf.shenwei.me/kmcp/faq)
+
 
 ## Installation
 
