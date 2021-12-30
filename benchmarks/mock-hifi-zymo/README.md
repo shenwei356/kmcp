@@ -120,8 +120,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     
     
     # ------------------------------------------------------------------------
-    # [for merged search results] multiple profiling modes
-        
+    # [for merged search results] multiple profiling modes        
     
     X=taxdump/
     # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
@@ -132,7 +131,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         fd kmcp.tsv.gz$ $reads/ \
             | csvtk sort -H -k 1:N \
             | rush -v X=$X -v T=$T -v m=$m \
-                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:)} --log {}.k-m{m}.profile.log' 
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
         
         profile=$reads.c-m$m.profile
         fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
@@ -225,4 +224,25 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | rush -j $j -v 'p={:}' \
             'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
             
-            
+
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes        
+    
+    X=taxdump/
+    # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    # cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    T=taxid.map
+    
+    for m in $(seq 1 5); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
+

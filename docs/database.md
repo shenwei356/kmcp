@@ -2,7 +2,7 @@
 
 ## Prebuilt databases
 
-All prebuilt database are available on [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC).
+All prebuilt database are available at [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) (for global users) and [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) (for Chinese users, [a command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is recommended).
 
 **Hardware requirements**
 
@@ -157,7 +157,7 @@ Mapping file:
     serotype          1
   
         
-Building database (all k-mers for profiling):
+Building database (all k-mers, for profiling on short-reads):
     
     input=gtdb
     
@@ -179,7 +179,7 @@ Building database (all k-mers for profiling):
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
     
-Building database (k-mer sketches for profiling):
+Building database (k-mer sketches, for profiling on long-reads):
     
     # here we compute Closed Syncmers with s=16
     
@@ -203,6 +203,42 @@ Building database (k-mer sketches for profiling):
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.sync16.kmcp/
+    
+Building small databases (all k-mers, for profiling with a computer cluster):
+    
+    input=gtdb
+    
+    find $input -name "*.fna.gz" > $input.files.txt
+    
+    
+    # number of databases
+    n=16
+        
+    # split into $n chunks
+    split -n l/$n $chunksize -d  $input.files.txt $input.n$n-
+    
+    # create database for every chunks
+    for f in $input.n$n-*; do 
+        echo $f
+        
+        # compute k-mers
+        #   sequence containing "plasmid" in name are ignored,
+        #   reference genomes are splitted into 10 fragments with 100bp overlap
+        #   k = 21
+        kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+            --log $f-k21-n10.log -j 24 --force
+
+        # build database
+        #   number of index files: 24, for server with >= 24 CPU cores
+        #   bloom filter parameter:
+        #     number of hash function: 1
+        #     false positive rate: 0.3
+        kmcp index -j 24 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
+            --log $f.kmcp.log
+        
+        # cp taxid and name mapping file to database directory
+        cp taxid.map name.map $f.kmcp/
+    done
 
 ### RefSeq viral or fungi
 

@@ -134,10 +134,39 @@ can use stricter criteria in `kmcp profile`.
             --out-file       $sample.kmcp@$dbname.tsv.gz \
             --log            $sample.kmcp@$dbname.tsv.gz.log
     done
-    
+
     
 Merging searching results on multiple database:
 
+    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
+    
+#### Searching on a computer cluster
+
+Here, we divided genomes of GTDB into 16 parts and build a database for 
+every part, so we can use computer cluster to accelerate the searching.
+
+A helper script [easy_sbatch](https://github.com/shenwei356/easy_sbatch)
+is used for batch submitting Slurm jobs via script templates.
+    
+    dbprefix=~/ws/db/gtdb/gtdb.n16-
+    
+    file=sample.fq.gz
+    sample=sample
+    
+    j=32    
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $file \
+            "kmcp search       \
+                --threads   $j \
+                --db-dir    {} \
+                $file          \
+                --out-file  $sample.kmcp@\$(basename {}).tsv.gz \
+                --log       $sample.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+
+    # merge results
     kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
     
 #### Searching result format

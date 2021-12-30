@@ -41,10 +41,10 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
 
 - **Easy to use, no dependencies, no configurations**.
 - **Building database is easy and fast**.
-    - ~25min for 47894 genomes from GTDB-r202 on a sever with 40 CPU threads and solid disk drive.
+    - ~25 min for 47894 genomes from GTDB-r202 on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**.
     - Searching time is linearly related to the number of reference genomes.
-    - Automatically scales to utilize all available CPU cores.
+    - Automatically scales to exploit all available CPU cores.
 - **Scalable searching**. Searching results against multiple databases can be fast merged.
     This brings multiple benefits:
     - There's no need to re-built the database with newly added reference genomes. 
