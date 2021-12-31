@@ -65,14 +65,34 @@ Building Bracken database. https://github.com/jenniferlu717/Bracken, recommend h
             > bracken.build_1bc.${READ_LEN}.log 2>&1
     done
 
+The path of database is:
+
+    ~/ws/db/kraken/kmcp/kmcp
+    
 ## Custom databases fro Centrifuge
 
- https://github.com/DaehwanKimLab/centrifuge/blob/master/MANUAL.markdown
+https://github.com/DaehwanKimLab/centrifuge/blob/master/MANUAL.markdown
 
+We use the files above to create centrifuge index.
 
+    # reformat sequence header
+    seqkit replace -p '\|.+' all.fasta -o all.cf.fasta
     
-    memusg -t -s "centrifuge-build --conversion-table kmcp/seqid2taxid.map \
+    # reformat seq2taxid.map
+    csvtk replace -Ht -p '\|.+' kmcp/seqid2taxid.map -o seqid2taxid.cf.map
+
+    memusg -t -s "centrifuge-build --threads 40 --conversion-table seqid2taxid.cf.map \
         --taxonomy-tree kmcp/taxonomy/nodes.dmp \
         --name-table kmcp/taxonomy/names.dmp \
-        all.fasta \
-        kmcp.cf " > centrifuge.build.log 2>&1
+        all.cf.fasta \
+        kmcp " > centrifuge.build.log 2>&1
+
+    # generated files
+
+    # move out of the kraken directory:
+    mkdir -p ~/ws/db/centrifuge
+    mv kmcp.*.cf ~/ws/db/centrifuge
+    
+The path of database is:
+
+    ~/ws/db/centrifuge/kmcp

@@ -2,7 +2,6 @@
 
 ![](kmcp-logo.png)
 
-
 ## What can we do?
 
 ### 1. Accurate metagenomic profiling
@@ -57,11 +56,14 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
       while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
     - Except for bacteria, KMCP performed well on virus/phages.
     - Preset five modes for multiple scenarios.
-    - Supports CAMI profiling format.
+    - Supports CAMI and MetaPhlAn profiling format.
     
-
+<hr/>
+    
 <img src="kmcp.png" alt="" width="800"/>
- 
+
+<hr/>
+
 ## Documents and resources
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)

@@ -277,7 +277,7 @@ Steps
     
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v db=$db -v readlen=$readlen -v threshold=$threshold \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v readlen=$readlen -v threshold=$threshold \
             'memusg -t -s \
                 "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed --paired  \
                     {p}.left.fq.gz {p}.right.fq.gz --report {p}.kreport > /dev/null; \
@@ -292,6 +292,52 @@ Steps
     # convert to CAMI format
     fd .bracken$ $reads/ \
         | rush -j 12 'python3 ./tocami.py -d ./ -f bracken {} -s {%:} -o {}.profile'
+    
+    profile=$reads.profile
+    fd bracken.profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $profile
+
+## Centrifuge
+
+    # --------------------------------------------------
+    # using centrifuge database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=centrifuge-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=centrifuge-pe    
+    j=4
+    J=40
+    
+    db=~/ws/db/centrifuge/kmcp  
+    
+
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'memusg -t -s \
+                "centrifuge -t -p {j} --mm -x {db} \
+                    -q -1 {p}.left.fq.gz -2 {p}.right.fq.gz \
+                    --report-file {p}.cf-report.tsv -S {}.cf.tsv" \
+                >{p}.log 2>&1 '
+
+    # Kraken-style report
+        fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'centrifuge-kreport -x $db {}.cf.tsv -o {}.kreport'
+                
+    # ------------------------------------------------------
+    # convert to CAMI format
+    fd .kreport$ $reads/ \
+        | rush -j 12 'python3 ./tocami.py -d ./ -f centrifuge {} -s {%:} -o {}.profile'
     
     profile=$reads.profile
     fd bracken.profile$ $reads/ \
