@@ -80,7 +80,9 @@ We use the files above to create centrifuge index.
     
     # reformat seq2taxid.map
     csvtk replace -Ht -p '\|.+' kmcp/seqid2taxid.map -o seqid2taxid.cf.map
-
+    
+    # elapsed time: 1.0days 20h:35m:33s
+    # peak rss: 522.41 GB
     memusg -t -s "centrifuge-build --threads 40 --conversion-table seqid2taxid.cf.map \
         --taxonomy-tree kmcp/taxonomy/nodes.dmp \
         --name-table kmcp/taxonomy/names.dmp \
@@ -88,6 +90,10 @@ We use the files above to create centrifuge index.
         kmcp " > centrifuge.build.log 2>&1
 
     # generated files
+    -rw-rw-r-- 1 shenwei shenwei  56G Jan  1 15:51 kmcp.1.cf
+    -rw-rw-r-- 1 shenwei shenwei  42G Jan  1 15:50 kmcp.2.cf
+    -rw-rw-r-- 1 shenwei shenwei 147M Dec 30 19:44 kmcp.3.cf
+    -rw-rw-r-- 1 shenwei shenwei  70M Jan  1 15:50 kmcp.4.cf
 
     # move out of the kraken directory:
     mkdir -p ~/ws/db/centrifuge

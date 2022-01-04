@@ -153,7 +153,7 @@ is used for batch submitting Slurm jobs via script templates.
     file=sample.fq.gz
     sample=sample
     
-    j=32    
+    j=30    
 
     ls -d $dbprefix*.kmcp \
         | easy_sbatch \

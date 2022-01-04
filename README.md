@@ -18,7 +18,7 @@ sensitivity and specificity than other k-mer-based tools
 KMCP can be used for fast sequence search against large scales of genomic dataset
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
-bringing smaller index size and much faster searching speed
+bringing smaller index size and much faster searching speed (4x-10x faster than COBS)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
  
 ### 3. Fast genome similarity estimation
@@ -33,7 +33,7 @@ KMCP utilizes multiple k-mer sketches
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [Scaled MinHash](https://f1000research.com/articles/8-1006) and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
-KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
+KMCP is 4x-7x faster than Mash/Sourmash
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
@@ -54,7 +54,7 @@ KMCP is 4x-10x faster than COBS, 4x-7x faster than Mash/Sourmash
 - **Accurate taxonomic profiling**. 
     - Some k-mer based taxonomic profilers suffers from high false positive rates,
       while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
-    - Except for bacteria, KMCP performed well on virus/phages.
+    - Except for archaea, and bacteria, KMCP performed well on virus/phages.
     - Preset five modes for multiple scenarios.
     - Supports CAMI and MetaPhlAn profiling format.
     

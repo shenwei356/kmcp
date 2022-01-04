@@ -35,7 +35,7 @@ Download and rename. The files look like:
 We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge the results.
 
     # ------------------------------------------------------------------------
-    # prepare folder and files.
+    # prepare folder and files
     
     mkdir -p kmcp-all-kmer
     cd kmcp-all-kmer
@@ -123,8 +123,8 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     # [for merged search results] multiple profiling modes        
     
     X=taxdump/
-    # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
-    # cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
     T=taxid.map
     
     for m in $(seq 1 5); do
@@ -157,8 +157,8 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     reads=kmcp-syncmers
     j=4
     J=40
-    s=500   # sliding step   
-    w=500   # sliding window
+    s=1000   # sliding step   
+    w=1000   # sliding window
   
 
     # -------------------------------------
@@ -246,3 +246,48 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             > $profile
     done
 
+## Centrifuge
+
+    # --------------------------------------------------
+    # using centrifuge database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=centrifuge-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=centrifuge-pe    
+    j=4
+    J=40
+    
+    db=~/ws/db/centrifuge/kmcp  
+    
+
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'memusg -t -s \
+                "centrifuge -t -p {j} --mm -x {db} \
+                    -q -U {} \
+                    --report-file {p}.cf-report.tsv -S {}.cf.tsv" \
+                >{p}.log 2>&1 '
+
+    # Kraken-style report
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'centrifuge-kreport -x {db} {}.cf.tsv > {}.kreport'
+                
+    # ------------------------------------------------------
+    # convert to CAMI format
+    fd .kreport$ $reads/ \
+        | rush -j 12 'python3 ./tocami.py -d ./ -f centrifuge {} -s {%:} -o {}.profile'
+    
+    profile=$reads.profile
+    fd kreport.profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $profile

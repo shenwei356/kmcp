@@ -41,26 +41,32 @@ All FASTQ files were downloaded and saved in one directory `reads`.
         
 ## KMCP
 
-        
-    db=gtdb.kmcp/
-    X=taxdump/
-    T=gtdb.kmcp/taxid.map    
-    dbname=gtdb
-    
-    
+We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge the results.
+
     # ------------------------------------------------------------------------
-    # single-end mode    
+    # prepare folder and files
     
     # prepare folder and files.
     mkdir -p kmcp-se
     cd kmcp-se
-    fd fq.gz$ ../reads | rush 'ln -s {}'
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
-    
+   
+    # ------------------------------------------------------------------------
+    # search
+      
     reads=kmcp-se
     j=4
     J=40
+    
+    # -------------------------------------
+    # gtdb
+
+    db=gtdb.kmcp/
+    X=taxdump/
+    T=gtdb.kmcp/taxid.map    
+    dbname=gtdb
     
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -68,60 +74,73 @@ All FASTQ files were downloaded and saved in one directory `reads`.
             'kmcp search -d {db} {p}.left.fq.gz {p}.right.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
-            
-            
-    # ------------------------------------------------------------------------           
-    # paired-end mode
-    
-    # prepare folder and files.
-    reads=kmcp-pe
-    mkdir -p $reads
-    cd $reads
-    fd fq.gz$ ../reads | rush 'ln -s {}'
-    cd ..
-    
-    
-    reads=kmcp-pe
-    j=4
-    J=40
+ 
+    # -------------------------------------
+    # genbank-viral
+
+    # genbank-viral
+    db=genbank-viral.kmcp/
+    X=taxdump/
+    T=genbank-viral.kmcp/taxid.map    
+    dbname=genbank-viral
     
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -d {db} -1 {p}.left.fq.gz -2 {p}.right.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
+            'kmcp search -d {db} {p}.left.fq.gz {p}.right.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
     
+    # -------------------------------------
+    # refseq-fungi
+    
+    # refseq-fungi
+    db=refseq-fungi.kmcp/
+    X=taxdump/
+    T=refseq-fungi.kmcp/taxid.map    
+    dbname=refseq-fungi
+    
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
+            'kmcp search -d {db} {p}.left.fq.gz {p}.right.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
+                --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+
     
     # ------------------------------------------------------------------------
-    # default profiling mode
+    # merge results
     
-    fd kmcp@$dbname.tsv.gz$ $reads/ \
+    reads=kmcp-se
+    j=16
+    fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T \
-            'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} --log {}.k.profile.log' 
+        | rush -j $j -v 'p={:}' \
+            'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
     
-    profile=$reads@$dbname.c.profile
-    fd kmcp@$dbname.tsv.gz.c.profile$ $reads/ \
-        | csvtk sort -H -k 1:N \
-        | rush -j 1 'cat {}' \
-        > $profile
-        
+    
     # ------------------------------------------------------------------------
-    # multiple profiling modes
-        
+    # [for merged search results] multiple profiling modes
+     
+    X=taxdump/
+    cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    T=taxid.map
+    
     for m in $(seq 1 5); do
-        fd kmcp@$dbname.tsv.gz$ $reads/ \
+        fd kmcp.tsv.gz$ $reads/ \
             | csvtk sort -H -k 1:N \
-            | rush -v db=$db -v dbname=$dbname -v X=$X -v T=$T -v m=$m \
+            | rush -v X=$X -v T=$T -v m=$m \
                 'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
         
-        profile=$reads@$dbname.c-m$m.profile
-        fd kmcp@$dbname.tsv.gz.c-m$m.profile$ $reads/ \
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
             | csvtk sort -H -k 1:N \
             | rush -j 1 'cat {}' \
             > $profile
     done
+
+
     
 ## mOTUs
     
@@ -329,10 +348,10 @@ Steps
                 >{p}.log 2>&1 '
 
     # Kraken-style report
-        fd left.fq.gz$ $reads/ \
+    fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
-            'centrifuge-kreport -x $db {}.cf.tsv -o {}.kreport'
+            'centrifuge-kreport -x {db} {}.cf.tsv > {}.kreport'
                 
     # ------------------------------------------------------
     # convert to CAMI format
@@ -340,7 +359,7 @@ Steps
         | rush -j 12 'python3 ./tocami.py -d ./ -f centrifuge {} -s {%:} -o {}.profile'
     
     profile=$reads.profile
-    fd bracken.profile$ $reads/ \
+    fd kreport.profile$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $profile
