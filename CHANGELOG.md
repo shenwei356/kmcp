@@ -20,6 +20,7 @@
     - fix queries with many Ns.
     - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
     - change default value of flag `-n/--keep-top-scores` from `5` to `0`, i.e., keep all matches by default.
+    - new flag `-w/--load-whole-db`: load all index files into memory.
     - 10-25% faster.
     - better log.
 - `merge`:

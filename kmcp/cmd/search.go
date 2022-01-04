@@ -65,11 +65,23 @@ Shared flags between "search" and "profile":
 Special attentions:
   1. The values of tCov and jacc in results only apply to single size of k-mer.
 
+Index files loading modes:
+  1. Memory sharing with MMAP (default)
+      - Multiple KMCP processes in the same computer can share the memory.
+  2. Loading the whole files into main memory (-w/--load-whole-db):
+      - It's 20-25% faster, while it needs a little more memory and 
+        multiple KMCP processes can not share the database in memory.
+      - It's highly recommended when searching on computer clusters,
+        where mmap would be very slow (in my test).
+  3. Low memory mode (--low-mem):
+      - Do not load all index files into memory nor use mmap, using file seeking.
+      - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
+      - Only use this mode for small number of queries or a huge database that
+        can't be loaded into memory.
+
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger
      than number of CPU cores won't bring extra speedup.
-  2. Use --low-mem for database larger than RAM, but the searching would be
-     very very slow for a large number of queries.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -110,6 +122,7 @@ Performance tips:
 		targetCov := getFlagFloat64(cmd, "min-target-cov")
 		minCount := getFlagPositiveInt(cmd, "min-kmers")
 		useMmap := !getFlagBool(cmd, "low-mem")
+		loadWholeFile := getFlagBool(cmd, "load-whole-db")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
 		loadDefaultNameMap := getFlagBool(cmd, "default-name-map")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
@@ -295,13 +308,17 @@ Performance tips:
 		// load db
 
 		if outputLog {
-			if useMmap {
+			if loadWholeFile {
+				log.Info("loading database into main memory ...")
+			} else if useMmap {
 				log.Info("loading database with mmap enabled ...")
 			} else {
 				log.Info("loading database ...")
 			}
 		}
 		searchOpt := SearchOptions{
+			LoadWholeFile: loadWholeFile,
+
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 			Verbose: opt.Verbose,
@@ -929,7 +946,8 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory, the searching would be very very slow for a large number of queries`)
+	searchCmd.Flags().BoolP("load-whole-db", "w", false, `load all index files into memory, it's faster but need more memory. please read performance notes in "kmcp search -h"`)
+	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)

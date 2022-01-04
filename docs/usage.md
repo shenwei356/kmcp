@@ -224,11 +224,23 @@ Shared flags between "search" and "profile":
 Special attentions:
   1. The values of tCov and jacc in results only apply to single size of k-mer.
 
+Index files loading modes:
+  1. Memory sharing with MMAP (default)
+      - Multiple KMCP processes in the same computer can share the memory.
+  2. Loading the whole files into main memory (-w/--load-whole-db):
+      - It's 20-25% faster, while it needs a little more memory and 
+        multiple KMCP processes can not share the database in memory.
+      - It's highly recommended when searching on computer clusters,
+        where mmap would be very slow (in my test).
+  3. Low memory mode (--low-mem):
+      - Do not load all index files into memory nor use mmap, using file seeking.
+      - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
+      - Only use this mode for small number of queries or a huge database that
+        can't be loaded into memory.
+
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger
      than number of CPU cores won't bring extra speedup.
-  2. Use --low-mem for database larger than RAM, but the searching would be
-     very very slow for a large number of queries.
 
 Usage:
   kmcp search [flags]

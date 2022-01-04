@@ -158,6 +158,8 @@ type IndexQuery struct {
 
 // SearchOptions defines options for searching
 type SearchOptions struct {
+	LoadWholeFile bool
+
 	UseMMap bool
 	Threads int
 	Verbose bool
@@ -1166,6 +1168,8 @@ type UnikIndex struct {
 
 	// -------------------------------
 
+	loadWholeFile bool
+
 	useMmap bool
 	sigs    mmap.MMap // mapped sigatures
 	sigsB   []byte
@@ -1208,17 +1212,41 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 	h.NumSigs = reader.NumSigs
 
 	useMmap := opt.UseMMap
+	loadWholeFile := opt.LoadWholeFile
 	numHashes := reader.NumHashes
 	moreThanOneHash := numHashes > 1
 	moreThanTwoHashes := numHashes > 2
 
 	idx := &UnikIndex{Options: opt, Path: file, Header: h, fh: fh, reader: reader, offset0: offset}
 	idx.useMmap = opt.UseMMap
+	idx.loadWholeFile = opt.LoadWholeFile
 
 	idx.done = make(chan int)
 	idx.InCh = make(chan *IndexQuery, channelBuffSize(opt.Threads)*(1+nextraWorkers))
 
-	if idx.useMmap {
+	if loadWholeFile {
+		_, err := fh.Seek(0, 0)
+		if err != nil {
+			return nil, err
+		}
+
+		// get file size
+		fi, err := fh.Stat()
+		if err != nil {
+			return nil, err
+		}
+
+		// do not use io.ReadAll() which uses more memory during growing slice.
+		idx.sigsB = make([]byte, fi.Size())
+
+		n, err := fh.Read(idx.sigsB)
+		if err != nil {
+			return nil, err
+		}
+		if int64(n) != fi.Size() {
+			return nil, fmt.Errorf("unmatched size when reading file: %s", file)
+		}
+	} else if useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
 		if err != nil {
 			return nil, err
@@ -7613,14 +7641,14 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 func (idx *UnikIndex) Close() error {
 	close(idx.InCh) // close InCh
 	<-idx.done      // confirm stopped
-	// another one
+	// extra workers
 	if idx.useMmap {
 		for i := 1; i <= idx.ExtraWorkers; i++ {
 			<-idx.done
 		}
 	}
 
-	if idx.useMmap {
+	if !idx.loadWholeFile && idx.useMmap {
 		err := idx.sigs.Unmap()
 		if err != nil {
 			return err

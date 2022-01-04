@@ -86,6 +86,21 @@ can use stricter criteria in `kmcp profile`.
    proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity))
 2. `-N/--name-map`, tabular two-column file(s) mapping names to user-defined values.
 
+**Index files loading modes**:
+
+1. Memory sharing with MMAP (default)
+    - Multiple KMCP processes in the same computer can share the memory.
+2. Loading the whole files into main memory (`-w/--load-whole-db`):
+    - It's 20-25% faster, while it needs a little more memory and 
+    multiple KMCP processes can not share the database in memory.
+    - **It's highly recommended when searching on computer clusters**,
+    where mmap would be very slow (in my test).
+3. Low memory mode (`--low-mem`):
+    - Do not load all index files into memory nor use mmap, using file seeking.
+    - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
+    - Only use this mode for small number of queries or a huge database that
+        can't be loaded into memory.
+
 **Performance tips**:
 
 1. Increase value of `-j/--threads` for acceleratation, but values larger
@@ -153,12 +168,13 @@ is used for batch submitting Slurm jobs via script templates.
     file=sample.fq.gz
     sample=sample
     
-    j=30    
+    j=32    
 
     ls -d $dbprefix*.kmcp \
         | easy_sbatch \
             -c $j -J $file \
             "kmcp search       \
+                --load-whole-db \
                 --threads   $j \
                 --db-dir    {} \
                 $file          \
@@ -167,7 +183,7 @@ is used for batch submitting Slurm jobs via script templates.
                 --quiet "
 
     # merge results
-    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
+    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz --log $sample.kmcp.tsv.gz.merge.log
     
 #### Searching result format
 
