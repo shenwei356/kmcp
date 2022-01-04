@@ -333,6 +333,7 @@ Performance tips:
 				checkError(fmt.Errorf("query coverage threshold (%f) should not be smaller than FPR of single bloom filter of index database (%f)", queryCov, db.Info.FPR))
 			}
 		}
+
 		if outputLog {
 			log.Infof("database loaded: %s", dbDir)
 			log.Info()
@@ -654,8 +655,8 @@ Performance tips:
 				var ok bool
 
 				for result := range sg.OutCh {
+					total++
 					if verbose {
-						total++
 						if (total < 8192 && total&63 == 0) || total&8191 == 0 {
 							speed = float64(total) / 1000000 / time.Since(timeStart1).Minutes()
 							fmt.Fprintf(os.Stderr, "processed queries: %d, speed: %.3f million queries per minute\r", total, speed)
