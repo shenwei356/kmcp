@@ -213,7 +213,7 @@ Attentions:
   2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
-  3. For long reads or contigs, you should split them in to short reads
+  3. For long reads or contigs, you should split them into short reads
      using "seqkit sliding", e.g.,
          seqkit sliding -s 100 -W 300
 
@@ -225,13 +225,16 @@ Special attentions:
   1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Index files loading modes:
-  1. Memory sharing with MMAP (default)
-      - Multiple KMCP processes in the same computer can share the memory.
-  2. Loading the whole files into main memory (-w/--load-whole-db):
-      - It's 20-25% faster, while it needs a little more memory and 
-        multiple KMCP processes can not share the database in memory.
+  1. Using memory-mapped index files with mmap (default)
+      - Faster startup speed when index files are buffered in memory.
+      - Multiple KMCP processes can share the memory.
+  2. Loading the whole index files into memory (-w/--load-whole-db):
+      - This mode occupies a little more memory.
+        And Multiple KMCP processes can not share the database in memory.
+      - It's slightly faster due to the use of physically contiguous memory.
+        The speedup is more significant for smaller databases.
       - It's highly recommended when searching on computer clusters,
-        where mmap would be very slow (in my test).
+        where the default mmap mode would be very slow (in my test).
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -253,7 +256,8 @@ Flags:
   -n, --keep-top-scores int        keep matches with the top N score for a query, 0 for all
   -K, --keep-unmatched             keep unmatched query sequence information
   -u, --kmer-dedup-threshold int   remove duplicated kmers for a query with >= N k-mers (default 256)
-      --low-mem                    do not load all index files into memory, the searching would be very very slow for a large number of queries
+  -w, --load-whole-db              load all index files into memory, it's faster for small databases but needs more memory. please read "Index files loading modes" in "kmcp search -h"
+      --low-mem                    do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. please read "Index files loading modes" in "kmcp search -h"
   -c, --min-kmers int              minimal number of matched k-mers (sketches) (default 30)
   -t, --min-query-cov float        minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query (default 0.55)
   -m, --min-query-len int          minimal query length (default 70)

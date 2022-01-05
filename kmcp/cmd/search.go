@@ -54,7 +54,7 @@ Attentions:
   2. A long query sequences may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
-  3. For long reads or contigs, you should split them in to short reads
+  3. For long reads or contigs, you should split them into short reads
      using "seqkit sliding", e.g.,
          seqkit sliding -s 100 -W 300
 
@@ -66,13 +66,16 @@ Special attentions:
   1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Index files loading modes:
-  1. Memory sharing with MMAP (default)
-      - Multiple KMCP processes in the same computer can share the memory.
-  2. Loading the whole files into main memory (-w/--load-whole-db):
-      - It's 20-25% faster, while it needs a little more memory and 
-        multiple KMCP processes can not share the database in memory.
+  1. Using memory-mapped index files with mmap (default)
+      - Faster startup speed when index files are buffered in memory.
+      - Multiple KMCP processes can share the memory.
+  2. Loading the whole index files into memory (-w/--load-whole-db):
+      - This mode occupies a little more memory.
+        And Multiple KMCP processes can not share the database in memory.
+      - It's slightly faster due to the use of physically contiguous memory.
+        The speedup is more significant for smaller databases.
       - It's highly recommended when searching on computer clusters,
-        where mmap would be very slow (in my test).
+        where the default mmap mode would be very slow (in my test).
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -321,7 +324,7 @@ Performance tips:
 
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
-			Verbose: opt.Verbose,
+			Verbose: opt.Verbose || opt.Log2File,
 
 			DeduplicateThreshold: deduplicateThreshold,
 
@@ -946,8 +949,8 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("load-whole-db", "w", false, `load all index files into memory, it's faster but need more memory. please read performance notes in "kmcp search -h"`)
-	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries`)
+	searchCmd.Flags().BoolP("load-whole-db", "w", false, `load all index files into memory, it's faster for small databases but needs more memory. please read "Index files loading modes" in "kmcp search -h"`)
+	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. please read "Index files loading modes" in "kmcp search -h"`)
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)

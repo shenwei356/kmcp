@@ -88,18 +88,21 @@ can use stricter criteria in `kmcp profile`.
 
 **Index files loading modes**:
 
-1. Memory sharing with MMAP (default)
-    - Multiple KMCP processes in the same computer can share the memory.
-2. Loading the whole files into main memory (`-w/--load-whole-db`):
-    - It's 20-25% faster, while it needs a little more memory and 
-    multiple KMCP processes can not share the database in memory.
+1. Using memory-mapped index files with `mmap` (default)
+    - Faster startup speed when index files are buffered in memory.
+    - Multiple KMCP processes can share the memory.
+2. Loading the whole index files into memory (`-w/--load-whole-db`):
+    - This mode occupies a little more memory.
+    And Multiple KMCP processes can not share the database in memory.
+    - **It's slightly faster due to the use of physically contiguous memory.
+    The speedup is more significant for smaller databases**.
     - **It's highly recommended when searching on computer clusters**,
-    where mmap would be very slow (in my test).
+    where the default mmap mode would be very slow (in my test).
 3. Low memory mode (`--low-mem`):
     - Do not load all index files into memory nor use mmap, using file seeking.
     - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
-    - Only use this mode for small number of queries or a huge database that
-        can't be loaded into memory.
+    - **Only use this mode for small number of queries or a huge database that
+    can't be loaded into memory**.
 
 **Performance tips**:
 
@@ -183,7 +186,8 @@ is used for batch submitting Slurm jobs via script templates.
                 --quiet "
 
     # merge results
-    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz --log $sample.kmcp.tsv.gz.merge.log
+    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz \
+        --log $sample.kmcp.tsv.gz.merge.log
     
 #### Searching result format
 

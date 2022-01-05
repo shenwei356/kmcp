@@ -670,7 +670,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	nextraWorkers := extraWorkers(len(info.Files), opt.Threads)
 
 	if opt.Verbose && nextraWorkers > 0 {
-		log.Infof("number of extra workers for every index file: %d", nextraWorkers)
+		log.Infof("  number of extra workers for every index file: %d", nextraWorkers)
 	}
 
 	// the first idx
@@ -1235,16 +1235,30 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 		if err != nil {
 			return nil, err
 		}
-
+		N := fi.Size()
 		// do not use io.ReadAll() which uses more memory during growing slice.
-		idx.sigsB = make([]byte, fi.Size())
+		idx.sigsB = make([]byte, N)
 
-		n, err := fh.Read(idx.sigsB)
-		if err != nil {
-			return nil, err
+		var n, sum int
+		for {
+			n, err = fh.Read(idx.sigsB[sum:])
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				return nil, fmt.Errorf("reading file: %s: %s", file, err)
+			}
+			if n == 0 {
+				break
+			}
+
+			sum += n
 		}
-		if int64(n) != fi.Size() {
-			return nil, fmt.Errorf("unmatched size when reading file: %s", file)
+		if int64(sum) != N {
+			return nil, fmt.Errorf("unmatched size (%d != %d) when reading file: %s", sum, N, file)
+		}
+		if opt.Verbose {
+			log.Infof("  loaded index file: %s", file)
 		}
 	} else if useMmap {
 		idx.sigs, err = mmap.Map(fh, mmap.RDONLY, 0)
