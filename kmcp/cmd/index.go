@@ -335,7 +335,7 @@ Performance tips:
 			} else {
 				checkCompatibility(reader0, reader, file, &meta0, &meta)
 				if scaled && scale != reader.GetScale() {
-					checkError(fmt.Errorf(`scales not consistent, please check with "unikmer info": %s`, file))
+					checkError(fmt.Errorf(`scales not consistent, please check with "kmcp utils unik-info": %s`, file))
 				}
 			}
 

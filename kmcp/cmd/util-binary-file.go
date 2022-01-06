@@ -32,16 +32,16 @@ const extDataFile = ".unik"
 
 func checkCompatibility(reader0 *unik.Reader, reader *unik.Reader, file string, meta0 *Meta, meta *Meta) {
 	if reader0.K != reader.K {
-		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "unikmer info": %s`, reader0.K, reader.K, file))
+		checkError(fmt.Errorf(`k-mer length not consistent (%d != %d), please check with "kmcp utils unik-info": %s`, reader0.K, reader.K, file))
 	}
 	if reader0.IsCanonical() != reader.IsCanonical() {
-		checkError(fmt.Errorf(`'canonical' flags not consistent, please check with "unikmer info": %s`, file))
+		checkError(fmt.Errorf(`'canonical' flags not consistent, please check with "kmcp utils unik-info": %s`, file))
 	}
 	if reader0.IsHashed() != reader.IsHashed() {
-		checkError(fmt.Errorf(`'hashed' flags not consistent, please check with "unikmer info": %s`, file))
+		checkError(fmt.Errorf(`'hashed' flags not consistent, please check with "kmcp utils unik-info": %s`, file))
 	}
 	if reader0.IsScaled() != reader.IsScaled() {
-		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "unikmer info": %s`, file))
+		checkError(fmt.Errorf(`'scaled' flags not consistent, please check with "kmcp utils unik-info": %s`, file))
 	}
 
 	if meta0.MinimizerW == meta.MinimizerW &&
@@ -50,7 +50,7 @@ func checkCompatibility(reader0 *unik.Reader, reader *unik.Reader, file string, 
 		meta0.SplitOverlap == meta.SplitOverlap {
 		return
 	}
-	checkError(fmt.Errorf(`sketch information (description) not consistent, please check with "unikmer info -a ": %s. file1: %s, file: %s`,
+	checkError(fmt.Errorf(`sketch information (description) not consistent, please check with "kmcp utils unik-info -a ": %s. file1: %s, file: %s`,
 		file, meta0, meta))
 
 }

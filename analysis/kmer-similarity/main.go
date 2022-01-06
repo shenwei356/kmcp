@@ -12,8 +12,8 @@ import (
 
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
+	"github.com/shenwei356/bio/sketches"
 	"github.com/shenwei356/breader"
-	"github.com/shenwei356/unikmer"
 	"github.com/shenwei356/xopen"
 )
 
@@ -174,9 +174,9 @@ blastn output format:
 }
 
 func getKmers(sequence *seq.Seq, k int) (map[uint64]interface{}, bool, error) {
-	iter, err := unikmer.NewHashIterator(sequence, k, true, false)
+	iter, err := sketches.NewHashIterator(sequence, k, true, false)
 	if err != nil {
-		if err == unikmer.ErrShortSeq {
+		if err == sketches.ErrShortSeq {
 			return nil, false, nil
 		}
 		return nil, false, err
