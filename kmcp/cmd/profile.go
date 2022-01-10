@@ -90,12 +90,12 @@ Accuracy notes:
 Profiling modes:
   We preset six profiling modes, availabe with the flag -m/--mode:
     - 0 (for pathogen detection)
-    - 1 (highest recall)
+    - 1 (higher recall)
     - 2 (high recall)
     - 3 (default)
-    - 4 (higher precision)
-    - 5 (highest precision)
-  Using this flag will overide the relevant options.
+    - 4 (high precision)
+    - 5 (higher precision)
+  Using this flag will override the relevant options.
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
@@ -2499,7 +2499,7 @@ func init() {
 	profileCmd.Flags().BoolP("no-amb-corr", "", false, `do not correct ambiguous reads (just for benchmark)`)
 
 	// modes
-	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (highest precision)`)
+	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision)`)
 
 }
 

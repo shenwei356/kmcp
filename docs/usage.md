@@ -346,12 +346,12 @@ Accuracy notes:
 Profiling modes:
   We preset six profiling modes, availabe with the flag -m/--mode:
     - 0 (for pathogen detection)
-    - 1 (highest recall)
+    - 1 (higher recall)
     - 2 (high recall)
     - 3 (default)
-    - 4 (higher precision)
-    - 5 (highest precision)
-  Using this flag will overide the relevant options.
+    - 4 (high precision)
+    - 5 (higher precision)
+  Using this flag will override the relevant options.
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
@@ -408,7 +408,7 @@ Flags:
   -H, --min-hic-ureads-qcov float     minimal query coverage of high-confidence uniquely matched reads (default 0.75)
   -t, --min-query-cov float           minimal query coverage of a read in search result (default 0.55)
   -u, --min-uniq-reads int            minimal number of uniquely matched reads for a reference (default 20)
-  -m, --mode int                      profiling mode, type "kmcp profile -h" for details. available values: 1 (highest recall), 2 (high recall), 3 (default), 4 (higher precision), 5 (higher precision) (default 3)
+  -m, --mode int                      profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision) (default 3)
   -N, --name-map strings              tabular two-column file(s) mapping reference IDs to reference names
       --norm-abund string             method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max (default "mean")
   -o, --out-prefix string             out file prefix ("-" for stdout) (default "-")
