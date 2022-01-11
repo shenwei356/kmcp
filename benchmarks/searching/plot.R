@@ -36,6 +36,7 @@ theme1 <- theme_bw() +
 df <- read.csv("bench.kmcp-cobs.csv")
 
 df$app <- factor(df$app, levels = c('KMCP', 'COBS'))
+df$group <- factor(df$group, levels = unique(df$group))
 
 n <- length(unique(df$app))
 
@@ -50,6 +51,7 @@ p1 <- ggplot(df,
     facet_grid(. ~ group, scales = "free_x") + 
     xlab(NULL) +
     ylab('time (second)') +
+    expand_limits(y = 0) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",
@@ -77,6 +79,7 @@ p2 <- ggplot(df2,
     facet_grid(. ~ group, scales = "free_x") + 
     xlab(NULL) +
     ylab('time (second)') +
+    expand_limits(y = 0) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",
@@ -93,7 +96,10 @@ p <- plot_grid(
     nrow = 2,
     labels = c("a", "b"),
     rel_heights = c(1.8, 2)
-)
+) + theme ( # fill the gap in sub figures
+    panel.background = element_rect(fill = "white", colour = NA),
+) 
+
 
 
 ggsave(p,

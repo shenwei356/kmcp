@@ -49,7 +49,7 @@ KMCP is 4x-7x faster than Mash/Sourmash
 - **Scalable searching**. Searching results against multiple databases can be fast merged.
     This brings many benefits:
     - There's no need to re-built the database with newly added reference genomes. 
-    - HPC cluster could accerlerate searching with each computation node hosting a database built with a part of reference genomes.
+    - HPC cluster could accelerate searching with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
 - **Accurate taxonomic profiling**. 
     - Some k-mer based taxonomic profilers suffers from high false positive rates,

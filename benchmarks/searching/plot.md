@@ -6,7 +6,7 @@ KMCP vs COBS
         | csvtk cut -t -f 1,2,4 \
         | csvtk rename -t  -f 2,3 -n COBS,KMCP \
         | csvtk gather -t -k app -v time -f 2,3 \
-        | csvtk mutate2 -t -n group -e '"short reads"' \
+        | csvtk mutate2 -t -n group -e '"1M 150-bp reads"' \
         | csvtk tab2csv \
         > bench.kmcp-cobs.short.tsv.time.csv
 
@@ -14,11 +14,11 @@ KMCP vs COBS
         | csvtk cut -t -f 1,2,4 \
         | csvtk rename -t  -f 2,3 -n COBS,KMCP \
         | csvtk gather -t -k app -v time -f 2,3 \
-        | csvtk mutate2 -t -n group -e '"one genome"' \
+        | csvtk mutate2 -t -n group -e '"One genome"' \
         | csvtk tab2csv \
         > bench.kmcp-cobs.long.tsv.time.csv
         
-    csvtk concat bench.kmcp-cobs.short.tsv.time.csv bench.kmcp-cobs.long.tsv.time.csv \
+    csvtk concat bench.kmcp-cobs.long.tsv.time.csv bench.kmcp-cobs.short.tsv.time.csv \
         > bench.kmcp-cobs.csv
         
 KMCP vs Mash and Sourmash
@@ -27,7 +27,7 @@ KMCP vs Mash and Sourmash
         | csvtk cut -t -f 1,2,4,6 \
         | csvtk rename -t  -f 2,3,4 -n Mash,Sourmash,KMCP \
         | csvtk gather -t -k app -v time -f 2,3,4 \
-        | csvtk mutate2 -t -n group -e '"threads=1"' \
+        | csvtk mutate2 -t -n group -e '"Threads=1"' \
         | csvtk tab2csv \
         > bench.kmcp-mash-sourmash.thread1.tsv.csv
         
@@ -35,7 +35,7 @@ KMCP vs Mash and Sourmash
         | csvtk cut -t -f 1,2,4,6 \
         | csvtk rename -t  -f 2,3,4 -n Mash,Sourmash,KMCP \
         | csvtk gather -t -k app -v time -f 2,3,4 \
-        | csvtk mutate2 -t -n group -e '"threads=8"' \
+        | csvtk mutate2 -t -n group -e '"Threads=8"' \
         | csvtk tab2csv \
         > bench.kmcp-mash-sourmash.thread8.tsv.csv
         

@@ -1,37 +1,33 @@
 query,app,time,group
-NC_000913.3.fasta.short,COBS,181.941,short reads
-NC_000913.3.fasta.short,KMCP,16.781,short reads
-NC_002695.2.fasta.short,COBS,210.005,short reads
-NC_002695.2.fasta.short,KMCP,16.960,short reads
-NC_010655.1.fasta.short,COBS,121.183,short reads
-NC_010655.1.fasta.short,KMCP,14.384,short reads
-NC_011750.1.fasta.short,COBS,202.856,short reads
-NC_011750.1.fasta.short,KMCP,16.355,short reads
-NC_012971.2.fasta.short,COBS,184.675,short reads
-NC_012971.2.fasta.short,KMCP,16.041,short reads
-NC_013654.1.fasta.short,COBS,183.921,short reads
-NC_013654.1.fasta.short,KMCP,16.694,short reads
-NC_018658.1.fasta.short,COBS,203.736,short reads
-NC_018658.1.fasta.short,KMCP,17.266,short reads
-NZ_CP007592.1.fasta.short,COBS,193.875,short reads
-NZ_CP007592.1.fasta.short,KMCP,17.195,short reads
-NZ_CP028116.1.fasta.short,COBS,213.337,short reads
-NZ_CP028116.1.fasta.short,KMCP,17.253,short reads
-NC_000913.3.fasta,COBS,38.077,one genome
-NC_000913.3.fasta,KMCP,12.533,one genome
-NC_002695.2.fasta,COBS,49.512,one genome
-NC_002695.2.fasta,KMCP,12.966,one genome
-NC_010655.1.fasta,COBS,22.023,one genome
-NC_010655.1.fasta,KMCP,11.433,one genome
-NC_011750.1.fasta,COBS,42.081,one genome
-NC_011750.1.fasta,KMCP,12.901,one genome
-NC_012971.2.fasta,COBS,37.044,one genome
-NC_012971.2.fasta,KMCP,12.075,one genome
-NC_013654.1.fasta,COBS,34.247,one genome
-NC_013654.1.fasta,KMCP,12.319,one genome
-NC_018658.1.fasta,COBS,42.646,one genome
-NC_018658.1.fasta,KMCP,12.902,one genome
-NZ_CP007592.1.fasta,COBS,36.686,one genome
-NZ_CP007592.1.fasta,KMCP,12.945,one genome
-NZ_CP028116.1.fasta,COBS,43.989,one genome
-NZ_CP028116.1.fasta,KMCP,13.226,one genome
+NC_000913.3.fasta,COBS,38.077,One genome
+NC_000913.3.fasta,KMCP,12.533,One genome
+NC_002695.2.fasta,COBS,49.512,One genome
+NC_002695.2.fasta,KMCP,12.966,One genome
+NC_011750.1.fasta,COBS,42.081,One genome
+NC_011750.1.fasta,KMCP,12.901,One genome
+NC_012971.2.fasta,COBS,37.044,One genome
+NC_012971.2.fasta,KMCP,12.075,One genome
+NC_013654.1.fasta,COBS,34.247,One genome
+NC_013654.1.fasta,KMCP,12.319,One genome
+NC_018658.1.fasta,COBS,42.646,One genome
+NC_018658.1.fasta,KMCP,12.902,One genome
+NZ_CP007592.1.fasta,COBS,36.686,One genome
+NZ_CP007592.1.fasta,KMCP,12.945,One genome
+NZ_CP028116.1.fasta,COBS,43.989,One genome
+NZ_CP028116.1.fasta,KMCP,13.226,One genome
+NC_000913.3.fasta.short,COBS,709.126,1M 150-bp reads
+NC_000913.3.fasta.short,KMCP,61.606,1M 150-bp reads
+NC_002695.2.fasta.short,COBS,865.891,1M 150-bp reads
+NC_002695.2.fasta.short,KMCP,70.424,1M 150-bp reads
+NC_011750.1.fasta.short,COBS,785.426,1M 150-bp reads
+NC_011750.1.fasta.short,KMCP,67.699,1M 150-bp reads
+NC_012971.2.fasta.short,COBS,707.142,1M 150-bp reads
+NC_012971.2.fasta.short,KMCP,63.483,1M 150-bp reads
+NC_013654.1.fasta.short,COBS,727.527,1M 150-bp reads
+NC_013654.1.fasta.short,KMCP,62.750,1M 150-bp reads
+NC_018658.1.fasta.short,COBS,787.855,1M 150-bp reads
+NC_018658.1.fasta.short,KMCP,70.082,1M 150-bp reads
+NZ_CP007592.1.fasta.short,COBS,779.729,1M 150-bp reads
+NZ_CP007592.1.fasta.short,KMCP,67.929,1M 150-bp reads
+NZ_CP028116.1.fasta.short,COBS,853.900,1M 150-bp reads
+NZ_CP028116.1.fasta.short,KMCP,75.900,1M 150-bp reads

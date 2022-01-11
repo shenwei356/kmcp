@@ -1,0 +1,9 @@
+query	cobs:time(s)	cobs:memory(GB)	kmcp:time(s)	kmcp:memory(GB)
+NC_000913.3.fasta.short	745.945	140.11	75.472	64.83
+NC_002695.2.fasta.short	887.930	149.92	88.510	66.68
+NC_011750.1.fasta.short	838.736	145.73	84.674	64.83
+NC_012971.2.fasta.short	738.051	139.17	76.511	64.83
+NC_013654.1.fasta.short	768.631	140.97	68.738	64.83
+NC_018658.1.fasta.short	855.912	147.34	76.041	66.68
+NZ_CP007592.1.fasta.short	854.553	145.41	77.974	64.83
+NZ_CP028116.1.fasta.short	904.421	151.63	83.184	66.93
