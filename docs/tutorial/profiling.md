@@ -111,8 +111,10 @@ can use stricter criteria in `kmcp profile`.
 
 #### **Commands**
 
+Single-end mode is recommended for pair-end reads, for higher sensitivity
+
     # ---------------------------------------------------
-    # single-end
+    # single-end (recommended)
 
     file=sample.fq.gz
     sample=sample
@@ -130,6 +132,9 @@ can use stricter criteria in `kmcp profile`.
             --out-file          $sample.kmcp@$dbname.tsv.gz \
             --log               $sample.kmcp@$dbname.tsv.gz.log
     done
+    
+
+Pair-end reads
 
     # ---------------------------------------------------
     # paired-end
@@ -162,32 +167,114 @@ Merging searching results on multiple database:
 
 Here, we divided genomes of GTDB into 16 parts and build a database for 
 every part, so we can use computer cluster to accelerate the searching.
+The genbank-viral genomes are also diveded into 4 parts.
 
 A helper script [easy_sbatch](https://github.com/shenwei356/easy_sbatch)
 is used for batch submitting Slurm jobs via script templates.
     
-    dbprefix=~/ws/db/gtdb/gtdb.n16-
+    # ------------------------------------
+    # searching
     
-    file=sample.fq.gz
-    sample=sample
     
-    j=32    
+    j=32
+    reads=reads
+    
+    # -----------------
+    # gtdb
+    
+    dbprefix=~/ws/db/kmcp/gtdb.n16-
+    
+    for file in $reads/*.left.fq.gz; do
+        prefix=$(echo $file | sed 's/.left.fq.gz//')
+        read1=$file
+        read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+        
+        ls -d $dbprefix*.kmcp \
+            | easy_sbatch \
+                -c $j -J $(basename $prefix) \
+                "kmcp search         \
+                    --load-whole-db  \
+                    --threads   $j   \
+                    --db-dir    {}   \
+                    $read1 $read2    \
+                    --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                    --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                    --quiet "
+    done
+    
+    # -----------------
+    # viral
+    
+    dbprefix=~/ws/db/kmcp/genbank-viral.n4-
+    
+    for file in $reads/*.left.fq.gz; do
+        prefix=$(echo $file | sed 's/.left.fq.gz//')
+        read1=$file
+        read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+        
+        ls -d $dbprefix*.kmcp \
+            | easy_sbatch \
+                -c $j -J $(basename $prefix) \
+                "kmcp search         \
+                    --load-whole-db  \
+                    --threads   $j   \
+                    --db-dir    {}   \
+                    $read1 $read2    \
+                    --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                    --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                    --quiet "
+    done
+    
+    # -----------------
+    # fungi
+    
+    dbprefix=~/ws/db/kmcp/refseq-fungi
 
-    ls -d $dbprefix*.kmcp \
-        | easy_sbatch \
-            -c $j -J $file \
-            "kmcp search       \
-                --load-whole-db \
-                --threads   $j \
-                --db-dir    {} \
-                $file          \
-                --out-file  $sample.kmcp@\$(basename {}).tsv.gz \
-                --log       $sample.kmcp@\$(basename {}).tsv.gz.log \
-                --quiet "
+    for file in $reads/*.left.fq.gz; do
+        prefix=$(echo $file | sed 's/.left.fq.gz//')
+        read1=$file
+        read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+        
+        ls -d $dbprefix*.kmcp \
+            | easy_sbatch \
+                -c $j -J $(basename $prefix) \
+                "kmcp search         \
+                    --load-whole-db  \
+                    --threads   $j   \
+                    --db-dir    {}   \
+                    $read1 $read2    \
+                    --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                    --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                    --quiet "
+    done
+    
 
+    # ----------------------------------
+    # wait all job being done
+    
+    
+    
+    # ----------------------------------
+    # merge result and profiling
+        
     # merge results
-    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz \
-        --log $sample.kmcp.tsv.gz.merge.log
+    # there's no need to submit to slurm, which could make it slower, cause the bottleneck is file IO
+    for file in $reads/*.left.fq.gz; do
+        prefix=$(echo $file | sed 's/.left.fq.gz//')        
+        
+        echo $prefix; date
+        kmcp merge $prefix.kmcp@*.tsv.gz --out-file $prefix.kmcp.tsv.gz \
+            --quiet --log $prefix.kmcp.tsv.gz.merge.log
+    done
+
+    # profiling
+    X=taxdump/
+    T=taxid.map
+    
+    fd kmcp.tsv.gz$ $reads/ \
+        | rush -v X=$X -v T=$T \
+            'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
+                --log {}.k.profile.log' 
     
 #### Searching result format
 
@@ -412,7 +499,10 @@ Demo output:
     386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	5.014025
     349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.469811
 
-Metaphlan format ([`taxonkit profile2cami`](https://bioinf.shenwei.me/taxonkit/usage/#profile2cami) can also converts any metagenomic profile table with TaxIds to CAMI format):
+[`taxonkit profile2cami`](https://bioinf.shenwei.me/taxonkit/usage/#profile2cami) can also
+converts any metagenomic profile table with TaxIds to CAMI format.
+    
+Metaphlan format:
 
     #SampleID	
     k__Bacteria	100.000000

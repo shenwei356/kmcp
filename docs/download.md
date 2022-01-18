@@ -21,7 +21,7 @@ Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwe
 
 - please open an issuse to request binaries for other platforms.
 - run `kmcp version` to check update !!!
-- run `kmcp autocomplete` to update shell autocompletion script !!!
+- run `kmcp autocompletion` to update shell autocompletion script !!!
 
 
 ## Installation 
@@ -56,7 +56,7 @@ Supported shell: bash|zsh|fish|powershell
 Bash:
 
     # generate completion shell
-    kmcp autocomplete --shell bash
+    kmcp autocompletion --shell bash
 
     # configure if never did.
     # install bash-completion if the "complete" command is not found.
@@ -66,7 +66,7 @@ Bash:
 Zsh:
 
     # generate completion shell
-    kmcp autocomplete --shell zsh --file ~/.zfunc/_kmcp
+    kmcp autocompletion --shell zsh --file ~/.zfunc/_kmcp
 
     # configure if never did
     echo 'fpath=( ~/.zfunc "${fpath[@]}" )' >> ~/.zshrc
@@ -74,7 +74,7 @@ Zsh:
 
 fish:
 
-    kmcp autocomplete --shell fish --file ~/.config/fish/completions/kmcp.fish
+    kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 ## Release History
 
@@ -140,7 +140,7 @@ fish:
     - flush result immediately.
     - keep the output order by default
 - `compute`: change default file regexp for matching `.fna` files.
-- `autocomplete`: support bash, zsh, fish, powershell.
+- `autocompletion`: support bash, zsh, fish, powershell.
 
 ### v0.2.1 - 2020-12-31
 

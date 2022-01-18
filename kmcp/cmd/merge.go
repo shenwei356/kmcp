@@ -160,6 +160,8 @@ Input:
 			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
 
+		// ---------------------------------------------------------------
+
 		poolMatches := &sync.Pool{New: func() interface{} {
 			tmp := make([]*_Match, 0, 32)
 			return &tmp
@@ -170,8 +172,10 @@ Input:
 			return &tmp
 		}}
 
-		chOut := make(chan *SearchResult, 256)
+		// output channel, the results from all files are piped in in order.
+		chOut := make(chan *SearchResult, 1024)
 		done := make(chan int)
+
 		go func() {
 			var preId uint64
 			var preSeqId string
@@ -245,94 +249,84 @@ Input:
 			done <- 1
 		}()
 
-		m := make([]chan *SearchResult, len(files))
+		// ---------------------------------------------------------------
+
+		readers := make(map[int]chan *SearchResult, len(files))
 		for i, file := range files {
 			ch, err := NewSearchResultParser(file, poolStrings, poolMatches, scoreField, queryIdxField, 128)
 			checkError(err)
-			m[i] = ch
+			readers[i] = ch
 		}
 
-		var idx uint64
+		entries := make([]*resultEntry, 0, len(files))
+		buf := resultEntryHeap{entries: &entries}
 
+		var e *resultEntry
+		var i int
 		var ch chan *SearchResult
-		var found bool
-		var allClosed bool
-		var imin uint64
-		var ids *Uint64Slice
-		buf := make(map[uint64]*[]*SearchResult, 256)
-		var results *[]*SearchResult
-		var r2 *SearchResult
+		var r *SearchResult
+		var ok bool
 		for {
-			found = false
-			allClosed = true
-			for _, ch = range m {
-				r, ok := <-ch
-				if !ok { // closed channel
-					continue
-				} else {
-					allClosed = false
-				}
-
-				if r.QueryIdx != idx { // not found, save to buffer
-					if results, ok = buf[r.QueryIdx]; !ok {
-						buf[r.QueryIdx] = &[]*SearchResult{r}
-
-						if ids == nil {
-							ids = &Uint64Slice{r.QueryIdx}
-							heap.Init(ids)
-						} else {
-							heap.Push(ids, r.QueryIdx)
-						}
-					} else {
-						*results = append(*results, r)
+			if len(*(buf.entries)) == 0 {
+				// read from left files
+				for i, ch = range readers {
+					r, ok = <-ch
+					if !ok {
+						delete(readers, i)
+						continue
 					}
-					continue
+					heap.Push(buf, &resultEntry{idx: i, data: r})
 				}
-
-				found = true
-
-				if results, ok = buf[r.QueryIdx]; ok { // send previously saved
-					for _, r2 = range *results {
-						chOut <- r2
-					}
-
-					delete(buf, r.QueryIdx)
-					heap.Pop(ids) // we believe it's there
-				}
-				chOut <- r // send this one
 			}
-
-			if allClosed {
+			if len(*(buf.entries)) == 0 {
 				break
 			}
 
-			if found {
-				idx++
+			e = heap.Pop(buf).(*resultEntry)
+			chOut <- e.data
+
+			// read next record from the file
+			r, ok = <-readers[e.idx]
+			if !ok {
+				delete(readers, e.idx)
 				continue
 			}
-
-			// not found.
-			// find the minimum idx in buffer
-			imin = heap.Pop(ids).(uint64)
-
-			for _, r := range *buf[imin] {
-				chOut <- r
-			}
-			delete(buf, imin)
-
-			idx = imin + 1
-		}
-
-		// left data in buffer, no need to sort
-		for _, results = range buf {
-			for _, r := range *results {
-				chOut <- r
-			}
+			heap.Push(buf, &resultEntry{idx: e.idx, data: r})
 		}
 
 		close(chOut)
 		<-done
 	},
+}
+
+type resultEntry struct {
+	idx  int // file index
+	data *SearchResult
+}
+
+type resultEntryHeap struct {
+	entries *[]*resultEntry
+}
+
+func (h resultEntryHeap) Len() int { return len(*(h.entries)) }
+
+func (h resultEntryHeap) Less(i, j int) bool {
+	return (*(h.entries))[i].data.QueryIdx < (*(h.entries))[j].data.QueryIdx
+}
+
+func (h resultEntryHeap) Swap(i, j int) {
+	(*(h.entries))[i], (*(h.entries))[j] = (*(h.entries))[j], (*(h.entries))[i]
+}
+
+func (h resultEntryHeap) Push(x interface{}) {
+	*(h.entries) = append(*(h.entries), x.(*resultEntry))
+}
+
+func (h resultEntryHeap) Pop() interface{} {
+	n := len(*(h.entries))
+	x := (*(h.entries))[n-1]
+	*(h.entries) = (*(h.entries))[:n-1]
+	return x
 }
 
 func init() {
@@ -346,9 +340,9 @@ func init() {
 }
 
 // do not use, it's slower
-var pool_Match = &sync.Pool{New: func() interface{} {
-	return &_Match{}
-}}
+// var pool_Match = &sync.Pool{New: func() interface{} {
+// 	return &_Match{}
+// }}
 
 type _Match struct {
 	Data  *[]string
@@ -378,7 +372,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		fieldScore := scoreField - 1
 		scanner := bufio.NewScanner(infh)
 
-		tmp := make([]*_Match, 0, 32)
+		tmp := make([]*_Match, 0, 8)
 		matches := &tmp
 		// matches := poolMatches.Get().(*[]*_Match)
 		// *matches = (*matches)[:0]
@@ -435,7 +429,7 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 					QuerySeqId: preSeqId,
 					Matches:    matches,
 				}
-				tmp := make([]*_Match, 0, 32)
+				tmp := make([]*_Match, 0, 8)
 				matches = &tmp
 				// matches = poolMatches.Get().(*[]*_Match)
 				// *matches = (*matches)[:0]

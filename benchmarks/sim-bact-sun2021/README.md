@@ -7,10 +7,12 @@
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+- Centrifuge [v1.0.4](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 
 ## Databases and taxonomy version
 
-- KMCP,  GTDB-RS202 (2021-04-27), 2021-10
+- KMCP,  GTDB-RS202 (2021-04-27) + Genbank-viral (r246, 2021-12-06) + Refseq-fungi (r208, 2021-09-30), 2021-12-06
+- Centrifuge, built with the genomes same to KMCP.
 - mOTUs, 3.0.1 (2021-06-28), 2019-01
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
@@ -34,7 +36,7 @@ including the gold-standard profiles.
 Sun *et al.* simulated [25 metagenomic reads](https://figshare.com/projects/Pitfalls_and_Opportunities_in_Benchmarking_Metagenomic_Classifiers/79916) for benchmarking metagenomic profilers,
 while the ground truth profiles format is not convenient for interpretation
 with tools like [opal](https://github.com/CAMI-challenge/OPAL).
-I've convert the ground truth profiles to CAMI format with Taxonomy version 2021-10-06,
+I've convert the ground truth profiles to CAMI format with Taxonomy version 2021-12-06,
 available [here](https://github.com/shenwei356/sun2021-cami-profiles/releases/tag/v2021-12-06).
 
 All FASTQ files were downloaded and saved in one directory `reads`.
@@ -49,7 +51,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     # prepare folder and files.
     mkdir -p kmcp-se
     cd kmcp-se
-    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    fd fq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
    
@@ -277,7 +279,7 @@ Steps
     # --------------------------------------------------
     # using kraken database built with GTDB, Genbank-viral, Refseq-fungi
     
-    reads = bracken-kmcp
+    reads=bracken-kmcp
     
     # prepare folder and files.
     mkdir -p $reads

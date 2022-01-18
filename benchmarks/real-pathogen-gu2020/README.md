@@ -5,11 +5,13 @@
 - KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+- Centrifuge [v1.0.4](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 
 ## Databases and taxonomy version
 
 - KMCP,  genbank-viral (2021-12-06), 2021-12-06
 - Kraken, PlusPF (2021-05-17), 2021-05-17
+- Centrifuge, built with the genomes same to KMCP.
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
@@ -35,7 +37,7 @@ including the gold-standard profiles.
 
 We download the 99 Illumina short-reads datasets from [PRJNA558701](https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA558701),
 in which 92 samples has detailed information in the supplementary table 1.
-And 87 samples are culture-positive.
+And 87 samples are verified by culture or 16S rRNA gene qPCR.
 
 Run accession and corresponding sample names are listed in [acc2sample.tsv](https://github.com/shenwei356/kmcp/blob/main/benchmarks/pathogen-gu2020/acc2sample.tsv).
 
@@ -175,6 +177,17 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             | csvtk sort -H -k 1:N \
             | rush -j 1 'cat {}' \
             > $profile
+    done
+
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes
+    #  --no-amb-corr                   do not correct ambiguous reads (just for benchmark)
+    
+    for m in $(seq 0 0); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} --no-amb-corr -o {}.k-m{m}.profile.no-amb-corr -s {%:}' 
     done
 
 

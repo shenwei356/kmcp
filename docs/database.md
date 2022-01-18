@@ -34,7 +34,7 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 |**Bacteria and Archaea**|GTDB r202  |43252   |47894      |k=21, frags=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
 |**Bacteria and Archaea**|HumGut     |23604   |30691      |k=21, frags=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
 |**Fungi**               |Refseq r208|161     |403        |k=21, frags=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
-|**Viruses**             |GenBank 246|19584   |27936      |k=21, frags=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjg0hls35Ak3sPIoD?e=ApnUEW) (2.49 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjg-a1pMCiTeJwTue?e=NkYUUb))|4.97 GB  |
+|**Viruses**             |GenBank 246|19584   |27936      |k=21, frags=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
 |**Viruses**             |Refseq r208|7189    |11618      |k=21, frags=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
 |**Human**               |CHM13      |1       |1          |k=21, frags=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
@@ -499,10 +499,10 @@ Building database:
         --log genbank-$name-k21-n5.log -j 32 --force
     
     # viral genomes are small:
-    #   using small false positive rate: 0.001
-    #   using more hash functions: 3
+    #   using small false positive rate: 0.05
+    #   still using one hash function: 1
     kmcp index -I genbank-$name-k21-n5/ -O genbank-viral.kmcp \
-        -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+        -j 32 -f 0.05 -n 1 -x 100K -8 1M \
         --log genbank-viral.kmcp.log --force
     
     # cp taxid and name mapping file to database directory
@@ -528,7 +528,43 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.sync16.kmcp/
     
+Building small databases (all k-mers, for profiling with a computer cluster):
+    
+    name=genbank-viral
+    
+    input=files.renamed.slim
+    
+    find $input -name "*.fna.gz" > $input.files.txt
+    
+    
+    # number of databases
+    n=4
+        
+    # split into $n chunks
+    split -n l/$n $chunksize -d  $input.files.txt $name.n$n-
+    
+    # create database for every chunks
+    for f in $name.n$n-*; do 
+        echo $f
+  
+        kmcp compute -i $f -O $f-k21-n5 \
+            -k 21 --seq-name-filter plasmid \
+            --split-number 5 --split-overlap 100 \
+            --log $f-k21-n5.log -j 32 --force
+        
+        # viral genomes are small:
+        #   using small false positive rate: 0.001
+        #   using more hash functions: 3
+        kmcp index -I $f-k21-n5/ -O $f.kmcp \
+            -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+            --log $f.kmcp.log --force
+        
+        # cp taxid and name mapping file to database directory
+        cp taxid.map name.map $f.kmcp/
+    done
+    
 
+    
 ### Human genome
 
 

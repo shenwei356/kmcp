@@ -58,7 +58,7 @@ Building Bracken database. https://github.com/jenniferlu717/Bracken, recommend h
     memusg -t -s "kraken2 --db=${dbname} --threads=40 all.fasta > ${dbname}/database.kraken" \
         > bracken.build_1a.log 2>&1
     
-    for READ_LEN in 75 100 125 150; do
+    for READ_LEN in 50 75 100 125 150; do
         memusg -t -s "kmer2read_distr --seqid2taxid ${dbname}/seqid2taxid.map --taxonomy ${dbname}/taxonomy \
             --kraken ${dbname}/database.kraken --output ${dbname}/database${READ_LEN}mers.kraken -k 35 -l ${READ_LEN} -t 40; \
             generate_kmer_distribution.py -i ${dbname}/database${READ_LEN}mers.kraken -o ${dbname}/database${READ_LEN}mers.kmer_distrib" \

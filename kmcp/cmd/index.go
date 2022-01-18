@@ -87,7 +87,7 @@ Performance tips:
   1. Number of blocks (.uniki files) better be smaller than or equal
      to number of CPU cores for faster searching speed. 
      We can set -j/--threads to control blocks number.
-     When more threads (>= 1.5 * #blocks) are given, extra workers are
+     When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
   2. #threads files are simultaneously opened, and max number
      of opened files is limited by the flag -F/--max-open-files.

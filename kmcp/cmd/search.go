@@ -85,6 +85,8 @@ Index files loading modes:
 Performance tips:
   1. Increase value of -j/--threads for acceleratation, but values larger
      than number of CPU cores won't bring extra speedup.
+  2. When more threads (>= 1.3 * #blocks) are given, extra workers are
+     automatically created.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {

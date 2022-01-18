@@ -24,8 +24,8 @@
     - 10-25% faster.
     - better log.
 - `merge`:
-    - fix adding up `hits`, does not affect `profile`.
-    - fix bug of incorrect order.
+    - fix adding up `hits`.
+    - fix bug of incorrect order, reduce memory usage.
     - support one input file.
 - `profile`:
     - change analysis workflow, using 4 stages.

@@ -206,7 +206,7 @@ func tokenNum(v int) int {
 }
 
 func extraWorkers(nIdxFiles int, threads int) int {
-	n := int(math.Ceil(float64(threads)/float64(nIdxFiles)-0.5)) - 1
+	n := int(math.Ceil(float64(threads)/float64(nIdxFiles)-0.3)) - 1
 	if n < 0 {
 		return 0
 	}
