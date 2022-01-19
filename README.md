@@ -28,10 +28,11 @@ KMCP can be used for fast similarity estimation of assemblies/genomes against kn
 Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 [Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
-provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (Sourmash).
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
 KMCP utilizes multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
-[Scaled MinHash](https://f1000research.com/articles/8-1006) and
+[FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
+(previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)) and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
 KMCP is 4x-7x faster than Mash/Sourmash
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).

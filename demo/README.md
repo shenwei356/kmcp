@@ -143,7 +143,7 @@ Profiling
 |NC_018658.1|Escherichia coli O157:H16 strain Santai  |0.5782|0.5868|0.4109|
 |NC_018658.1|Escherichia coli O157:H7 str. Sakai      |0.5482|0.5322|0.3699|
 
-### Scaled MinHash
+### FracMinHash (Scaled MinHash)
 
     # computing k-mers
     kmcp compute \

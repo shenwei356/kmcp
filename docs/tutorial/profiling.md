@@ -111,15 +111,16 @@ can use stricter criteria in `kmcp profile`.
 
 #### **Commands**
 
-Single-end mode is recommended for pair-end reads, for higher sensitivity
+Single-end mode is recommended for pair-end reads, for higher sensitivity:
 
     # ---------------------------------------------------
     # single-end (recommended)
 
-    file=sample.fq.gz
+    read1=sample_1.fq.gz
+    read2=sample_2.fq.gz
     sample=sample
 
-    for db in refseq-viruses.kmcp gtdb.kmcp ; do
+    for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         dbname=$(basename $db)
 
         kmcp search \
@@ -128,13 +129,13 @@ Single-end mode is recommended for pair-end reads, for higher sensitivity
             --min-kmers          30 \
             --min-query-len      70 \
             --min-query-cov    0.55 \
-            $file                   \
-            --out-file          $sample.kmcp@$dbname.tsv.gz \
-            --log               $sample.kmcp@$dbname.tsv.gz.log
+            $read1   $read2         \
+            --out-file         $sample.kmcp@$dbname.tsv.gz \
+            --log              $sample.kmcp@$dbname.tsv.gz.log
     done
     
 
-Pair-end reads
+Pair-end reads:
 
     # ---------------------------------------------------
     # paired-end
@@ -143,7 +144,7 @@ Pair-end reads
     read2=sample_2.fq.gz
     sample=sample
     
-    for db in refseq-viruses.kmcp gtdb.kmcp ; do
+    for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         dbname=$(basename $db)
 
         kmcp search \
@@ -172,7 +173,7 @@ The genbank-viral genomes are also diveded into 4 parts.
 A helper script [easy_sbatch](https://github.com/shenwei356/easy_sbatch)
 is used for batch submitting Slurm jobs via script templates.
     
-    # ------------------------------------
+    # ---------------------------------------------------
     # searching
     
     
@@ -249,12 +250,12 @@ is used for batch submitting Slurm jobs via script templates.
     done
     
 
-    # ----------------------------------
+    # ---------------------------------------------------
     # wait all job being done
     
     
     
-    # ----------------------------------
+    # ---------------------------------------------------
     # merge result and profiling
         
     # merge results

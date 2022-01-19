@@ -147,10 +147,11 @@ Besides, the database is big and the searching speed is relative slow.
 Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 [Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
-provide fast genome distance estimation using MinHash (Mash) or Scaled MinHash (Sourmash).
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
 Here KMCP utilizes multiple sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
-[Scaled MinHash](https://f1000research.com/articles/8-1006) and
+[FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
+(previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)) and
 [Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
 
 [Prebuilt databases](/kmcp/database) are available and users can also build custom databases following steps below.
@@ -170,13 +171,13 @@ Supported k-mer (sketches) types:
 1. K-mer:
     - ntHash of k-mer (`-k`)
 2. K-mer sketchs (all using ntHash):
-    - Scaled MinHash (`-k -D`)
+    - FracMinHash    (`-k -D`), previously named Scaled MinHash
     - Minimizer      (`-k -W`), optionally scaling/down-sampling (`-D`)
     - Closed Syncmer (`-k -S`), optionally scaling/down-sampling (`-D`)
 
 Taken GTDB for example:
     
-    # compute Scaled MinHash with scale 1000
+    # compute FracMinHash (Scaled MinHash) with scale 1000
     #   sequence containing "plasmid" in name are ignored,
     #   k = 31
     kmcp compute -I gtdb/ -k 31 -D 1000 -B plasmid -O gtdb-r202-minhash

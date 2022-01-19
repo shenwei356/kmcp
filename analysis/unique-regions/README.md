@@ -1,4 +1,4 @@
-## Create database of Scaled MinHash sketch
+## Create database of FracMinHash sketch
 
 Using scale `10`.
 

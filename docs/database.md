@@ -54,7 +54,7 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 Check the [tutorial](/tutorial/searching).
 
-Scaled MinHash:
+FracMinHash (Scaled MinHash):
 
 |kingdoms                |source     |parameters      |file                                                                                                                                                                     |size     |
 |:-----------------------|:----------|:---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
@@ -77,7 +77,7 @@ Closed Syncmers:
 |source     |# assembly|type          |parameters    |file                                                                                                                                                                       |size   |
 |:----------|:---------|:-------------|:-------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------|
 |Refseq r208|37318     |All k-mers    |k=21          |[refseq-plasmid.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUQpIuKC5ju2TIdD?e=yKdRs2) (5.29 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjT-TO94gsfpUpe8_?e=1RAvr1))        |7.80 GB|
-|Refseq r208|37318     |Scaled MinHash|K=31, scale=10|[refseq-plasmid.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8) (1.01 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp))|2.00 GB|
+|Refseq r208|37318     |FracMinHash   |K=31, scale=10|[refseq-plasmid.minhash.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8) (1.01 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp))|2.00 GB|
 |Refseq r208|37318     |Closed Syncmer|K=31, s=21    |[refseq-plasmid.syncmer.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUPv9o2SA4kiSxwU?e=UvkSDV) (806 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUKt3A_p7Q7BE7qT?e=dApTX8)) |1.54 GB|
 
 
@@ -651,7 +651,7 @@ Building database (all k-mers):
     # cp name mapping file to database directory
     cp name.map refseq-$name.kmcp/
 
-Building database (Scaled MinHash):
+Building database (FracMinHash/Scaled MinHash):
 
     name=plasmid
     
@@ -972,7 +972,7 @@ is good enough.
 1. K-mer:
     - ntHash of k-mer (`-k`)
 2. K-mer sketchs (all using ntHash):
-    - Scaled MinHash (`-k -D`)
+    - Scaled MinHash (`-k -D`), reviously named Scaled MinHash
     - Minimizer      (`-k -W`), optionally scaling/down-sampling (`-D`)
     - Closed Syncmer (`-k -S`), optionally scaling/down-sampling (`-D`)
 

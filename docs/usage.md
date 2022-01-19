@@ -15,7 +15,7 @@ KMCP can also be used for:
   1. Fast sequence search from large scales of genomic datasets
      as BIGSI and COBS do.
   2. Fast assembly/genome similarity estimation as Mash and sourmash do,
-     by utilizing Minimizer, Scaled MinHash, or Closed Syncmers.
+     by utilizing Minimizer, FracMinHash (Scaled MinHash), or Closed Syncmers.
 
 Usage:
   kmcp [command]
@@ -66,7 +66,7 @@ Supported k-mer (sketches) types:
   1. K-mer:
      1). ntHash of k-mer (-k)
   2. K-mer sketchs (all using ntHash):
-     1). Scaled MinHash (-k -D)
+     1). FracMinHash    (-k -D), previously named Scaled MinHash
      2). Minimizer      (-k -W), optionally scaling/down-sampling (-D)
      3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
 

@@ -69,7 +69,7 @@ Supported k-mer (sketches) types:
   1. K-mer:
      1). ntHash of k-mer (-k)
   2. K-mer sketchs (all using ntHash):
-     1). Scaled MinHash (-k -D)
+     1). FracMinHash    (-k -D), previously named Scaled MinHash
      2). Minimizer      (-k -W), optionally scaling/down-sampling (-D)
      3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
 

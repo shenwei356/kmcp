@@ -44,7 +44,7 @@ KMCP can also be used for:
   1. Fast sequence search against large scales of genomic datasets
      as BIGSI and COBS do.
   2. Fast assembly/genome similarity estimation as Mash and sourmash do,
-     by utilizing Minimizer, Scaled MinHash, or Closed Syncmers.
+     by utilizing Minimizer, FracMinHash (Scaled MinHash), or Closed Syncmers.
 
 `, VERSION),
 }

@@ -30,7 +30,7 @@ Searching with bacterial genomes or short reads (~200K reads).
 
 ## KMCP vs Mash and Sourmash
 
-Only Scaled MinHash (scale=1000 for Sourmash and KMCP) or MinHash (scale=3400 fo Mash) are indexed and searched.
+Only FracMinHash (Scaled MinHash) (scale=1000 for Sourmash and KMCP) or MinHash (scale=3400 for Mash) are indexed and searched.
 
 Database size and building time:
 
