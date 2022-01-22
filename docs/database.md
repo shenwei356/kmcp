@@ -181,7 +181,8 @@ Building database (all k-mers, for profiling on short-reads):
     
 Building database (k-mer sketches, for profiling on long-reads):
     
-    # here we compute Closed Syncmers with s=16
+    # -------------------------------------------------------------------------------------
+    # Closed Syncmers with s=16
     
     input=gtdb
     
@@ -203,6 +204,56 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.sync16.kmcp/
+    
+    
+    # -------------------------------------------------------------------------------------
+    # FracMinhash/Scaled MinHash with d=5
+    
+    input=gtdb
+       
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   k = 21
+    #   D = 5 # FracMinhash
+    kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
+        --log gtdb-r202-k21-n10-D5.log -j 32 --force
+
+    # build database
+    #   number of index files: 32, for server with >= 32 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.2
+    kmcp index -j 32 -I gtdb-r202-k21-n10-D5 -O gtdb.minh5.kmcp -n 1 -f 0.2 \
+        --log gtdb.minh5.kmcp.log
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map gtdb.minh5.kmcp/
+    
+    
+    # -------------------------------------------------------------------------------------
+    # Minimizer with W=5
+    
+    input=gtdb
+       
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   k = 21
+    #   W = 5 # Minimizer
+    kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
+        --log gtdb-r202-k21-n10-W5.log -j 32 --force
+
+    # build database
+    #   number of index files: 32, for server with >= 32 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.2
+    kmcp index -j 32 -I gtdb-r202-k21-n10-W5 -O gtdb.mini5.kmcp -n 1 -f 0.2 \
+        --log gtdb.mini5.kmcp.log
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map gtdb.mini5.kmcp/
     
 Building small databases (all k-mers, for profiling with a computer cluster):
     
@@ -301,7 +352,7 @@ Downloading viral and fungi sequences:
     # rename
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
         
-Building database:
+Building database (all k-mers, for profiling on short-reads):
         
     # -----------------------------------------------------------------
     # for viral, only splitting into 5 fragments
@@ -328,26 +379,6 @@ Building database:
     cp taxid.map name.map refseq-viral.kmcp/
 
     
-    # ---------------
-    # kmer sketches
-    # here we compute Closed Syncmers with s=16
-    
-    kmcp compute -I $input -O refseq-$name-k21-n5-S16 \
-        -k 21 -S 16 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5-S16.log -j 32 --force
-    
-    # viral genomes are small:
-    #   using small false positive rate: 0.001
-    #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n5-S16/ -O refseq-viral.sync16.kmcp \
-        -j 32 -f 0.001 -n 3 -x 100K \
-        --log refseq-viral.sync16.kmcp.log --force
-    
-    # cp taxid and name mapping file to database directory
-    cp taxid.map name.map refseq-viral.sync16.kmcp/
-    
-    
     # -----------------------------------------------------------------
     # for fungi
     name=fungi
@@ -370,9 +401,63 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-fungi.kmcp/
     
+   
     
-    # ---------------
-    # kmer sketches
+Building database (k-mer sketches, for profiling on long-reads):
+
+
+    # -----------------------------------------------------------------
+    # for viral, only splitting into 5 fragments
+    name=viral
+    
+    input=files.renamed
+
+     
+    # ---------------------------------------------
+    # here we compute Closed Syncmers with s=16
+    
+    kmcp compute -I $input -O refseq-$name-k21-n5-S16 \
+        -k 21 -S 16 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log refseq-$name-k21-n5-S16.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I refseq-$name-k21-n5-S16/ -O refseq-viral.sync16.kmcp \
+        -j 32 -f 0.001 -n 3 -x 100K \
+        --log refseq-viral.sync16.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-viral.sync16.kmcp/
+    
+    
+    # ---------------------------------------------
+    # here we compute FracMinHash with D=5
+    
+    kmcp compute -I $input -O refseq-$name-k21-n5-D5 \
+        -k 21 -D 5 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log refseq-$name-k21-n5-D5.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I refseq-$name-k21-n5-D5/ -O refseq-viral.minh5.kmcp \
+        -j 32 -f 0.001 -n 3 -x 100K \
+        --log refseq-viral.minh5.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-viral.minh5.kmcp/
+    
+        
+    # -----------------------------------------------------------------
+    # for fungi
+    name=fungi
+    
+    input=files.renamed
+     
+    # ---------------------------------------------
     # here we compute Closed Syncmers with s=16
     
     kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
@@ -386,6 +471,38 @@ Building database:
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map refseq-fungi.sync16.kmcp/
+    
+  
+    # ---------------------------------------------
+    # here we compute FracMinHash with D=5
+    
+    kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
+        -k 21 -D 5 --seq-name-filter plasmid \
+        --split-number 10 --split-overlap 100 \
+        --log refseq-$name-k21-n10-D5.log -j 32 --force
+      
+    kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-fungi.minh5.kmcp \
+        -j 32 -f 0.2 -n 1 \
+        --log refseq-fungi.minh5.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-fungi.minh5.kmcp/
+    
+    
+    # ---------------------------------------------
+    # here we compute Minimizer with W=5
+    
+    kmcp compute -I $input -O refseq-$name-k21-n10-W5 \
+        -k 21 -W 5 --seq-name-filter plasmid \
+        --split-number 10 --split-overlap 100 \
+        --log refseq-$name-k21-n10-W5.log -j 32 --force
+      
+    kmcp index -I refseq-$name-k21-n10-W5/ -O refseq-fungi.mini5.kmcp \
+        -j 32 -f 0.2 -n 1 \
+        --log refseq-fungi.mini5.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map refseq-fungi.mini5.kmcp/
     
 ### Genbank viral
 
@@ -448,7 +565,9 @@ Downloading viral sequences:
     # rename
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
         
-Building database:
+        
+keep at most 5 genomes for a taxid:
+
 
     # -----------------------------------------------------------------
     # keep at most 5 genomes for a taxid
@@ -482,7 +601,8 @@ Building database:
     ls $output | wc -l
     wc -l taxid.map
 
-        
+Building database (all k-mers, for profiling on short-reads):
+
     # -----------------------------------------------------------------
     # for viral, only splitting into 5 fragments
     name=viral
@@ -508,9 +628,15 @@ Building database:
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.kmcp/
 
+
+Building database (k-mer sketches, for profiling on long-reads):
+
+    name=viral
     
-    # ---------------
-    # kmer sketches
+    input=files.renamed.slim
+    
+    
+    # ----------------------------------------------
     # here we compute Closed Syncmers with s=16
     
     kmcp compute -I $input -O genbank-$name-k21-n5-S16 \
@@ -527,6 +653,44 @@ Building database:
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.sync16.kmcp/
+    
+    
+    # ----------------------------------------------
+    # here we compute FracMinHash with D=5
+    
+    kmcp compute -I $input -O genbank-$name-k21-n5-D5 \
+        -k 21 -D 5 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log genbank-$name-k21-n5-D5.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I genbank-$name-k21-n5-D5/ -O genbank-viral.minh5.kmcp \
+        -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+        --log genbank-viral.minh5.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map genbank-viral.minh5.kmcp/
+    
+    
+    # ----------------------------------------------
+    # here we compute Minimizer with W=5
+    
+    kmcp compute -I $input -O genbank-$name-k21-n5-W5 \
+        -k 21 -W 5 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log genbank-$name-k21-n5-W5.log -j 32 --force
+    
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I genbank-$name-k21-n5-W5/ -O genbank-viral.mini5.kmcp \
+        -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+        --log genbank-viral.mini5.kmcp.log --force
+    
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map genbank-viral.mini5.kmcp/
     
 Building small databases (all k-mers, for profiling with a computer cluster):
     

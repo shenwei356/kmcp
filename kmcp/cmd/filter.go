@@ -401,17 +401,29 @@ Performance notes:
 func init() {
 	utilsCmd.AddCommand(filterCmd)
 
-	filterCmd.Flags().IntP("chunk-size", "", 5000, `number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details`)
-	filterCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
-	filterCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
+	filterCmd.Flags().IntP("chunk-size", "", 5000,
+		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
+
+	filterCmd.Flags().BoolP("no-header-row", "H", false,
+		formatFlagUsage(`Do not print header row.`))
+
+	filterCmd.Flags().StringP("out-prefix", "o", "-",
+		formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	// for single read
-	filterCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
-	filterCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
+	filterCmd.Flags().Float64P("max-fpr", "f", 0.05,
+		formatFlagUsage(`Maximal false positive rate of a read in search result.`))
+
+	filterCmd.Flags().Float64P("min-query-cov", "t", 0.55,
+		formatFlagUsage(`Minimal query coverage of a read in search result.`))
 
 	// taxonomy
-	filterCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
-	filterCmd.Flags().StringP("taxdump", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
+	filterCmd.Flags().StringSliceP("taxid-map", "T", []string{},
+		formatFlagUsage(`Tabular two-column file(s) mapping reference IDs to TaxIds.`))
 
-	filterCmd.Flags().StringP("level", "", "species", `level to filter. available values: species, strain/assembly`)
+	filterCmd.Flags().StringP("taxdump", "X", "",
+		formatFlagUsage(`Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp.`))
+
+	filterCmd.Flags().StringP("level", "", "species",
+		formatFlagUsage(`Level to filter. available values: species, strain/assembly.`))
 }

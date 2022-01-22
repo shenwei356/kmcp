@@ -527,13 +527,19 @@ type statInfo struct {
 func init() {
 	utilsCmd.AddCommand(statCmd)
 
-	statCmd.Flags().StringP("out-file", "o", "-", `out file ("-" for stdout, suffix .gz for gzipped out)`)
-	statCmd.Flags().BoolP("all", "a", false, "all information, including number of k-mers")
-	statCmd.Flags().BoolP("tabular", "T", false, "output in machine-friendly tabular format")
-	statCmd.Flags().BoolP("skip-err", "e", false, "skip error, only show warning message")
-	statCmd.Flags().StringP("symbol-true", "", "✓", "smybol for true")
-	statCmd.Flags().StringP("symbol-false", "", "✕", "smybol for false")
-	statCmd.Flags().BoolP("basename", "b", false, "only output basename of files")
+	statCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file ("-" for stdout, suffix .gz for gzipped out.)`))
+
+	statCmd.Flags().BoolP("all", "a", false, formatFlagUsage("All information, including the number of k-mers."))
+
+	statCmd.Flags().BoolP("tabular", "T", false, formatFlagUsage("Output in machine-friendly tabular format."))
+
+	statCmd.Flags().BoolP("skip-err", "e", false, formatFlagUsage("Skip error, only show warning message."))
+
+	statCmd.Flags().StringP("symbol-true", "", "✓", formatFlagUsage("Smybol for true."))
+
+	statCmd.Flags().StringP("symbol-false", "", "✕", formatFlagUsage("Smybol for false."))
+
+	statCmd.Flags().BoolP("basename", "b", false, formatFlagUsage("Only output basename of files."))
 }
 
 func boolStr(sTrue, sFalse string, v bool) string {

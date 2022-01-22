@@ -397,20 +397,20 @@ Performance notes:
 func init() {
 	utilsCmd.AddCommand(regionsCmd)
 
-	regionsCmd.Flags().IntP("chunk-size", "", 5000, `number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details`)
-	regionsCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
+	regionsCmd.Flags().IntP("chunk-size", "", 5000, formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
+	regionsCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	// for single read
-	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
-	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
+	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, formatFlagUsage(`Maximal false positive rate of a read in search result.`))
+	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, formatFlagUsage(`Minimal query coverage of a read in search result.`))
 
 	// for merge
-	regionsCmd.Flags().IntP("max-gap", "g", 0, `maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging`)
-	regionsCmd.Flags().IntP("min-overlap", "l", 1, `minimal overlap of two adjacent regions, recommend K-1`)
-	regionsCmd.Flags().BoolP("ignore-type", "I", false, "merge species and assembly-specific regions")
+	regionsCmd.Flags().IntP("max-gap", "g", 0, formatFlagUsage(`Maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging.`))
+	regionsCmd.Flags().IntP("min-overlap", "l", 1, formatFlagUsage(`Minimal overlap of two adjacent regions, recommend K-1.`))
+	regionsCmd.Flags().BoolP("ignore-type", "I", false, formatFlagUsage("Merge species and assembly-specific regions."))
 
-	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, `regular expression for extract reference name and query locations`)
+	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, formatFlagUsage(`Regular expression for extract reference name and query locations.`))
 
-	regionsCmd.Flags().StringP("name-species", "s", "species-specific", `name of species-specific regions`)
-	regionsCmd.Flags().StringP("name-assembly", "a", "assembly-specific", `name of assembly-specific regions`)
+	regionsCmd.Flags().StringP("name-species", "s", "species-specific", formatFlagUsage(`Name of species-specific regions.`))
+	regionsCmd.Flags().StringP("name-assembly", "a", "assembly-specific", formatFlagUsage(`Name of assembly-specific regions.`))
 }

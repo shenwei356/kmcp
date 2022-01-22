@@ -119,7 +119,7 @@ var infoCmd = &cobra.Command{
 func init() {
 	utilsCmd.AddCommand(infoCmd)
 
-	infoCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
-	infoCmd.Flags().BoolP("all", "a", false, "all information")
-	infoCmd.Flags().BoolP("basename", "b", false, "only output basenames of files")
+	infoCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	infoCmd.Flags().BoolP("all", "a", false, formatFlagUsage("Show all information."))
+	infoCmd.Flags().BoolP("basename", "b", false, formatFlagUsage("Only output basenames of files."))
 }

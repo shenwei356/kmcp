@@ -332,11 +332,15 @@ func (h resultEntryHeap) Pop() interface{} {
 func init() {
 	RootCmd.AddCommand(mergeCmd)
 
-	mergeCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)
-	mergeCmd.Flags().IntP("field-queryIdx", "f", 15, `field of queryIdx`)
-	mergeCmd.Flags().IntP("field-hits", "n", 5, `field of hits`)
-	mergeCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
-	mergeCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
+	mergeCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))
+
+	mergeCmd.Flags().IntP("field-queryIdx", "f", 15, formatFlagUsage(`Field of queryIdx.`))
+
+	mergeCmd.Flags().IntP("field-hits", "n", 5, formatFlagUsage(`Field of hits.`))
+
+	mergeCmd.Flags().StringP("sort-by", "s", "qcov", formatFlagUsage(`Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index).`))
+
+	mergeCmd.Flags().BoolP("no-header-row", "H", false, formatFlagUsage(`Do not print header row.`))
 }
 
 // do not use, it's slower

@@ -140,7 +140,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             > $profile
     done
 
-## KMCP (k-mer sketches database)
+## KMCP (k-mer sketches database: closed syncmers)
 
     # ------------------------------------------------------------------------
     # prepare folder and files.
@@ -246,12 +246,224 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             > $profile
     done
 
+## KMCP (k-mer sketches database: FracMinHash)
+
+    # ------------------------------------------------------------------------
+    # prepare folder and files.
+    
+    mkdir -p kmcp-fracminhash
+    cd kmcp-fracminhash
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+    
+    
+    # ------------------------------------------------------------------------
+    # search
+    
+    reads=kmcp-fracminhash
+    j=4
+    J=40
+    s=1000   # sliding step   
+    w=1000   # sliding window
+  
+
+    # -------------------------------------
+    # gtdb
+    
+    db=gtdb.minh5.kmcp/
+    X=taxdump/
+    T=gtdb.minh5.kmcp/taxid.map    
+    dbname=gtdb
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+     
+    
+    # -------------------------------------
+    # refseq-fungi
+    
+    db=refseq-fungi.minh5.kmcp/
+    X=taxdump/
+    T=refseq-fungi.minh5.kmcp/taxid.map    
+    dbname=refseq-fungi
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+    
+        
+    # -------------------------------------
+    # genbank-viral
+    
+    db=genbank-viral.minh5.kmcp/
+    X=taxdump/
+    T=genbank-viral.minh5.kmcp/taxid.map    
+    dbname=genbank-viral    
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+    
+    # ------------------------------------------------------------------------
+    # merge results
+    
+    reads=kmcp-fracminhash
+    j=16
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v 'p={:}' \
+            'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
+            
+
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes        
+    
+    X=taxdump/
+    # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    # cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    T=taxid.map
+    
+    for m in $(seq 1 5); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
+
+## KMCP (k-mer sketches database: Minimizer )
+
+    # ------------------------------------------------------------------------
+    # prepare folder and files.
+    
+    mkdir -p kmcp-fracminhash
+    cd kmcp-fracminhash
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+    
+    
+    # ------------------------------------------------------------------------
+    # search
+    
+    reads=kmcp-fracminhash
+    j=4
+    J=40
+    s=1000   # sliding step   
+    w=1000   # sliding window
+  
+
+    # -------------------------------------
+    # gtdb
+    
+    db=gtdb.minh5.kmcp/
+    X=taxdump/
+    T=gtdb.minh5.kmcp/taxid.map    
+    dbname=gtdb
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+     
+    
+    # -------------------------------------
+    # refseq-fungi
+    
+    db=refseq-fungi.minh5.kmcp/
+    X=taxdump/
+    T=refseq-fungi.minh5.kmcp/taxid.map    
+    dbname=refseq-fungi
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+    
+        
+    # -------------------------------------
+    # genbank-viral
+    
+    db=genbank-viral.minh5.kmcp/
+    X=taxdump/
+    T=genbank-viral.minh5.kmcp/taxid.map    
+    dbname=genbank-viral    
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -v s=$s -v w=$w -j $j -v j=$J -v 'p={:}' \
+            'seqkit sliding -s {s} -W {w} -g {} \
+                | kmcp search -d {db} \
+                    -o {p}.kmcp@{dbname}.tsv.gz \
+                    --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+    
+    # ------------------------------------------------------------------------
+    # merge results
+    
+    reads=kmcp-fracminhash
+    j=16
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v 'p={:}' \
+            'kmcp merge {p}.kmcp@*.tsv.gz -o {p}.kmcp.tsv.gz --log {p}.kmcp.tsv.gz.log'
+            
+
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes        
+    
+    X=taxdump/
+    # cat genbank-viral.kmcp/taxid.map gtdb.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    # cat genbank-viral.kmcp/name.map gtdb.kmcp/name.map refseq-fungi.kmcp/name.map > name.map
+    T=taxid.map
+    
+    for m in $(seq 1 5); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
+
 ## Centrifuge
 
     # --------------------------------------------------
     # using centrifuge database built with GTDB, Genbank-viral, Refseq-fungi
 
-    reads=centrifuge-pe
+    reads=centrifuge-se
     
     # prepare folder and files.
     mkdir -p $reads
@@ -259,7 +471,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
-    reads=centrifuge-pe    
+    reads=centrifuge-se    
     j=4
     J=40
     

@@ -28,7 +28,6 @@ var utilsCmd = &cobra.Command{
 	Use:   "utils",
 	Short: "Some utilities",
 	Long: `Some utilities
-
 `,
 }
 

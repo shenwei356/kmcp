@@ -95,7 +95,7 @@ or install using conda:
 |:-------------------------------------------------------------------------|:---------------------------------------------------------------|
 |[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketches) from FASTA/Q sequences               |
 |[index](https://bioinf.shenwei.me/kmcp/usage/#index)                      |Construct database from k-mer files                             |
-|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequence against a database                              |
+|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequences against a database                              |
 |[merge](https://bioinf.shenwei.me/kmcp/usage/#merge)                      |Merge search results from multiple databases                    |
 |[profile](https://bioinf.shenwei.me/kmcp/usage/#profile)                  |Generate taxonomic profile from search results                  |
 |[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
@@ -136,10 +136,10 @@ propose new functions or ask for help.
 
 [MIT License](https://github.com/shenwei356/kmcp/blob/master/LICENSE)
 
-## Acknowledgements
+## Acknowledgments
 
 - [Zhi-Luo Deng](https://dawnmy.github.io/CV/) (Helmholtz Centre for Infection Research, Germany)
-  gave many valuable advice on metagenomic profiling and benchmarking.
+  gave a lot of valuable advice on metagenomic profiling and benchmarking.
 - [Robert Clausecker](https://github.com/clausecker/) (Zuse Institute Berlin, Germany)
   wrote the high-performance vectorized positional popcount package 
   ([pospop](https://github.com/clausecker/pospop)) 

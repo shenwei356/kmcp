@@ -102,3 +102,37 @@ We use the files above to create centrifuge index.
 The path of database is:
 
     ~/ws/db/centrifuge/kmcp
+
+## Custom database for Metamaps
+
+https://github.com/DiltheyLab/MetaMaps/issues/5#issuecomment-414301437
+
+Preparing files:
+
+    genbank-viral/  gtdb/  refseq-fungi/  taxdump/ taxid.map
+    
+    $ tree refseq-fungi/ | head -n 3
+    refseq-fungi/
+    ├── GCF_000001985.1.fna
+    ├── GCF_000002495.2.fna
+    
+File list
+
+    fd fn?a$ genbank-viral/ gtdb/ refseq-fungi/ > files.tsv
+    
+    csvtk join -Ht -f '2;1' <(csvtk mutate -Ht -p '/(\w{3}_\d{9}\.\d+)' files.tsv) taxid.map \
+        | csvtk cut -Ht -f 3,1 \
+        > taxid2file.tsv
+        
+Build it!
+
+    memusg -t -s "perl $(which combineAndAnnotateReferences.pl) \
+        --inputFileList taxid2file.tsv \
+        --outputFile kmcp.fa \
+        --taxonomyInDirectory taxdump/ \
+        --taxonomyOutDirectory kmcp-taxdump " > metamaps.a.log 2>&1
+        
+        
+     memusg -t -s "perl $(which buildDB.pl) --DB kmcp \
+        --FASTAs kmcp.fa \
+        --taxonomy kmcp-taxdump " > metamaps.b.log 2>&1

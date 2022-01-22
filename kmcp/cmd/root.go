@@ -62,12 +62,58 @@ func init() {
 
 	defaultThreads := runtime.NumCPU()
 
-	RootCmd.PersistentFlags().IntP("threads", "j", defaultThreads, "number of CPUs to use")
+	RootCmd.PersistentFlags().IntP("threads", "j", defaultThreads,
+		formatFlagUsage("Number of CPUs cores to use."))
+
 	// RootCmd.PersistentFlags().BoolP("verbose", "", false, "print verbose information (recommended)")
-	RootCmd.PersistentFlags().BoolP("quiet", "q", false, "do not print any verbose information. you can write them to file with --log")
-	RootCmd.PersistentFlags().StringP("infile-list", "i", "", "file of input files list (one file per line), if given, they are appended to files from cli arguments")
-	RootCmd.PersistentFlags().StringP("log", "", "", "log file")
+
+	RootCmd.PersistentFlags().BoolP("quiet", "q", false,
+		formatFlagUsage("Do not print any verbose information. But you can write them to file with --log."))
+
+	RootCmd.PersistentFlags().StringP("infile-list", "i", "",
+		formatFlagUsage("File of input files list (one file per line). If given, they are appended to files from CLI arguments."))
+
+	RootCmd.PersistentFlags().StringP("log", "", "", formatFlagUsage("Log file."))
 
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	RootCmd.SetUsageTemplate(usageTemplate)
 }
+
+func formatFlagUsage(s string) string {
+	// return s
+	// return s + "\n"
+	// return "· " + s
+	// return "> " + s
+	return "► " + s
+	// return "▶ " + s
+	// return "| " + s
+	// return "  " + s
+}
+
+var usageTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsagesWrapped 110 | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsagesWrapped 110 | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`

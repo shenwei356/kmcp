@@ -910,32 +910,57 @@ func writeKmers(k int, codes []uint64, n uint64,
 func init() {
 	RootCmd.AddCommand(computeCmd)
 
-	computeCmd.Flags().StringP("in-dir", "I", "", `directory containing FASTA/Q files. directory symlinks are followed`)
-	computeCmd.Flags().StringP("file-regexp", "r", `\.(f[aq](st[aq])?|fna)(.gz)?$`, `regular expression for matching files in -I/--in-dir to compute, case ignored`)
+	computeCmd.Flags().StringP("in-dir", "I", "",
+		formatFlagUsage(`Directory containing FASTA/Q files. Directory symlinks are followed.`))
 
-	computeCmd.Flags().StringP("out-dir", "O", "", `output directory`)
-	computeCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
+	computeCmd.Flags().StringP("file-regexp", "r", `\.(f[aq](st[aq])?|fna)(.gz)?$`,
+		formatFlagUsage(`Regular expression for matching sequence files in -I/--in-dir, case ignored.`))
 
-	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, `k-mer size(s)`)
-	computeCmd.Flags().BoolP("circular", "", false, `input sequence is circular`)
+	computeCmd.Flags().StringP("out-dir", "O", "",
+		formatFlagUsage(`Output directory.`))
 
-	computeCmd.Flags().IntP("scale", "D", 1, `scale/down-sample factor`)
-	computeCmd.Flags().IntP("minimizer-w", "W", 0, `minimizer window size`)
-	computeCmd.Flags().IntP("syncmer-s", "S", 0, `closed syncmer length`)
+	computeCmd.Flags().BoolP("force", "", false,
+		formatFlagUsage(`Overwrite existed output directory.`))
+
+	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, formatFlagUsage(`K-mer size(s).`))
+
+	computeCmd.Flags().BoolP("circular", "", false,
+		formatFlagUsage(`Input sequences are circular.`))
+
+	computeCmd.Flags().IntP("scale", "D", 1,
+		formatFlagUsage(`Scale of the FracMinHash (Scaled MinHash), or down-sample factor for Syncmers and Minimizer.`))
+
+	computeCmd.Flags().IntP("minimizer-w", "W", 0,
+		formatFlagUsage(`Minimizer window size.`))
+
+	computeCmd.Flags().IntP("syncmer-s", "S", 0,
+		formatFlagUsage(`Length of the s-mer in Closed Syncmers.`))
 
 	// computeCmd.Flags().BoolP("exact-number", "e", false, `save exact number of unique k-mers for indexing (recommended)`)
 
-	computeCmd.Flags().BoolP("compress", "c", false, `output gzipped .unik files, it's slower and can saves little space`)
+	computeCmd.Flags().BoolP("compress", "c", false,
+		formatFlagUsage(`Output gzipped .unik files, it's slower and can save little space.`))
 
-	computeCmd.Flags().IntP("split-number", "n", 0, `fragment number, incompatible with -s/--split-size`)
-	computeCmd.Flags().IntP("split-size", "s", 0, `fragment size for splitting sequences, incompatible with -n/--split-number`)
-	computeCmd.Flags().IntP("split-overlap", "l", 0, `fragment overlap for splitting sequences`)
-	computeCmd.Flags().IntP("split-min-ref", "m", 1000, `only splitting sequences >= M bp`)
+	computeCmd.Flags().IntP("split-number", "n", 0,
+		formatFlagUsage(`Fragment number for splitting sequences, incompatible with -s/--split-size.`))
 
-	computeCmd.Flags().BoolP("by-seq", "", false, `compute k-mers (sketches) for every sequence, instead of whole file`)
+	computeCmd.Flags().IntP("split-size", "s", 0,
+		formatFlagUsage(`Fragment size for splitting sequences, incompatible with -n/--split-number.`))
 
-	computeCmd.Flags().StringP("ref-name-regexp", "N", `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`, `regular expression (must contains "(" and ")") for extracting reference name from file name`)
-	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{}, `list of regular expressions for filtering out sequences by header/name, case ignored`)
+	computeCmd.Flags().IntP("split-overlap", "l", 0,
+		formatFlagUsage(`Fragment overlap for splitting sequences.`))
+
+	computeCmd.Flags().IntP("split-min-ref", "m", 1000,
+		formatFlagUsage(`Only splitting sequences >= X bp.`))
+
+	computeCmd.Flags().BoolP("by-seq", "", false,
+		formatFlagUsage(`Compute k-mers (sketches) for every sequence, instead of the whole file.`))
+
+	computeCmd.Flags().StringP("ref-name-regexp", "N", `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`,
+		formatFlagUsage(`Regular expression (must contains "(" and ")") for extracting reference name from filename.`))
+
+	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{},
+		formatFlagUsage(`List of regular expressions for filtering out sequences by header/name, case ignored.`))
 }
 
 var reIgnoreCaseStr = "(?i)"

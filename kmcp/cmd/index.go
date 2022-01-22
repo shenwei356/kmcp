@@ -1386,29 +1386,56 @@ Performance tips:
 func init() {
 	RootCmd.AddCommand(indexCmd)
 
-	indexCmd.Flags().StringP("in-dir", "I", "", `directory containing .unik files. directory symlinks are followed`)
-	indexCmd.Flags().StringP("file-regexp", "", ".unik$", `regular expression for matching files in -I/--in-dir to index, case ignored`)
+	indexCmd.Flags().StringP("in-dir", "I", "",
+		formatFlagUsage(`Directory containing .unik files. Directory symlinks are followed.`))
 
-	indexCmd.Flags().StringP("out-dir", "O", "", `output directory. default: ${indir}.kmcp-db`)
-	indexCmd.Flags().StringP("alias", "a", "", `database alias/name, default: basename of --out-dir. you can also manually edit it in info file: ${outdir}/__db.yml`)
+	indexCmd.Flags().StringP("file-regexp", "", ".unik$",
+		formatFlagUsage(`Regular expression for matching files in -I/--in-dir, case ignored.`))
 
-	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3, `false positive rate of single bloom filter, range: (0, 1)`)
-	indexCmd.Flags().IntP("num-hash", "n", 1, `number of hashes of bloom filters`)
-	indexCmd.Flags().IntP("block-size", "b", 0, `block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)`)
-	indexCmd.Flags().StringP("block-sizeX-kmers-t", "x", "10M", `if k-mers of single .unik file exceeds this threshold, block size is changed to --block-sizeX. unit supported: K, M, G`)
-	indexCmd.Flags().IntP("block-sizeX", "X", 256, `if k-mers of single .unik file exceeds --block-sizeX-kmers-t, block size is changed to this value`)
-	indexCmd.Flags().StringP("block-size8-kmers-t", "8", "20M", `if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G`)
-	indexCmd.Flags().StringP("block-size1-kmers-t", "1", "200M", `if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G`)
+	indexCmd.Flags().StringP("out-dir", "O", "",
+		formatFlagUsage(`Output directory. (default: ${indir}.kmcp-db)`))
+
+	indexCmd.Flags().StringP("alias", "a", "",
+		formatFlagUsage(`Database alias/name. (default: basename of --out-dir). You can also manually edit it in info file: ${outdir}/__db.yml.`))
+
+	indexCmd.Flags().Float64P("false-positive-rate", "f", 0.3,
+		formatFlagUsage(`False positive rate of the bloom filters, range: (0, 1).`))
+
+	indexCmd.Flags().IntP("num-hash", "n", 1,
+		formatFlagUsage(`Number of hashes functions in bloom filters.`))
+
+	indexCmd.Flags().IntP("block-size", "b", 0,
+		formatFlagUsage(`Block size, better be multiple of 64 for large number of input files. (default: min(#.files/#theads, 8))`))
+
+	indexCmd.Flags().StringP("block-sizeX-kmers-t", "x", "10M",
+		formatFlagUsage(`If k-mers of single .unik file exceeds this threshold, block size is changed to --block-sizeX. Supported units: K, M, G.`))
+
+	indexCmd.Flags().IntP("block-sizeX", "X", 256,
+		formatFlagUsage(`If k-mers of single .unik file exceeds --block-sizeX-kmers-t, block size is changed to this value.`))
+
+	indexCmd.Flags().StringP("block-size8-kmers-t", "8", "20M",
+		formatFlagUsage(`If k-mers of single .unik file exceeds this threshold, block size is changed to 8. Supported units: K, M, G.`))
+
+	indexCmd.Flags().StringP("block-size1-kmers-t", "1", "200M",
+		formatFlagUsage(`If k-mers of single .unik file exceeds this threshold, an individual index is created for this file. Supported units: K, M, G.`))
+
+	// smaller big sizes is more important and brings extra speedup.
 	// indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
 
 	// indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)
 	// indexCmd.Flags().IntP("num-buckets", "B", 0, `[RAMBO] number of buckets per repitition, 0 for one set per bucket`)
 	// indexCmd.Flags().IntP("seed", "", 1, `[RAMBO] seed for randomly assigning names to buckets`)
 
-	indexCmd.Flags().BoolP("force", "", false, `overwrite output directory`)
-	indexCmd.Flags().IntP("max-open-files", "F", 256, `maximal number of opened files, please use a small value for hard disk drive storage`)
+	indexCmd.Flags().BoolP("force", "", false,
+		formatFlagUsage(`Overwrite existed output directory.`))
+
+	indexCmd.Flags().IntP("max-open-files", "F", 256,
+		formatFlagUsage(`Maximal number of opened files, please use a small value for hard disk drive storage.`))
+
 	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximal number of writing files, please use a small value for hard disk drive storage`)
-	indexCmd.Flags().BoolP("dry-run", "", false, `dry run, useful for adjusting parameters (recommended)`)
+
+	indexCmd.Flags().BoolP("dry-run", "", false,
+		formatFlagUsage(`Dry run, useful for adjusting parameters (highly recommended).`))
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block

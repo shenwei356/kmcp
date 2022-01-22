@@ -6,13 +6,13 @@ KMCP is a command-line tool consisting of several subcommands.
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
     Version: v0.7.0
-  Documents: https://shenwei356.github.io/kmcp
+  Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
 KMCP is a tool for metagenomic classification and profiling.
 
 KMCP can also be used for:
-  1. Fast sequence search from large scales of genomic datasets
+  1. Fast sequence search against large scales of genomic datasets
      as BIGSI and COBS do.
   2. Fast assembly/genome similarity estimation as Mash and sourmash do,
      by utilizing Minimizer, FracMinHash (Scaled MinHash), or Closed Syncmers.
@@ -32,12 +32,12 @@ Available Commands:
 
 Flags:
   -h, --help                 help for kmcp
-  -i, --infile-list string   file of input files list (one file per line), if given, they are appended to files from cli arguments
-      --log string           log file
-  -q, --quiet                do not print any verbose information. you can write them to file with --log
-  -j, --threads int          number of CPUs to use (default 16)
-
-Use "kmcp [command] --help" for more information about a command.
+  -i, --infile-list string   ► File of input files list (one file per line). If given, they are
+                             appended to files from CLI arguments.
+      --log string           ► Log file.
+  -q, --quiet                ► Do not print any verbose information. But you can write them to file
+                             with --log.
+  -j, --threads int          ► Number of CPUs cores to use. (default 16)
 
 ```
 
@@ -107,24 +107,31 @@ Usage:
   kmcp compute [flags]
 
 Flags:
-      --by-seq                    compute k-mers (sketches) for every sequence, instead of whole file
-      --circular                  input sequence is circular
-  -c, --compress                  output gzipped .unik files, it's slower and can saves little space
-  -r, --file-regexp string        regular expression for matching files in -I/--in-dir to compute, case ignored (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
-      --force                     overwrite output directory
+      --by-seq                    ► Compute k-mers (sketches) for every sequence, instead of the whole file.
+      --circular                  ► Input sequences are circular.
+  -c, --compress                  ► Output gzipped .unik files, it's slower and can save little space.
+  -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir, case
+                                  ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
+      --force                     ► Overwrite existed output directory.
   -h, --help                      help for compute
-  -I, --in-dir string             directory containing FASTA/Q files. directory symlinks are followed
-  -k, --kmer ints                 k-mer size(s) (default [21])
-  -W, --minimizer-w int           minimizer window size
-  -O, --out-dir string            output directory
-  -N, --ref-name-regexp string    regular expression (must contains "(" and ")") for extracting reference name from file name (default "(?i)(.+)\\.(f[aq](st[aq])?|fna)(.gz)?$")
-  -D, --scale int                 scale/down-sample factor (default 1)
-  -B, --seq-name-filter strings   list of regular expressions for filtering out sequences by header/name, case ignored
-  -m, --split-min-ref int         only splitting sequences >= M bp (default 1000)
-  -n, --split-number int          fragment number, incompatible with -s/--split-size
-  -l, --split-overlap int         fragment overlap for splitting sequences
-  -s, --split-size int            fragment size for splitting sequences, incompatible with -n/--split-number
-  -S, --syncmer-s int             closed syncmer length
+  -I, --in-dir string             ► Directory containing FASTA/Q files. Directory symlinks are followed.
+  -k, --kmer ints                 ► K-mer size(s). (default [21])
+  -W, --minimizer-w int           ► Minimizer window size.
+  -O, --out-dir string            ► Output directory.
+  -N, --ref-name-regexp string    ► Regular expression (must contains "(" and ")") for extracting
+                                  reference name from filename. (default
+                                  "(?i)(.+)\\.(f[aq](st[aq])?|fna)(.gz)?$")
+  -D, --scale int                 ► Scale of the FracMinHash (Scaled MinHash), or down-sample factor
+                                  for Syncmers and Minimizer. (default 1)
+  -B, --seq-name-filter strings   ► List of regular expressions for filtering out sequences by
+                                  header/name, case ignored.
+  -m, --split-min-ref int         ► Only splitting sequences >= X bp. (default 1000)
+  -n, --split-number int          ► Fragment number for splitting sequences, incompatible with
+                                  -s/--split-size.
+  -l, --split-overlap int         ► Fragment overlap for splitting sequences.
+  -s, --split-size int            ► Fragment size for splitting sequences, incompatible with
+                                  -n/--split-number.
+  -S, --syncmer-s int             ► Length of the s-mer in Closed Syncmers.
 
 ```
 
@@ -181,28 +188,39 @@ Usage:
   kmcp index [flags]
 
 Flags:
-  -a, --alias string                 database alias/name, default: basename of --out-dir. you can also manually edit it in info file: ${outdir}/__db.yml
-  -b, --block-size int               block size, better be multiple of 64 for large number of input files. default: min(#.files/#theads, 8)
-  -1, --block-size1-kmers-t string   if k-mers of single .unik file exceeds this threshold, an individual index is created for this file. unit supported: K, M, G (default "200M")
-  -8, --block-size8-kmers-t string   if k-mers of single .unik file exceeds this threshold, block size is changed to 8. unit supported: K, M, G (default "20M")
-  -X, --block-sizeX int              if k-mers of single .unik file exceeds --block-sizeX-kmers-t, block size is changed to this value (default 256)
-  -x, --block-sizeX-kmers-t string   if k-mers of single .unik file exceeds this threshold, block size is changed to --block-sizeX. unit supported: K, M, G (default "10M")
-      --dry-run                      dry run, useful for adjusting parameters (recommended)
-  -f, --false-positive-rate float    false positive rate of single bloom filter, range: (0, 1) (default 0.3)
-      --file-regexp string           regular expression for matching files in -I/--in-dir to index, case ignored (default ".unik$")
-      --force                        overwrite output directory
+  -a, --alias string                 ► Database alias/name. (default: basename of --out-dir). You can
+                                     also manually edit it in info file: ${outdir}/__db.yml.
+  -b, --block-size int               ► Block size, better be multiple of 64 for large number of input
+                                     files. (default: min(#.files/#theads, 8))
+  -1, --block-size1-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, an
+                                     individual index is created for this file. Supported units: K, M,
+                                     G. (default "200M")
+  -8, --block-size8-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, block
+                                     size is changed to 8. Supported units: K, M, G. (default "20M")
+  -X, --block-sizeX int              ► If k-mers of single .unik file exceeds --block-sizeX-kmers-t,
+                                     block size is changed to this value. (default 256)
+  -x, --block-sizeX-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, block
+                                     size is changed to --block-sizeX. Supported units: K, M, G.
+                                     (default "10M")
+      --dry-run                      ► Dry run, useful for adjusting parameters (highly recommended).
+  -f, --false-positive-rate float    ► False positive rate of the bloom filters, range: (0, 1).
+                                     (default 0.3)
+      --file-regexp string           ► Regular expression for matching files in -I/--in-dir, case
+                                     ignored. (default ".unik$")
+      --force                        ► Overwrite existed output directory.
   -h, --help                         help for index
-  -I, --in-dir string                directory containing .unik files. directory symlinks are followed
-  -F, --max-open-files int           maximal number of opened files, please use a small value for hard disk drive storage (default 256)
-  -n, --num-hash int                 number of hashes of bloom filters (default 1)
-  -O, --out-dir string               output directory. default: ${indir}.kmcp-db
+  -I, --in-dir string                ► Directory containing .unik files. Directory symlinks are followed.
+  -F, --max-open-files int           ► Maximal number of opened files, please use a small value for
+                                     hard disk drive storage. (default 256)
+  -n, --num-hash int                 ► Number of hashes functions in bloom filters. (default 1)
+  -O, --out-dir string               ► Output directory. (default: ${indir}.kmcp-db)
 
 ```
 
 ## search
 
 ```text
-Search sequence against a database
+Search sequences against a database
 
 Attentions:
   1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
@@ -251,29 +269,39 @@ Usage:
   kmcp search [flags]
 
 Flags:
-  -d, --db-dir string              database directory created by "kmcp index"
-  -D, --default-name-map           load ${db}/__name_mapping.tsv for mapping name first
-  -S, --do-not-sort                do not sort matches of a query
+  -d, --db-dir string              ► Database directory created by "kmcp index".
+  -D, --default-name-map           ► Load ${db}/__name_mapping.tsv for mapping name first.
+  -S, --do-not-sort                ► Do not sort matches of a query.
   -h, --help                       help for search
-  -n, --keep-top-scores int        keep matches with the top N score for a query, 0 for all
-  -K, --keep-unmatched             keep unmatched query sequence information
-  -u, --kmer-dedup-threshold int   remove duplicated kmers for a query with >= N k-mers (default 256)
-  -w, --load-whole-db              load all index files into memory, it's faster for small databases but needs more memory. please read "Index files loading modes" in "kmcp search -h"
-      --low-mem                    do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. please read "Index files loading modes" in "kmcp search -h"
-  -c, --min-kmers int              minimal number of matched k-mers (sketches) (default 30)
-  -t, --min-query-cov float        minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query (default 0.55)
-  -m, --min-query-len int          minimal query length (default 70)
-  -T, --min-target-cov float       minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target
-  -N, --name-map strings           tabular two-column file(s) mapping names to user-defined values
-  -H, --no-header-row              do not print header row
-  -o, --out-file string            out file, supports and recommends a ".gz" suffix ("-" for stdout) (default "-")
-      --query-id string            custom query Id when using the whole file as a query
-  -g, --query-whole-file           use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database
-  -1, --read1 string               (gzipped) read1 file
-  -2, --read2 string               (gzipped) read2 file
-  -s, --sort-by string             sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index) (default "qcov")
-      --try-se                     if paired-end reads have no hits, re-search with read1, if still fails, try read2
-  -G, --use-filename               use file name as query ID when using the whole file as a query
+  -n, --keep-top-scores int        ► Keep matches with the top N scores for a query, 0 for all.
+  -K, --keep-unmatched             ► Keep unmatched query sequence information.
+  -u, --kmer-dedup-threshold int   ► Remove duplicated kmers for a query with >= X k-mers. (default 256)
+  -w, --load-whole-db              ► Load all index files into memory, it's faster for small databases
+                                   but needs more memory. Please read "Index files loading modes" in
+                                   "kmcp search -h".
+      --low-mem                    ► Do not load all index files into memory nor use mmap, the
+                                   searching would be very very slow for a large number of queries.
+                                   Please read "Index files loading modes" in "kmcp search -h".
+  -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 30)
+  -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
+                                   unique k-mers of a query. (default 0.55)
+  -m, --min-query-len int          ► Minimal query length. (default 70)
+  -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
+                                   unique k-mers of a target.
+  -N, --name-map strings           ► Tabular two-column file(s) mapping names to user-defined values.
+  -H, --no-header-row              ► Do not print header row.
+  -o, --out-file string            ► Out file, supports and recommends a ".gz" suffix ("-" for
+                                   stdout). (default "-")
+      --query-id string            ► Custom query Id when using the whole file as a query.
+  -g, --query-whole-file           ► Use the whole file as a query, e.g., for genome similarity
+                                   estimation against k-mer sketch database.
+  -1, --read1 string               ► (Gzipped) read1 file.
+  -2, --read2 string               ► (Gzipped) read2 file.
+  -s, --sort-by string             ► Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index). (default
+                                   "qcov")
+      --try-se                     ► If paired-end reads have no hits, re-search with read1, if still
+                                   fails, try read2.
+  -G, --use-filename               ► Use file name as query ID when using the whole file as a query.
 
 ```
 
@@ -292,12 +320,14 @@ Usage:
   kmcp merge [flags]
 
 Flags:
-  -n, --field-hits int       field of hits (default 5)
-  -f, --field-queryIdx int   field of queryIdx (default 15)
+  -n, --field-hits int       ► Field of hits. (default 5)
+  -f, --field-queryIdx int   ► Field of queryIdx. (default 15)
   -h, --help                 help for merge
-  -H, --no-header-row        do not print header row
-  -o, --out-file string      out file, supports and recommends a ".gz" suffix ("-" for stdout) (default "-")
-  -s, --sort-by string       sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index) (default "qcov")
+  -H, --no-header-row        ► Do not print header row.
+  -o, --out-file string      ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
+                             (default "-")
+  -s, --sort-by string       ► Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index). (default "qcov")
+
 
 ```
 
@@ -388,39 +418,64 @@ Usage:
   kmcp profile [flags]
 
 Flags:
-  -B, --binning-result string         save extra binning result in CAMI report
-  -C, --cami-report string            save extra CAMI-like report
-      --chunk-size int                number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
-  -F, --filter-low-pct float          filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)
+  -B, --binning-result string         ► Save extra binning result in CAMI report.
+  -C, --cami-report string            ► Save extra CAMI-like report.
+      --chunk-size int                ► Number of lines to process for each thread, and 4 threads is
+                                      fast enough. Type "kmcp profile -h" for details. (default 5000)
+      --debug string                  ► Debug output file.
+  -F, --filter-low-pct float          ► Filter out predictions with the smallest relative abundances
+                                      summing up X%. Range: [0,100).
   -h, --help                          help for profile
-      --keep-main-match               only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)
-      --keep-perfect-match            only keep the perfect matches (qcov == 1) if there are
-  -n, --keep-top-qcovs int            keep matches with the top N qcovs for a query, 0 for all
-      --level string                  level to estimate abundance at. available values: species, strain/assembly (default "species")
-  -f, --max-fpr float                 maximal false positive rate of a read in search result (default 0.05)
-  -d, --max-frags-depth-stdev float   maximal standard deviation of relative depths of all fragments (default 2)
-  -R, --max-mismatch-err float        maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
-      --max-qcov-gap float            max qcov gap between adjacent matches (default 0.2)
-  -M, --metaphlan-report string       save extra metaphlan-like report
-  -D, --min-dreads-prop float         minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1) (default 0.05)
-  -p, --min-frags-fraction float      minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads (default 0.8)
-  -r, --min-frags-reads int           minimal number of reads for a reference fragment (default 50)
-  -U, --min-hic-ureads int            minimal number of high-confidence uniquely matched reads for a reference (default 5)
-  -P, --min-hic-ureads-prop float     minimal proportion of high-confidence uniquely matched reads (default 0.1)
-  -H, --min-hic-ureads-qcov float     minimal query coverage of high-confidence uniquely matched reads (default 0.75)
-  -t, --min-query-cov float           minimal query coverage of a read in search result (default 0.55)
-  -u, --min-uniq-reads int            minimal number of uniquely matched reads for a reference (default 20)
-  -m, --mode int                      profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision) (default 3)
-  -N, --name-map strings              tabular two-column file(s) mapping reference IDs to reference names
-      --norm-abund string             method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max (default "mean")
-  -o, --out-prefix string             out file prefix ("-" for stdout) (default "-")
-      --rank-prefix strings           prefixes of taxon name in certain ranks, used with --metaphlan-report  (default [k__,p__,c__,o__,f__,g__,s__,t__])
-  -s, --sample-id string              sample ID in result file
-  -S, --separator string              separator of TaxIds and taxonomy names (default ";")
-      --show-rank strings             only show TaxIds and names of these ranks (default [superkingdom,phylum,class,order,family,genus,species,strain])
-  -X, --taxdump string                directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
-  -T, --taxid-map strings             tabular two-column file(s) mapping reference IDs to TaxIds
-      --taxonomy-id string            taxonomy ID in result file
+      --keep-main-match               ► Only keep main matches, abandon matches with sharply decreased
+                                      qcov (> --max-qcov-gap).
+      --keep-perfect-match            ► Only keep the perfect matches (qcov == 1) if there are.
+  -n, --keep-top-qcovs int            ► Keep matches with the top N qcovs for a query, 0 for all.
+      --level string                  ► Level to estimate abundance at. Available values: species,
+                                      strain/assembly. (default "species")
+  -f, --max-fpr float                 ► Maximal false positive rate of a read in search result.
+                                      (default 0.05)
+  -d, --max-frags-depth-stdev float   ► Maximal standard deviation of relative depths of all
+                                      fragments. (default 2)
+  -R, --max-mismatch-err float        ► Maximal error rate of a read being matched to a wrong
+                                      reference, for determing the right reference for ambiguous reads.
+                                      Range: (0, 1). (default 0.05)
+      --max-qcov-gap float            ► Max qcov gap between adjacent matches. (default 0.2)
+  -M, --metaphlan-report string       ► Save extra metaphlan-like report.
+  -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
+                                      reference for ambiguous reads. Range: (0, 1). (default 0.05)
+  -p, --min-frags-fraction float      ► Minimal fraction of matched reference fragments with reads >=
+                                      -r/--min-frags-reads. (default 0.8)
+  -r, --min-frags-reads int           ► Minimal number of reads for a reference fragment. (default 50)
+  -U, --min-hic-ureads int            ► Minimal number of high-confidence uniquely matched reads for a
+                                      reference. (default 5)
+  -P, --min-hic-ureads-prop float     ► Minimal proportion of high-confidence uniquely matched reads.
+                                      (default 0.1)
+  -H, --min-hic-ureads-qcov float     ► Minimal query coverage of high-confidence uniquely matched
+                                      reads. (default 0.75)
+  -t, --min-query-cov float           ► Minimal query coverage of a read in search result. (default 0.55)
+  -u, --min-uniq-reads int            ► Minimal number of uniquely matched reads for a reference.
+                                      (default 20)
+  -m, --mode int                      ► Profiling mode, type "kmcp profile -h" for details. available
+                                      values: 0 (for pathogen detection), 1 (higherrecall), 2 (high
+                                      recall), 3 (default), 4 (high precision), 5 (higher precision).
+                                      (default 3)
+  -N, --name-map strings              ► Tabular two-column file(s) mapping reference IDs to reference
+                                      names.
+      --no-amb-corr                   ► Do not correct ambiguous reads (just for benchmark).
+      --norm-abund string             ► Method for normalize abundance of a reference by the
+                                      mean/min/max abundance in all fragments, available values: mean,
+                                      min, max. (default "mean")
+  -o, --out-prefix string             ► Out file prefix ("-" for stdout). (default "-")
+      --rank-prefix strings           ► Prefixes of taxon name in certain ranks, used with
+                                      --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
+  -s, --sample-id string              ► Sample ID in result file.
+  -S, --separator string              ► Separator of TaxIds and taxonomy names. (default ";")
+      --show-rank strings             ► Only show TaxIds and names of these ranks. (default
+                                      [superkingdom,phylum,class,order,family,genus,species,strain])
+  -X, --taxdump string                ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp,
+                                      optional with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings             ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+      --taxonomy-id string            ► Taxonomy ID in result file.
 
 ```
 
@@ -459,15 +514,18 @@ Usage:
   kmcp utils filter [flags]
 
 Flags:
-      --chunk-size int        number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
+      --chunk-size int        ► Number of lines to process for each thread, and 4 threads is fast
+                              enough. Type "kmcp profile -h" for details. (default 5000)
   -h, --help                  help for filter
-      --level string          level to filter. available values: species, strain/assembly (default "species")
-  -f, --max-fpr float         maximal false positive rate of a read in search result (default 0.05)
-  -t, --min-query-cov float   minimal query coverage of a read in search result (default 0.55)
-  -H, --no-header-row         do not print header row
-  -o, --out-prefix string     out file prefix ("-" for stdout) (default "-")
-  -X, --taxdump string        directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp
-  -T, --taxid-map strings     tabular two-column file(s) mapping reference IDs to TaxIds
+      --level string          ► Level to filter. available values: species, strain/assembly. (default
+                              "species")
+  -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
+  -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
+  -H, --no-header-row         ► Do not print header row.
+  -o, --out-prefix string     ► Out file prefix ("-" for stdout). (default "-")
+  -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
+                              with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
 
 ```
 
@@ -480,10 +538,10 @@ Usage:
   kmcp utils index-info [flags]
 
 Flags:
-  -a, --all                 all information
-  -b, --basename            only output basenames of files
+  -a, --all                 ► Show all information.
+  -b, --basename            ► Only output basenames of files.
   -h, --help                help for index-info
-  -o, --out-prefix string   out file prefix ("-" for stdout) (default "-")
+  -o, --out-prefix string   ► Out file prefix ("-" for stdout). (default "-")
 
 ```
 
@@ -527,17 +585,21 @@ Usage:
   kmcp utils merge-regions [flags]
 
 Flags:
-      --chunk-size int         number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details (default 5000)
+      --chunk-size int         ► Number of lines to process for each thread, and 4 threads is fast
+                               enough. Type "kmcp profile -h" for details. (default 5000)
   -h, --help                   help for merge-regions
-  -I, --ignore-type            merge species and assembly-specific regions
-  -f, --max-fpr float          maximal false positive rate of a read in search result (default 0.05)
-  -g, --max-gap int            maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging
-  -l, --min-overlap int        minimal overlap of two adjacent regions, recommend K-1 (default 1)
-  -t, --min-query-cov float    minimal query coverage of a read in search result (default 0.55)
-  -a, --name-assembly string   name of assembly-specific regions (default "assembly-specific")
-  -s, --name-species string    name of species-specific regions (default "species-specific")
-  -o, --out-prefix string      out file prefix ("-" for stdout) (default "-")
-  -r, --regexp string          regular expression for extract reference name and query locations (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
+  -I, --ignore-type            ► Merge species and assembly-specific regions.
+  -f, --max-fpr float          ► Maximal false positive rate of a read in search result. (default 0.05)
+  -g, --max-gap int            ► Maximal distance of starting positions of two adjacent regions, 0 for
+                               no limitation, 1 for no merging.
+  -l, --min-overlap int        ► Minimal overlap of two adjacent regions, recommend K-1. (default 1)
+  -t, --min-query-cov float    ► Minimal query coverage of a read in search result. (default 0.55)
+  -a, --name-assembly string   ► Name of assembly-specific regions. (default "assembly-specific")
+  -s, --name-species string    ► Name of species-specific regions. (default "species-specific")
+  -o, --out-prefix string      ► Out file prefix ("-" for stdout). (default "-")
+  -r, --regexp string          ► Regular expression for extract reference name and query locations.
+                               (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
+
 ```
 
 ## unik-info
@@ -553,14 +615,14 @@ Usage:
   kmcp utils unik-info [flags]
 
 Flags:
-  -a, --all                   all information, including number of k-mers
-  -b, --basename              only output basename of files
+  -a, --all                   ► All information, including the number of k-mers.
+  -b, --basename              ► Only output basename of files.
   -h, --help                  help for unik-info
-  -o, --out-file string       out file ("-" for stdout, suffix .gz for gzipped out) (default "-")
-  -e, --skip-err              skip error, only show warning message
-      --symbol-false string   smybol for false (default "✕")
-      --symbol-true string    smybol for true (default "✓")
-  -T, --tabular               output in machine-friendly tabular format
+  -o, --out-file string       ► Out file ("-" for stdout, suffix .gz for gzipped out.) (default "-")
+  -e, --skip-err              ► Skip error, only show warning message.
+      --symbol-false string   ► Smybol for false. (default "✕")
+      --symbol-true string    ► Smybol for true. (default "✓")
+  -T, --tabular               ► Output in machine-friendly tabular format.
 
 ```
 

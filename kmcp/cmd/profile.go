@@ -2441,65 +2441,112 @@ Taxonomic binning formats:
 func init() {
 	RootCmd.AddCommand(profileCmd)
 
-	profileCmd.Flags().IntP("chunk-size", "", 5000, `number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details`)
+	profileCmd.Flags().IntP("chunk-size", "", 5000,
+		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
 
-	profileCmd.Flags().StringP("out-prefix", "o", "-", `out file prefix ("-" for stdout)`)
+	profileCmd.Flags().StringP("out-prefix", "o", "-",
+		formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.05, `maximal false positive rate of a read in search result`)
-	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage of a read in search result`)
-	profileCmd.Flags().IntP("keep-top-qcovs", "n", 0, `keep matches with the top N qcovs for a query, 0 for all`)
-	profileCmd.Flags().BoolP("keep-perfect-match", "", false, `only keep the perfect matches (qcov == 1) if there are`)
-	profileCmd.Flags().BoolP("keep-main-match", "", false, `only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap)`)
-	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.2, `max qcov gap between adjacent matches`)
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.05,
+		formatFlagUsage(`Maximal false positive rate of a read in search result.`))
+
+	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55,
+		formatFlagUsage(`Minimal query coverage of a read in search result.`))
+
+	profileCmd.Flags().IntP("keep-top-qcovs", "n", 0,
+		formatFlagUsage(`Keep matches with the top N qcovs for a query, 0 for all.`))
+
+	profileCmd.Flags().BoolP("keep-perfect-match", "", false,
+		formatFlagUsage(`Only keep the perfect matches (qcov == 1) if there are.`))
+
+	profileCmd.Flags().BoolP("keep-main-match", "", false,
+		formatFlagUsage(`Only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap).`))
+
+	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.2,
+		formatFlagUsage(`Max qcov gap between adjacent matches.`))
 
 	// for matches against a reference
-	profileCmd.Flags().IntP("min-frags-reads", "r", 50, `minimal number of reads for a reference fragment`)
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 20, `minimal number of uniquely matched reads for a reference`)
-	profileCmd.Flags().Float64P("min-frags-fraction", "p", 0.8, `minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads`)
-	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2, `maximal standard deviation of relative depths of all fragments`)
+	profileCmd.Flags().IntP("min-frags-reads", "r", 50,
+		formatFlagUsage(`Minimal number of reads for a reference fragment.`))
 
-	profileCmd.Flags().IntP("min-hic-ureads", "U", 5, `minimal number of high-confidence uniquely matched reads for a reference`)
-	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75, `minimal query coverage of high-confidence uniquely matched reads`)
-	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1, `minimal proportion of high-confidence uniquely matched reads`)
+	profileCmd.Flags().IntP("min-uniq-reads", "u", 20,
+		formatFlagUsage(`Minimal number of uniquely matched reads for a reference.`))
+
+	profileCmd.Flags().Float64P("min-frags-fraction", "p", 0.8,
+		formatFlagUsage(`Minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads.`))
+
+	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2,
+		formatFlagUsage(`Maximal standard deviation of relative depths of all fragments.`))
+
+	profileCmd.Flags().IntP("min-hic-ureads", "U", 5,
+		formatFlagUsage(`Minimal number of high-confidence uniquely matched reads for a reference.`))
+
+	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75,
+		formatFlagUsage(`Minimal query coverage of high-confidence uniquely matched reads.`))
+
+	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1,
+		formatFlagUsage(`Minimal proportion of high-confidence uniquely matched reads.`))
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
-	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05, `minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1)`)
-	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05, `maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1)`)
+	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05,
+		formatFlagUsage(`Minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1).`))
+
+	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05,
+		formatFlagUsage(`Maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1).`))
 
 	// name mapping
-	profileCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping reference IDs to reference names`)
+	profileCmd.Flags().StringSliceP("name-map", "N", []string{},
+		formatFlagUsage(`Tabular two-column file(s) mapping reference IDs to reference names.`))
 
 	// taxonomy
-	profileCmd.Flags().StringSliceP("taxid-map", "T", []string{}, `tabular two-column file(s) mapping reference IDs to TaxIds`)
-	profileCmd.Flags().StringP("taxdump", "X", "", `directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp`)
-	profileCmd.Flags().StringP("separator", "S", ";", `separator of TaxIds and taxonomy names`)
-	profileCmd.Flags().StringSliceP("show-rank", "", []string{"superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"}, "only show TaxIds and names of these ranks")
-	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"}, "prefixes of taxon name in certain ranks, used with --metaphlan-report ")
+	profileCmd.Flags().StringSliceP("taxid-map", "T", []string{},
+		formatFlagUsage(`Tabular two-column file(s) mapping reference IDs to TaxIds.`))
+
+	profileCmd.Flags().StringP("taxdump", "X", "",
+		formatFlagUsage(`Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional with merged.dmp and delnodes.dmp.`))
+
+	profileCmd.Flags().StringP("separator", "S", ";",
+		formatFlagUsage(`Separator of TaxIds and taxonomy names.`))
+
+	profileCmd.Flags().StringSliceP("show-rank", "", []string{"superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"},
+		formatFlagUsage("Only show TaxIds and names of these ranks."))
+
+	profileCmd.Flags().StringSliceP("rank-prefix", "", []string{"k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__"},
+		formatFlagUsage("Prefixes of taxon name in certain ranks, used with --metaphlan-report."))
 
 	// other output formats
-	profileCmd.Flags().StringP("sample-id", "s", "", `sample ID in result file`)
-	profileCmd.Flags().StringP("taxonomy-id", "", "", `taxonomy ID in result file`)
-	profileCmd.Flags().StringP("metaphlan-report", "M", "", `save extra metaphlan-like report`)
-	profileCmd.Flags().StringP("cami-report", "C", "", `save extra CAMI-like report`)
-	profileCmd.Flags().StringP("binning-result", "B", "", `save extra binning result in CAMI report`)
+	profileCmd.Flags().StringP("sample-id", "s", "", formatFlagUsage(`Sample ID in result file.`))
 
-	profileCmd.Flags().Float64P("filter-low-pct", "F", 0, `filter out predictions with the smallest relative abundances summing up N%. Range: [0,100)`)
+	profileCmd.Flags().StringP("taxonomy-id", "", "", formatFlagUsage(`Taxonomy ID in result file.`))
+
+	profileCmd.Flags().StringP("metaphlan-report", "M", "", formatFlagUsage(`Save extra metaphlan-like report.`))
+
+	profileCmd.Flags().StringP("cami-report", "C", "", formatFlagUsage(`Save extra CAMI-like report.`))
+
+	profileCmd.Flags().StringP("binning-result", "B", "", formatFlagUsage(`Save extra binning result in CAMI report.`))
+
+	profileCmd.Flags().Float64P("filter-low-pct", "F", 0,
+		formatFlagUsage(`Filter out predictions with the smallest relative abundances summing up X%. Range: [0,100).`))
 
 	// abundance
-	profileCmd.Flags().StringP("norm-abund", "", "mean", `method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max`)
+	profileCmd.Flags().StringP("norm-abund", "", "mean",
+		formatFlagUsage(`Method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max.`))
 
-	profileCmd.Flags().StringP("level", "", "species", `level to estimate abundance at. available values: species, strain/assembly`)
+	profileCmd.Flags().StringP("level", "", "species",
+		formatFlagUsage(`Level to estimate abundance at. Available values: species, strain/assembly.`))
 
 	// not used
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
 
 	// debug
-	profileCmd.Flags().StringP("debug", "", "", `debug output file`)
-	profileCmd.Flags().BoolP("no-amb-corr", "", false, `do not correct ambiguous reads (just for benchmark)`)
+	profileCmd.Flags().StringP("debug", "", "", formatFlagUsage(`Debug output file.`))
+
+	profileCmd.Flags().BoolP("no-amb-corr", "", false, formatFlagUsage(`Do not correct ambiguous reads (just for benchmark).`))
 
 	// modes
-	profileCmd.Flags().IntP("mode", "m", 3, `profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision)`)
+	profileCmd.Flags().IntP("mode", "m", 3,
+		formatFlagUsage(`Profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision).`))
 
 }
 

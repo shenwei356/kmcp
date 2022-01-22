@@ -42,8 +42,8 @@ import (
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "Search sequence against a database",
-	Long: `Search sequence against a database
+	Short: "Search sequences against a database",
+	Long: `Search sequences against a database
 
 Attentions:
   1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
@@ -946,42 +946,73 @@ Performance tips:
 func init() {
 	RootCmd.AddCommand(searchCmd)
 
-	searchCmd.Flags().StringP("read1", "1", "", "(gzipped) read1 file")
-	searchCmd.Flags().StringP("read2", "2", "", "(gzipped) read2 file")
+	searchCmd.Flags().StringP("read1", "1", "", formatFlagUsage("(Gzipped) read1 file."))
+
+	searchCmd.Flags().StringP("read2", "2", "", formatFlagUsage("(Gzipped) read2 file."))
+
+	searchCmd.Flags().BoolP("try-se", "", false,
+		formatFlagUsage(`If paired-end reads have no hits, re-search with read1, if still fails, try read2.`))
 
 	// database option
-	searchCmd.Flags().StringP("db-dir", "d", "", `database directory created by "kmcp index"`)
-	searchCmd.Flags().BoolP("load-whole-db", "w", false, `load all index files into memory, it's faster for small databases but needs more memory. please read "Index files loading modes" in "kmcp search -h"`)
-	searchCmd.Flags().BoolP("low-mem", "", false, `do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. please read "Index files loading modes" in "kmcp search -h"`)
+	searchCmd.Flags().StringP("db-dir", "d", "",
+		formatFlagUsage(`Database directory created by "kmcp index".`))
+
+	searchCmd.Flags().BoolP("load-whole-db", "w", false,
+		formatFlagUsage(`Load all index files into memory, it's faster for small databases but needs more memory. Please read "Index files loading modes" in "kmcp search -h".`))
+
+	searchCmd.Flags().BoolP("low-mem", "", false,
+		formatFlagUsage(`Do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. Please read "Index files loading modes" in "kmcp search -h".`))
 
 	// query option
-	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256, `remove duplicated kmers for a query with >= N k-mers`)
-	searchCmd.Flags().BoolP("query-whole-file", "g", false, `use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database`)
-	searchCmd.Flags().BoolP("use-filename", "G", false, `use file name as query ID when using the whole file as a query`)
-	searchCmd.Flags().StringP("query-id", "", "", `custom query Id when using the whole file as a query`)
+	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256,
+		formatFlagUsage(`Remove duplicated kmers for a query with >= X k-mers.`))
 
-	searchCmd.Flags().IntP("min-kmers", "c", 30, `minimal number of matched k-mers (sketches)`)
-	searchCmd.Flags().IntP("min-query-len", "m", 70, `minimal query length`)
-	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55, `minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query`)
-	searchCmd.Flags().Float64P("min-target-cov", "T", 0, `minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target`)
+	searchCmd.Flags().BoolP("query-whole-file", "g", false,
+		formatFlagUsage(`Use the whole file as a query, e.g., for genome similarity estimation against k-mer sketch database.`))
+
+	searchCmd.Flags().BoolP("use-filename", "G", false,
+		formatFlagUsage(`Use file name as query ID when using the whole file as a query.`))
+
+	searchCmd.Flags().StringP("query-id", "", "",
+		formatFlagUsage(`Custom query Id when using the whole file as a query.`))
+
+	searchCmd.Flags().IntP("min-kmers", "c", 30, formatFlagUsage(`Minimal number of matched k-mers (sketches).`))
+
+	searchCmd.Flags().IntP("min-query-len", "m", 70, formatFlagUsage(`Minimal query length.`))
+
+	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55,
+		formatFlagUsage(`Minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query.`))
+
+	searchCmd.Flags().Float64P("min-target-cov", "T", 0,
+		formatFlagUsage(`Minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target.`))
 
 	// output
-	searchCmd.Flags().StringP("out-file", "o", "-", `out file, supports and recommends a ".gz" suffix ("-" for stdout)`)
-	searchCmd.Flags().StringSliceP("name-map", "N", []string{}, `tabular two-column file(s) mapping names to user-defined values`)
-	searchCmd.Flags().BoolP("default-name-map", "D", false, `load ${db}/__name_mapping.tsv for mapping name first`)
-	searchCmd.Flags().BoolP("keep-unmatched", "K", false, `keep unmatched query sequence information`)
+	searchCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))
+
+	searchCmd.Flags().StringSliceP("name-map", "N", []string{}, formatFlagUsage(`Tabular two-column file(s) mapping names to user-defined values.`))
+
+	searchCmd.Flags().BoolP("default-name-map", "D", false, formatFlagUsage(`Load ${db}/__name_mapping.tsv for mapping name first.`))
+
+	searchCmd.Flags().BoolP("keep-unmatched", "K", false, formatFlagUsage(`Keep unmatched query sequence information.`))
+
 	// making it default
 	// searchCmd.Flags().BoolP("keep-order", "k", false, `keep results in order of input sequences`)
 	// do not use
 	// searchCmd.Flags().IntP("keep-top", "n", 0, `keep top N hits, 0 for all`)
-	searchCmd.Flags().IntP("keep-top-scores", "n", 0, `keep matches with the top N score for a query, 0 for all`)
-	searchCmd.Flags().BoolP("no-header-row", "H", false, `do not print header row`)
-	searchCmd.Flags().StringP("sort-by", "s", "qcov", `sort hits by "qcov" (Containment Index), "tcov" or "jacc" (Jaccard Index)`)
-	searchCmd.Flags().BoolP("do-not-sort", "S", false, `do not sort matches of a query`)
+
+	searchCmd.Flags().IntP("keep-top-scores", "n", 0,
+		formatFlagUsage(`Keep matches with the top N scores for a query, 0 for all.`))
+
+	searchCmd.Flags().BoolP("no-header-row", "H", false,
+		formatFlagUsage(`Do not print header row.`))
+
+	searchCmd.Flags().StringP("sort-by", "s", "qcov",
+		formatFlagUsage(`Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index).`))
+
+	searchCmd.Flags().BoolP("do-not-sort", "S", false,
+		formatFlagUsage(`Do not sort matches of a query.`))
 	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
 
-	// making it default
-	searchCmd.Flags().BoolP("try-se", "", false, `if paired-end reads have no hits, re-search with read1, if still fails, try read2`)
 }
 
 func cloneFastx(sequence *seq.Seq) *seq.Seq {
