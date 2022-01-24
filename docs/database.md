@@ -2,7 +2,10 @@
 
 ## Prebuilt databases
 
-All prebuilt database are available at [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) (for global users) and [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) (for Chinese users, [a command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is recommended).
+All prebuilt database are available at:
+
+- [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) for global users.
+- [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) for Chinese users, [a command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is recommended.
 
 **Hardware requirements**
 
@@ -1263,7 +1266,7 @@ and have improved the indexing and searching speed
 1. Number of blocks (`.uniki` files) better be smaller than or equal
    to number of CPU cores for faster searching speed. 
    **We can set `-j/--threads` to control the blocks number**.
-   When more threads (>= 1.5 * #blocks) are given, extra workers are
+   When more threads (>= 1.3 * #blocks) are given, extra workers are
    automatically created.
 2. `#threads` files are simultaneously opened, and the max number
     of opened files is limited by the flag `-F/--max-open-files`.

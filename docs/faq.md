@@ -27,9 +27,9 @@ of sensitivity. `k = 21` is recommended for metagenomic profiling.
 KMCP builds database very fast,
 you can eigher rebuilt the database after adding new genomes,
 or create a separate database with the new genomes,
-search against these databases, and merge the results.
+search against these databases, and [merge](/usage/#merge) the results.
 
-## unexpected EOF error
+## Unexpected EOF error
 
 Some files could corrupt during downloading, we recommend checking
 sequence file integrity using seqkit (`gzip -t` failed for some files in

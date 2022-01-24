@@ -26,7 +26,7 @@ Database size and building time:
 |building time  | 29m:55s  | 24min52s|
 |temporary files| 160.76GB | 1.19TB  |
 
-Searching with bacterial genomes or short reads (~200K reads).
+Searching with bacterial genomes or short reads (~1M reads).
 
 ## KMCP vs Mash and Sourmash
 

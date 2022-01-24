@@ -4,6 +4,7 @@ library(dplyr)
 library(scales)
 library(ggthemes)
 library(cowplot)
+library(ggbeeswarm)
 
 theme1 <- theme_bw() +
     theme(
@@ -45,13 +46,15 @@ colors <- colorblind_pal()(n+1)[2:(n+1)]
 p1 <- ggplot(df,
             aes(app, time, color = app)) +
     geom_boxplot(width = 0.6) + 
-    geom_jitter(width = 0.2) +
-    geom_point(size = 1.2) +
+    # geom_jitter(width = 0.2) +
+    # geom_point(size = 1.2) +
+    geom_quasirandom(size = 1.5) + 
     coord_flip() +
     facet_grid(. ~ group, scales = "free_x") + 
     xlab(NULL) +
-    ylab('time (second)') +
+    ylab('Time (second)') +
     expand_limits(y = 0) + 
+    scale_y_continuous(expand = c(0, 0)) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",
@@ -73,13 +76,15 @@ colors <- colorblind_pal()(n+1)[2:(n+1)]
 p2 <- ggplot(df2,
             aes(app, time, color = app)) +
     geom_boxplot(width = 0.6) + 
-    geom_jitter(width = 0.2) +
-    geom_point(size = 1.2) +
+    # geom_jitter(width = 0.2) +
+    # geom_point(size = 1.2) +
+    geom_quasirandom(size = 1.5) + 
     coord_flip() +
     facet_grid(. ~ group, scales = "free_x") + 
     xlab(NULL) +
-    ylab('time (second)') +
+    ylab('Time (second)') +
     expand_limits(y = 0) + 
+    scale_y_continuous(expand = c(0, 0)) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",

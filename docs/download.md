@@ -3,6 +3,16 @@
 KMCP is implemented in [Go](https://golang.org/) programming language,
 statically-linked executable binary files are [freely available](https://github.com/shenwei356/kmcp/releases).
 
+### SIMD instructions support
+
+SIMD extensions including `AVX512`, `AVX2`, `SSE2` are sequentially detected and used
+in two packages for better searching performance.
+
+- [pand](https://github.com/shenwei356/pand),
+  for accelerating searching on databases constructed with multiple hash functions.
+- [pospop](https://github.com/clausecker/pospop/tree/677120eb417c111be2b18c5c16ac5228a094306d),
+  for batch counting matched k-mers in bloom filters.
+
 ## Current Version
 
 - [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0) - 2021-11-11
