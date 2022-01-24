@@ -38,16 +38,6 @@
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 
-|          |Database size (GB)|Building time|Building memory (GB)|
-|:--------:|:----------------:|:-----------:|:------------------:|
-|KMCP      |66                |21 m         |14                  |
-|Kraken2   |300               |5 h 23 m     |255                 |
-|Bracken2  |4                 |4 h 45 m     |258                 |
-|Centrifuge|97                |44 h 35m     |522                 |
-|MetaPhlAn3|3                 |/            |/                   |
-|mOTUs3    |8                 |/            |/                   |
-
-
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
 
@@ -114,5 +104,15 @@ including the gold-standard profiles.
 <img src="/benchmark/gu.jpg" alt="" width="700"/>
 
 ## Analysis time and storage requirement
+
+
+|          |Database size (GB)|Building time|Building memory (GB)|
+|:--------:|:----------------:|:-----------:|:------------------:|
+|KMCP      |66                |21 m         |14                  |
+|Kraken2   |300               |5 h 23 m     |255                 |
+|Bracken2  |4                 |4 h 45 m     |258                 |
+|Centrifuge|97                |44 h 35m     |522                 |
+|MetaPhlAn3|3                 |/            |/                   |
+|mOTUs3    |8                 |/            |/                   |
 
 <img src="/benchmark/benchmark.jpg" alt="" width="600"/>

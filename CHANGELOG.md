@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.7.0 - 2022-02-01
+### v0.7.0 - 2022-01-24
 
 - commands:
     - new command `utils filter`: Filter search results and find species-specific queries.

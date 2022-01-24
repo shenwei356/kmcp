@@ -1,4 +1,5 @@
-# KMCP - K-mer-based Metagenomic Classification and Profiling
+# KMCP: accurate metagenomic profiling of both prokaryotic and viral organisms by pseudo alignment
+
 
 ![](kmcp-logo.png)
 
@@ -18,7 +19,7 @@ sensitivity and specificity than other k-mer-based tools
 KMCP can be used for fast sequence search against large scales of genomic dataset
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
-bringing smaller index size and much faster searching speed (4x-10x faster than COBS)
+bringing a smaller index size and much faster searching speed (4x-10x faster than COBS)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
  
 ### 3. Fast genome similarity estimation
@@ -50,13 +51,13 @@ KMCP is 4x-7x faster than Mash/Sourmash
 - **Scalable searching**. Searching results against multiple databases can be fast merged.
     This brings many benefits:
     - There's no need to re-built the database with newly added reference genomes. 
-    - HPC cluster could accelerate searching with each computation node hosting a database built with a part of reference genomes.
+    - **HPC cluster could linearly accelerate searching** with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
 - **Accurate taxonomic profiling**. 
     - Some k-mer based taxonomic profilers suffers from high false positive rates,
       while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
     - Except for archaea, and bacteria, KMCP performed well on virus/phages.
-    - Preset five modes for multiple scenarios.
+    - Preset six modes for multiple scenarios.
     - Supports CAMI and MetaPhlAn profiling format.
     
 <hr/>
@@ -65,7 +66,7 @@ KMCP is 4x-7x faster than Mash/Sourmash
 
 <hr/>
 
-## Documents and resources
+## Documents
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Databases](https://bioinf.shenwei.me/kmcp/database)

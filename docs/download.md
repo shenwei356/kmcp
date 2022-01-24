@@ -15,8 +15,7 @@ in two packages for better searching performance.
 
 ## Current Version
 
-- [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0) - 2021-11-11
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0) - 2021-01-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
 
 ### Links
 
@@ -87,6 +86,48 @@ fish:
     kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 ## Release History
+
+### [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0) - 2022-01-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+
+- commands:
+    - new command `utils filter`: Filter search results and find species-specific queries.
+    - new command `utils merge-regions`: Merge species/assembly-specific regions.
+    - rename `info` to `utils index-info`.
+- `compute`:
+    - skip k-mer containing Ns.
+    - when splitting genome into fragments, sequences are concatenated with k-1 'N's
+     instead of directly concatenation.
+     It eliminates fake k-mers at the concatenation position.
+    - set default value for flag `-N/--ref-name-regexp`: `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`.
+    - fix a rare bug when splitting FASTQ files.
+- `search`:
+    - support searching with paired-end reads which has a higher specificity and a lower sensitivity.
+      A flag `--try-se` is added for search read1/read2 when the paired end reads have no hits.
+    - fix matches order of a query.
+    - fix queries with many Ns.
+    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
+    - change default value of flag `-n/--keep-top-scores` from `5` to `0`, i.e., keep all matches by default.
+    - new flag `-w/--load-whole-db`: load all index files into memory.
+    - 10-25% faster.
+    - better log.
+- `merge`:
+    - fix adding up `hits`.
+    - fix bug of incorrect order, reduce memory usage.
+    - support one input file.
+- `profile`:
+    - change analysis workflow, using 4 stages.
+    - output format change: new column `coverage`, `fragsRelDepth` and `fragsRelDepthStd`.
+    - change default file extension of binning file.
+    - check if the taxid of a target is given by taxid mapping file.
+    - automatically switch to the new taxid for a merged one.
+    - change computation of `score`.
+    - new flag `-d/--max-frags-depth-stdev`.
+    - new option `-m/--mode`.
+    - change default value of flag `-t/--min-query-qcov` from `0.6` to `0.55` (similarity `~96.5%`).
+    - change default value of flag `-n/--keep-top-qcovs` from `5` to `0` (keep all matches).
+    - change default value of falg `-f/--max-fpr` from `0.01` to `0.05`.
+    - change default value of flag `-H/--min-hic-ureads-qcov` from `0.8` to `0.75` (similarity `~98%`).
+    - faster search result parsing.
 
 ### v0.6.0 - 2021-08-13
 
