@@ -19,7 +19,7 @@ sensitivity and specificity than other k-mer-based tools
 KMCP can be used for fast sequence search against large scales of genomic dataset
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
-bringing a smaller index size and much faster searching speed (4x-10x faster than COBS)
+bringing a smaller index size and much faster searching speed ([4x-10x faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result))
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
  
 ### 3. Fast genome similarity estimation
@@ -35,14 +35,15 @@ KMCP utilizes multiple k-mer sketches
 [FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
 (previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)) and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
-KMCP is 4x-7x faster than Mash/Sourmash
+[KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
 ## Features
 
-- Easy to install, no dependencies, no configurations
-    - [Statically linked executable binaries for multiple platforms]((https://bioinf.shenwei.me/kmcp/download)) (Linux/Windows/macOS, amd64).
+- Easy to install
+    - [Statically linked executable binaries for multiple platforms](https://bioinf.shenwei.me/kmcp/download) (Linux/Windows/macOS, amd64).
+    - No dependencies, no configurations.
 - Easy to use
     - Supporting [shell autocompletion](https://bioinf.shenwei.me/kmcp/usage/#autocompletion).
     - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage) and [tutorials](https://bioinf.shenwei.me/kmcp/tutorial/).
@@ -54,7 +55,7 @@ KMCP is 4x-7x faster than Mash/Sourmash
     - Searching time is linearly related to the number of reference genomes.
 - **Scalable searching**. *Searching results against multiple databases can be fast merged*.
     This brings many benefits:
-    - There's no need to re-built the database with newly added reference genomes. 
+    - *There's no need to re-built the database with newly added reference genomes*. 
     - [**HPC cluster could linearly accelerate searching**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#analysis-time-and-storage-requirement) with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
 - **Accurate taxonomic profiling**
