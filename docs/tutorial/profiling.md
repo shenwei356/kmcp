@@ -365,7 +365,7 @@ Three-rounds profiling:
 - `-n/--keep-top-qcovs`  is not recommended, which affects accuracy of
      abundance estimation.
      
-**Profiling modes:**
+#### Profiling modes
 
 We preset six profiling modes, availabe with the flag `-m/--mode`.
 

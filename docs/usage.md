@@ -627,7 +627,7 @@ Flags:
 ```
 
 
-## autocomplete
+## autocompletion
 
 ```text
 Generate shell autocompletion script

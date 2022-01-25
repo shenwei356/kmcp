@@ -1,4 +1,4 @@
-# KMCP: accurate metagenomic profiling of both prokaryotic and viral organisms by pseudo alignment
+# KMCP: accurate metagenomic profiling of both prokaryotic and viral organisms by pseudo-mapping
 
 
 ![](kmcp-logo.png)
@@ -41,24 +41,30 @@ KMCP is 4x-7x faster than Mash/Sourmash
 
 ## Features
 
-- **Easy to use, no dependencies, no configurations**.
+- Easy to install, no dependencies, no configurations
+    - [Statically linked executable binaries for multiple platforms]((https://bioinf.shenwei.me/kmcp/download)) (Linux/Windows/macOS, amd64).
+- Easy to use
+    - Supporting [shell autocompletion](https://bioinf.shenwei.me/kmcp/usage/#autocompletion).
+    - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage) and [tutorials](https://bioinf.shenwei.me/kmcp/tutorial/).
 - **Building database is easy and fast**.
-    - ~25 min for 47894 genomes from GTDB-r202 on a sever with 40 CPU threads and solid disk drive.
+    - [~25 min for 47894 genomes from GTDB-r202](https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs) on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**.
-    - The database structure is modified from COBS, while KMCP is 4x-10x faster.
+    - The index structure is modified from COBS, while [KMCP is 4x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
     - Automatically scales to exploit all available CPU cores.
     - Searching time is linearly related to the number of reference genomes.
-- **Scalable searching**. Searching results against multiple databases can be fast merged.
+- **Scalable searching**. *Searching results against multiple databases can be fast merged*.
     This brings many benefits:
     - There's no need to re-built the database with newly added reference genomes. 
-    - **HPC cluster could linearly accelerate searching** with each computation node hosting a database built with a part of reference genomes.
+    - [**HPC cluster could linearly accelerate searching**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#analysis-time-and-storage-requirement) with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
-- **Accurate taxonomic profiling**. 
+- **Accurate taxonomic profiling**
     - Some k-mer based taxonomic profilers suffers from high false positive rates,
-      while KMCP adopts multiple strategies to improve specificity and keeps high sensitivity at the same time.
-    - Except for archaea, and bacteria, KMCP performed well on virus/phages.
-    - Preset six modes for multiple scenarios.
-    - Supports CAMI and MetaPhlAn profiling format.
+      while [KMCP adopts multiple strategies](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods)
+      to [improve specificity and keeps high sensitivity at the same time](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
+    - Except for archaea and bacteria, [KMCP performed well on **virus/phages**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages).
+    - [KMCP also provides **confident infectious pathogen detection**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#87-metagenomic-samples-of-infected-body-fluids-bacteria-pathogens-low-coverage).
+    - [Preset six modes for multiple scenarios](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes).
+    - [Supports CAMI and MetaPhlAn profiling format](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats).
     
 <hr/>
     
