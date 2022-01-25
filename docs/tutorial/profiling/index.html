@@ -1,0 +1,1597 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KMCP - K-mer-based Metagenomic Classification and Profiling">
+      
+      
+        <meta name="author" content="Wei Shen">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+    
+    
+      
+        <title>Taxonomic profiling - KMCP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ee0f47ba.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#metagenomic-profiling" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            KMCP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Taxonomic profiling
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    KMCP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../database/" class="md-nav__link">
+        Databases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        Usage
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Taxonomic profiling
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Taxonomic profiling
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    Datasets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-preprocessing-reads" class="md-nav__link">
+    Step 1. Preprocessing reads
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-removing-host-reads" class="md-nav__link">
+    Step 2. Removing host reads
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-searching" class="md-nav__link">
+    Step 3. Searching
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3. Searching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attentions" class="md-nav__link">
+    Attentions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
+    Searching on a computer cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-result-format" class="md-nav__link">
+    Searching result format
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-profiling" class="md-nav__link">
+    Step 4. Profiling
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4. Profiling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input" class="md-nav__link">
+    Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profiling-modes" class="md-nav__link">
+    Profiling modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands_1" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profiling-result-formats" class="md-nav__link">
+    Profiling result formats
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/shenwei356" class="md-nav__link">
+        More tools
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    Datasets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-preprocessing-reads" class="md-nav__link">
+    Step 1. Preprocessing reads
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-removing-host-reads" class="md-nav__link">
+    Step 2. Removing host reads
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-searching" class="md-nav__link">
+    Step 3. Searching
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3. Searching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attentions" class="md-nav__link">
+    Attentions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
+    Searching on a computer cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-result-format" class="md-nav__link">
+    Searching result format
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-profiling" class="md-nav__link">
+    Step 4. Profiling
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4. Profiling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input" class="md-nav__link">
+    Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profiling-modes" class="md-nav__link">
+    Profiling modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands_1" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profiling-result-formats" class="md-nav__link">
+    Profiling result formats
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/tutorial/profiling.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="metagenomic-profiling">Metagenomic profiling</h1>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>Database<ul>
+<li><a href="/database/#prebuilt-databases">Prebuilt databases</a> are available.</li>
+<li>Or <a href="/database/#custom-database">build custom databases</a>.</li>
+</ul>
+</li>
+<li>Hardware.<ul>
+<li>CPU: ≥ 32 cores preferred.</li>
+<li>RAM: ≥ 64 GB, depends on file size of the maximal database.</li>
+</ul>
+</li>
+</ul>
+<h2 id="datasets">Datasets</h2>
+<ul>
+<li>Short reads, single or paired end.</li>
+<li>Long reads (PacBio HIFI).</li>
+</ul>
+<h2 id="steps">Steps</h2>
+<h3 id="step-1-preprocessing-reads">Step 1. Preprocessing reads</h3>
+<p>For example, removing adapters and trimming using <a href="https://github.com/OpenGene/fastp">fastp</a>:</p>
+<pre><code>fastp -i in_1.fq.gz -I in_2.fq.gz  \
+    -o out_1.fq.gz -O out_2.fq.gz \
+    -l 75 -q 20 -W 4 -M 20 -3 20 --thread 32 \
+    --html out.fastp.html
+</code></pre>
+<h3 id="step-2-removing-host-reads">Step 2. Removing host reads</h3>
+<p>Tools:</p>
+<ul>
+<li><a href="https://github.com/BenLangmead/bowtie2">bowtie2</a> is <a href="https://doi.org/10.1099/mgen.0.000393">recommended</a> for removing host reads.</li>
+<li><a href="https://github.com/samtools/samtools">samtools</a> is also used for processing reads mapping file.</li>
+<li><a href="https://zlib.net/pigz/">pigz</a> is a parallel implementation of <code>gzip</code>, which is much faster than <code>gzip</code>.</li>
+</ul>
+<p>Host reference genomes:</p>
+<ul>
+<li>Human: <a href="https://github.com/marbl/CHM13">CHM13</a>. We also provide a database of CHM13 for fast removing human reads.</li>
+</ul>
+<p>Building the index (~60min):</p>
+<pre><code>bowtie2-build --threads 32 GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz chm13
+</code></pre>
+<p>Mapping and removing mapped reads:</p>
+<pre><code>index=~/ws/db/bowtie2/chm13
+
+bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz  \
+    | samtools view -buS -f 4 - \
+    | samtools fastq - \
+    | gzip -c &gt; sample.fq.gz
+</code></pre>
+<h3 id="step-3-searching">Step 3. Searching</h3>
+<p><strong>Reads can be searched against multiple databases which can be built with different parameters</strong>,
+and the results can be fastly merged for downstream analysis.</p>
+<h4 id="attentions"><strong>Attentions</strong></h4>
+<ol>
+<li>
+<p>Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+   Paired-End reads should be given via <code>-1/--read1</code> and <code>-2/--read2</code>.</p>
+<pre><code>kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
+</code></pre>
+<p>Single-end can be given as positional arguments or <code>-1</code>/<code>-2</code>.</p>
+<pre><code>kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+</code></pre>
+<p><strong>Single-end mode is recommended for pair-end reads, for higher sensitivity</strong>.
+See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.</p>
+</li>
+<li>
+<p>A long query sequences may contain duplicated k-mers, which are
+    not removed for short sequences by default. You may modify the
+    value of <code>-u/--kmer-dedup-threshold</code> (default <code>256</code>) to remove duplicates.</p>
+</li>
+<li>
+<p>For long reads or contigs, you should split them into short reads
+    using <code>seqkit sliding</code>, e.g.,</p>
+<pre><code>seqkit sliding -s 100 -W 300
+</code></pre>
+</li>
+<li>
+<p>The values of <code>tCov</code> and <code>jacc</code> in results only apply for single size of k-mer.</p>
+</li>
+</ol>
+<p><strong><code>kmcp search</code> and <code>kmcp profile</code> share some flags</strong>, therefore users
+can use stricter criteria in <code>kmcp profile</code>.</p>
+<ol>
+<li><code>-t/--min-query-cov</code>, minimal query coverage, i.e., 
+   proportion of matched k-mers and unique k-mers of a query (default <code>0.55</code>, close to <code>~96.5%</code> sequence similarity))</li>
+<li><code>-N/--name-map</code>, tabular two-column file(s) mapping names to user-defined values.</li>
+</ol>
+<p><strong>Index files loading modes</strong>:</p>
+<ol>
+<li>Using memory-mapped index files with <code>mmap</code> (default)<ul>
+<li>Faster startup speed when index files are buffered in memory.</li>
+<li>Multiple KMCP processes can share the memory.</li>
+</ul>
+</li>
+<li>Loading the whole index files into memory (<code>-w/--load-whole-db</code>):<ul>
+<li>This mode occupies a little more memory.
+And Multiple KMCP processes can not share the database in memory.</li>
+<li><strong>It's slightly faster due to the use of physically contiguous memory.
+The speedup is more significant for smaller databases</strong>.</li>
+<li><strong>It's highly recommended when searching on computer clusters</strong>,
+where the default mmap mode would be very slow (in my test).</li>
+</ul>
+</li>
+<li>Low memory mode (<code>--low-mem</code>):<ul>
+<li>Do not load all index files into memory nor use mmap, using file seeking.</li>
+<li>It's much slower, &gt;4X slower on SSD and would be much slower on HDD disks.</li>
+<li><strong>Only use this mode for small number of queries or a huge database that
+can't be loaded into memory</strong>.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Performance tips</strong>:</p>
+<ol>
+<li>Increase value of <code>-j/--threads</code> for acceleratation, but values larger
+  than the number of CPU cores won't bring extra speedup.</li>
+</ol>
+<h4 id="commands"><strong>Commands</strong></h4>
+<p>Single-end mode is recommended for pair-end reads, for higher sensitivity:</p>
+<pre><code># ---------------------------------------------------
+# single-end (recommended)
+
+read1=sample_1.fq.gz
+read2=sample_2.fq.gz
+sample=sample
+
+for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
+    dbname=$(basename $db)
+
+    kmcp search \
+        --threads            32 \
+        --db-dir            $db \
+        --min-kmers          30 \
+        --min-query-len      70 \
+        --min-query-cov    0.55 \
+        $read1   $read2         \
+        --out-file         $sample.kmcp@$dbname.tsv.gz \
+        --log              $sample.kmcp@$dbname.tsv.gz.log
+done
+</code></pre>
+<p>Pair-end reads:</p>
+<pre><code># ---------------------------------------------------
+# paired-end
+
+read1=sample_1.fq.gz
+read2=sample_2.fq.gz
+sample=sample
+
+for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
+    dbname=$(basename $db)
+
+    kmcp search \
+        --threads            32 \
+        --db-dir            $db \
+        --min-kmers          30 \
+        --min-query-len      70 \
+        --min-query-cov    0.55 \
+        --read1          $read1 \
+        --read2          $read2 \
+        --out-file       $sample.kmcp@$dbname.tsv.gz \
+        --log            $sample.kmcp@$dbname.tsv.gz.log
+done
+</code></pre>
+<p>Merging searching results on multiple database:</p>
+<pre><code>kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
+</code></pre>
+<h4 id="searching-on-a-computer-cluster">Searching on a computer cluster</h4>
+<p>Here, we divided genomes of GTDB into 16 parts and build a database for 
+every part, so we can use computer cluster to accelerate the searching.
+The genbank-viral genomes are also diveded into 4 parts.</p>
+<p>A helper script <a href="https://github.com/shenwei356/easy_sbatch">easy_sbatch</a>
+is used for batch submitting Slurm jobs via script templates.</p>
+<pre><code># ---------------------------------------------------
+# searching
+
+
+j=32
+reads=reads
+
+# -----------------
+# gtdb
+
+dbprefix=~/ws/db/kmcp/gtdb.n16-
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+# -----------------
+# viral
+
+dbprefix=~/ws/db/kmcp/genbank-viral.n4-
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+# -----------------
+# fungi
+
+dbprefix=~/ws/db/kmcp/refseq-fungi
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+
+# ---------------------------------------------------
+# wait all job being done
+
+
+
+# ---------------------------------------------------
+# merge result and profiling
+
+# merge results
+# there's no need to submit to slurm, which could make it slower, cause the bottleneck is file IO
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+
+    echo $prefix; date
+    kmcp merge $prefix.kmcp@*.tsv.gz --out-file $prefix.kmcp.tsv.gz \
+        --quiet --log $prefix.kmcp.tsv.gz.merge.log
+done
+
+# profiling
+X=taxdump/
+T=taxid.map
+
+fd kmcp.tsv.gz$ $reads/ \
+    | rush -v X=$X -v T=$T \
+        'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
+            --log {}.k.profile.log'
+</code></pre>
+<h4 id="searching-result-format">Searching result format</h4>
+<pre><code> 1. query,    Identifier of query sequence
+ 2. qLen,     Query length
+ 3. qKmers,   K-mer number of query sequence
+ 4. FPR,      False positive rate
+ 5. hits,     Number of matches
+ 6. target,   Identifier of target sequence
+ 7. fragIdx,  Index of reference fragment
+ 8. frags,    Number of reference fragments
+ 9. tLen,     Reference length
+10. kSize,    K-mer size
+11. mKmers,   Number of matched k-mers
+12. qCov,     Query coverage,  equals to: mKmers / qKmers
+13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference fragment
+14. jacc,     Jaccard index
+15. queryIdx, Index of query sequence, only for merging
+</code></pre>
+<p>Note: The header line starts with <code>#</code>, you need to assign another comment charactor
+if using <code>csvtk</code> for analysis. e.g.,</p>
+<pre><code>csvtk filter2 -C '$' -t -f '$qCov &gt; 0.7' mock.fastq.gz.kmcp.gz
+</code></pre>
+<p>Demo result:</p>
+<table>
+<thead>
+<tr>
+<th align="left">#query</th>
+<th align="left">qLen</th>
+<th align="left">qKmers</th>
+<th align="left">FPR</th>
+<th align="left">hits</th>
+<th align="left">target</th>
+<th align="left">fragIdx</th>
+<th align="left">frags</th>
+<th align="left">tLen</th>
+<th align="left">kSize</th>
+<th align="left">mKmers</th>
+<th align="left">qCov</th>
+<th align="left">tCov</th>
+<th align="left">jacc</th>
+<th align="left">queryIdx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NC_012971.2</td>
+<td align="left">2</td>
+<td align="left">10</td>
+<td align="left">4558953</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0003</td>
+<td align="left">0.0003</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NC_000913.3</td>
+<td align="left">2</td>
+<td align="left">10</td>
+<td align="left">4641652</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0003</td>
+<td align="left">0.0003</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NC_018658.1</td>
+<td align="left">5</td>
+<td align="left">10</td>
+<td align="left">5273097</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NZ_CP028116.1</td>
+<td align="left">2</td>
+<td align="left">10</td>
+<td align="left">5648177</td>
+<td align="left">31</td>
+<td align="left">79</td>
+<td align="left">0.6583</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NZ_CP007592.1</td>
+<td align="left">3</td>
+<td align="left">10</td>
+<td align="left">5104557</td>
+<td align="left">31</td>
+<td align="left">69</td>
+<td align="left">0.5750</td>
+<td align="left">0.0001</td>
+<td align="left">0.0001</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">6</td>
+<td align="left">NC_002695.2</td>
+<td align="left">3</td>
+<td align="left">10</td>
+<td align="left">5498578</td>
+<td align="left">31</td>
+<td align="left">69</td>
+<td align="left">0.5750</td>
+<td align="left">0.0001</td>
+<td align="left">0.0001</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">8</td>
+<td align="left">NC_012971.2</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4558953</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0003</td>
+<td align="left">0.0003</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">8</td>
+<td align="left">NC_000913.3</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4641652</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0003</td>
+<td align="left">0.0003</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">2.1127e-08</td>
+<td align="left">8</td>
+<td align="left">NC_013654.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4717338</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0003</td>
+<td align="left">0.0003</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-4-profiling">Step 4. Profiling</h3>
+<h4 id="input"><strong>Input</strong></h4>
+<ul>
+<li>TaxId mapping file(s).</li>
+<li>Taxdump files.</li>
+<li>KMCP search results.</li>
+</ul>
+<h4 id="methods"><strong>Methods</strong></h4>
+<ol>
+<li>Reference genomes can be splitted into fragments when computing
+    k-mers (sketches), which could help to increase the specificity
+    via a threshold, i.e., the minimal proportion of matched fragments
+    (<code>-p/--min-frags-fraction</code>). (<strong><em>highly recommended</em></strong>)
+    Another flag <code>-d/--max-frags-cov-stdev</code> further reduces false positives.</li>
+<li>We require part of the uniquely matched reads of a reference
+    having high similarity, i.e., with high confidence for decreasing
+    the false positive rate.</li>
+<li>We also use the two-stage taxonomy assignment algorithm in <a href="https://doi.org/10.1186/s12864-020-06875-6">MegaPath</a>
+    to reduce the false positive of ambiguous matches.</li>
+<li>Multi-aligned queries are proportionally assigned to references
+    with a similar strategy in <a href="https://doi.org/10.1186/s13059-020-02159-0">Metalign</a>.</li>
+<li>Input files are parsed 4 times, therefore STDIN is not supported.</li>
+</ol>
+<p>Three-rounds profiling:</p>
+<p><img src="/tutorial/profiling-steps.png" alt="" width="500"/></p>
+<p><strong>Accuracy notes</strong>:</p>
+<ul>
+<li>Smaller <code>-t/--min-qcov</code> increase sensitivity in cost of higher false
+    positive rate (<code>-f/--max-fpr</code>) of a query.</li>
+<li>And we require part of the uniquely matched reads of a reference
+    having high similarity, i.e., with high confidence to decrease
+    the false positive.
+    E.g., <code>-H &gt;= 0.8</code> and <code>-P &gt;= 0.1</code> equals to <code>90th percentile &gt;= 0.8</code><ul>
+<li><code>-U/--min-hic-ureads</code>,      minimal number, <code>&gt;= 1</code></li>
+<li><code>-H/--min-hic-ureads-qcov</code>, minimal query coverage, <code>&gt;= -t/--min-qcov</code></li>
+<li><code>-P/--min-hic-ureads-prop</code>, minimal proportion, higher values
+increase precision in cost of sensitivity.</li>
+</ul>
+</li>
+<li><code>-R/--max-mismatch-err</code> and <code>-D/--min-dreads-prop</code> is for determing
+    the right reference for ambigous reads.</li>
+<li><code>--keep-perfect-match</code> is not recommended, which decreases sensitivity.</li>
+<li><code>-n/--keep-top-qcovs</code>  is not recommended, which affects accuracy of
+     abundance estimation.</li>
+</ul>
+<h4 id="profiling-modes">Profiling modes</h4>
+<p>We preset six profiling modes, availabe with the flag <code>-m/--mode</code>.</p>
+<ul>
+<li><code>0</code> (for pathogen detection)</li>
+<li><code>1</code> (higher recall)</li>
+<li><code>2</code> (high recall)</li>
+<li><code>3</code> (default)</li>
+<li><code>4</code> (high precision)</li>
+<li><code>5</code> (higher precision)</li>
+</ul>
+<p>Using this flag will override the relevant options.</p>
+<pre><code>options                      m=0    m=1   m=2   m=3    m=4   m=5
+--------------------------   ----   ---   ---   ----   ---   ----
+-r/--min-frags-reads         1      20    30    50     100   100
+-p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
+-d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+-u/--min-uniq-reads          1      20    20    20     50    50
+-U/--min-hic-ureads          1      5     5     5      10    10
+-H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
+-P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
+</code></pre>
+<p><strong>Taxonomy data</strong>:</p>
+<ol>
+<li>Mapping references IDs to TaxIds: <code>-T/--taxid-map</code></li>
+<li>NCBI taxonomy dump files: <code>-X/--taxdump</code></li>
+</ol>
+<p><strong>Performance notes</strong>:</p>
+<ol>
+<li>Searching results are parsed in parallel, and the number of
+    lines proceeded by a thread can be set by the flag <code>--chunk-size</code>.</li>
+<li>However using a lot of threads does not always accelerate
+    processing, 4 threads with chunk size of 500-5000 is fast enough.</li>
+</ol>
+<h4 id="commands_1"><strong>Commands</strong></h4>
+<pre><code># taxid mapping files, multiple files supported.
+taxid_map=gtdb.kmcp/taxid.map,refseq-viral.kmcp/taxid.map,refseq-fungi.kmcp
+
+# taxdump directory
+taxdump=taxdump/
+
+sfile=$file.kmcp.tsv.gz
+
+kmcp profile \
+    --taxid-map      $taxid_map \
+    --taxdump          $taxdump \
+    --level             species \
+    --min-query-cov        0.55 \
+    --min-frags-reads        50 \
+    --min-frags-fraction     0.8 \
+    --max-frags-depth-stdev   2 \
+    --min-uniq-reads         10 \
+    --min-hic-ureads          1 \
+    --min-hic-ureads-qcov  0.75 \
+    --min-hic-ureads-prop   0.1 \
+    $sfile                      \
+    --out-prefix       $sfile.kmcp.profile \
+    --metaphlan-report $sfile.metaphlan.profile \
+    --cami-report      $sfile.cami.profile \
+    --sample-id        "0" \
+    --binning-result   $sfile.binning.gz
+</code></pre>
+<h4 id="profiling-result-formats">Profiling result formats</h4>
+<p><strong>Supported profiling output formats</strong>:</p>
+<ul>
+<li>KMCP      (<code>-o/--out-prefix</code>)</li>
+<li>CAMI      (<code>-M/--metaphlan-report</code>, sample name: <code>-s/--sample-id</code>)</li>
+<li>MetaPhlAn (<code>-C/--cami-report</code>, sample name: <code>-s/--sample-id</code>))</li>
+</ul>
+<p><strong>Supported taxonomic binning formats</strong>:</p>
+<ul>
+<li>CAMI      (<code>-B/--binning-result</code>)</li>
+</ul>
+<p>KMCP format:</p>
+<pre><code> 1. ref,                Identifier of the reference genome
+ 2. percentage,         Relative abundance of a reference
+ 3. score,              The 90th percentile of qCov of uniquely matched reads
+ 4. fragsFrac,          Genome fragments fraction
+ 5. fragsRelDepth,      Relative depths of reference fragments
+ 6. fragsRelDepthStd,   The strandard deviation of fragsRelDepth
+ 7. reads,              Total number of matched reads of this reference
+ 8. ureads,             Number of uniquely matched reads
+ 9. hicureads,          Number of uniquely matched reads with high-confidence
+10. refsize,            Reference size
+11. refname,            Reference name, optional via name mapping file
+12. taxid,              TaxId of the reference
+13. rank,               Taxonomic rank
+14. taxname,            Taxonomic name
+15. taxpath,            Complete lineage
+16. taxpathsn,          Corresponding TaxIds of taxons in the complete lineage
+</code></pre>
+<p>Demo output:</p>
+<table>
+<thead>
+<tr>
+<th align="left">ref</th>
+<th align="left">percentage</th>
+<th align="left">score</th>
+<th align="left">fragsFrac</th>
+<th align="left">fragsRelDepth</th>
+<th align="left">fragsRelDepthStd</th>
+<th align="left">reads</th>
+<th align="left">ureads</th>
+<th align="left">hicureads</th>
+<th align="left">refsize</th>
+<th align="left">refname</th>
+<th align="left">taxid</th>
+<th align="left">rank</th>
+<th align="left">taxname</th>
+<th align="left">taxpath</th>
+<th align="left">taxpathsn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">NC_013654.1</td>
+<td align="left">48.321535</td>
+<td align="left">100.00</td>
+<td align="left">1.00</td>
+<td align="left">0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02</td>
+<td align="left">0.02</td>
+<td align="left">287936</td>
+<td align="left">226225</td>
+<td align="left">226225</td>
+<td align="left">4717338</td>
+<td align="left"></td>
+<td align="left">431946</td>
+<td align="left">strain</td>
+<td align="left">Escherichia coli SE15</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15</td>
+<td align="left">2;1224;1236;91347;543;561;562;431946</td>
+</tr>
+<tr>
+<td align="left">NC_000913.3</td>
+<td align="left">46.194629</td>
+<td align="left">100.00</td>
+<td align="left">1.00</td>
+<td align="left">1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98</td>
+<td align="left">0.02</td>
+<td align="left">270846</td>
+<td align="left">175686</td>
+<td align="left">175686</td>
+<td align="left">4641652</td>
+<td align="left"></td>
+<td align="left">511145</td>
+<td align="left">no rank</td>
+<td align="left">Escherichia coli str. K-12 substr. MG1655</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12</td>
+<td align="left">2;1224;1236;91347;543;561;562;83333</td>
+</tr>
+<tr>
+<td align="left">NC_002695.2</td>
+<td align="left">5.014025</td>
+<td align="left">100.00</td>
+<td align="left">1.00</td>
+<td align="left">0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00</td>
+<td align="left">0.05</td>
+<td align="left">34825</td>
+<td align="left">22945</td>
+<td align="left">22945</td>
+<td align="left">5498578</td>
+<td align="left"></td>
+<td align="left">386585</td>
+<td align="left">strain</td>
+<td align="left">Escherichia coli O157:H7 str. Sakai</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai</td>
+<td align="left">2;1224;1236;91347;543;561;562;386585</td>
+</tr>
+<tr>
+<td align="left">NC_010655.1</td>
+<td align="left">0.469811</td>
+<td align="left">100.00</td>
+<td align="left">1.00</td>
+<td align="left">1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09</td>
+<td align="left">0.10</td>
+<td align="left">1581</td>
+<td align="left">1581</td>
+<td align="left">1581</td>
+<td align="left">2664102</td>
+<td align="left"></td>
+<td align="left">349741</td>
+<td align="left">strain</td>
+<td align="left">Akkermansia muciniphila ATCC BAA-835</td>
+<td align="left">Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835</td>
+<td align="left">2;74201;203494;48461;1647988;239934;239935;349741</td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd">CAMI format</a>:</p>
+<pre><code>@SampleID:
+@Version:0.10.0
+@Ranks:superkingdom|phylum|class|order|family|genus|species|strain
+@TaxonomyID:ncbi-taxonomy
+@@TAXID RANK    TAXPATH TAXPATHSN   PERCENTAGE
+2   superkingdom    2   Bacteria    100.000000
+1224    phylum  2|1224  Bacteria|Proteobacteria 99.530189
+74201   phylum  2|74201 Bacteria|Verrucomicrobia    0.469811
+1236    class   2|1224|1236 Bacteria|Proteobacteria|Gammaproteobacteria 99.530189
+203494  class   2|74201|203494  Bacteria|Verrucomicrobia|Verrucomicrobiae   0.469811
+91347   order   2|1224|1236|91347   Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales    99.530189
+48461   order   2|74201|203494|48461    Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales    0.469811
+543 family  2|1224|1236|91347|543   Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae 99.530189
+1647988 family  2|74201|203494|48461|1647988    Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae    0.469811
+561 genus   2|1224|1236|91347|543|561   Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia 99.530189
+239934  genus   2|74201|203494|48461|1647988|239934 Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia    0.469811
+562 species 2|1224|1236|91347|543|561|562   Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli    99.530189
+239935  species 2|74201|203494|48461|1647988|239934|239935  Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila    0.469811
+431946  strain  2|1224|1236|91347|543|561|562|431946    Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli SE15  48.321535
+83333   strain  2|1224|1236|91347|543|561|562|83333 Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli K-12  46.194629
+386585  strain  2|1224|1236|91347|543|561|562|386585    Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai    5.014025
+349741  strain  2|74201|203494|48461|1647988|239934|239935|349741   Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835   0.469811
+</code></pre>
+<p><a href="https://bioinf.shenwei.me/taxonkit/usage/#profile2cami"><code>taxonkit profile2cami</code></a> can also
+converts any metagenomic profile table with TaxIds to CAMI format.</p>
+<p>Metaphlan format:</p>
+<pre><code>#SampleID   
+k__Bacteria 100.000000
+k__Bacteria|p__Proteobacteria   99.530189
+k__Bacteria|p__Verrucomicrobia  0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria    99.530189
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae  0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales    99.530189
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales    0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae  99.530189
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae 0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia   99.530189
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia  0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli   99.530189
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila   0.469811
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli SE15  48.321535
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli K-12  46.194629
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli O157:H7 str. Sakai    5.014025
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila|t__Akkermansia muciniphila ATCC BAA-835   0.469811
+</code></pre>
+<p><a href="https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_B_specification.mkd">Binning result</a>:</p>
+<pre><code># This is the bioboxes.org binning output format at
+# https://github.com/bioboxes/rfc/tree/master/data-format
+@Version:0.10.0
+@SampleID:
+@@SEQUENCEID    TAXID
+NC_000913.3_sliding:1244941-1245090     511145
+NC_013654.1_sliding:344871-345020       562
+NC_000913.3_sliding:3801041-3801190     511145
+NC_013654.1_sliding:752751-752900       562
+NC_000913.3_sliding:4080871-4081020     562
+NC_000913.3_sliding:3588091-3588240     511145
+NC_000913.3_sliding:2249621-2249770     562
+NC_013654.1_sliding:2080171-2080320     431946
+NC_000913.3_sliding:2354841-2354990     511145
+NC_013654.1_sliding:437671-437820       431946
+</code></pre>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../../usage/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Usage" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Usage
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../searching/" class="md-footer__link md-footer__link--next" aria-label="Next: Sequence and genome searching" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Sequence and genome searching
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.5e13d264.min.js"></script>
+      
+    
+  </body>
+</html>

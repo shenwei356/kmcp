@@ -1,0 +1,1349 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KMCP - K-mer-based Metagenomic Classification and Profiling">
+      
+      
+        <meta name="author" content="Wei Shen">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+    
+    
+      
+        <title>Usage - KMCP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ee0f47ba.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            KMCP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    KMCP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        Databases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Usage
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compute" class="md-nav__link">
+    compute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#index" class="md-nav__link">
+    index
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search" class="md-nav__link">
+    search
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merge" class="md-nav__link">
+    merge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profile" class="md-nav__link">
+    profile
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utils" class="md-nav__link">
+    utils
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    filter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#index-info" class="md-nav__link">
+    index-info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merge-regions" class="md-nav__link">
+    merge-regions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unik-info" class="md-nav__link">
+    unik-info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autocompletion" class="md-nav__link">
+    autocompletion
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/shenwei356" class="md-nav__link">
+        More tools
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compute" class="md-nav__link">
+    compute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#index" class="md-nav__link">
+    index
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search" class="md-nav__link">
+    search
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merge" class="md-nav__link">
+    merge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profile" class="md-nav__link">
+    profile
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utils" class="md-nav__link">
+    utils
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    filter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#index-info" class="md-nav__link">
+    index-info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merge-regions" class="md-nav__link">
+    merge-regions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unik-info" class="md-nav__link">
+    unik-info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autocompletion" class="md-nav__link">
+    autocompletion
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/usage.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="usage">Usage</h1>
+<p>KMCP is a command-line tool consisting of several subcommands.</p>
+<pre><code class="language-text">
+    Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
+    Version: v0.7.0
+  Documents: https://bioinf.shenwei.me/kmcp
+Source code: https://github.com/shenwei356/kmcp
+
+KMCP is a tool for metagenomic classification and profiling.
+
+KMCP can also be used for:
+  1. Fast sequence search against large scales of genomic datasets
+     as BIGSI and COBS do.
+  2. Fast assembly/genome similarity estimation as Mash and sourmash do,
+     by utilizing Minimizer, FracMinHash (Scaled MinHash), or Closed Syncmers.
+
+Usage:
+  kmcp [command]
+
+Available Commands:
+  autocompletion Generate shell autocompletion script
+  compute        Generate k-mers (sketches) from FASTA/Q sequences
+  index          Construct database from k-mer files
+  merge          Merge search results from multiple databases
+  profile        Generate taxonomic profile from search results
+  search         Search sequence against a database
+  utils          Some utilities
+  version        Print version information and check for update
+
+Flags:
+  -h, --help                 help for kmcp
+  -i, --infile-list string   ► File of input files list (one file per line). If given, they are
+                             appended to files from CLI arguments.
+      --log string           ► Log file.
+  -q, --quiet                ► Do not print any verbose information. But you can write them to file
+                             with --log.
+  -j, --threads int          ► Number of CPUs cores to use. (default 16)
+
+</code></pre>
+<h2 id="compute">compute</h2>
+<pre><code class="language-text">Generate k-mers (sketches) from FASTA/Q sequences
+
+Attentions:
+  1. Input files can be given as list of FASTA/Q files via
+     positional arguments or a directory containing sequence files
+     via the flag -I/--in-dir. A regular expression for matching
+     sequencing files is available by the flag -r/--file-regexp.
+  2. Unwanted sequence like plasmid can be filtered out by
+     the name via regular expressions (-B/--seq-name-filter).
+  3. By default, kmcp computes k-mers (sketches) of every file,
+     you can also use --by-seq to compute for every sequence,
+     where sequence IDs in all input files better be distinct.
+  4. It also supports splitting sequences into fragments, this
+     could increase the specificity in profiling result in cost
+     of slower searching speed.
+  5. Multiple sizes of k-mers are supported.
+
+Supported k-mer (sketches) types:
+  1. K-mer:
+     1). ntHash of k-mer (-k)
+  2. K-mer sketchs (all using ntHash):
+     1). FracMinHash    (-k -D), previously named Scaled MinHash
+     2). Minimizer      (-k -W), optionally scaling/down-sampling (-D)
+     3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
+
+Splitting sequences:
+  1. Sequences can be splitted into fragments by a fragment size 
+     (-s/--split-size) or number of fragments (-n/--split-number)
+     with overlap (-l/--split-overlap).
+  2. When splitting by number of fragments, all sequences (except for
+     these mathching any regular expression given by -B/--seq-name-filter)
+     in a sequence file are concatenated with k-1 'N's before splitting.
+  3. Both sequence IDs and fragments indices are saved for later use,
+     in form of meta/description data in .unik files.
+
+Meta data:
+  1. Every outputted .unik file contains the sequence/reference ID,
+     fragment index, number of fragments, and genome size of reference.
+  2. When parsing whole sequence files or splitting by number of fragments,
+     the identifier of a reference is the basename of the input file
+     by default. It can also be extracted from the input file name via
+     -N/--ref-name-regexp, e.g., &quot;^(\w{3}_\d{9}\.\d+)&quot; for refseq records.
+
+Output:
+  1. All outputted .unik files are saved in ${outdir}, with path
+     ${outdir}/xxx/yyy/zzz/${infile}-id_${seqID}.unik
+     where dirctory tree '/xxx/yyy/zzz/' is built for &gt; 1000 output files.
+  2. For splitting sequence mode (--split-size &gt; 0 or --split-number &gt; 0),
+     output files are:
+     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+  3. A summary file (&quot;${outdir}/_info.txt&quot;) is generated for later use.
+     Users need to check if the reference IDs (column &quot;name&quot;) are what
+     supposed to be.
+
+Performance tips:
+  1. Decrease value of -j/--threads for data in hard disk drives to
+     reduce I/O pressure.
+
+Usage:
+  kmcp compute [flags]
+
+Flags:
+      --by-seq                    ► Compute k-mers (sketches) for every sequence, instead of the whole file.
+      --circular                  ► Input sequences are circular.
+  -c, --compress                  ► Output gzipped .unik files, it's slower and can save little space.
+  -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir, case
+                                  ignored. (default &quot;\\.(f[aq](st[aq])?|fna)(.gz)?$&quot;)
+      --force                     ► Overwrite existed output directory.
+  -h, --help                      help for compute
+  -I, --in-dir string             ► Directory containing FASTA/Q files. Directory symlinks are followed.
+  -k, --kmer ints                 ► K-mer size(s). (default [21])
+  -W, --minimizer-w int           ► Minimizer window size.
+  -O, --out-dir string            ► Output directory.
+  -N, --ref-name-regexp string    ► Regular expression (must contains &quot;(&quot; and &quot;)&quot;) for extracting
+                                  reference name from filename. (default
+                                  &quot;(?i)(.+)\\.(f[aq](st[aq])?|fna)(.gz)?$&quot;)
+  -D, --scale int                 ► Scale of the FracMinHash (Scaled MinHash), or down-sample factor
+                                  for Syncmers and Minimizer. (default 1)
+  -B, --seq-name-filter strings   ► List of regular expressions for filtering out sequences by
+                                  header/name, case ignored.
+  -m, --split-min-ref int         ► Only splitting sequences &gt;= X bp. (default 1000)
+  -n, --split-number int          ► Fragment number for splitting sequences, incompatible with
+                                  -s/--split-size.
+  -l, --split-overlap int         ► Fragment overlap for splitting sequences.
+  -s, --split-size int            ► Fragment size for splitting sequences, incompatible with
+                                  -n/--split-number.
+  -S, --syncmer-s int             ► Length of the s-mer in Closed Syncmers.
+
+</code></pre>
+<h2 id="index">index</h2>
+<pre><code class="language-text">Construct database from k-mer files
+
+We build index for k-mers (sketches) with a modified compact bit-sliced
+signature index (COBS). We totally rewrite the algorithms, data structure
+and file format, and have improved the indexing and searching speed.
+
+Attentions:
+  1. All input .unik files should be generated by &quot;kmcp compute&quot;.
+
+Database size and searching accuracy:
+  0. Use --dry-run to adjust parameters and check final number of 
+     index files (#index-files) and the total file size.
+  1. -f/--false-positive-rate: the default value 0.3 is enough for a
+     query with tens of matched k-mers (see BIGSI/COBS paper).
+     Small values could largely increase the size of database.
+  2. -n/--num-hash: large values could reduce the database size,
+     in cost of slower searching speed. Values &lt;=4 is recommended.
+  3. Value of block size -b/--block-size better be multiple of 64.
+     The default value is:  (#unikFiles/#threads + 7) / 8 * 8
+  4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
+     and -1/--block-size1-kmers-t to separately create index for
+     inputs with huge number of k-mers, for precise control of
+     database size.
+
+References:
+  1. COBS: https://arxiv.org/abs/1905.09624
+
+Taxonomy data:
+  1. No taxonomy data are included in the database.
+  2. Taxonomy information are only needed in &quot;profile&quot; command.
+
+Performance tips:
+  1. Number of blocks (.uniki files) better be smaller than or equal
+     to number of CPU cores for faster searching speed. 
+     We can set -j/--threads to control blocks number.
+     When more threads (&gt;= 1.3 * #blocks) are given, extra workers are
+     automatically created.
+  2. #threads files are simultaneously opened, and max number
+     of opened files is limited by the flag -F/--max-open-files.
+     You may use a small value of -F/--max-open-files for 
+     hard disk drive storage.
+  3. When the database is used in a new computer with more CPU cores,
+     'kmcp search' could automatically scale to utilize as many cores
+     as possible.
+
+Usage:
+  kmcp index [flags]
+
+Flags:
+  -a, --alias string                 ► Database alias/name. (default: basename of --out-dir). You can
+                                     also manually edit it in info file: ${outdir}/__db.yml.
+  -b, --block-size int               ► Block size, better be multiple of 64 for large number of input
+                                     files. (default: min(#.files/#theads, 8))
+  -1, --block-size1-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, an
+                                     individual index is created for this file. Supported units: K, M,
+                                     G. (default &quot;200M&quot;)
+  -8, --block-size8-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, block
+                                     size is changed to 8. Supported units: K, M, G. (default &quot;20M&quot;)
+  -X, --block-sizeX int              ► If k-mers of single .unik file exceeds --block-sizeX-kmers-t,
+                                     block size is changed to this value. (default 256)
+  -x, --block-sizeX-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, block
+                                     size is changed to --block-sizeX. Supported units: K, M, G.
+                                     (default &quot;10M&quot;)
+      --dry-run                      ► Dry run, useful for adjusting parameters (highly recommended).
+  -f, --false-positive-rate float    ► False positive rate of the bloom filters, range: (0, 1).
+                                     (default 0.3)
+      --file-regexp string           ► Regular expression for matching files in -I/--in-dir, case
+                                     ignored. (default &quot;.unik$&quot;)
+      --force                        ► Overwrite existed output directory.
+  -h, --help                         help for index
+  -I, --in-dir string                ► Directory containing .unik files. Directory symlinks are followed.
+  -F, --max-open-files int           ► Maximal number of opened files, please use a small value for
+                                     hard disk drive storage. (default 256)
+  -n, --num-hash int                 ► Number of hashes functions in bloom filters. (default 1)
+  -O, --out-dir string               ► Output directory. (default: ${indir}.kmcp-db)
+
+</code></pre>
+<h2 id="search">search</h2>
+<pre><code class="language-text">Search sequences against a database
+
+Attentions:
+  1. Input format should be (gzipped) FASTA or FASTQ from files or stdin.
+     - Paired-end files should be given via -1/--read1 and -2/--read2.
+        kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
+     - Single-end can be given as positional arguments or -1/-2.
+        kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+  2. A long query sequences may contain duplicated k-mers, which are
+     not removed for short sequences by default. You may modify the
+     value of -u/--kmer-dedup-threshold to remove duplicates.
+  3. For long reads or contigs, you should split them into short reads
+     using &quot;seqkit sliding&quot;, e.g.,
+         seqkit sliding -s 100 -W 300
+
+Shared flags between &quot;search&quot; and &quot;profile&quot;:
+  1. -t/--min-query-cov.
+  2. -N/--name-map.
+
+Special attentions:
+  1. The values of tCov and jacc in results only apply to single size of k-mer.
+
+Index files loading modes:
+  1. Using memory-mapped index files with mmap (default)
+      - Faster startup speed when index files are buffered in memory.
+      - Multiple KMCP processes can share the memory.
+  2. Loading the whole index files into memory (-w/--load-whole-db):
+      - This mode occupies a little more memory.
+        And Multiple KMCP processes can not share the database in memory.
+      - It's slightly faster due to the use of physically contiguous memory.
+        The speedup is more significant for smaller databases.
+      - It's highly recommended when searching on computer clusters,
+        where the default mmap mode would be very slow (in my test).
+  3. Low memory mode (--low-mem):
+      - Do not load all index files into memory nor use mmap, using file seeking.
+      - It's much slower, &gt;4X slower on SSD and would be much slower on HDD disks.
+      - Only use this mode for small number of queries or a huge database that
+        can't be loaded into memory.
+
+Performance tips:
+  1. Increase value of -j/--threads for acceleratation, but values larger
+     than number of CPU cores won't bring extra speedup.
+  2. When more threads (&gt;= 1.3 * #blocks) are given, extra workers are
+     automatically created.
+
+Usage:
+  kmcp search [flags]
+
+Flags:
+  -d, --db-dir string              ► Database directory created by &quot;kmcp index&quot;.
+  -D, --default-name-map           ► Load ${db}/__name_mapping.tsv for mapping name first.
+  -S, --do-not-sort                ► Do not sort matches of a query.
+  -h, --help                       help for search
+  -n, --keep-top-scores int        ► Keep matches with the top N scores for a query, 0 for all.
+  -K, --keep-unmatched             ► Keep unmatched query sequence information.
+  -u, --kmer-dedup-threshold int   ► Remove duplicated kmers for a query with &gt;= X k-mers. (default 256)
+  -w, --load-whole-db              ► Load all index files into memory, it's faster for small databases
+                                   but needs more memory. Please read &quot;Index files loading modes&quot; in
+                                   &quot;kmcp search -h&quot;.
+      --low-mem                    ► Do not load all index files into memory nor use mmap, the
+                                   searching would be very very slow for a large number of queries.
+                                   Please read &quot;Index files loading modes&quot; in &quot;kmcp search -h&quot;.
+  -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 30)
+  -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
+                                   unique k-mers of a query. (default 0.55)
+  -m, --min-query-len int          ► Minimal query length. (default 70)
+  -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
+                                   unique k-mers of a target.
+  -N, --name-map strings           ► Tabular two-column file(s) mapping names to user-defined values.
+  -H, --no-header-row              ► Do not print header row.
+  -o, --out-file string            ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for
+                                   stdout). (default &quot;-&quot;)
+      --query-id string            ► Custom query Id when using the whole file as a query.
+  -g, --query-whole-file           ► Use the whole file as a query, e.g., for genome similarity
+                                   estimation against k-mer sketch database.
+  -1, --read1 string               ► (Gzipped) read1 file.
+  -2, --read2 string               ► (Gzipped) read2 file.
+  -s, --sort-by string             ► Sort hits by &quot;qcov&quot;, &quot;tcov&quot; or &quot;jacc&quot; (Jaccard Index). (default
+                                   &quot;qcov&quot;)
+      --try-se                     ► If paired-end reads have no hits, re-search with read1, if still
+                                   fails, try read2.
+  -G, --use-filename               ► Use file name as query ID when using the whole file as a query.
+
+</code></pre>
+<h2 id="merge">merge</h2>
+<pre><code class="language-text">Merge search results from multiple databases
+
+Input:
+  *. Searching results of the same reads in different databases.
+  *. The order of multiple input reads files should be the same during searching.
+  *. When only one input given, we just copy and write to the input file.
+     This is friendly to workflows which assume multiple inputs are given.
+
+Usage:
+  kmcp merge [flags]
+
+Flags:
+  -n, --field-hits int       ► Field of hits. (default 5)
+  -f, --field-queryIdx int   ► Field of queryIdx. (default 15)
+  -h, --help                 help for merge
+  -H, --no-header-row        ► Do not print header row.
+  -o, --out-file string      ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for stdout).
+                             (default &quot;-&quot;)
+  -s, --sort-by string       ► Sort hits by &quot;qcov&quot;, &quot;tcov&quot; or &quot;jacc&quot; (Jaccard Index). (default &quot;qcov&quot;)
+
+
+</code></pre>
+<h2 id="profile">profile</h2>
+<pre><code class="language-text">Generate taxonomic profile from search results
+
+Methods:
+  1. Reference genomes can be splitted into fragments when computing
+     k-mers (sketches), which could help to increase the specificity
+     via a threshold, i.e., the minimal proportion of matched fragments
+     (-p/--min-frags-fraction). (***highly recommended***)
+     Another flag -d/--max-frags-depth-stdev further reduces false positives.
+  2. We require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
+  3. We also use the two-stage taxonomy assignment algorithm in MegaPath
+     to reduce the false positive of ambiguous matches.
+  4. Multi-aligned queries are proportionally assigned to references
+     with a similar strategy in Metalign.
+  5. Input files are parsed fours times, therefore STDIN is not supported.
+
+Reference:
+  1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
+  2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
+
+Accuracy notes:
+  *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
+     positive rate (-f/--max-fpr) of a query.
+  *. We require part of the uniquely matched reads of a reference
+     having high similarity, i.e., with high confidence for decreasing
+     the false positive rate.
+     E.g., -H &gt;= 0.8 and -P &gt;= 0.1 equals to 90th percentile &gt;= 0.8
+     *. -U/--min-hic-ureads,      minimal number, &gt;= 1
+     *. -H/--min-hic-ureads-qcov, minimal query coverage, &gt;= -t/--min-qcov
+     *. -P/--min-hic-ureads-prop, minimal proportion, higher values
+        increase precision in cost of sensitivity.
+  *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
+     the right reference for ambiguous reads.
+  *. --keep-perfect-match is not recommended, which decreases sensitivity. 
+  *. --keep-main-match is not recommended, which affects accuracy of
+     abundance estimation.
+  *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
+     abundance estimation.
+
+Profiling modes:
+  We preset six profiling modes, availabe with the flag -m/--mode:
+    - 0 (for pathogen detection)
+    - 1 (higher recall)
+    - 2 (high recall)
+    - 3 (default)
+    - 4 (high precision)
+    - 5 (higher precision)
+  Using this flag will override the relevant options.
+
+    options                      m=0    m=1   m=2   m=3    m=4   m=5
+    --------------------------   ----   ---   ---   ----   ---   ----
+    -r/--min-frags-reads         1      20    30    50     100   100
+    -p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
+    -d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+    -u/--min-uniq-reads          1      20    20    20     50    50
+    -U/--min-hic-ureads          1      5     5     5      10    10
+    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
+    -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
+
+
+Taxonomy data:
+  1. Mapping references IDs to TaxIds: -T/--taxid-map
+  2. NCBI taxonomy dump files: -X/--taxdump
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
+
+Profiling output formats:
+  1. KMCP      (-o/--out-prefix)
+  2. CAMI      (-M/--metaphlan-report)
+  3. MetaPhlAn (-C/--cami-report)
+
+Taxonomic binning formats:
+  1. CAMI      (-B/--binning-result)
+
+Usage:
+  kmcp profile [flags]
+
+Flags:
+  -B, --binning-result string         ► Save extra binning result in CAMI report.
+  -C, --cami-report string            ► Save extra CAMI-like report.
+      --chunk-size int                ► Number of lines to process for each thread, and 4 threads is
+                                      fast enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
+      --debug string                  ► Debug output file.
+  -F, --filter-low-pct float          ► Filter out predictions with the smallest relative abundances
+                                      summing up X%. Range: [0,100).
+  -h, --help                          help for profile
+      --keep-main-match               ► Only keep main matches, abandon matches with sharply decreased
+                                      qcov (&gt; --max-qcov-gap).
+      --keep-perfect-match            ► Only keep the perfect matches (qcov == 1) if there are.
+  -n, --keep-top-qcovs int            ► Keep matches with the top N qcovs for a query, 0 for all.
+      --level string                  ► Level to estimate abundance at. Available values: species,
+                                      strain/assembly. (default &quot;species&quot;)
+  -f, --max-fpr float                 ► Maximal false positive rate of a read in search result.
+                                      (default 0.05)
+  -d, --max-frags-depth-stdev float   ► Maximal standard deviation of relative depths of all
+                                      fragments. (default 2)
+  -R, --max-mismatch-err float        ► Maximal error rate of a read being matched to a wrong
+                                      reference, for determing the right reference for ambiguous reads.
+                                      Range: (0, 1). (default 0.05)
+      --max-qcov-gap float            ► Max qcov gap between adjacent matches. (default 0.2)
+  -M, --metaphlan-report string       ► Save extra metaphlan-like report.
+  -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
+                                      reference for ambiguous reads. Range: (0, 1). (default 0.05)
+  -p, --min-frags-fraction float      ► Minimal fraction of matched reference fragments with reads &gt;=
+                                      -r/--min-frags-reads. (default 0.8)
+  -r, --min-frags-reads int           ► Minimal number of reads for a reference fragment. (default 50)
+  -U, --min-hic-ureads int            ► Minimal number of high-confidence uniquely matched reads for a
+                                      reference. (default 5)
+  -P, --min-hic-ureads-prop float     ► Minimal proportion of high-confidence uniquely matched reads.
+                                      (default 0.1)
+  -H, --min-hic-ureads-qcov float     ► Minimal query coverage of high-confidence uniquely matched
+                                      reads. (default 0.75)
+  -t, --min-query-cov float           ► Minimal query coverage of a read in search result. (default 0.55)
+  -u, --min-uniq-reads int            ► Minimal number of uniquely matched reads for a reference.
+                                      (default 20)
+  -m, --mode int                      ► Profiling mode, type &quot;kmcp profile -h&quot; for details. available
+                                      values: 0 (for pathogen detection), 1 (higherrecall), 2 (high
+                                      recall), 3 (default), 4 (high precision), 5 (higher precision).
+                                      (default 3)
+  -N, --name-map strings              ► Tabular two-column file(s) mapping reference IDs to reference
+                                      names.
+      --no-amb-corr                   ► Do not correct ambiguous reads (just for benchmark).
+      --norm-abund string             ► Method for normalize abundance of a reference by the
+                                      mean/min/max abundance in all fragments, available values: mean,
+                                      min, max. (default &quot;mean&quot;)
+  -o, --out-prefix string             ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+      --rank-prefix strings           ► Prefixes of taxon name in certain ranks, used with
+                                      --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
+  -s, --sample-id string              ► Sample ID in result file.
+  -S, --separator string              ► Separator of TaxIds and taxonomy names. (default &quot;;&quot;)
+      --show-rank strings             ► Only show TaxIds and names of these ranks. (default
+                                      [superkingdom,phylum,class,order,family,genus,species,strain])
+  -X, --taxdump string                ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp,
+                                      optional with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings             ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+      --taxonomy-id string            ► Taxonomy ID in result file.
+
+</code></pre>
+<h2 id="utils">utils</h2>
+<pre><code class="language-text">Some utilities
+
+Usage:
+  kmcp utils [command]
+
+Available Commands:
+  filter        Filter search results and find species/assembly-specific queries
+  index-info    Print information of index file
+  merge-regions Merge species/assembly-specific regions
+  unik-info     Print information of .unik file
+
+</code></pre>
+<h2 id="filter">filter</h2>
+<pre><code class="language-text">Filter search results and find species/assembly-specific queries
+
+Taxonomy data:
+  1. Mapping references IDs to TaxIds: -T/--taxid-map
+  2. NCBI taxonomy dump files: -X/--taxdump
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
+
+Usage:
+  kmcp utils filter [flags]
+
+Flags:
+      --chunk-size int        ► Number of lines to process for each thread, and 4 threads is fast
+                              enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
+  -h, --help                  help for filter
+      --level string          ► Level to filter. available values: species, strain/assembly. (default
+                              &quot;species&quot;)
+  -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
+  -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
+  -H, --no-header-row         ► Do not print header row.
+  -o, --out-prefix string     ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
+                              with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+
+</code></pre>
+<h2 id="index-info">index-info</h2>
+<pre><code class="language-text">Print information of index file
+
+Usage:
+  kmcp utils index-info [flags]
+
+Flags:
+  -a, --all                 ► Show all information.
+  -b, --basename            ► Only output basenames of files.
+  -h, --help                help for index-info
+  -o, --out-prefix string   ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+
+</code></pre>
+<h2 id="merge-regions">merge-regions</h2>
+<pre><code class="language-text">Merge species/assembly-specific regions
+
+Steps:
+  # 1. Simulating reads and searching on one or more databases.
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
+      | kmcp search -d db1.kmcp -o ref.fna.gz.kmcp@db1.tsv.gz
+  seqkit sliding --step 10 --window 100 ref.fna.gz \
+      | kmcp search -d db2.kmcp -o ref.fna.gz.kmcp@db2.tsv.gz
+
+  # 2. Merging and filtering searching results
+  kmcp merge ref.fna.gz.kmcp@*.tsv.gz \
+      | kmcp utils filter -X taxdump -T taxid.map \
+            -o ref.fna.gz.kmcp.uniq.tsv.gz
+
+  # 3. Merging regions.
+  # Here the value of --min-overlap should be k-1.
+  kmcp utils merge-regions --min-overlap 20 ref.fna.gz.kmcp.uniq.tsv.gz \
+      -o ref.fna.gz.kmcp.uniq.tsv.gz.bed
+
+Output (BED6 format):
+  1. chrom      - chromosome name
+  2. chromStart - starting position (0-based)
+  3. chromEnd   - ending position (0-based)
+  4. name       - &quot;species-specific&quot; or &quot;assembly-specific&quot;
+  5. score      - 0-1000, 1000 for &quot;assembly-specific&quot;, others for &quot;&quot;species-specific&quot;
+  6. strand     - &quot;.&quot;
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with chunk size of 500-5000 is fast enough.
+
+Usage:
+  kmcp utils merge-regions [flags]
+
+Flags:
+      --chunk-size int         ► Number of lines to process for each thread, and 4 threads is fast
+                               enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
+  -h, --help                   help for merge-regions
+  -I, --ignore-type            ► Merge species and assembly-specific regions.
+  -f, --max-fpr float          ► Maximal false positive rate of a read in search result. (default 0.05)
+  -g, --max-gap int            ► Maximal distance of starting positions of two adjacent regions, 0 for
+                               no limitation, 1 for no merging.
+  -l, --min-overlap int        ► Minimal overlap of two adjacent regions, recommend K-1. (default 1)
+  -t, --min-query-cov float    ► Minimal query coverage of a read in search result. (default 0.55)
+  -a, --name-assembly string   ► Name of assembly-specific regions. (default &quot;assembly-specific&quot;)
+  -s, --name-species string    ► Name of species-specific regions. (default &quot;species-specific&quot;)
+  -o, --out-prefix string      ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -r, --regexp string          ► Regular expression for extract reference name and query locations.
+                               (default &quot;^(.+)_sliding:(\\d+)\\-(\\d+)$&quot;)
+
+</code></pre>
+<h2 id="unik-info">unik-info</h2>
+<pre><code class="language-text">Print information of .unik file
+
+Tips:
+  1. For lots of small files (especially on SDD), use big value of '-j' to
+     parallelize counting.
+
+Usage:
+  kmcp utils unik-info [flags]
+
+Flags:
+  -a, --all                   ► All information, including the number of k-mers.
+  -b, --basename              ► Only output basename of files.
+  -h, --help                  help for unik-info
+  -o, --out-file string       ► Out file (&quot;-&quot; for stdout, suffix .gz for gzipped out.) (default &quot;-&quot;)
+  -e, --skip-err              ► Skip error, only show warning message.
+      --symbol-false string   ► Smybol for false. (default &quot;✕&quot;)
+      --symbol-true string    ► Smybol for true. (default &quot;✓&quot;)
+  -T, --tabular               ► Output in machine-friendly tabular format.
+
+</code></pre>
+<h2 id="autocompletion">autocompletion</h2>
+<pre><code class="language-text">Generate shell autocompletion script
+
+Supported shell: bash|zsh|fish|powershell
+
+Bash:
+
+    # generate completion shell
+    kmcp autocompletion --shell bash
+
+    # configure if never did.
+    # install bash-completion if the &quot;complete&quot; command is not found.
+    echo &quot;for bcfile in ~/.bash_completion.d/* ; do source \$bcfile; done&quot; &gt;&gt; ~/.bash_completion
+    echo &quot;source ~/.bash_completion&quot; &gt;&gt; ~/.bashrc
+
+Zsh:
+
+    # generate completion shell
+    kmcp autocompletion --shell zsh --file ~/.zfunc/_kmcp
+
+    # configure if never did
+    echo 'fpath=( ~/.zfunc &quot;${fpath[@]}&quot; )' &gt;&gt; ~/.zshrc
+    echo &quot;autoload -U compinit; compinit&quot; &gt;&gt; ~/.zshrc
+
+fish:
+
+    kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
+
+Usage:
+  kmcp autocompletion [flags]
+
+Flags:
+      --file string    autocompletion file (default &quot;/home/shenwei/.bash_completion.d/kmcp.sh&quot;)
+  -h, --help           help for autocompletion
+      --shell string   autocompletion type (bash|zsh|fish|powershell) (default &quot;bash&quot;)
+
+</code></pre>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../database/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Databases" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Databases
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../tutorial/profiling/" class="md-footer__link md-footer__link--next" aria-label="Next: Taxonomic profiling" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Taxonomic profiling
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5e13d264.min.js"></script>
+      
+    
+  </body>
+</html>

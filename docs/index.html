@@ -1,0 +1,921 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KMCP - K-mer-based Metagenomic Classification and Profiling">
+      
+      
+        <meta name="author" content="Wei Shen">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+    
+    
+      
+        <title>KMCP</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ee0f47ba.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kmcp-accurate-metagenomic-profiling-of-both-prokaryotic-and-viral-organisms-by-pseudo-mapping" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            KMCP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    KMCP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        Home
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-can-we-do" class="md-nav__link">
+    What can we do?
+  </a>
+  
+    <nav class="md-nav" aria-label="What can we do?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-accurate-metagenomic-profiling" class="md-nav__link">
+    1. Accurate metagenomic profiling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fast-sequence-search-against-large-scales-of-genomic-datasets" class="md-nav__link">
+    2. Fast sequence search against large scales of genomic datasets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-fast-genome-similarity-estimation" class="md-nav__link">
+    3. Fast genome similarity estimation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documents" class="md-nav__link">
+    Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    Support
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgments" class="md-nav__link">
+    Acknowledgments
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="database/" class="md-nav__link">
+        Databases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="usage/" class="md-nav__link">
+        Usage
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/shenwei356" class="md-nav__link">
+        More tools
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-can-we-do" class="md-nav__link">
+    What can we do?
+  </a>
+  
+    <nav class="md-nav" aria-label="What can we do?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-accurate-metagenomic-profiling" class="md-nav__link">
+    1. Accurate metagenomic profiling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fast-sequence-search-against-large-scales-of-genomic-datasets" class="md-nav__link">
+    2. Fast sequence search against large scales of genomic datasets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-fast-genome-similarity-estimation" class="md-nav__link">
+    3. Fast genome similarity estimation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documents" class="md-nav__link">
+    Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    Support
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgments" class="md-nav__link">
+    Acknowledgments
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="kmcp-accurate-metagenomic-profiling-of-both-prokaryotic-and-viral-organisms-by-pseudo-mapping">KMCP: accurate metagenomic profiling of both prokaryotic and viral organisms by pseudo-mapping</h1>
+<p><img alt="" src="kmcp-logo.png" /></p>
+<h2 id="what-can-we-do">What can we do?</h2>
+<h3 id="1-accurate-metagenomic-profiling">1. Accurate metagenomic profiling</h3>
+<p>KMCP adopts a novol metagenomic profiling strategy,
+by splitting reference genomes into 10 fragments and mappings reads to these
+fragments via fast k-mer matching.
+KMCP performs well on both prokaryotic and viral organisms, with higher
+sensitivity and specificity than other k-mer-based tools
+(check the <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>).</p>
+<h3 id="2-fast-sequence-search-against-large-scales-of-genomic-datasets">2. Fast sequence search against large scales of genomic datasets</h3>
+<p>KMCP can be used for fast sequence search against large scales of genomic dataset
+as <a href="https://github.com/Phelimb/BIGSI">BIGSI</a> and <a href="https://github.com/bingmann/cobs">COBS</a> do.
+We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
+bringing a smaller index size and much faster searching speed (<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">4x-10x faster than COBS</a>)
+ (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
+<h3 id="3-fast-genome-similarity-estimation">3. Fast genome similarity estimation</h3>
+<p>KMCP can be used for fast similarity estimation of assemblies/genomes against known reference genomes.</p>
+<p>Genome sketching is a method of utilizing small and approximate summaries of
+genomic data for fast searching and comparison.
+<a href="https://github.com/marbl/Mash">Mash</a> and <a href="https://github.com/sourmash-bio/sourmash">Sourmash</a>
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
+KMCP utilizes multiple k-mer sketches 
+(<a href="https://academic.oup.com/bioinformatics/article/20/18/3363/202143">Minimizer</a>, 
+<a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
+(previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>) and
+<a href="https://peerj.com/articles/10805/">Closed Syncmers</a>) for genome similarity estimation.
+<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-7x faster than Mash/Sourmash</a>
+ (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Easy to install<ul>
+<li><a href="https://bioinf.shenwei.me/kmcp/download">Statically linked executable binaries for multiple platforms</a> (Linux/Windows/macOS, amd64).</li>
+<li>No dependencies, no configurations.</li>
+</ul>
+</li>
+<li>Easy to use<ul>
+<li>Supporting <a href="https://bioinf.shenwei.me/kmcp/usage/#autocompletion">shell autocompletion</a>.</li>
+<li>Detailed <a href="https://bioinf.shenwei.me/kmcp/usage">usage</a> and <a href="https://bioinf.shenwei.me/kmcp/tutorial/">tutorials</a>.</li>
+</ul>
+</li>
+<li><strong>Building database is easy and fast</strong>.<ul>
+<li><a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs">~25 min for 47894 genomes from GTDB-r202</a> on a sever with 40 CPU threads and solid disk drive.</li>
+</ul>
+</li>
+<li><strong>Fast searching speed</strong>.<ul>
+<li>The index structure is modified from COBS, while <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-10x faster</a>.</li>
+<li>Automatically scales to exploit all available CPU cores.</li>
+<li>Searching time is linearly related to the number of reference genomes.</li>
+</ul>
+</li>
+<li><strong>Scalable searching</strong>. <em>Searching results against multiple databases can be fast merged</em>.
+    This brings many benefits:<ul>
+<li><em>There's no need to re-built the database with newly added reference genomes</em>. </li>
+<li><a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#analysis-time-and-storage-requirement"><strong>HPC cluster could linearly accelerate searching</strong></a> with each computation node hosting a database built with a part of reference genomes.</li>
+<li>Computers with limited main memory would also support searching by building small databases.</li>
+</ul>
+</li>
+<li><strong>Accurate taxonomic profiling</strong><ul>
+<li>Some k-mer based taxonomic profilers suffers from high false positive rates,
+  while <a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods">KMCP adopts multiple strategies</a>
+  to <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">improve specificity and keeps high sensitivity at the same time</a>.</li>
+<li>Except for archaea and bacteria, <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages">KMCP performed well on <strong>virus/phages</strong></a>.</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#87-metagenomic-samples-of-infected-body-fluids-bacteria-pathogens-low-coverage">KMCP also provides <strong>confident infectious pathogen detection</strong></a>.</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes">Preset six modes for multiple scenarios</a>.</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats">Supports CAMI and MetaPhlAn profiling format</a>.</li>
+</ul>
+</li>
+</ul>
+<hr/>
+
+<p><img src="kmcp.png" alt="" width="800"/></p>
+<hr/>
+
+<h2 id="documents">Documents</h2>
+<ul>
+<li><a href="https://bioinf.shenwei.me/kmcp/download">Installation</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/database">Databases</a></li>
+<li>Tutorials<ul>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling">Taxonomic profiling</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">Sequence and genome searching</a></li>
+</ul>
+</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/usage">Usage</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/benchmark">Benchmarks</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/faq">FAQs</a></li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p><a href="https://github.com/shenwei356/kmcp/releases"><img alt="Latest Version" src="https://img.shields.io/github/release/shenwei356/kmcp.svg?style=flat?maxAge=86400" /></a>
+<a href="http://bioinf.shenwei.me/kmcp/download/"><img alt="Github Releases" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/total.svg?maxAge=3600" /></a>
+<a href="http://bioinf.shenwei.me/kmcp/download/"><img alt="Cross-platform" src="https://img.shields.io/badge/platform-any-ec2eb4.svg?style=flat" /></a>
+<a href="https://anaconda.org/bioconda/kmcp"><img alt="Anaconda Cloud" src="https://anaconda.org/bioconda/kmcp/badges/version.svg" /></a></p>
+<p>Download <a href="https://github.com/shenwei356/kmcp/releases">executable binaries</a>,
+or install using conda:</p>
+<pre><code>conda install -c bioconda kmcp
+</code></pre>
+<p>SIMD extensions including <code>AVX512</code>, <code>AVX2</code>, <code>SSE2</code> are sequentially detected and used
+in two packages for better searching performance.</p>
+<ul>
+<li><a href="https://github.com/shenwei356/pand">pand</a>,
+  for accelerating searching on databases constructed with multiple hash functions.</li>
+<li><a href="https://github.com/clausecker/pospop/tree/677120eb417c111be2b18c5c16ac5228a094306d">pospop</a>,
+  for batch counting matched k-mers in bloom filters.</li>
+</ul>
+<h2 id="commands">Commands</h2>
+<table>
+<thead>
+<tr>
+<th align="left">subcommand</th>
+<th align="left">function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#compute">compute</a></td>
+<td align="left">Generate k-mers (sketches) from FASTA/Q sequences</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index">index</a></td>
+<td align="left">Construct database from k-mer files</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#search">search</a></td>
+<td align="left">Search sequences against a database</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge">merge</a></td>
+<td align="left">Merge search results from multiple databases</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#profile">profile</a></td>
+<td align="left">Generate taxonomic profile from search results</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#filter">utils filter</a></td>
+<td align="left">Filter search results and find species/assembly-specific queries</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge-regions">utils merge-regions</a></td>
+<td align="left">Merge species/assembly-specific regions</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#unik-info">utils unik-info</a></td>
+<td align="left">Print information of .unik file</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-info">utils index-info</a></td>
+<td align="left">Print information of index file</td>
+</tr>
+</tbody>
+</table>
+<h2 id="quickstart">Quickstart</h2>
+<pre><code># compute k-mers
+kmcp compute -k 21 --split-number 10 --split-overlap 100 \
+    --in-dir genomes/ --out-dir genomes-k21-n10
+
+# index k-mers
+kmcp index --in-dir genomes-k21-n10/ --out-dir genomes.kmcp
+
+# delete temporary files
+# rm -rf genomes-k21-n10/
+
+# search    
+kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.tsv.gz
+
+# profile and binning
+kmcp profile search.tsv.gz \
+    --taxid-map        taxid.map \
+    --taxdump          taxdump/ \
+    --out-prefix       search.tsv.gz.k.profile \
+    --metaphlan-report search.tsv.gz.m.profile \
+    --cami-report      search.tsv.gz.c.profile \
+    --binning-result   search.tsv.gz.binning.gz
+</code></pre>
+<h2 id="support">Support</h2>
+<p>Please <a href="https://github.com/shenwei356/kmcp/issues">open an issue</a> to report bugs,
+propose new functions or ask for help.</p>
+<h2 id="license">License</h2>
+<p><a href="https://github.com/shenwei356/kmcp/blob/master/LICENSE">MIT License</a></p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<ul>
+<li><a href="https://dawnmy.github.io/CV/">Zhi-Luo Deng</a> (Helmholtz Centre for Infection Research, Germany)
+  gave a lot of valuable advice on metagenomic profiling and benchmarking.</li>
+<li><a href="https://github.com/clausecker/">Robert Clausecker</a> (Zuse Institute Berlin, Germany)
+  wrote the high-performance vectorized positional popcount package 
+  (<a href="https://github.com/clausecker/pospop">pospop</a>) 
+  <a href="https://stackoverflow.com/questions/63248047/">during my development of KMCP</a>,
+  which greatly accelerated the bit-matrix searching.</li>
+</ul>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+      
+        
+        <a href="download/" class="md-footer__link md-footer__link--next" aria-label="Next: Download" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Download
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    
+    
+      <script src="assets/javascripts/bundle.5e13d264.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2335 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KMCP - K-mer-based Metagenomic Classification and Profiling">
+      
+      
+        <meta name="author" content="Wei Shen">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+    
+    
+      
+        <title>Databases - KMCP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ee0f47ba.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#database" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            KMCP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Databases
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    KMCP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Databases
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Databases
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prebuilt-databases" class="md-nav__link">
+    Prebuilt databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Prebuilt databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-databases-for-metagenomic-profiling" class="md-nav__link">
+    A). Databases for metagenomic profiling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-databases-for-genome-similarity-estimation" class="md-nav__link">
+    B). Databases for genome similarity estimation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-databases-of-plasmid" class="md-nav__link">
+    C). Databases of plasmid
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases" class="md-nav__link">
+    Building databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gtdb" class="md-nav__link">
+    GTDB
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refseq-viral-or-fungi" class="md-nav__link">
+    RefSeq viral or fungi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genbank-viral" class="md-nav__link">
+    Genbank viral
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human-genome" class="md-nav__link">
+    Human genome
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refseq-plasmid" class="md-nav__link">
+    Refseq plasmid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humgut" class="md-nav__link">
+    HumGut
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progenomes2" class="md-nav__link">
+    proGenomes2
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-custom-databases" class="md-nav__link">
+    Building custom databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Building custom databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-computing-k-mers" class="md-nav__link">
+    Step 1. Computing k-mers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-building-databases" class="md-nav__link">
+    Step 2. Building databases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        Usage
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/shenwei356" class="md-nav__link">
+        More tools
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prebuilt-databases" class="md-nav__link">
+    Prebuilt databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Prebuilt databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-databases-for-metagenomic-profiling" class="md-nav__link">
+    A). Databases for metagenomic profiling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-databases-for-genome-similarity-estimation" class="md-nav__link">
+    B). Databases for genome similarity estimation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-databases-of-plasmid" class="md-nav__link">
+    C). Databases of plasmid
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases" class="md-nav__link">
+    Building databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gtdb" class="md-nav__link">
+    GTDB
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refseq-viral-or-fungi" class="md-nav__link">
+    RefSeq viral or fungi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genbank-viral" class="md-nav__link">
+    Genbank viral
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human-genome" class="md-nav__link">
+    Human genome
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refseq-plasmid" class="md-nav__link">
+    Refseq plasmid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humgut" class="md-nav__link">
+    HumGut
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progenomes2" class="md-nav__link">
+    proGenomes2
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-custom-databases" class="md-nav__link">
+    Building custom databases
+  </a>
+  
+    <nav class="md-nav" aria-label="Building custom databases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-computing-k-mers" class="md-nav__link">
+    Step 1. Computing k-mers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-building-databases" class="md-nav__link">
+    Step 2. Building databases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/database.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="database">Database</h1>
+<h2 id="prebuilt-databases">Prebuilt databases</h2>
+<p>All prebuilt database are available at:</p>
+<ul>
+<li><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC">OneDrive</a> for global users.</li>
+<li><a href="https://shenwei356.cowtransfer.com/s/c7220dd5901c42">CowTransfer</a> for Chinese users, <a href="https://github.com/Mikubill/cowtransfer-uploader">a command-line tool</a> is recommended.</li>
+</ul>
+<p><strong>Hardware requirements</strong></p>
+<ul>
+<li>Prebuilt databases were built for computers with &gt;= 32 CPU cores
+in consideration of better parallelization,
+and computers should have at least 64 GB. </li>
+<li>By default, <code>kmcp search</code> loads the whole database into main memory (via <a href="https://en.wikipedia.org/wiki/Mmap">mmap</a>) for fast searching.
+Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
+while it's much slower, &gt;10X slower on SSD and should be much slower on HDD disks.</li>
+<li><strong><em>To reduce memory requirements on computers without enough memory,
+users can divide the reference genomes into several parts
+and build smaller databases for all parts, so that the biggest
+database can be loaded into RAM</em></strong>. 
+This can also accelerate searching on a <strong>computer cluster</strong>, where every node searches a part of the database.
+After performing database searching,
+search results on all small databases can be merged with <code>kmcp merge</code>
+for downstream analysis.</li>
+</ul>
+<h3 id="a-databases-for-metagenomic-profiling">A). Databases for metagenomic profiling</h3>
+<p>These databases are created following <a href="#building-databases">steps below</a>.
+Users can also <a href="#building-custom-databases">build custom databases</a>, it's simple and fast.</p>
+<table>
+<thead>
+<tr>
+<th align="left">DB</th>
+<th align="left">source</th>
+<th align="left">#species</th>
+<th align="left">#assemblies</th>
+<th align="left">parameters</th>
+<th align="left">archive file</th>
+<th align="left">size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>Bacteria and Archaea</strong></td>
+<td align="left">GTDB r202</td>
+<td align="left">43252</td>
+<td align="left">47894</td>
+<td align="left">k=21, frags=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI">gtdb.kmcp.tar.gz</a> (50.16 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa">md5</a>)</td>
+<td align="left">58.02 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Bacteria and Archaea</strong></td>
+<td align="left">HumGut</td>
+<td align="left">23604</td>
+<td align="left">30691</td>
+<td align="left">k=21, frags=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.70 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>)</td>
+<td align="left">21.52 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Fungi</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">161</td>
+<td align="left">403</td>
+<td align="left">k=21, frags=10</td>
+<td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78">refseq-fungi.kmcp.tar.gz</a> (3.67 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E">md5</a>)</td>
+<td align="left">4.18 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">GenBank 246</td>
+<td align="left">19584</td>
+<td align="left">27936</td>
+<td align="left">k=21, frags=5</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8">genbank-viral.kmcp.tar.gz</a> (1.15 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X">md5</a>)</td>
+<td align="left">3.75 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">7189</td>
+<td align="left">11618</td>
+<td align="left">k=21, frags=5</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk">refseq-viral.kmcp.tar.gz</a> (967 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e">md5</a>)</td>
+<td align="left">2.00 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Human</strong></td>
+<td align="left">CHM13</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">k=21, frags=1024</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U">human-chm13.kmcp.tar.gz</a> (818 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE">md5</a>)</td>
+<td align="left">946 MB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Taxonomy data</strong>:</p>
+<ul>
+<li>Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ">taxdump.tar.gz</a> (2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU">md5</a>)</li>
+</ul>
+<p><strong>Taxonomy data for HumGut</strong>:</p>
+<ul>
+<li>Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC">taxdump-humgut.tar.gz</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf">md5</a>)</li>
+<li>Taxid mapping file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA">taxid-humgut.map</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2">md5</a>)</li>
+<li>Name mapping file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec">name-humgut.map</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman">md5</a>)</li>
+</ul>
+<h3 id="b-databases-for-genome-similarity-estimation">B). Databases for genome similarity estimation</h3>
+<p>Check the <a href="/tutorial/searching">tutorial</a>.</p>
+<p>FracMinHash (Scaled MinHash):</p>
+<table>
+<thead>
+<tr>
+<th align="left">kingdoms</th>
+<th align="left">source</th>
+<th align="left">parameters</th>
+<th align="left">file</th>
+<th align="left">size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>Bacteria and Archaea</strong></td>
+<td align="left">GTDB r202</td>
+<td align="left">k=31, scale=1000</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q">gtdb.minhash.kmcp.tar.gz</a> (710 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r">md5</a>)</td>
+<td align="left">1.52 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Fungi</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">k=31, scale=1000</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8">refseq-fungi.minhash.kmcp.tar.gz</a> (49 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1">md5</a>)</td>
+<td align="left">98 MB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">Genbank 246</td>
+<td align="left">k=31, scale=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhNMoB2v8OcXPwlB?e=dOCBL3">genbank-viral.minhash.kmcp.tar.gz</a> (580 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjhH5MRvKtbb-OW4v?e=dY6Yh9">md5</a>)</td>
+<td align="left">1.19 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">k=31, scale=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B">refseq-viral.minhash.kmcp.tar.gz</a> (205 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl">md5</a>)</td>
+<td align="left">555 MB</td>
+</tr>
+</tbody>
+</table>
+<p>Closed Syncmers:</p>
+<table>
+<thead>
+<tr>
+<th align="left">kingdoms</th>
+<th align="left">source</th>
+<th align="left">parameters</th>
+<th align="left">file</th>
+<th align="left">size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>Bacteria and Archaea</strong></td>
+<td align="left">GTDB r202</td>
+<td align="left">k=31, s=15, scale=60</td>
+<td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r">gtdb.syncmer.kmcp.tar.gz</a> (1.03 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk">md5</a>)</td>
+<td align="left">2.28 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Fungi</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">k=31, s=15, scale=60</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQZqTZrnLyiEJ0IX?e=aORH7a">refseq-fungi.syncmer.kmcp.tar.gz</a> (73 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQdqsq1rGf0YuCdz?e=g0gOtx">md5</a>)</td>
+<td align="left">145 MB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">Genbank 246</td>
+<td align="left">k=31, s=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhQiHSTYQNFUgqPx?e=xlJm35">genbank-viral.syncmer.kmcp.tar.gz</a> (473 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjhL1YSXJGeBmI_c7?e=lWVkON">md5</a>)</td>
+<td align="left">1.06 GB</td>
+</tr>
+<tr>
+<td align="left"><strong>Viruses</strong></td>
+<td align="left">Refseq r208</td>
+<td align="left">k=31, s=21</td>
+<td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl">refseq-viral.syncmer.kmcp.tar.gz</a> (162 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQKyoa8lcPTO5yt_?e=e7Ki65">md5</a>)</td>
+<td align="left">441 MB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c-databases-of-plasmid">C). Databases of plasmid</h3>
+<table>
+<thead>
+<tr>
+<th align="left">source</th>
+<th align="left"># assembly</th>
+<th align="left">type</th>
+<th align="left">parameters</th>
+<th align="left">file</th>
+<th align="left">size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Refseq r208</td>
+<td align="left">37318</td>
+<td align="left">All k-mers</td>
+<td align="left">k=21</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUQpIuKC5ju2TIdD?e=yKdRs2">refseq-plasmid.kmcp.tar.gz</a> (5.29 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjT-TO94gsfpUpe8_?e=1RAvr1">md5</a>)</td>
+<td align="left">7.80 GB</td>
+</tr>
+<tr>
+<td align="left">Refseq r208</td>
+<td align="left">37318</td>
+<td align="left">FracMinHash</td>
+<td align="left">K=31, scale=10</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8">refseq-plasmid.minhash.kmcp.tar.gz</a> (1.01 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp">md5</a>)</td>
+<td align="left">2.00 GB</td>
+</tr>
+<tr>
+<td align="left">Refseq r208</td>
+<td align="left">37318</td>
+<td align="left">Closed Syncmer</td>
+<td align="left">K=31, s=21</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUPv9o2SA4kiSxwU?e=UvkSDV">refseq-plasmid.syncmer.kmcp.tar.gz</a> (806 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUKt3A_p7Q7BE7qT?e=dApTX8">md5</a>)</td>
+<td align="left">1.54 GB</td>
+</tr>
+</tbody>
+</table>
+<h2 id="building-databases">Building databases</h2>
+<h3 id="gtdb">GTDB</h3>
+<p>Tools:</p>
+<ul>
+<li><a href="https://github.com/shenwei356/brename/releases">brename</a> for batching renaming files.</li>
+<li><a href="https://github.com/shenwei356/rush/releases">rush</a> for executing jobs in parallel.</li>
+<li><a href="https://github.com/shenwei356/seqkit/releases">seqkit</a> for FASTA file processing.</li>
+<li><a href="/download">kmcp</a> for metagenomic profiling.</li>
+</ul>
+<p>Files:</p>
+<ul>
+<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz">gtdb_genomes_reps_r202.tar.gz</a></li>
+<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/ar122_metadata_r202.tar.gz">ar122_metadata_r202.tar.gz</a></li>
+<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/bac120_metadata_r202.tar.gz">bac120_metadata_r202.tar.gz</a></li>
+</ul>
+<p>Uncompressing and renaming:</p>
+<pre><code># uncompress
+mkdir -p gtdb
+tar -zxvf gtdb_genomes_reps_r202.tar.gz -O gtdb
+
+# rename
+brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
+</code></pre>
+<p>Mapping file:</p>
+<pre><code>tar -zxvf ar122_metadata_r202.tar.gz  bac120_metadata_r202.tar.gz
+
+# assembly accesion -&gt; full head
+find gtdb/ -name "*.fna.gz" \
+    | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
+    &gt; name.map
+
+# assembly accesion -&gt; taxid
+(cat ar122_metadata_r202.tsv; sed 1d bac120_metadata_r202.tsv) \
+    | csvtk cut -t -f accession,ncbi_taxid \
+    | csvtk replace -t -p '^.._' \
+    | csvtk grep -t -P &lt;(cut -f 1 name.map) \
+    | csvtk del-header \
+    &gt; taxid.map
+
+
+# stats (optional)
+
+# number of species/strains
+cat taxid.map \
+    | taxonkit lineage -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid.map.stats
+species           43566
+strain            4108
+subspecies        111
+forma specialis   58
+no rank           26
+isolate           24
+serotype          1
+
+# number of unique species/strains
+cat taxid.map \
+    | csvtk uniq -Ht -f 2 \
+    | taxonkit lineage -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid.map.uniq.stats
+species           24739
+strain            4101
+subspecies        89
+forma specialis   58
+no rank           26
+isolate           24
+serotype          1
+</code></pre>
+<p>Building database (all k-mers, for profiling on short-reads):</p>
+<pre><code>input=gtdb
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments with 100bp overlap
+#   k = 21
+kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+    --log gtdb-r202-k21-n10.log -j 32 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
+    --log gtdb.kmcp.log
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map gtdb.kmcp/
+</code></pre>
+<p>Building database (k-mer sketches, for profiling on long-reads):</p>
+<pre><code># -------------------------------------------------------------------------------------
+# Closed Syncmers with s=16
+
+input=gtdb
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments with 100bp overlap
+#   k = 21
+#   s = 16 # Closed Syncmers
+kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
+    --log gtdb-r202-k21-n10-S16.log -j 32 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.2
+kmcp index -j 32 -I gtdb-r202-k21-n10-S16 -O gtdb.sync16.kmcp -n 1 -f 0.2 \
+    --log gtdb.sync16.kmcp.log
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map gtdb.sync16.kmcp/
+
+
+# -------------------------------------------------------------------------------------
+# FracMinhash/Scaled MinHash with d=5
+
+input=gtdb
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments with 100bp overlap
+#   k = 21
+#   D = 5 # FracMinhash
+kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
+    --log gtdb-r202-k21-n10-D5.log -j 32 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.2
+kmcp index -j 32 -I gtdb-r202-k21-n10-D5 -O gtdb.minh5.kmcp -n 1 -f 0.2 \
+    --log gtdb.minh5.kmcp.log
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map gtdb.minh5.kmcp/
+
+
+# -------------------------------------------------------------------------------------
+# Minimizer with W=5
+
+input=gtdb
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments with 100bp overlap
+#   k = 21
+#   W = 5 # Minimizer
+kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
+    --log gtdb-r202-k21-n10-W5.log -j 32 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.2
+kmcp index -j 32 -I gtdb-r202-k21-n10-W5 -O gtdb.mini5.kmcp -n 1 -f 0.2 \
+    --log gtdb.mini5.kmcp.log
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map gtdb.mini5.kmcp/
+</code></pre>
+<p>Building small databases (all k-mers, for profiling with a computer cluster):</p>
+<pre><code>input=gtdb
+
+find $input -name "*.fna.gz" &gt; $input.files.txt
+
+
+# number of databases
+n=16
+
+# split into $n chunks
+split -n l/$n $chunksize -d  $input.files.txt $input.n$n-
+
+# create database for every chunks
+for f in $input.n$n-*; do 
+    echo $f
+
+    # compute k-mers
+    #   sequence containing "plasmid" in name are ignored,
+    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   k = 21
+    kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+        --log $f-k21-n10.log -j 24 --force
+
+    # build database
+    #   number of index files: 24, for server with &gt;= 24 CPU cores
+    #   bloom filter parameter:
+    #     number of hash function: 1
+    #     false positive rate: 0.3
+    kmcp index -j 24 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
+        --log $f.kmcp.log
+
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map $f.kmcp/
+done
+</code></pre>
+<h3 id="refseq-viral-or-fungi">RefSeq viral or fungi</h3>
+<p>Tools</p>
+<ul>
+<li><a href="https://github.com/pirovc/genome_updater">genome_updater</a> for downloading genomes from NCBI.</li>
+</ul>
+<p>Downloading viral and fungi sequences:</p>
+<pre><code># name=fungi
+name=viral
+
+# -k for dry-run
+# -i for fix
+time genome_updater.sh \
+    -d "refseq"\
+    -g $name \
+    -c "all" \
+    -l "all" \
+    -f "genomic.fna.gz" \
+    -o "refseq-$name" \
+    -t 12 \
+    -m -a -p
+
+# cd to 2021-09-30_19-35-19
+
+# taxdump
+mkdir -p taxdump
+tar -zxvf taxdump.tar.gz -C taxdump
+
+# assembly accesion -&gt; taxid
+cut -f 1,6 assembly_summary.txt &gt; taxid.map    
+# assembly accesion -&gt; name
+cut -f 1,8 assembly_summary.txt &gt; name.map
+
+
+# stats (optional)
+cat taxid.map  \
+    | csvtk freq -Ht -f 2 -nr \
+    | taxonkit lineage -r -n -L --data-dir taxdump/ \
+    | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
+    | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
+    &gt; taxid.map.stats.tsv
+
+seqkit stats -T -j 12 --infile-list &lt;(find files -name "*.fna.gz") &gt; files.stats.tsv
+
+
+
+# ------------------------------------------------------ 
+# create another directory linking to genome files
+
+input=files.renamed
+
+mkdir -p $input
+# create soft links
+cd $input
+find ../files -name "*.fna.gz" \
+    | rush 'ln -s {}'
+cd ..    
+# rename
+brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
+</code></pre>
+<p>Building database (all k-mers, for profiling on short-reads):</p>
+<pre><code># -----------------------------------------------------------------
+# for viral, only splitting into 5 fragments
+name=viral
+
+input=files.renamed
+
+# -------------
+# all kmers
+
+kmcp compute -I $input -O refseq-$name-k21-n5 \
+    -k 21 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log refseq-$name-k21-n5.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k21-n5/ -O refseq-viral.kmcp \
+    -j 32 -f 0.001 -n 3 -x 100K \
+    --log refseq-viral.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-viral.kmcp/
+
+
+# -----------------------------------------------------------------
+# for fungi
+name=fungi
+
+input=files.renamed
+
+
+# -------------
+# all kmers
+
+kmcp compute -I $input -O refseq-$name-k21-n10 \
+    -k 21 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 100 \
+    --log refseq-$name-k21-n10.log -j 32 --force
+
+kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
+    -j 32 -f 0.3 -n 1 \
+    --log refseq-fungi.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-fungi.kmcp/
+</code></pre>
+<p>Building database (k-mer sketches, for profiling on long-reads):</p>
+<pre><code># -----------------------------------------------------------------
+# for viral, only splitting into 5 fragments
+name=viral
+
+input=files.renamed
+
+
+# ---------------------------------------------
+# here we compute Closed Syncmers with s=16
+
+kmcp compute -I $input -O refseq-$name-k21-n5-S16 \
+    -k 21 -S 16 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log refseq-$name-k21-n5-S16.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k21-n5-S16/ -O refseq-viral.sync16.kmcp \
+    -j 32 -f 0.001 -n 3 -x 100K \
+    --log refseq-viral.sync16.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-viral.sync16.kmcp/
+
+
+# ---------------------------------------------
+# here we compute FracMinHash with D=5
+
+kmcp compute -I $input -O refseq-$name-k21-n5-D5 \
+    -k 21 -D 5 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log refseq-$name-k21-n5-D5.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k21-n5-D5/ -O refseq-viral.minh5.kmcp \
+    -j 32 -f 0.001 -n 3 -x 100K \
+    --log refseq-viral.minh5.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-viral.minh5.kmcp/
+
+
+# -----------------------------------------------------------------
+# for fungi
+name=fungi
+
+input=files.renamed
+
+# ---------------------------------------------
+# here we compute Closed Syncmers with s=16
+
+kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
+    -k 21 -S 16 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 100 \
+    --log refseq-$name-k21-n10-S16.log -j 32 --force
+
+kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-fungi.sync16.kmcp \
+    -j 32 -f 0.2 -n 1 \
+    --log refseq-fungi.sync16.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-fungi.sync16.kmcp/
+
+
+# ---------------------------------------------
+# here we compute FracMinHash with D=5
+
+kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
+    -k 21 -D 5 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 100 \
+    --log refseq-$name-k21-n10-D5.log -j 32 --force
+
+kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-fungi.minh5.kmcp \
+    -j 32 -f 0.2 -n 1 \
+    --log refseq-fungi.minh5.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-fungi.minh5.kmcp/
+
+
+# ---------------------------------------------
+# here we compute Minimizer with W=5
+
+kmcp compute -I $input -O refseq-$name-k21-n10-W5 \
+    -k 21 -W 5 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 100 \
+    --log refseq-$name-k21-n10-W5.log -j 32 --force
+
+kmcp index -I refseq-$name-k21-n10-W5/ -O refseq-fungi.mini5.kmcp \
+    -j 32 -f 0.2 -n 1 \
+    --log refseq-fungi.mini5.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-fungi.mini5.kmcp/
+</code></pre>
+<h3 id="genbank-viral">Genbank viral</h3>
+<p>Tools</p>
+<ul>
+<li><a href="https://github.com/pirovc/genome_updater">genome_updater</a> for downloading genomes from NCBI.</li>
+</ul>
+<p>Downloading viral sequences:</p>
+<pre><code>name=viral
+
+# -k for dry-run
+# -i for fix
+time genome_updater.sh \
+    -d "genbank"\
+    -g $name \
+    -c "all" \
+    -l "all" \
+    -f "genomic.fna.gz" \
+    -o "genbank-$name" \
+    -t 12 \
+    -m -a -p
+
+# cd genbank-viral/2021-12-06_15-27-37/
+
+# taxdump
+mkdir -p taxdump
+tar -zxvf taxdump.tar.gz -C taxdump
+
+# assembly accesion -&gt; taxid
+cut -f 1,6 assembly_summary.txt &gt; taxid.map    
+# assembly accesion -&gt; name
+cut -f 1,8 assembly_summary.txt &gt; name.map
+
+
+# stats (optional)
+cat taxid.map  \
+    | csvtk freq -Ht -f 2 -nr \
+    | taxonkit lineage -r -n -L --data-dir taxdump/ \
+    | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
+    | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
+    &gt; taxid.map.stats.tsv
+
+seqkit stats -T -j 12 --infile-list &lt;(find files -name "*.fna.gz") &gt; files.stats.tsv
+
+
+
+# ------------------------------------------------------ 
+# create another directory linking to genome files
+
+input=files.renamed
+
+mkdir -p $input
+# create soft links
+cd $input
+find ../files -name "*.fna.gz" \
+    | rush 'ln -s {}'
+cd ..    
+# rename
+brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
+</code></pre>
+<p>keep at most 5 genomes for a taxid:</p>
+<pre><code># -----------------------------------------------------------------
+# keep at most 5 genomes for a taxid
+
+# backup
+cat taxid.map &gt; taxid.all.map
+cat name.map &gt; name.all.map
+
+# keep at most 5 ids for a taxid
+cat taxid.all.map \
+    | csvtk sort -Ht -k 2:n -k 1:n \
+    | csvtk uniq -Ht -f 2 -n 5 \
+    &gt; taxid.map
+
+cat name.all.map \
+    | csvtk grep -Ht -P &lt;(cut -f 1 taxid.map) \
+    &gt; name.map
+
+# organize files
+input=files.renamed
+output=files.renamed.slim
+mkdir -p $output 
+cd $output
+find ../$input -name "*.fna.gz" \
+    | csvtk mutate -Ht -p '/([^\/]+).fna.gz' \
+    | csvtk grep -Ht -f 2 -P &lt;(cut -f 1 ../taxid.map) \
+    | rush 'ln -s {1}'
+cd ..
+
+# check number of genomes
+ls $output | wc -l
+wc -l taxid.map
+</code></pre>
+<p>Building database (all k-mers, for profiling on short-reads):</p>
+<pre><code># -----------------------------------------------------------------
+# for viral, only splitting into 5 fragments
+name=viral
+
+input=files.renamed.slim
+
+
+# ----------------
+# all kmers
+
+kmcp compute -I $input -O genbank-$name-k21-n5 \
+    -k 21 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log genbank-$name-k21-n5.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.05
+#   still using one hash function: 1
+kmcp index -I genbank-$name-k21-n5/ -O genbank-viral.kmcp \
+    -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+    --log genbank-viral.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map genbank-viral.kmcp/
+</code></pre>
+<p>Building database (k-mer sketches, for profiling on long-reads):</p>
+<pre><code>name=viral
+
+input=files.renamed.slim
+
+
+# ----------------------------------------------
+# here we compute Closed Syncmers with s=16
+
+kmcp compute -I $input -O genbank-$name-k21-n5-S16 \
+    -k 21 -S 16 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log genbank-$name-k21-n5-S16.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I genbank-$name-k21-n5-S16/ -O genbank-viral.sync16.kmcp \
+    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+    --log genbank-viral.sync16.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map genbank-viral.sync16.kmcp/
+
+
+# ----------------------------------------------
+# here we compute FracMinHash with D=5
+
+kmcp compute -I $input -O genbank-$name-k21-n5-D5 \
+    -k 21 -D 5 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log genbank-$name-k21-n5-D5.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I genbank-$name-k21-n5-D5/ -O genbank-viral.minh5.kmcp \
+    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+    --log genbank-viral.minh5.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map genbank-viral.minh5.kmcp/
+
+
+# ----------------------------------------------
+# here we compute Minimizer with W=5
+
+kmcp compute -I $input -O genbank-$name-k21-n5-W5 \
+    -k 21 -W 5 --seq-name-filter plasmid \
+    --split-number 5 --split-overlap 100 \
+    --log genbank-$name-k21-n5-W5.log -j 32 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.001
+#   using more hash functions: 3
+kmcp index -I genbank-$name-k21-n5-W5/ -O genbank-viral.mini5.kmcp \
+    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
+    --log genbank-viral.mini5.kmcp.log --force
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map genbank-viral.mini5.kmcp/
+</code></pre>
+<p>Building small databases (all k-mers, for profiling with a computer cluster):</p>
+<pre><code>name=genbank-viral
+
+input=files.renamed.slim
+
+find $input -name "*.fna.gz" &gt; $input.files.txt
+
+
+# number of databases
+n=4
+
+# split into $n chunks
+split -n l/$n $chunksize -d  $input.files.txt $name.n$n-
+
+# create database for every chunks
+for f in $name.n$n-*; do 
+    echo $f
+
+    kmcp compute -i $f -O $f-k21-n5 \
+        -k 21 --seq-name-filter plasmid \
+        --split-number 5 --split-overlap 100 \
+        --log $f-k21-n5.log -j 32 --force
+
+    # viral genomes are small:
+    #   using small false positive rate: 0.001
+    #   using more hash functions: 3
+    kmcp index -I $f-k21-n5/ -O $f.kmcp \
+        -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+        --log $f.kmcp.log --force
+
+    # cp taxid and name mapping file to database directory
+    cp taxid.map name.map $f.kmcp/
+done
+</code></pre>
+<h3 id="human-genome">Human genome</h3>
+<p>Downloading human genome file from <a href="https://github.com/marbl/CHM13">CHM13</a>:</p>
+<pre><code>wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.3_CHM13_T2T_v1.1/GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+</code></pre>
+<p>Building database (all k-mers, &lt; 6min):</p>
+<pre><code>input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+
+# splitting human genome into 1024 fragments.
+# The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.3' from the file name.
+kmcp compute $input -O human-chm13-k21-n1024 \
+    --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
+    -k 21 \
+    --split-number 1024 --split-overlap 100 \
+    --log human-chm13-k21-n1024.log -j 32 --force
+
+#   using small false positive rate: 0.3
+#   using more hash functions: 1
+kmcp index -I human-chm13-k21-n1024/ -O human-chm13.kmcp \
+    -j 8 -f 0.3 -n 1 \
+    --log human-chm13.kmcp.log --force
+
+# taxid.map
+echo -ne "GCA_009914755.3\t9606\n" &gt; taxid.map
+
+# name.mapp
+echo -ne "GCA_009914755.3\tHomo sapiens isolate CHM13\n" &gt; name.map
+
+# cp name mapping file to database directory
+cp taxid.map name.map human-chm13.kmcp/
+</code></pre>
+<h3 id="refseq-plasmid">Refseq plasmid</h3>
+<p>Downloading plasmid sequences:</p>
+<pre><code>wget https://ftp.ncbi.nlm.nih.gov/refseq/release/plasmid/
+cat index.html \
+    | perl -ne 'next unless /"(plasmid.*genomic.fna.gz)"/; print "$1\n"' &gt; files.txt
+
+baseurl=https://ftp.ncbi.nlm.nih.gov/refseq/release/plasmid/
+outdir=archives; mkdir -p $outdir
+cat files.txt \
+    | rush -j 12 -v b=$baseurl -v out=$outdir \
+        'wget -c {b}/{} -o /dev/null -O {out}/{}' -c -C download.rush
+
+
+# name mapping
+seqkit seq -n archives/*.fna.gz \
+    | sed -E 's/\s+/\t/' \
+    &gt; name.map
+
+# length stats
+seqkit stats -b -a -j 12 -T archives/*.fna.gz &gt; archives.stats.tsv
+
+
+# split to individual files
+for f in archives/*.fna.gz; do \
+    seqkit split2 -s 1 --quiet $f -O refseq-plasmid; \
+done
+# rename files with sequence ID
+find refseq-plasmid -name "*.fna.gz" \
+    | rush 'mv {} {/}/$(seqkit seq -ni {}).fna.gz'
+</code></pre>
+<p>Building database (all k-mers):</p>
+<pre><code>name=plasmid
+
+input=refseq-plasmid
+
+kmcp compute -I $input -O refseq-$name-k21-n5 \
+    -k 21 --circular \
+    --split-number 5 --split-overlap 100 \
+    --log refseq-$name-k21-n5.log -j 32 --force
+
+#   using small false positive rate: 0.01
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k21-n5/ -O refseq-$name.kmcp \
+    -j 32 -f 0.01 -n 3 -x 200K -X 1024 \
+    --log refseq-$name.kmcp.log --force
+
+# cp name mapping file to database directory
+cp name.map refseq-$name.kmcp/
+</code></pre>
+<p>Building database (FracMinHash/Scaled MinHash):</p>
+<pre><code>name=plasmid
+
+input=refseq-plasmid
+
+kmcp compute -I $input -O refseq-$name-k31-D10 \
+    -k 31 --circular --scale 10 \
+    --log refseq-$name-k31-D10.log -j 32 --force
+
+#   using small false positive rate: 0.01
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k31-D10/ -O refseq-$name.minhash.kmcp \
+    -j 8 -f 0.01 -n 3 -x 100K -X 1024 \
+    --log refseq-$name.minhash.kmcp.log --force
+
+# cp name mapping file to database directory
+cp name.map refseq-$name.minhash.kmcp/
+</code></pre>
+<p>Building database (Closed Syncmer):</p>
+<pre><code>name=plasmid
+
+input=refseq-plasmid
+
+kmcp compute -I $input -O refseq-$name-k31-S21 \
+    -k 31 --circular --syncmer-s 21 \
+    --log refseq-$name-k31-S21.log -j 32 --force
+
+#   using small false positive rate: 0.01
+#   using more hash functions: 3
+kmcp index -I refseq-$name-k31-S21/ -O refseq-$name.syncmer.kmcp \
+    -j 8 -f 0.01 -n 3 -x 100K -X 1024 \
+    --log refseq-$name.syncmer.kmcp.log --force
+
+# cp name mapping file to database directory
+cp name.map refseq-$name.syncmer.kmcp/
+</code></pre>
+<h3 id="humgut">HumGut</h3>
+<p><a href="http://arken.nmbu.no/~larssn/humgut/">HumGut</a> is a comprehensive Human Gut prokaryotic genomes collection filtered by metagenome data.</p>
+<p>Dataset</p>
+<ul>
+<li>Genomes: <a href="http://arken.nmbu.no/~larssn/humgut/HumGut.tar.gz">HumGut.tar.gz</a></li>
+<li>Metadata: <a href="http://arken.nmbu.no/~larssn/humgut/HumGut.tsv">HumGut.tsv</a></li>
+<li>Taxdump files:<ul>
+<li>NCBI taxonomy: <a href="http://arken.nmbu.no/~larssn/humgut/ncbi_names.dmp">ncbi_names.dump</a>
+  and <a href="http://arken.nmbu.no/~larssn/humgut/ncbi_names.dmp">ncbi_nodes.dump</a></li>
+<li>GTDB taxomomy: <a href="http://arken.nmbu.no/~larssn/humgut/gtdb_names.dmp">gtdb_names.dump</a>
+  and <a href="http://arken.nmbu.no/~larssn/humgut/gtdb_names.dmp">gtdb_nodes.dump</a></li>
+</ul>
+</li>
+</ul>
+<p>Uncompressing and renaming:</p>
+<pre><code># uncompress
+tar -zxvf HumGut.tar.gz
+
+# taxdump files
+mkdir taxdump
+mv ncbi_names.dmp taxdump/names.dmp
+mv ncbi_nodes.dmp taxdump/nodes.dmp
+</code></pre>
+<p>Mapping file:</p>
+<pre><code># assembly accesion -&gt; taxid
+cat HumGut.tsv \
+    | csvtk cut -t -f genome_file,ncbi_tax_id \
+    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk del-header \
+    &gt; taxid.map
+
+# assembly accesion -&gt; name
+cat HumGut.tsv \
+    | csvtk cut -t -f genome_file,ncbi_organism_name \
+    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk del-header \
+    &gt; name.map
+</code></pre>
+<p>Stats:</p>
+<pre><code># -------------------------------------------------------------
+# NCBI taxonomy
+
+# number of species/strains
+cat taxid.map \
+    | taxonkit lineage --data-dir taxdump-ncbi -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid.map.stats
+species      23604
+strain       6816
+subspecies   161
+no rank      69
+serotype     38
+genus        3
+
+# number of unique species/strains
+cat taxid.map \
+    | csvtk uniq -Ht -f 2 \
+    | taxonkit lineage --data-dir taxdump-ncbi -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid.map.uniq.stats;
+species      1240
+strain       458
+subspecies   15
+genus        1
+no rank      1
+serotype     1
+
+# -------------------------------------------------------------
+# GTDB taxonomy
+
+cat HumGut.tsv \
+    | csvtk cut -t -f genome_file,gtdbtk_tax_id \
+    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk del-header \
+    &gt; taxid-gtdb.map
+
+cat taxid-gtdb.map \
+    | csvtk uniq -Ht -f 2 \
+    | taxonkit lineage --data-dir taxdump-gtdb -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid-gtdb.map.uniq.stats
+species   2810
+genus     434
+family    52
+order     12
+class     2
+</code></pre>
+<p>Building database:</p>
+<pre><code># compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments
+#   k = 21
+kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 -j 32 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+kmcp index -j 32 -I humgut-k21-n10 -O humgut.kmcp -n 1 -f 0.3
+
+cp taxid.map taxid-gtdb.map humgut.kmcp/
+</code></pre>
+<h3 id="progenomes2">proGenomes2</h3>
+<p><a href="https://progenomes.embl.de/">proGenomes</a> v2.1 provides 84,096 consistently annotated bacterial
+and archaeal genomes from over 12000 species</p>
+<p>Dataset:</p>
+<ul>
+<li>Representative genomes: <a href="https://progenomes.embl.de/data/repGenomes/freeze12.contigs.representatives.fasta.gz">contigs.representatives.fasta.gz</a></li>
+<li>NCBI taxonomy: <a href="https://progenomes.embl.de/data/proGenomes2.1_specI_lineageNCBI.tab">proGenomes2.1_specI_lineageNCBI.tab</a></li>
+</ul>
+<p>Organize sequences:</p>
+<pre><code># download
+wget https://progenomes.embl.de/data/repGenomes/freeze12.contigs.representatives.fasta.gz
+
+# unzip for splitting by genome ID
+time seqkit seq freeze12.contigs.representatives.fasta.gz -o freeze12.contigs.representatives.fasta
+
+# split by genome ID
+seqkit split --by-id --two-pass --id-regexp '(^\d+\.\w+)\.' freeze12.contigs.representatives.fasta --out-dir genomes
+
+# batch rename
+brename -p '^.+id_' genomes
+
+# compress genomes for saving space
+find genomes/ -name "*.fasta" | rush 'gzip {}'
+</code></pre>
+<p>Mapping file:</p>
+<pre><code># download
+wget https://progenomes.embl.de/data/proGenomes2.1_specI_lineageNCBI.tab
+
+ls genomes/ | sed 's/.fasta.gz//' &gt; id.txt
+
+# id -&gt; taxid
+cut -f 1 proGenomes2.1_specI_lineageNCBI.tab \
+    | awk -F . '{print $0"\t"$1}' \
+    | csvtk grep -Ht -P id.txt \
+    &gt; taxid.map
+
+cat taxid.map \
+    | csvtk uniq -Ht -f 2 \
+    | taxonkit lineage --data-dir taxdump -i 2 -r -n -L \
+    | csvtk freq -Ht -f 4 -nr \
+    | csvtk pretty -H -t \
+    | tee taxid.map.uniq.stats
+species           8088
+strain            3262
+subspecies        37
+isolate           25
+no rank           16
+forma specialis   14
+biotype           1
+
+
+# use the taxonomy verion of the refseq-virus: 2021-10-01
+# id -&gt; name
+cat taxid.map \
+    | taxonkit lineage --data-dir taxdump -i 2 -n -L \
+    | cut -f 1,3 \
+    &gt; name.map
+</code></pre>
+<p>Building database:</p>
+<pre><code># compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments
+#   k = 21
+kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+kmcp index -j 32 -I progenomes-k21-n10 -O progenomes.kmcp -n 1 -f 0.3
+
+cp taxid.map name.map progenomes.kmcp/
+</code></pre>
+<h2 id="building-custom-databases">Building custom databases</h2>
+<p>Files:</p>
+<ol>
+<li>Genome files<ul>
+<li>(Gzip-compressed) FASTA/Q format.</li>
+<li>One genome per file with the reference identifier in the file name.</li>
+</ul>
+</li>
+<li>TaxId mapping file (for metagenomic profiling)<ul>
+<li>Two-column (reference identifier and TaxId) tab-delimited.</li>
+</ul>
+</li>
+<li><a href="ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz">NCBI taxonomy dump files</a> (for metagenomic profiling)<ul>
+<li><code>names.dmp</code></li>
+<li><code>nodes.dmp</code></li>
+<li><code>merged.dmp</code> (optional)</li>
+<li><code>delnodes.dmp</code> (optional)</li>
+</ul>
+</li>
+</ol>
+<p>Tools:</p>
+<ul>
+<li><a href="/download">kmcp</a> for metagenomic profiling.</li>
+<li><a href="https://github.com/shenwei356/rush/releases">rush</a> for executing jobs in parallel.</li>
+<li><a href="https://github.com/shenwei356/brename/releases">brename</a> for batching renaming files (optional)</li>
+</ul>
+<p><strong>Memory notes</strong>:</p>
+<p>By default, <code>kmcp search</code> loads the whole database into main memory (RAM) for fast searching.
+Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
+while it's much slower, &gt;10X slower on SSD and should be much slower on HDD disks.</p>
+<p>Another way is dividing the reference genomes into several parts
+and building smaller databases for all parts, so that the biggest
+database can be loaded into RAM. After performing database searching,
+search results on all small databases can be merged with <code>kmcp merge</code>
+for downstream analysis.</p>
+<p>Buiding small databases can also accelerate searching on a <em>computer cluster</em>,
+where every node searches a part of the database.</p>
+<h3 id="step-1-computing-k-mers">Step 1. Computing k-mers</h3>
+<p>Plain or gzip-compressed input genome sequence files better be saved in one directory,
+with multiple-level directories allowed. 
+The file extension could be <code>fa</code>, <code>fasta</code>, <code>fna</code>, <code>fq</code>, <code>fastq</code>, <code>fa.gz</code>, <code>fasta.gz</code>,
+ <code>fna.gz</code>, <code>fq.gz</code> or <code>fastq.gz</code>.</p>
+<p><strong>Input files</strong> can be given as a list of FASTA/Q files via
+positional arguments or a directory (with multiple-level directories allowed) containing sequence files
+via the flag <code>-I/--in-dir</code>. A regular expression for matching
+sequencing files is available by the flag <code>-r/--file-regexp</code>.
+The default pattern matches files with extension of 
+<code>fa</code>, <code>fasta</code>, <code>fna</code>, <code>fq</code>, <code>fastq</code>, <code>fa.gz</code>, <code>fasta.gz</code>,
+<code>fna.gz</code>, <code>fq.gz</code> or <code>fastq.gz</code>.</p>
+<p>Unwanted sequence like plasmid sequences can be <strong>filtered out</strong> by
+the name via regular expression(s) (<code>-B/--seq-name-filter</code>).</p>
+<p><strong>How to compute k-mers</strong>:
+By default, <code>kmcp</code> computes k-mers (sketches) of every file,
+you can also use <code>--by-seq</code> to compute for every sequence,
+where sequence IDs in all input files better be distinct.
+It also <strong>supports splitting sequences into fragments, this
+could increase the specificity in profiling result in cost
+of slower searching speed</strong>. </p>
+<p><strong>Splitting sequences</strong>:</p>
+<ol>
+<li>Sequences can be splitted into fragments by a fragment size 
+    (<code>-s/--split-size</code>) or number of fragments (<code>-n/--split-number</code>)
+    with overlap (-<code>l/--split-overlap</code>).</li>
+<li>When splitting by number of fragments, <strong>all sequences (except for
+    these mathching any regular expression given by <code>-B/--seq-name-filter</code>)
+    in a sequence file are concatenated with k-1 Ns before splitting</strong>.</li>
+<li>Both sequence/reference IDs and fragments indices are saved for later use,
+    in form of meta/description data in <code>.unik</code> files, and will
+    be reported in <code>kmcp search</code> results.</li>
+</ol>
+<p><strong>Meta data</strong>:</p>
+<ol>
+<li>Every outputted <code>.unik</code> file contains the sequence/reference ID,
+    fragment index, number of fragments, and genome size of reference.</li>
+<li>When parsing whole sequence files or splitting by number of fragments,
+    the <strong>identifier of a reference</strong> is the basename of the input file
+    by default. It can also be extracted from the input file name via
+    <code>-N/--ref-name-regexp</code>, e.g., <code>^(\w{3}_\d{9}\.\d+)</code> for <strong>RefSeq assembly accessions</strong>.</li>
+</ol>
+<p>Multiple <strong>sizes of k-mers</strong> are supported, but a single k-mer size
+is good enough. </p>
+<p><strong>Supported k-mer (sketches) types</strong>:</p>
+<ol>
+<li>K-mer:<ul>
+<li>ntHash of k-mer (<code>-k</code>)</li>
+</ul>
+</li>
+<li>K-mer sketchs (all using ntHash):<ul>
+<li>Scaled MinHash (<code>-k -D</code>), reviously named Scaled MinHash</li>
+<li>Minimizer      (<code>-k -W</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
+<li>Closed Syncmer (<code>-k -S</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Output</strong>:</p>
+<ol>
+<li>
+<p>All outputted <code>.unik</code> files are saved in <code>${outdir}</code>, with path</p>
+<pre><code>${outdir}/xxx/yyy/zzz/${infile}-id_${seqID}.unik
+</code></pre>
+<p>where dirctory tree <code>/xxx/yyy/zzz/</code> is built for &gt; 1000 output files.</p>
+</li>
+<li>
+<p>For splitting sequence mode (<code>--split-size &gt; 0</code> or <code>--split-number &gt; 0</code>),
+    output files are:</p>
+<pre><code>${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+</code></pre>
+</li>
+<li>
+<p>A summary file (<code>${outdir}/_info.txt</code>) is generated for later use.
+     Users need to check if the reference IDs (column <code>name</code>) are what
+     supposed to be.</p>
+</li>
+</ol>
+<p><strong>Performance tips</strong>:</p>
+<ol>
+<li>Decrease value of <code>-j/--threads</code> for data in hard disk drives (HDD) to
+    reduce I/O pressure.</li>
+</ol>
+<p><strong>Commands</strong> (<a href="/usage/#compute">usage</a>):</p>
+<pre><code># compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are splitted into 10 fragments,
+#   k = 21
+kmcp compute --in-dir refs/ \
+    --kmer 21 \
+    --split-number 10 \
+    --seq-name-filter plasmid \
+    --ref-name-regexp '(.+).fasta.gz' \
+    --out-dir refs-k21-n10
+
+# demo output
+22:33:10.685 [INFO] kmcp v0.7.0
+22:33:10.685 [INFO]   https://github.com/shenwei356/kmcp
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] checking input files ...
+22:33:10.685 [INFO]   9 input file(s) given
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] -------------------- [main parameters] --------------------
+22:33:10.685 [INFO] input and output:
+22:33:10.685 [INFO]   input directory: refs/
+22:33:10.685 [INFO]     regular expression of input files: (?i)\.(f[aq](st[aq])?|fna)(.gz)?$
+22:33:10.685 [INFO]     *regular expression for extracting reference name from file name: 
+22:33:10.685 [INFO]     *regular expressions for filtering out sequences: [plasmid]
+22:33:10.685 [INFO]   output directory: refs-k21-n10
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] sequences splitting: true
+22:33:10.685 [INFO]   split parts: 10, overlap: 0 bp
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] k-mer (sketches) computing:
+22:33:10.685 [INFO]   k-mer size(s): 21
+22:33:10.685 [INFO]   circular genome: false
+22:33:10.685 [INFO]   saving exact number of k-mers: true
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] -------------------- [main parameters] --------------------
+22:33:10.685 [INFO] 
+22:33:10.685 [INFO] computing ...
+processed files:  9 / 9 [======================================] ETA: 0s. done
+22:33:11.121 [INFO] 
+22:33:11.121 [INFO] elapsed time: 436.367564ms
+22:33:11.121 [INFO]
+</code></pre>
+<p>A summary file (<code>_info.txt</code>) is generated for later use.
+<strong>Users need to check if the reference IDs (column <code>name</code>) are what supposed to be</strong>.</p>
+<table>
+<thead>
+<tr>
+<th align="left">#path</th>
+<th align="left">name</th>
+<th align="left">fragIdx</th>
+<th align="left">idxNum</th>
+<th align="left">genomeSize</th>
+<th align="left">kmers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_0.unik</td>
+<td align="left">NC_010655.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">2664102</td>
+<td align="left">264247</td>
+</tr>
+<tr>
+<td align="left">refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_1.unik</td>
+<td align="left">NC_010655.1</td>
+<td align="left">1</td>
+<td align="left">10</td>
+<td align="left">2664102</td>
+<td align="left">266237</td>
+</tr>
+<tr>
+<td align="left">refs-k21-n10/595/162/595/NC_012971.2.fasta.gz/NC_012971.2-frag_0.unik</td>
+<td align="left">NC_012971.2</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4558953</td>
+<td align="left">450494</td>
+</tr>
+<tr>
+<td align="left">refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913.3-frag_0.unik</td>
+<td align="left">NC_000913.3</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4641652</td>
+<td align="left">459277</td>
+</tr>
+<tr>
+<td align="left">refs-k21-n10/934/859/934/NC_013654.1.fasta.gz/NC_013654.1-frag_0.unik</td>
+<td align="left">NC_013654.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">4717338</td>
+<td align="left">470575</td>
+</tr>
+</tbody>
+</table>
+<p>Meta data in the <code>.unik</code> file can be showed using <code>kmcp utils unik-info</code>:</p>
+<pre><code>kmcp utils unik-info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-frag_0.unik -a
+</code></pre>
+<h3 id="step-2-building-databases">Step 2. Building databases</h3>
+<p>KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
+Signature Index (<a href="https://arxiv.org/abs/1905.09624">COBS</a>). 
+We totally rewrite the algorithms, data structure and file format,
+and have improved the indexing and searching speed
+(check <a href="/benchmark/searching">benchmark</a>).</p>
+<p><strong>Input</strong>:</p>
+<ul>
+<li>The output directory generated by <code>kmcp compute</code>.</li>
+</ul>
+<p><strong>Database size and searching accuracy</strong>:</p>
+<ol>
+<li><strong>Use <code>--dry-run</code> to adjust parameters and check final number of 
+    index files (#index-files) and the total file size</strong>.</li>
+<li><code>-f/--false-positive-rate</code>: the default value <code>0.3</code> is enough for a
+    query with tens of matched k-mers (see BIGSI/COBS paper).
+    Small values could largely increase the size of database.</li>
+<li><code>-n/--num-hash</code>: large values could reduce the database size,
+    in cost of slower searching speed. Values &lt;=4 is recommended.</li>
+<li>
+<p>Value of block size <code>-b/--block-size</code> better be multiple of 64.
+    The default value is: </p>
+<pre><code>(#unikFiles/#threads + 7) / 8 * 8
+</code></pre>
+</li>
+<li>
+<p>Use flag <code>-x/--block-sizeX-kmers-t</code>, <code>-8/--block-size8-kmers-t</code>,
+    and <code>-1/--block-size1-kmers-t</code> to separately create index for
+    inputs with huge number of k-mers, for precise control of
+    database size.</p>
+</li>
+</ol>
+<p><strong>Taxonomy data</strong>:</p>
+<ol>
+<li>No taxonomy data are included in the database.</li>
+<li>Taxonomy information are only needed in <code>kmcp profile</code>.</li>
+</ol>
+<p><strong>Performance tips</strong>:</p>
+<ol>
+<li>Number of blocks (<code>.uniki</code> files) better be smaller than or equal
+   to number of CPU cores for faster searching speed. 
+   <strong>We can set <code>-j/--threads</code> to control the blocks number</strong>.
+   When more threads (&gt;= 1.3 * #blocks) are given, extra workers are
+   automatically created.</li>
+<li><code>#threads</code> files are simultaneously opened, and the max number
+    of opened files is limited by the flag <code>-F/--max-open-files</code>.
+    You may use a small value of <code>-F/--max-open-files</code> for 
+    hard disk drive storage.</li>
+<li>When the database is used in a new computer with more CPU cores,
+   <code>kmcp search</code> could automatically scale to utilize as many cores
+   as possible.</li>
+</ol>
+<p><strong>Commands</strong> (<a href="/usage/#compute">usage</a>):</p>
+<pre><code># build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+kmcp index -I refs-k21-n10 \
+    --threads 32 \
+    --num-hash 1 \
+    --false-positive-rate 0.3 \
+    --out-dir refs.kmcp
+
+# demo output
+22:44:17.710 [INFO] kmcp v0.7.0
+22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
+22:44:17.710 [INFO] 
+22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt
+22:44:17.716 [INFO]   90 cached file infos loaded
+22:44:17.716 [INFO] 
+22:44:17.716 [INFO] -------------------- [main parameters] --------------------
+22:44:17.716 [INFO]   number of hashes: 1
+22:44:17.716 [INFO]   false positive rate: 0.300000
+22:44:17.717 [INFO]   k-mer size(s): 21
+22:44:17.717 [INFO]   split seqequence size: 0, overlap: 0
+22:44:17.717 [INFO]   block-sizeX-kmers-t: 10.00 M
+22:44:17.717 [INFO]   block-sizeX        : 256.00
+22:44:17.717 [INFO]   block-size8-kmers-t: 20.00 M
+22:44:17.717 [INFO]   block-size1-kmers-t: 200.00 M
+22:44:17.717 [INFO] -------------------- [main parameters] --------------------
+22:44:17.717 [INFO] 
+22:44:17.717 [INFO] building index ...
+22:44:17.726 [WARN] ignore -X/--block-size (256) which is &gt;= -b/--block-size (8)
+22:44:17.726 [INFO] 
+22:44:17.726 [INFO]   block size: 8
+22:44:17.726 [INFO]   number of index files: 32 (may be more)
+22:44:17.726 [INFO] 
+22:44:17.726 [block #001]   1 / 1  100 %
+22:44:17.726 [block #002]   1 / 1  100 %
+22:44:17.726 [block #003]   1 / 1  100 %
+22:44:17.726 [block #004]   1 / 1  100 %
+22:44:17.726 [block #005]   1 / 1  100 %
+22:44:17.726 [block #006]   1 / 1  100 %
+22:44:17.726 [block #007]   1 / 1  100 %
+22:44:17.726 [block #008]   1 / 1  100 %
+22:44:17.726 [block #009]   1 / 1  100 %
+22:44:17.727 [block #010]   1 / 1  100 %
+22:44:17.727 [block #011]   1 / 1  100 %
+22:44:17.727 [block #012]   1 / 1  100 %
+[saved index files] 12 / 12  ETA: 0s. done
+22:44:17.933 [INFO] 
+22:44:17.933 [INFO] kmcp database with 42713316 k-mers saved to refs.kmcp
+22:44:17.933 [INFO] total file size: 15.66 MB
+22:44:17.933 [INFO] total index files: 12
+22:44:17.933 [INFO] 
+22:44:17.933 [INFO] elapsed time: 223.524128ms
+22:44:17.933 [INFO]
+</code></pre>
+<p>Output:</p>
+<pre><code>refs.kmcp/
+└── R001
+    ├── _block001.uniki
+    ├── _block002.uniki
+    ├── _block003.uniki
+    ├── _block004.uniki
+    ├── _block005.uniki
+    ├── _block006.uniki
+    ├── _block007.uniki
+    ├── _block008.uniki
+    ├── _block009.uniki
+    ├── _block010.uniki
+    ├── _block011.uniki
+    ├── _block012.uniki
+    ├── __db.yml
+    └── __name_mapping.tsv
+</code></pre>
+<p><code>__db.yml</code> contains configuration of the database, and <code>_blockXXX.uniki</code> are index files.
+<code>kmcp utils index-info</code> could show the basic information of index files:</p>
+<pre><code>kmcp utils index-info  refs.kmcp/R001/_block001.uniki
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">k</th>
+<th align="left">canonical</th>
+<th align="left">num-hashes</th>
+<th align="left">num-sigs</th>
+<th align="left">num-names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">refs.kmcp/R001/_block001.uniki</td>
+<td align="left">21</td>
+<td align="left">true</td>
+<td align="left">1</td>
+<td align="left">746442</td>
+<td align="left">8</td>
+</tr>
+</tbody>
+</table>
+<p>What's next? Check the <a href="/tutorial">tutorials</a>.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../download/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Download" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Download
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../usage/" class="md-footer__link md-footer__link--next" aria-label="Next: Usage" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Usage
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5e13d264.min.js"></script>
+      
+    
+  </body>
+</html>

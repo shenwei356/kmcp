@@ -1,0 +1,1124 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KMCP - K-mer-based Metagenomic Classification and Profiling">
+      
+      
+        <meta name="author" content="Wei Shen">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+    
+    
+      
+        <title>Sequence and genome searching - KMCP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ee0f47ba.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#009485">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sequence-and-genome-searching" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            KMCP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sequence and genome searching
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+
+    </a>
+    KMCP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/" class="md-nav__link">
+        Download
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../database/" class="md-nav__link">
+        Databases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        Usage
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Sequence and genome searching
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Sequence and genome searching
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-cases" class="md-nav__link">
+    Using cases
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sequence-search" class="md-nav__link">
+    Sequence search
+  </a>
+  
+    <nav class="md-nav" aria-label="Sequence search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-building-databases" class="md-nav__link">
+    Step 1. Building databases
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-searching" class="md-nav__link">
+    Step 2. Searching
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#genome-similarity-estimation" class="md-nav__link">
+    Genome similarity estimation
+  </a>
+  
+    <nav class="md-nav" aria-label="Genome similarity estimation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-building-databases_1" class="md-nav__link">
+    Step 1. Building databases
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-searching_1" class="md-nav__link">
+    Step 2. Searching
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/shenwei356" class="md-nav__link">
+        More tools
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-cases" class="md-nav__link">
+    Using cases
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sequence-search" class="md-nav__link">
+    Sequence search
+  </a>
+  
+    <nav class="md-nav" aria-label="Sequence search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-building-databases" class="md-nav__link">
+    Step 1. Building databases
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-searching" class="md-nav__link">
+    Step 2. Searching
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#genome-similarity-estimation" class="md-nav__link">
+    Genome similarity estimation
+  </a>
+  
+    <nav class="md-nav" aria-label="Genome similarity estimation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-building-databases_1" class="md-nav__link">
+    Step 1. Building databases
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-searching_1" class="md-nav__link">
+    Step 2. Searching
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/tutorial/searching.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="sequence-and-genome-searching">Sequence and genome searching</h1>
+<h2 id="using-cases">Using cases</h2>
+<ul>
+<li>Searching sequences against raws reads.<ul>
+<li>For checking existence:<ul>
+<li>Building database with raws reads and searching with query sequences,
+  optionally using k-mer sketches for long query sequences.</li>
+</ul>
+</li>
+<li>For abundance estimation:<ul>
+<li>For long sequences (similar to taxonomic profiling):<ul>
+<li>Building database with query sequences, searching with raws reads, and profiling.</li>
+</ul>
+</li>
+<li>For short (shorter than reads length) sequences:<ul>
+<li>Not capable.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Searching sequences against assemblies/genomes.<ul>
+<li>For checking existence:<ul>
+<li>For short sequences (short reads, e.g., detecting host contamination):<ul>
+<li>Building database with assemblies/genomes and searching with raws reads.</li>
+</ul>
+</li>
+<li>For long sequences:<ul>
+<li>Building database with assemblies/genomes using k-mer sketches.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>For genome similarity estimation:<ul>
+<li>Building database with assemblies/genomes using k-mer sketches.</li>
+</ul>
+</li>
+<li>For taxonomic profiling:<ul>
+<li>For short reads:<ul>
+<li>Building database with assemblies/genomes, searching with raws reads, and profiling.</li>
+</ul>
+</li>
+<li>For long reads:<ul>
+<li>Split long reads into short reads before searching.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="sequence-search">Sequence search</h2>
+<p>KMCP can be used for fast sequence search against large scales of genomic datasets
+as <a href="https://github.com/Phelimb/BIGSI">BIGSI</a> and <a href="https://github.com/bingmann/cobs">COBS</a> do.</p>
+<p>KMCP reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
+bringing a small database size and much faster searching speed
+ (check the <a href="/benchmark/searching">benchmark</a>).</p>
+<h3 id="step-1-building-databases">Step 1. Building databases</h3>
+<p>The database building process is similar to that of metagenomic profiling,
+with one difference:</p>
+<ol>
+<li>Reference genomes are not splitted into fragments which slow down searching speed.</li>
+</ol>
+<p>Taken GTDB for example:</p>
+<pre><code># mask low-complexity region
+mkdir -p gtdb.masked
+find gtdb/ -name "*.fna.gz" \
+    | rush 'dustmasker -in &lt;(zcat {}) -outfmt fasta \
+        | sed -e "/^&gt;/!s/[a-z]/n/g" \
+        | gzip -c &gt; gtdb.masked/{%}'
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   k = 21
+kmcp compute -I gtdb.masked/ -k 21 -B plasmid -O gtdb-r202-k21 --force
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+kmcp index -j 32 -I gtdb-r202-k21 -O gtdb-r202-k21-n 1 -f 0.3
+
+# cp name mapping file to database directory
+cp name.map gtdb-r202-k21.kmcp/
+</code></pre>
+<p>The size of database is 56GB. </p>
+<p>By default, <code>kmcp search</code> loads the whole database into main memory (RAM) for fast searching.
+Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
+while it's much slower, &gt;10X slower on SSD and should be much slower on HDD disks.</p>
+<h3 id="step-2-searching">Step 2. Searching</h3>
+<p><code>kmcp search</code> supports FASTA/Q format from STDIN or files (<a href="/usage/#search">usage</a>).</p>
+<pre><code>kmcp search -d gtdb-r202-k21.kmcp/ test.fq.gz -o result.tsv.gz
+
+13:36:14.522 [INFO] kmcp v0.7.0
+13:36:14.522 [INFO]   https://github.com/shenwei356/kmcp
+13:36:14.522 [INFO] 
+13:36:14.522 [INFO] checking input files ...
+13:36:14.522 [INFO]   1 input file(s) given
+13:36:14.522 [INFO] loading database with mmap enabled ...
+13:36:14.523 [INFO] number of extra workers for every index file: 3
+13:36:14.571 [INFO] database loaded: gtdb-r202-k21.kmcp/
+13:36:14.571 [INFO] 
+13:36:14.571 [INFO] -------------------- [main parameters] --------------------
+13:36:14.571 [INFO]   minimum    query length: 70
+13:36:14.571 [INFO]   minimum  matched k-mers: 30
+13:36:14.571 [INFO]   minimum  query coverage: 0.550000
+13:36:14.571 [INFO]   minimum target coverage: 0.000000
+13:36:14.571 [INFO]   minimum target coverage: 0.000000
+13:36:14.571 [INFO] -------------------- [main parameters] --------------------
+13:36:14.571 [INFO] 
+13:36:14.571 [INFO] searching ...
+13:36:14.575 [INFO] reading sequence file: test.fq.gz
+processed queries: 999424, speed: 2.47 million queries per minute
+13:36:38.843 [INFO] 
+13:36:38.843 [INFO] processed queries: 1000000, speed: 2.47 million queries per minute
+13:36:38.843 [INFO] 68.2500% (682500/1000000) queries matched
+13:36:38.843 [INFO] done searching
+13:36:42.852 [INFO] 
+13:36:42.853 [INFO] elapsed time: 28.331134572s
+13:36:42.853 [INFO]
+</code></pre>
+<p>The result is tab-delimited.</p>
+<table>
+<thead>
+<tr>
+<th align="left">#query</th>
+<th align="left">qLen</th>
+<th align="left">qKmers</th>
+<th align="left">FPR</th>
+<th align="left">hits</th>
+<th align="left">target</th>
+<th align="left">fragIdx</th>
+<th align="left">frags</th>
+<th align="left">tLen</th>
+<th align="left">kSize</th>
+<th align="left">mKmers</th>
+<th align="left">qCov</th>
+<th align="left">tCov</th>
+<th align="left">jacc</th>
+<th align="left">queryIdx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">S0R0/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">3.0168e-03</td>
+<td align="left">2</td>
+<td align="left">GCF_002872255.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2582291</td>
+<td align="left">21</td>
+<td align="left">88</td>
+<td align="left">0.6769</td>
+<td align="left">0.0000</td>
+<td align="left">0.0000</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">S0R0/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">3.0168e-03</td>
+<td align="left">2</td>
+<td align="left">GCF_001434585.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2219511</td>
+<td align="left">21</td>
+<td align="left">74</td>
+<td align="left">0.5692</td>
+<td align="left">0.0000</td>
+<td align="left">0.0000</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">3.0168e-03</td>
+<td align="left">5</td>
+<td align="left">GCF_002872255.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2582291</td>
+<td align="left">21</td>
+<td align="left">81</td>
+<td align="left">0.6231</td>
+<td align="left">0.0000</td>
+<td align="left">0.0000</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">3.0168e-03</td>
+<td align="left">5</td>
+<td align="left">GCF_001434585.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2219511</td>
+<td align="left">21</td>
+<td align="left">80</td>
+<td align="left">0.6154</td>
+<td align="left">0.0000</td>
+<td align="left">0.0000</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">3.0168e-03</td>
+<td align="left">5</td>
+<td align="left">GCF_001437405.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2260906</td>
+<td align="left">21</td>
+<td align="left">77</td>
+<td align="left">0.5923</td>
+<td align="left">0.0000</td>
+<td align="left">0.0000</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+<p>Reference IDs (column <code>target</code>) can be optionally mapped to their names when searching:</p>
+<pre><code>kmcp search -d gtdb-r202-k21.kmcp/ -N name.map test.fq.gz -o result.tsv.gz
+</code></pre>
+<p>Or after searching using <code>csvtk</code>:</p>
+<pre><code>csvtk replace -t -C $ -f target -k name.map -p '(.+)' -r '{kv}' result.tsv.gz
+</code></pre>
+<p>Print the main columns only:</p>
+<pre><code>csvtk head -t -C $ -n 5 result.tsv.gz \
+    | csvtk rename -t -C $ -f 1 -n query \
+    | csvtk cut -t -f query,FPR,qCov,target \
+    | csvtk csv2md -t
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">query</th>
+<th align="left">FPR</th>
+<th align="left">qCov</th>
+<th align="left">target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">S0R0/1</td>
+<td align="left">3.0168e-03</td>
+<td align="left">0.6769</td>
+<td align="left">GCF_002872255.1</td>
+</tr>
+<tr>
+<td align="left">S0R0/1</td>
+<td align="left">3.0168e-03</td>
+<td align="left">0.5692</td>
+<td align="left">GCF_001434585.1</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">3.0168e-03</td>
+<td align="left">0.6231</td>
+<td align="left">GCF_002872255.1</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">3.0168e-03</td>
+<td align="left">0.6154</td>
+<td align="left">GCF_001434585.1</td>
+</tr>
+<tr>
+<td align="left">S0R0/2</td>
+<td align="left">3.0168e-03</td>
+<td align="left">0.5923</td>
+<td align="left">GCF_001437405.1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="genome-similarity-estimation">Genome similarity estimation</h2>
+<p>KMCP can be used for <strong>fast similarity estimation of newly assembled genome against known reference genomes</strong>.
+BLAST is an option while it focuses on local similarity.
+Besides, the database is big and the searching speed is relative slow.</p>
+<p>Genome sketching is a method of utilizing small and approximate summaries of
+genomic data for fast searching and comparison.
+<a href="https://github.com/marbl/Mash">Mash</a> and <a href="https://github.com/sourmash-bio/sourmash">Sourmash</a>
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
+Here KMCP utilizes multiple sketches 
+(<a href="https://academic.oup.com/bioinformatics/article/20/18/3363/202143">Minimizer</a>, 
+<a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
+(previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>) and
+<a href="https://peerj.com/articles/10805/">Syncmers</a>) for genome similarity estimation.</p>
+<p><a href="/kmcp/database">Prebuilt databases</a> are available and users can also build custom databases following steps below.</p>
+<h3 id="step-1-building-databases_1">Step 1. Building databases</h3>
+<p>The database building process is similar to that of metagenomic profiling,
+with few differences:</p>
+<ol>
+<li>K-mer sketches instead of all k-mers are computed.</li>
+<li>Reference genomes are not splitted into fragments.</li>
+<li>Smaller false positive rate (<code>-f</code>) and more than one hash functions (<code>-n</code>) are used to improve accuracy.</li>
+<li>Using bigger k-mer size: 31.</li>
+</ol>
+<p>Supported k-mer (sketches) types:</p>
+<ol>
+<li>K-mer:<ul>
+<li>ntHash of k-mer (<code>-k</code>)</li>
+</ul>
+</li>
+<li>K-mer sketchs (all using ntHash):<ul>
+<li>FracMinHash    (<code>-k -D</code>), previously named Scaled MinHash</li>
+<li>Minimizer      (<code>-k -W</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
+<li>Closed Syncmer (<code>-k -S</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
+</ul>
+</li>
+</ol>
+<p>Taken GTDB for example:</p>
+<pre><code># compute FracMinHash (Scaled MinHash) with scale 1000
+#   sequence containing "plasmid" in name are ignored,
+#   k = 31
+kmcp compute -I gtdb/ -k 31 -D 1000 -B plasmid -O gtdb-r202-minhash
+
+# build database
+#   number of index files: 8, for server with &gt;= 8 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 3
+#     false positive rate: 0.001
+kmcp index -j 8 -I gtdb-r202-minhash -O gtdb.minhash.kmcp -n 3 -f 0.001
+
+# cp name mapping file to database directory
+cp taxid.map name.map gtdb.minhash.kmcp/
+</code></pre>
+<p>Attention:</p>
+<ul>
+<li>For small genomes like viruses, sketching parameters should be adjusted. 
+For examples, setting a smaller scale like 10.</li>
+</ul>
+<h3 id="step-2-searching_1">Step 2. Searching</h3>
+<p>The searching process is simple and <a href="https://bioinf.shenwei.me/kmcp/benchmark">very fast</a> (&lt;1 second).</p>
+<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ contigs.fasta -o result.tsv
+</code></pre>
+<p>The output is in tab-delimited format, full search result:</p>
+<table>
+<thead>
+<tr>
+<th align="left">#query</th>
+<th align="left">qLen</th>
+<th align="left">qKmers</th>
+<th align="left">FPR</th>
+<th align="left">hits</th>
+<th align="left">target</th>
+<th align="left">fragIdx</th>
+<th align="left">frags</th>
+<th align="left">tLen</th>
+<th align="left">kSize</th>
+<th align="left">mKmers</th>
+<th align="left">qCov</th>
+<th align="left">tCov</th>
+<th align="left">jacc</th>
+<th align="left">queryIdx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">NODE_1_length_106749_cov_161.610981</td>
+<td align="left">4563649</td>
+<td align="left">9052</td>
+<td align="left">0.000000e+00</td>
+<td align="left">1</td>
+<td align="left">GCF_900460465.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">4777134</td>
+<td align="left">31</td>
+<td align="left">8942</td>
+<td align="left">0.9878</td>
+<td align="left">0.9933</td>
+<td align="left">0.9813</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<p>Reference IDs can be optionally mapped to their names, let's print the main columns only:</p>
+<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ -N gtdb.minhash.kmcp/name.map \
+    contigs.fasta --quiet \
+    | csvtk rename -t -C $ -f 1 -n query \
+    | csvtk cut -t -f query,jacc,target \
+    &gt; result.tsv
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">query</th>
+<th align="left">jacc</th>
+<th align="left">target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">NODE_1_length_106749_cov_161.610981</td>
+<td align="left">0.9813</td>
+<td align="left">NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence</td>
+</tr>
+</tbody>
+</table>
+<p>Using closed syncmer:</p>
+<pre><code>kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ -N gtdb.syncmer.kmcp/name.map \
+    contigs.fasta --quiet \
+    | csvtk rename -t -C $ -f 1 -n query \
+    | csvtk cut -t -f query,jacc,target
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">query</th>
+<th align="left">jacc</th>
+<th align="left">target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">NODE_1_length_106749_cov_161.610981</td>
+<td align="left">0.9383</td>
+<td align="left">NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence</td>
+</tr>
+</tbody>
+</table>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../profiling/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taxonomic profiling" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Taxonomic profiling
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../../benchmark/profiling/" class="md-footer__link md-footer__link--next" aria-label="Next: Taxonomic profiling" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Taxonomic profiling
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.5e13d264.min.js"></script>
+      
+    
+  </body>
+</html>
