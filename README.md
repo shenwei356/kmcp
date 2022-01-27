@@ -41,15 +41,15 @@ KMCP utilizes multiple k-mer sketches
 
 ## Features
 
-- Easy to install
+- **Easy to install**
     - [Statically linked executable binaries for multiple platforms](https://bioinf.shenwei.me/kmcp/download) (Linux/Windows/macOS, amd64).
     - No dependencies, no configurations.
-- Easy to use
+- **Easy to use**
     - Supporting [shell autocompletion](https://bioinf.shenwei.me/kmcp/usage/#autocompletion).
     - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage) and [tutorials](https://bioinf.shenwei.me/kmcp/tutorial/).
-- **Building database is easy and fast**.
+- **Building database is easy and fast**
     - [~25 min for 47894 genomes from GTDB-r202](https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs) on a sever with 40 CPU threads and solid disk drive.
-- **Fast searching speed**.
+- **Fast searching speed**
     - The index structure is modified from COBS, while [KMCP is 4x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
     - Automatically scales to exploit all available CPU cores.
     - Searching time is linearly related to the number of reference genomes.
@@ -69,7 +69,7 @@ KMCP utilizes multiple k-mer sketches
     
 <hr/>
     
-<img src="kmcp.png" alt="" width="800"/>
+<img src="kmcp.jpg" alt="" width="800"/>
 
 <hr/>
 
