@@ -14,7 +14,7 @@
 **Databases:** RefSeq and Taxonomy snapshot provided by CAMI2 (2019-01-08)
 
 
-<img src="/benchmark/cami2-mouse-gut.jpg" alt="" width="800"/>
+<img src="cami2-mouse-gut.jpg" alt="" width="800"/>
 
 
 ## 25 simulated bacterial communities from Sun et al (prokaryotes)
@@ -41,7 +41,7 @@
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
 
-<img src="/benchmark/sun.jpg" alt="" width="800"/>
+<img src="sun.jpg" alt="" width="800"/>
 
 Where KMCP* does not search against viral database.
 
@@ -70,7 +70,7 @@ including the gold-standard profiles.
 
 **Rankings**
 
-<img src="/benchmark/roux.jpg" alt="" width="800"/>
+<img src="roux.jpg" alt="" width="800"/>
 
 ## 87 metagenomic samples of infected body fluids (bacteria pathogens, low coverage)
 
@@ -101,7 +101,7 @@ including the gold-standard profiles.
 |Kraken2+Braken2 (KMCP)|87.14%     |100.00%    |
 |Centrifuge (KMCP)     |87.14%     |72.73%     |
 
-<img src="/benchmark/gu.jpg" alt="" width="700"/>
+<img src="gu.jpg" alt="" width="700"/>
 
 ## Analysis time and storage requirement
 
@@ -115,4 +115,4 @@ including the gold-standard profiles.
 |MetaPhlAn3|3                 |/            |/                   |
 |mOTUs3    |8                 |/            |/                   |
 
-<img src="/benchmark/benchmark.jpg" alt="" width="600"/>
+<img src="benchmark.jpg" alt="" width="600"/>

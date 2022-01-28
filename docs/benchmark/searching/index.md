@@ -45,4 +45,4 @@ Searching with bacterial genomes.
 
 ## Result
 
-<img src="/benchmark/bench.searching.jpg" alt="" width="600"/>
+<img src="bench.searching.jpg" alt="" width="600"/>

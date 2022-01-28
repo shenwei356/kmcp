@@ -5,11 +5,11 @@ nav:
 - Databases: database.md
 - Usage: usage.md
 - Tutorials:
-    - Taxonomic profiling: tutorial/profiling.md
-    - Sequence and genome searching: tutorial/searching.md
+    - Taxonomic profiling: tutorial/profiling/index.md
+    - Sequence and genome searching: tutorial/searching/index.md
 - Benchmarks:
-    - Taxonomic profiling: benchmark/profiling.md
-    - Sequence and genome searching: benchmark/searching.md
+    - Taxonomic profiling: benchmark/profiling/index.md
+    - Sequence and genome searching: benchmark/searching/index.md
 - FAQs: faq.md
 - More tools: https://github.com/shenwei356
 
