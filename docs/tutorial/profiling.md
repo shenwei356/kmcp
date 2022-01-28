@@ -345,7 +345,7 @@ Demo result:
 
 Three-rounds profiling:
 
-<img src="/tutorial/profiling-steps.png" alt="" width="500"/>
+<img src="/tutorial/profiling-steps.jpg" alt="" width="500"/>
 
 **Accuracy notes**:
 
