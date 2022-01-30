@@ -17,7 +17,7 @@
 <img src="cami2-mouse-gut.jpg" alt="" width="800"/>
 
 
-## 25 simulated bacterial communities from Sun et al (prokaryotes)
+## 25 simulated prokaryotic communities from Sun et al (prokaryotes)
 
 [Software, databases and commands details](https://github.com/shenwei356/kmcp/tree/main/benchmarks/sim-bact-sun2021).
 
