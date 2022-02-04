@@ -74,6 +74,8 @@ Splitting sequences:
   1. Sequences can be splitted into fragments by a fragment size 
      (-s/--split-size) or number of fragments (-n/--split-number)
      with overlap (-l/--split-overlap).
+     In this mode, the sequences of each genome should be saved in an
+     individual file.
   2. When splitting by number of fragments, all sequences (except for
      these mathching any regular expression given by -B/--seq-name-filter)
      in a sequence file are concatenated with k-1 'N's before splitting.

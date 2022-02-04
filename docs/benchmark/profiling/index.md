@@ -115,4 +115,4 @@ including the gold-standard profiles.
 |MetaPhlAn3|3                 |/            |/                   |
 |mOTUs3    |8                 |/            |/                   |
 
-<img src="benchmark.jpg" alt="" width="600"/>
+<img src="benchmark.jpg" alt="" width="650"/>

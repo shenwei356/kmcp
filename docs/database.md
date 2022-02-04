@@ -1114,7 +1114,9 @@ of slower searching speed**.
 
 1. Sequences can be splitted into fragments by a fragment size 
     (`-s/--split-size`) or number of fragments (`-n/--split-number`)
-    with overlap (-`l/--split-overlap`).
+    with overlap (`-l/--split-overlap`).
+    ***In this mode, the sequences of each genome should be saved in an
+    individual file***.
 2. When splitting by number of fragments, **all sequences (except for
     these mathching any regular expression given by `-B/--seq-name-filter`)
     in a sequence file are concatenated with k-1 Ns before splitting**.
@@ -1157,8 +1159,8 @@ is good enough.
         ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
         
 3. A summary file (`${outdir}/_info.txt`) is generated for later use.
-     Users need to check if the reference IDs (column `name`) are what
-     supposed to be.
+     ***Users need to check if the reference IDs (column `name`) are what
+     supposed to be***.
 
 **Performance tips**:
 
@@ -1210,7 +1212,7 @@ is good enough.
     22:33:11.121 [INFO]
 
 A summary file (`_info.txt`) is generated for later use.
-**Users need to check if the reference IDs (column `name`) are what supposed to be**.
+***Users need to check if the reference IDs (column `name`) are what supposed to be***.
 
 |#path                                                                |name       |fragIdx|idxNum|genomeSize|kmers |
 |:--------------------------------------------------------------------|:----------|:------|:-----|:---------|:-----|
