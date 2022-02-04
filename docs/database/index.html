@@ -1947,7 +1947,9 @@ of slower searching speed</strong>. </p>
 <ol>
 <li>Sequences can be splitted into fragments by a fragment size 
     (<code>-s/--split-size</code>) or number of fragments (<code>-n/--split-number</code>)
-    with overlap (-<code>l/--split-overlap</code>).</li>
+    with overlap (<code>-l/--split-overlap</code>).
+    <strong><em>In this mode, the sequences of each genome should be saved in an
+    individual file</em></strong>.</li>
 <li>When splitting by number of fragments, <strong>all sequences (except for
     these mathching any regular expression given by <code>-B/--seq-name-filter</code>)
     in a sequence file are concatenated with k-1 Ns before splitting</strong>.</li>
@@ -1995,8 +1997,8 @@ is good enough. </p>
 </li>
 <li>
 <p>A summary file (<code>${outdir}/_info.txt</code>) is generated for later use.
-     Users need to check if the reference IDs (column <code>name</code>) are what
-     supposed to be.</p>
+     <strong><em>Users need to check if the reference IDs (column <code>name</code>) are what
+     supposed to be</em></strong>.</p>
 </li>
 </ol>
 <p><strong>Performance tips</strong>:</p>
@@ -2048,7 +2050,7 @@ processed files:  9 / 9 [======================================] ETA: 0s. done
 22:33:11.121 [INFO]
 </code></pre>
 <p>A summary file (<code>_info.txt</code>) is generated for later use.
-<strong>Users need to check if the reference IDs (column <code>name</code>) are what supposed to be</strong>.</p>
+<strong><em>Users need to check if the reference IDs (column <code>name</code>) are what supposed to be</em></strong>.</p>
 <table>
 <thead>
 <tr>
