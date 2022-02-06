@@ -60,7 +60,7 @@ Attentions:
   3. By default, kmcp computes k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files better be distinct.
-  4. It also supports splitting sequences into fragments, this
+  4. It also supports splitting sequences into chunks, this
      could increase the specificity in profiling result in cost
      of slower searching speed.
   5. Multiple sizes of k-mers are supported.
@@ -74,21 +74,21 @@ Supported k-mer (sketches) types:
      3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
 
 Splitting sequences:
-  1. Sequences can be splitted into fragments by a fragment size 
-     (-s/--split-size) or number of fragments (-n/--split-number)
+  1. Sequences can be splitted into chunks by a chunk size 
+     (-s/--split-size) or number of chunks (-n/--split-number)
      with overlap (-l/--split-overlap).
      In this mode, the sequences of each genome should be saved in an
      individual file.
-  2. When splitting by number of fragments, all sequences (except for
+  2. When splitting by number of chunks, all sequences (except for
      these mathching any regular expression given by -B/--seq-name-filter)
      in a sequence file are concatenated with k-1 'N's before splitting.
-  3. Both sequence IDs and fragments indices are saved for later use,
+  3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 
 Meta data:
   1. Every outputted .unik file contains the sequence/reference ID,
-     fragment index, number of fragments, and genome size of reference.
-  2. When parsing whole sequence files or splitting by number of fragments,
+     chunk index, number of chunks, and genome size of reference.
+  2. When parsing whole sequence files or splitting by number of chunks,
      the identifier of a reference is the basename of the input file
      by default. It can also be extracted from the input file name via
      -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for refseq records.
@@ -99,7 +99,7 @@ Output:
      where dirctory tree '/xxx/yyy/zzz/' is built for > 1000 output files.
   2. For splitting sequence mode (--split-size > 0 or --split-number > 0),
      output files are:
-     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-chunk_${chunkIdx}.unik
   3. A summary file ("${outdir}/_info.txt") is generated for later use.
      Users need to check if the reference IDs (column "name") are what
      supposed to be.
@@ -385,7 +385,7 @@ Performance tips:
 		ch := make(chan UnikFileInfo, opt.NumCPUs)
 		done := make(chan int)
 		go func() {
-			outfh.WriteString("#path\tname\tfragIdx\tidxNum\tgenomeSize\tkmers\n")
+			outfh.WriteString("#path\tname\tchunkIdx\tidxNum\tgenomeSize\tkmers\n")
 			for info := range ch {
 				outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 			}
@@ -733,7 +733,7 @@ Performance tips:
 									seqID, _ = filepathTrimExtension(baseFile)
 								}
 							}
-							outFileBase = fmt.Sprintf("%s/%s-frag_%d%s", baseFile, seqID, slidIdx, extDataFile)
+							outFileBase = fmt.Sprintf("%s/%s-chunk_%d%s", baseFile, seqID, slidIdx, extDataFile)
 						} else {
 							outFileBase = fmt.Sprintf("%s-id_%s%s", baseFile, seqID, extDataFile)
 						}
@@ -944,13 +944,13 @@ func init() {
 		formatFlagUsage(`Output gzipped .unik files, it's slower and can save little space.`))
 
 	computeCmd.Flags().IntP("split-number", "n", 0,
-		formatFlagUsage(`Fragment number for splitting sequences, incompatible with -s/--split-size.`))
+		formatFlagUsage(`Chunk number for splitting sequences, incompatible with -s/--split-size.`))
 
 	computeCmd.Flags().IntP("split-size", "s", 0,
-		formatFlagUsage(`Fragment size for splitting sequences, incompatible with -n/--split-number.`))
+		formatFlagUsage(`Chunk size for splitting sequences, incompatible with -n/--split-number.`))
 
 	computeCmd.Flags().IntP("split-overlap", "l", 0,
-		formatFlagUsage(`Fragment overlap for splitting sequences.`))
+		formatFlagUsage(`Chunk overlap for splitting sequences.`))
 
 	computeCmd.Flags().IntP("split-min-ref", "m", 1000,
 		formatFlagUsage(`Only splitting sequences >= X bp.`))

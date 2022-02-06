@@ -383,7 +383,7 @@ Performance tips:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
+			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tchunkIdx\tchunks\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
 
 		// ---------------------------------------------------------------
@@ -397,7 +397,7 @@ Performance tips:
 		go func() {
 			var query []byte
 			var qLen, qKmers, FPR, hits string
-			var target, fragIdx, frags, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
+			var target, chunkIdx, chunks, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
 
 			for result := range ch {
 				if result.Matches == nil {
@@ -416,8 +416,8 @@ Performance tips:
 					queryIdx = strconv.Itoa(int(result.QueryIdx))
 
 					target = ""
-					fragIdx = "-1"
-					frags = "0"
+					chunkIdx = "-1"
+					chunks = "0"
 					tLen = "0"
 					mKmers = "0"
 					qCov = "0"
@@ -437,9 +437,9 @@ Performance tips:
 
 					outfh.WriteString(target)
 					outfh.WriteByte('\t')
-					outfh.WriteString(fragIdx)
+					outfh.WriteString(chunkIdx)
 					outfh.WriteByte('\t')
-					outfh.WriteString(frags)
+					outfh.WriteString(chunks)
 					outfh.WriteByte('\t')
 					outfh.WriteString(tLen)
 					outfh.WriteByte('\t')
@@ -477,8 +477,8 @@ Performance tips:
 				for _, match := range *result.Matches {
 
 					target = match.Target[0]
-					fragIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
-					frags = strconv.Itoa(int(match.TargetIdx[0] >> 16))
+					chunkIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
+					chunks = strconv.Itoa(int(match.TargetIdx[0] >> 16))
 					tLen = strconv.Itoa(int(match.GenomeSize[0]))
 					mKmers = strconv.Itoa(match.NumKmers)
 					qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
@@ -498,9 +498,9 @@ Performance tips:
 
 					outfh.WriteString(target)
 					outfh.WriteByte('\t')
-					outfh.WriteString(fragIdx)
+					outfh.WriteString(chunkIdx)
 					outfh.WriteByte('\t')
-					outfh.WriteString(frags)
+					outfh.WriteString(chunks)
 					outfh.WriteByte('\t')
 					outfh.WriteString(tLen)
 					outfh.WriteByte('\t')
@@ -537,7 +537,7 @@ Performance tips:
 			if !keepOrder {
 				var query []byte
 				var qLen, qKmers, FPR, hits string
-				var target, fragIdx, frags, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
+				var target, chunkIdx, chunks, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
 				for result := range sg.OutCh {
 					total++
 
@@ -558,8 +558,8 @@ Performance tips:
 						queryIdx = strconv.Itoa(int(result.QueryIdx))
 
 						target = ""
-						fragIdx = "-1"
-						frags = "0"
+						chunkIdx = "-1"
+						chunks = "0"
 						tLen = "0"
 						mKmers = "0"
 						qCov = "0"
@@ -579,9 +579,9 @@ Performance tips:
 
 						outfh.WriteString(target)
 						outfh.WriteByte('\t')
-						outfh.WriteString(fragIdx)
+						outfh.WriteString(chunkIdx)
 						outfh.WriteByte('\t')
-						outfh.WriteString(frags)
+						outfh.WriteString(chunks)
 						outfh.WriteByte('\t')
 						outfh.WriteString(tLen)
 						outfh.WriteByte('\t')
@@ -619,8 +619,8 @@ Performance tips:
 					for _, match := range *result.Matches {
 
 						target = match.Target[0]
-						fragIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
-						frags = strconv.Itoa(int(match.TargetIdx[0] >> 16))
+						chunkIdx = strconv.Itoa(int(uint16(match.TargetIdx[0])))
+						chunks = strconv.Itoa(int(match.TargetIdx[0] >> 16))
 						tLen = strconv.Itoa(int(match.GenomeSize[0]))
 						mKmers = strconv.Itoa(match.NumKmers)
 						qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
@@ -640,9 +640,9 @@ Performance tips:
 
 						outfh.WriteString(target)
 						outfh.WriteByte('\t')
-						outfh.WriteString(fragIdx)
+						outfh.WriteString(chunkIdx)
 						outfh.WriteByte('\t')
-						outfh.WriteString(frags)
+						outfh.WriteString(chunks)
 						outfh.WriteByte('\t')
 						outfh.WriteString(tLen)
 						outfh.WriteByte('\t')

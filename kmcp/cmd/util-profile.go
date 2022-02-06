@@ -95,7 +95,7 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 
 	m.FragIdx, err = strconv.Atoi((*items)[6])
 	if err != nil {
-		checkError(fmt.Errorf("failed to parse fragIdx: %s", (*items)[6]))
+		checkError(fmt.Errorf("failed to parse chunkIdx: %s", (*items)[6]))
 	}
 
 	m.IdxNum, err = strconv.Atoi((*items)[7])
@@ -126,7 +126,7 @@ type Target struct {
 
 	GenomeSize uint64
 
-	// Counting matches in all frags
+	// Counting matches in all chunks
 	// some reads match multiple sites in the same genome,
 	// the count should be divided by number of sites.
 	Match []float64

@@ -155,7 +155,7 @@ func dumpUnikFileInfos(fileInfos []UnikFileInfo, file string) {
 		w.Close()
 	}()
 
-	outfh.WriteString("#path\tname\tfragIdx\tidxNum\tgSize\tkmers\n")
+	outfh.WriteString("#path\tname\tchunkIdx\tidxNum\tgSize\tkmers\n")
 	for _, info := range fileInfos {
 		outfh.WriteString(fmt.Sprintf("%s\t%s\t%d\t%d\t%d\t%d\n", info.Path, info.Name, info.Index, info.Indexes, info.GenomeSize, info.Kmers))
 	}
@@ -182,6 +182,6 @@ type Meta struct {
 }
 
 func (m Meta) String() string {
-	return fmt.Sprintf("seqID: %s; fragIdx: %d; genome-len: %d, syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, number:%d / size: %d, overlap: %d",
+	return fmt.Sprintf("seqID: %s; chunkIdx: %d; genome-len: %d, syncmer: %v, size %d; minimizer: %v, window: %d; split-seq: %v, number:%d / size: %d, overlap: %d",
 		m.SeqID, m.FragIdx, m.GenomeSize, m.Syncmer, m.SyncmerS, m.Minimizer, m.MinimizerW, m.SplitSeq, m.SplitNum, m.SplitSize, m.SplitOverlap)
 }

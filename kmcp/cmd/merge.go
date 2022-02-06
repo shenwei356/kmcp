@@ -157,7 +157,7 @@ Input:
 			w.Close()
 		}()
 		if !noHeaderRow {
-			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
+			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tchunkIdx\tchunks\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
 
 		// ---------------------------------------------------------------

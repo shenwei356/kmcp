@@ -15,14 +15,14 @@ and computers should have at least 64 GB.
 - By default, `kmcp search` loads the whole database into main memory (via [mmap](https://en.wikipedia.org/wiki/Mmap)) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
-- ***To reduce memory requirements on computers without enough memory,
-users can divide the reference genomes into several parts
-and build smaller databases for all parts, so that the biggest
-database can be loaded into RAM***. 
-This can also accelerate searching on a **computer cluster**, where every node searches a part of the database.
+- **To reduce memory requirements on computers without enough memory,
+users can split the reference genomes into partitions
+and build a smaller database for each partition, so that the biggest
+database can be loaded into RAM**. 
+This can also **accelerate searching on a computer cluster, where every node searches against a small database.
 After performing database searching,
 search results on all small databases can be merged with `kmcp merge`
-for downstream analysis.
+for downstream analysis**.
 
 
 
@@ -32,14 +32,14 @@ These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
 
-|DB                      |source     |#species|#assemblies|parameters      |archive file                                                                                                                                                      |size     |
-|:-----------------------|:----------|:-------|:----------|:---------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252   |47894      |k=21, frags=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |23604   |30691      |k=21, frags=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
-|**Fungi**               |Refseq r208|161     |403        |k=21, frags=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
-|**Viruses**             |GenBank 246|19584   |27936      |k=21, frags=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
-|**Viruses**             |Refseq r208|7189    |11618      |k=21, frags=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
-|**Human**               |CHM13      |1       |1          |k=21, frags=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
+|DB                      |source     |#species|#assemblies|parameters       |archive file                                                                                                                                                      |size     |
+|:-----------------------|:----------|:-------|:----------|:----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |43252   |47894      |k=21, chunks=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |23604   |30691      |k=21, chunks=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
+|**Fungi**               |Refseq r208|161     |403        |k=21, chunks=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
+|**Viruses**             |GenBank 246|19584   |27936      |k=21, chunks=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
+|**Viruses**             |Refseq r208|7189    |11618      |k=21, chunks=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
+|**Human**               |CHM13      |1       |1          |k=21, chunks=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
 
 **Taxonomy data**:
@@ -166,7 +166,7 @@ Building database (all k-mers, for profiling on short-reads):
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   reference genomes are splitted into 10 chunks with 100bp overlap
     #   k = 21
     kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
         --log gtdb-r202-k21-n10.log -j 32 --force
@@ -191,7 +191,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   reference genomes are splitted into 10 chunks with 100bp overlap
     #   k = 21
     #   s = 16 # Closed Syncmers
     kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
@@ -216,7 +216,7 @@ Building database (k-mer sketches, for profiling on long-reads):
        
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   reference genomes are splitted into 10 chunks with 100bp overlap
     #   k = 21
     #   D = 5 # FracMinhash
     kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
@@ -241,7 +241,7 @@ Building database (k-mer sketches, for profiling on long-reads):
        
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments with 100bp overlap
+    #   reference genomes are splitted into 10 chunks with 100bp overlap
     #   k = 21
     #   W = 5 # Minimizer
     kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
@@ -277,7 +277,7 @@ Building small databases (all k-mers, for profiling with a computer cluster):
         
         # compute k-mers
         #   sequence containing "plasmid" in name are ignored,
-        #   reference genomes are splitted into 10 fragments with 100bp overlap
+        #   reference genomes are splitted into 10 chunks with 100bp overlap
         #   k = 21
         kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
             --log $f-k21-n10.log -j 24 --force
@@ -358,7 +358,7 @@ Downloading viral and fungi sequences:
 Building database (all k-mers, for profiling on short-reads):
         
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 fragments
+    # for viral, only splitting into 5 chunks
     name=viral
     
     input=files.renamed
@@ -410,7 +410,7 @@ Building database (k-mer sketches, for profiling on long-reads):
 
 
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 fragments
+    # for viral, only splitting into 5 chunks
     name=viral
     
     input=files.renamed
@@ -607,7 +607,7 @@ keep at most 5 genomes for a taxid:
 Building database (all k-mers, for profiling on short-reads):
 
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 fragments
+    # for viral, only splitting into 5 chunks
     name=viral
     
     input=files.renamed.slim
@@ -743,7 +743,7 @@ Building database (all k-mers, < 6min):
 
     input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
     
-    # splitting human genome into 1024 fragments.
+    # splitting human genome into 1024 chunks.
     # The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.3' from the file name.
     kmcp compute $input -O human-chm13-k21-n1024 \
         --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
@@ -954,7 +954,7 @@ Building database:
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments
+    #   reference genomes are splitted into 10 chunks
     #   k = 21
     kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 -j 32 --force
 
@@ -1033,7 +1033,7 @@ Building database:
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments
+    #   reference genomes are splitted into 10 chunks
     #   k = 21
     kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
 
@@ -1106,29 +1106,29 @@ the name via regular expression(s) (`-B/--seq-name-filter`).
 By default, `kmcp` computes k-mers (sketches) of every file,
 you can also use `--by-seq` to compute for every sequence,
 where sequence IDs in all input files better be distinct.
-It also **supports splitting sequences into fragments, this
+It also **supports splitting sequences into chunks, this
 could increase the specificity in profiling result in cost
 of slower searching speed**. 
 
 **Splitting sequences**:
 
-1. Sequences can be splitted into fragments by a fragment size 
-    (`-s/--split-size`) or number of fragments (`-n/--split-number`)
+1. Sequences can be splitted into chunks by a chunk size 
+    (`-s/--split-size`) or number of chunks (`-n/--split-number`)
     with overlap (`-l/--split-overlap`).
     ***In this mode, the sequences of each genome should be saved in an
     individual file***.
-2. When splitting by number of fragments, **all sequences (except for
+2. When splitting by number of chunks, **all sequences (except for
     these mathching any regular expression given by `-B/--seq-name-filter`)
     in a sequence file are concatenated with k-1 Ns before splitting**.
-3. Both sequence/reference IDs and fragments indices are saved for later use,
+3. Both sequence/reference IDs and chunks indices are saved for later use,
     in form of meta/description data in `.unik` files, and will
     be reported in `kmcp search` results.
 
 **Meta data**:
 
 1. Every outputted `.unik` file contains the sequence/reference ID,
-    fragment index, number of fragments, and genome size of reference.
-2. When parsing whole sequence files or splitting by number of fragments,
+    chunk index, number of chunks, and genome size of reference.
+2. When parsing whole sequence files or splitting by number of chunks,
     the **identifier of a reference** is the basename of the input file
     by default. It can also be extracted from the input file name via
     `-N/--ref-name-regexp`, e.g., `^(\w{3}_\d{9}\.\d+)` for **RefSeq assembly accessions**.
@@ -1156,7 +1156,7 @@ is good enough.
 2. For splitting sequence mode (`--split-size > 0` or `--split-number > 0`),
     output files are:
     
-        ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+        ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-chunk_${chunkIdx}.unik
         
 3. A summary file (`${outdir}/_info.txt`) is generated for later use.
      ***Users need to check if the reference IDs (column `name`) are what
@@ -1171,7 +1171,7 @@ is good enough.
 
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 fragments,
+    #   reference genomes are splitted into 10 chunks,
     #   k = 21
     kmcp compute --in-dir refs/ \
         --kmer 21 \
@@ -1214,17 +1214,17 @@ is good enough.
 A summary file (`_info.txt`) is generated for later use.
 ***Users need to check if the reference IDs (column `name`) are what supposed to be***.
 
-|#path                                                                |name       |fragIdx|idxNum|genomeSize|kmers |
+|#path                                                                |name       |chunkIdx|idxNum|genomeSize|kmers |
 |:--------------------------------------------------------------------|:----------|:------|:-----|:---------|:-----|
-|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_0.unik|NC_010655.1|0      |10    |2664102   |264247|
-|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-frag_1.unik|NC_010655.1|1      |10    |2664102   |266237|
-|refs-k21-n10/595/162/595/NC_012971.2.fasta.gz/NC_012971.2-frag_0.unik|NC_012971.2|0      |10    |4558953   |450494|
-|refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913.3-frag_0.unik|NC_000913.3|0      |10    |4641652   |459277|
-|refs-k21-n10/934/859/934/NC_013654.1.fasta.gz/NC_013654.1-frag_0.unik|NC_013654.1|0      |10    |4717338   |470575|
+|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-chunk_0.unik|NC_010655.1|0      |10    |2664102   |264247|
+|refs-k21-n10/672/060/672/NC_010655.1.fasta.gz/NC_010655.1-chunk_1.unik|NC_010655.1|1      |10    |2664102   |266237|
+|refs-k21-n10/595/162/595/NC_012971.2.fasta.gz/NC_012971.2-chunk_0.unik|NC_012971.2|0      |10    |4558953   |450494|
+|refs-k21-n10/292/039/292/NC_000913.3.fasta.gz/NC_000913.3-chunk_0.unik|NC_000913.3|0      |10    |4641652   |459277|
+|refs-k21-n10/934/859/934/NC_013654.1.fasta.gz/NC_013654.1-chunk_0.unik|NC_013654.1|0      |10    |4717338   |470575|
 
 Meta data in the `.unik` file can be showed using `kmcp utils unik-info`:
 
-    kmcp utils unik-info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-frag_0.unik -a
+    kmcp utils unik-info refs-k21-n10/072/380/072/NZ_CP028116.1.fasta.gz/NZ_CP028116.1-chunk_0.unik -a
 
 
 ### Step 2. Building databases

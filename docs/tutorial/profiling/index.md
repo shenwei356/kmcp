@@ -166,9 +166,9 @@ Merging searching results on multiple database:
     
 #### Searching on a computer cluster
 
-Here, we divided genomes of GTDB into 16 parts and build a database for 
-every part, so we can use computer cluster to accelerate the searching.
-The genbank-viral genomes are also diveded into 4 parts.
+Here, we split genomes of GTDB into 16 partitions and build a database for 
+every partition, so we can use computer cluster to accelerate the searching.
+The genbank-viral genomes are also diveded into 4 partition.
 
 A helper script [easy_sbatch](https://github.com/shenwei356/easy_sbatch)
 is used for batch submitting Slurm jobs via script templates.
@@ -287,13 +287,13 @@ is used for batch submitting Slurm jobs via script templates.
  4. FPR,      False positive rate
  5. hits,     Number of matches
  6. target,   Identifier of target sequence
- 7. fragIdx,  Index of reference fragment
- 8. frags,    Number of reference fragments
+ 7. chunkIdx, Index of reference chunk
+ 8. chunks,   Number of reference chunks
  9. tLen,     Reference length
 10. kSize,    K-mer size
 11. mKmers,   Number of matched k-mers
 12. qCov,     Query coverage,  equals to: mKmers / qKmers
-13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference fragment
+13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
 14. jacc,     Jaccard index
 15. queryIdx, Index of query sequence, only for merging
 ```
@@ -306,17 +306,17 @@ if using `csvtk` for analysis. e.g.,
 Demo result:
 
 
-|#query                             |qLen|qKmers|FPR       |hits|target       |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:----------------------------------|:---|:-----|:---------|:---|:------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_012971.2  |2      |10   |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_000913.3  |2      |10   |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_018658.1  |5      |10   |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP028116.1|2      |10   |5648177|31   |79    |0.6583|0.0002|0.0002|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP007592.1|3      |10   |5104557|31   |69    |0.5750|0.0001|0.0001|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_002695.2  |3      |10   |5498578|31   |69    |0.5750|0.0001|0.0001|0       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_012971.2  |0      |10   |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_000913.3  |0      |10   |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_013654.1  |0      |10   |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
+|#query                             |qLen|qKmers|FPR       |hits|target       |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:----------------------------------|:---|:-----|:---------|:---|:------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP028116.1|2       |10    |5648177|31   |79    |0.6583|0.0002|0.0002|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP007592.1|3       |10    |5104557|31   |69    |0.5750|0.0001|0.0001|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_002695.2  |3       |10    |5498578|31   |69    |0.5750|0.0001|0.0001|0       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
 
 
 ### Step 4. Profiling
@@ -329,11 +329,11 @@ Demo result:
 
 #### **Methods**
 
-1. Reference genomes can be splitted into fragments when computing
+1. Reference genomes can be splitted into chunks when computing
     k-mers (sketches), which could help to increase the specificity
-    via a threshold, i.e., the minimal proportion of matched fragments
-    (`-p/--min-frags-fraction`). (***highly recommended***)
-    Another flag `-d/--max-frags-cov-stdev` further reduces false positives.
+    via a threshold, i.e., the minimal proportion of matched chunks
+    (`-p/--min-chunks-fraction`). (***highly recommended***)
+    Another flag `-d/--max-chunks-cov-stdev` further reduces false positives.
 2. We require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
     the false positive rate.
@@ -380,9 +380,9 @@ Using this flag will override the relevant options.
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-frags-reads         1      20    30    50     100   100
-    -p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
-    -d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+    -r/--min-chunks-reads        1      20    30    50     100   100
+    -p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
     -u/--min-uniq-reads          1      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
@@ -397,7 +397,7 @@ Using this flag will override the relevant options.
 **Performance notes**:
 
 1. Searching results are parsed in parallel, and the number of
-    lines proceeded by a thread can be set by the flag `--chunk-size`.
+    lines proceeded by a thread can be set by the flag `--line-chunk-size`.
 2. However using a lot of threads does not always accelerate
     processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -418,9 +418,9 @@ Using this flag will override the relevant options.
         --taxdump          $taxdump \
         --level             species \
         --min-query-cov        0.55 \
-        --min-frags-reads        50 \
-        --min-frags-fraction     0.8 \
-        --max-frags-depth-stdev   2 \
+        --min-chunks-reads       50 \
+        --min-chunks-fraction   0.8 \
+        --max-chunks-depth-stdev  2 \
         --min-uniq-reads         10 \
         --min-hic-ureads          1 \
         --min-hic-ureads-qcov  0.75 \
@@ -451,9 +451,9 @@ KMCP format:
  1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of a reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
- 4. fragsFrac,          Genome fragments fraction
- 5. fragsRelDepth,      Relative depths of reference fragments
- 6. fragsRelDepthStd,   The strandard deviation of fragsRelDepth
+ 4. chunksFrac,         Genome chunks fraction
+ 5. chunksRelDepth,     Relative depths of reference chunks
+ 6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
  7. reads,              Total number of matched reads of this reference
  8. ureads,             Number of uniquely matched reads
  9. hicureads,          Number of uniquely matched reads with high-confidence
@@ -468,12 +468,12 @@ KMCP format:
 
 Demo output:
 
-|ref        |percentage|score |fragsFrac|fragsRelDepth                                    |fragsRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
-|:----------|:---------|:-----|:-------|:------------------------------------------------|:---------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
-|NC_013654.1|48.321535 |100.00|1.00    |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02            |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
-|NC_000913.3|46.194629 |100.00|1.00    |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02            |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
-|NC_002695.2|5.014025  |100.00|1.00    |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05            |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
-|NC_010655.1|0.469811  |100.00|1.00    |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10            |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
+|ref        |percentage|score |chunksFrac|chunksRelDepth                                   |chunksRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
+|:----------|:---------|:-----|:---------|:------------------------------------------------|:----------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
+|NC_013654.1|48.321535 |100.00|1.00      |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02             |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
+|NC_000913.3|46.194629 |100.00|1.00      |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02             |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
+|NC_002695.2|5.014025  |100.00|1.00      |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05             |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
+|NC_010655.1|0.469811  |100.00|1.00      |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10             |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 

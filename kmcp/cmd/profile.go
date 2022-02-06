@@ -50,11 +50,11 @@ var profileCmd = &cobra.Command{
 	Long: `Generate taxonomic profile from search results
 
 Methods:
-  1. Reference genomes can be splitted into fragments when computing
+  1. Reference genomes can be splitted into chunks when computing
      k-mers (sketches), which could help to increase the specificity
-     via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-fraction). (***highly recommended***)
-     Another flag -d/--max-frags-depth-stdev further reduces false positives.
+     via a threshold, i.e., the minimal proportion of matched chunks
+     (-p/--min-chunks-fraction). (***highly recommended***)
+     Another flag -d/--max-chunks-depth-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
@@ -99,9 +99,9 @@ Profiling modes:
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-frags-reads         1      20    30    50     100   100
-    -p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
-    -d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+    -r/--min-chunks-reads         1      20    30    50     100   100
+    -p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
     -u/--min-uniq-reads          1      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
@@ -114,7 +114,7 @@ Taxonomy data:
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size.
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -188,10 +188,10 @@ Taxonomic binning formats:
 		var hicUreadsMinQcov float64
 		var HicUreadsMinProp float64
 
-		minReads = float64(getFlagPositiveInt(cmd, "min-frags-reads"))
+		minReads = float64(getFlagPositiveInt(cmd, "min-chunks-reads"))
 		minUReads = float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
-		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-frags-fraction")
-		maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-frags-depth-stdev")
+		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-chunks-fraction")
+		maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-chunks-depth-stdev")
 
 		minHicUreads = float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
 		if minHicUreads > minUReads {
@@ -311,7 +311,7 @@ Taxonomic binning formats:
 			log.Warningf("value of -s/--separator better not be empty")
 		}
 
-		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
+		chunkSize := getFlagPositiveInt(cmd, "line-chunk-size")
 		if opt.NumCPUs > 4 {
 			if opt.Verbose || opt.Log2File {
 				log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
@@ -548,10 +548,10 @@ Taxonomic binning formats:
 
 			log.Infof("deciding the existence of a reference:")
 			log.Infof("  preset profiling mode: %d", mode)
-			log.Infof("  minimal number of reads per reference fragment: %.0f", minReads)
+			log.Infof("  minimal number of reads per reference chunk: %.0f", minReads)
 			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
-			log.Infof("  minimal proportion of matched reference fragments: %f", minFragsProp)
-			log.Infof("  maximal standard deviation of relative depths of all fragments: %f", maxFragsDepthStdev)
+			log.Infof("  minimal proportion of matched reference chunks: %f", minFragsProp)
+			log.Infof("  maximal standard deviation of relative depths of all chunks: %f", maxFragsDepthStdev)
 			log.Info()
 
 			log.Infof("  minimal number of high-confidence uniquely matched reads: %.0f", minHicUreads)
@@ -698,7 +698,7 @@ Taxonomic binning formats:
 							for h, ms = range matches {
 								floatMsSize = float64(len(*ms))
 								first = true
-								for _, m = range *ms { // multiple matches in different fragments
+								for _, m = range *ms { // multiple matches in different chunks
 									if t, ok = profile[h]; !ok {
 										t0 := Target{
 											Name:         m.Target,
@@ -822,7 +822,7 @@ Taxonomic binning formats:
 				for h, ms = range matches {
 					floatMsSize = float64(len(*ms))
 					first = true
-					for _, m = range *ms { // multiple matches in different fragments
+					for _, m = range *ms { // multiple matches in different chunks
 						if t, ok = profile[h]; !ok {
 							t0 := Target{
 								Name:         m.Target,
@@ -919,7 +919,7 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				if debug {
 					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1586,7 +1586,7 @@ Taxonomic binning formats:
 				hs = append(hs, h)
 				if debug {
 					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -2115,7 +2115,7 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp {
 				if debug {
 					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low fragments fraction", t.FragsProp, t.Match)
+						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -2286,7 +2286,7 @@ Taxonomic binning formats:
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
 
-		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tfragsFrac\tfragsRelDepth\tfragsRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
+		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tchunksFrac\tchunksRelDepth\tchunksRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
 		for _, t := range targets {
 			if mappingNames {
@@ -2441,7 +2441,7 @@ Taxonomic binning formats:
 func init() {
 	RootCmd.AddCommand(profileCmd)
 
-	profileCmd.Flags().IntP("chunk-size", "", 5000,
+	profileCmd.Flags().IntP("line-chunk-size", "", 5000,
 		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
 
 	profileCmd.Flags().StringP("out-prefix", "o", "-",
@@ -2467,17 +2467,17 @@ func init() {
 		formatFlagUsage(`Max qcov gap between adjacent matches.`))
 
 	// for matches against a reference
-	profileCmd.Flags().IntP("min-frags-reads", "r", 50,
-		formatFlagUsage(`Minimal number of reads for a reference fragment.`))
+	profileCmd.Flags().IntP("min-chunks-reads", "r", 50,
+		formatFlagUsage(`Minimal number of reads for a reference chunk.`))
 
 	profileCmd.Flags().IntP("min-uniq-reads", "u", 20,
 		formatFlagUsage(`Minimal number of uniquely matched reads for a reference.`))
 
-	profileCmd.Flags().Float64P("min-frags-fraction", "p", 0.8,
-		formatFlagUsage(`Minimal fraction of matched reference fragments with reads >= -r/--min-frags-reads.`))
+	profileCmd.Flags().Float64P("min-chunks-fraction", "p", 0.8,
+		formatFlagUsage(`Minimal fraction of matched reference chunks with reads >= -r/--min-chunks-reads.`))
 
-	profileCmd.Flags().Float64P("max-frags-depth-stdev", "d", 2,
-		formatFlagUsage(`Maximal standard deviation of relative depths of all fragments.`))
+	profileCmd.Flags().Float64P("max-chunks-depth-stdev", "d", 2,
+		formatFlagUsage(`Maximal standard deviation of relative depths of all chunks.`))
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", 5,
 		formatFlagUsage(`Minimal number of high-confidence uniquely matched reads for a reference.`))
@@ -2531,7 +2531,7 @@ func init() {
 
 	// abundance
 	profileCmd.Flags().StringP("norm-abund", "", "mean",
-		formatFlagUsage(`Method for normalize abundance of a reference by the mean/min/max abundance in all fragments, available values: mean, min, max.`))
+		formatFlagUsage(`Method for normalize abundance of a reference by the mean/min/max abundance in all chunks, available values: mean, min, max.`))
 
 	profileCmd.Flags().StringP("level", "", "species",
 		formatFlagUsage(`Level to estimate abundance at. Available values: species, strain/assembly.`))

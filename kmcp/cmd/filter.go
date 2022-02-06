@@ -49,7 +49,7 @@ Taxonomy data:
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size.
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -113,7 +113,7 @@ Performance notes:
 			checkError(fmt.Errorf("-T/--taxid-map needed for --level species"))
 		}
 
-		chunkSize := getFlagPositiveInt(cmd, "chunk-size")
+		chunkSize := getFlagPositiveInt(cmd, "line-chunk-size")
 		if opt.NumCPUs > 4 {
 			if opt.Verbose || opt.Log2File {
 				log.Infof("using a lot of threads does not always accelerate processing, 4-threads is fast enough")
@@ -216,7 +216,7 @@ Performance notes:
 		}()
 
 		if !noHeaderRow {
-			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tfragIdx\tfrags\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
+			outfh.WriteString("#query\tqLen\tqKmers\tFPR\thits\ttarget\tchunkIdx\tchunks\ttLen\tkSize\tmKmers\tqCov\ttCov\tjacc\tqueryIdx\n")
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -330,7 +330,7 @@ Performance notes:
 							if len(matches) == 1 || theSameSpecies {
 								nPassed++
 								for _, ms = range matches {
-									for _, m = range *ms { // multiple matches in different fragments
+									for _, m = range *ms { // multiple matches in different chunkments
 										outfh.WriteString(*m.Line)
 									}
 									poolMatchResults.Put(ms)
@@ -382,7 +382,7 @@ Performance notes:
 				if len(matches) == 1 || theSameSpecies {
 					nPassed++
 					for _, ms = range matches {
-						for _, m = range *ms { // multiple matches in different fragments
+						for _, m = range *ms { // multiple matches in different chunkments
 							outfh.WriteString(*m.Line)
 						}
 						poolMatchResults.Put(ms)
@@ -401,7 +401,7 @@ Performance notes:
 func init() {
 	utilsCmd.AddCommand(filterCmd)
 
-	filterCmd.Flags().IntP("chunk-size", "", 5000,
+	filterCmd.Flags().IntP("line-chunk-size", "", 5000,
 		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
 
 	filterCmd.Flags().BoolP("no-header-row", "H", false,

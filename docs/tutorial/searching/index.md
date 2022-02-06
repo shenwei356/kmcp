@@ -39,7 +39,7 @@ bringing a small database size and much faster searching speed
 The database building process is similar to that of metagenomic profiling,
 with one difference:
 
-1. Reference genomes are not splitted into fragments which slow down searching speed.
+1. Reference genomes are not splitted into chunks which slow down searching speed.
 
 Taken GTDB for example:
 
@@ -107,13 +107,13 @@ while it's much slower, >10X slower on SSD and should be much slower on HDD disk
 
 The result is tab-delimited.
 
-|#query|qLen|qKmers|FPR       |hits|target         |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:-----|:---|:-----|:---------|:---|:--------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|S0R0/1|150 |130   |3.0168e-03|2   |GCF_002872255.1|0      |1    |2582291|21   |88    |0.6769|0.0000|0.0000|0       |
-|S0R0/1|150 |130   |3.0168e-03|2   |GCF_001434585.1|0      |1    |2219511|21   |74    |0.5692|0.0000|0.0000|0       |
-|S0R0/2|150 |130   |3.0168e-03|5   |GCF_002872255.1|0      |1    |2582291|21   |81    |0.6231|0.0000|0.0000|1       |
-|S0R0/2|150 |130   |3.0168e-03|5   |GCF_001434585.1|0      |1    |2219511|21   |80    |0.6154|0.0000|0.0000|1       |
-|S0R0/2|150 |130   |3.0168e-03|5   |GCF_001437405.1|0      |1    |2260906|21   |77    |0.5923|0.0000|0.0000|1       |
+|#query|qLen|qKmers|FPR       |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:-----|:---|:-----|:---------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|S0R0/1|150 |130   |3.0168e-03|2   |GCF_002872255.1|0       |1     |2582291|21   |88    |0.6769|0.0000|0.0000|0       |
+|S0R0/1|150 |130   |3.0168e-03|2   |GCF_001434585.1|0       |1     |2219511|21   |74    |0.5692|0.0000|0.0000|0       |
+|S0R0/2|150 |130   |3.0168e-03|5   |GCF_002872255.1|0       |1     |2582291|21   |81    |0.6231|0.0000|0.0000|1       |
+|S0R0/2|150 |130   |3.0168e-03|5   |GCF_001434585.1|0       |1     |2219511|21   |80    |0.6154|0.0000|0.0000|1       |
+|S0R0/2|150 |130   |3.0168e-03|5   |GCF_001437405.1|0       |1     |2260906|21   |77    |0.5923|0.0000|0.0000|1       |
 
 Reference IDs (column `target`) can be optionally mapped to their names when searching:
 
@@ -162,7 +162,7 @@ The database building process is similar to that of metagenomic profiling,
 with few differences:
 
 1. K-mer sketches instead of all k-mers are computed.
-2. Reference genomes are not splitted into fragments.
+2. Reference genomes are not splitted into chunks.
 3. Smaller false positive rate (`-f`) and more than one hash functions (`-n`) are used to improve accuracy.
 4. Using bigger k-mer size: 31.
 
@@ -205,9 +205,9 @@ The searching process is simple and [very fast](https://bioinf.shenwei.me/kmcp/b
 
 The output is in tab-delimited format, full search result:
 
-|#query                             |qLen   |qKmers|FPR         |hits|target         |fragIdx|frags|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:----------------------------------|:------|:-----|:-----------|:---|:--------------|:------|:----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NODE_1_length_106749_cov_161.610981|4563649|9052  |0.000000e+00|1   |GCF_900460465.1|0      |1    |4777134|31   |8942  |0.9878|0.9933|0.9813|0       |
+|#query                             |qLen   |qKmers|FPR         |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:----------------------------------|:------|:-----|:-----------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|NODE_1_length_106749_cov_161.610981|4563649|9052  |0.000000e+00|1   |GCF_900460465.1|0       |1     |4777134|31   |8942  |0.9878|0.9933|0.9813|0       |
 
 Reference IDs can be optionally mapped to their names, let's print the main columns only:
 

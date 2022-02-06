@@ -75,7 +75,7 @@ type Header struct {
 	Names  [][]string // one bloom filter contains union of multiple sets
 	GSizes [][]uint64 // genome sizes
 	// Kmers   [][]uint64 // kmer numbers
-	Indices [][]uint32 // coresponding fragment indices of all sets.
+	Indices [][]uint32 // coresponding chunk indices of all sets.
 	Sizes   []uint64
 
 	NumRowBytes int // length of bytes for storing one row of signiture for n names
