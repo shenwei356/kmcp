@@ -698,7 +698,7 @@ Attentions:
   3. By default, kmcp computes k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files better be distinct.
-  4. It also supports splitting sequences into fragments, this
+  4. It also supports splitting sequences into chunks, this
      could increase the specificity in profiling result in cost
      of slower searching speed.
   5. Multiple sizes of k-mers are supported.
@@ -712,21 +712,21 @@ Supported k-mer (sketches) types:
      3). Closed Syncmer (-k -S), optionally scaling/down-sampling (-D)
 
 Splitting sequences:
-  1. Sequences can be splitted into fragments by a fragment size 
-     (-s/--split-size) or number of fragments (-n/--split-number)
+  1. Sequences can be splitted into chunks by a chunk size 
+     (-s/--split-size) or number of chunks (-n/--split-number)
      with overlap (-l/--split-overlap).
      In this mode, the sequences of each genome should be saved in an
      individual file.
-  2. When splitting by number of fragments, all sequences (except for
+  2. When splitting by number of chunks, all sequences (except for
      these mathching any regular expression given by -B/--seq-name-filter)
      in a sequence file are concatenated with k-1 'N's before splitting.
-  3. Both sequence IDs and fragments indices are saved for later use,
+  3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 
 Meta data:
   1. Every outputted .unik file contains the sequence/reference ID,
-     fragment index, number of fragments, and genome size of reference.
-  2. When parsing whole sequence files or splitting by number of fragments,
+     chunk index, number of chunks, and genome size of reference.
+  2. When parsing whole sequence files or splitting by number of chunks,
      the identifier of a reference is the basename of the input file
      by default. It can also be extracted from the input file name via
      -N/--ref-name-regexp, e.g., &quot;^(\w{3}_\d{9}\.\d+)&quot; for refseq records.
@@ -737,7 +737,7 @@ Output:
      where dirctory tree '/xxx/yyy/zzz/' is built for &gt; 1000 output files.
   2. For splitting sequence mode (--split-size &gt; 0 or --split-number &gt; 0),
      output files are:
-     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-frag_${fragIdx}.unik
+     ${outdir}//xxx/yyy/zzz/${infile}/{seqID}-chunk_${chunkIdx}.unik
   3. A summary file (&quot;${outdir}/_info.txt&quot;) is generated for later use.
      Users need to check if the reference IDs (column &quot;name&quot;) are what
      supposed to be.
@@ -967,11 +967,11 @@ Flags:
 <pre><code class="language-text">Generate taxonomic profile from search results
 
 Methods:
-  1. Reference genomes can be splitted into fragments when computing
+  1. Reference genomes can be splitted into chunks when computing
      k-mers (sketches), which could help to increase the specificity
-     via a threshold, i.e., the minimal proportion of matched fragments
-     (-p/--min-frags-fraction). (***highly recommended***)
-     Another flag -d/--max-frags-depth-stdev further reduces false positives.
+     via a threshold, i.e., the minimal proportion of matched chunks
+     (-p/--min-chunks-fraction). (***highly recommended***)
+     Another flag -d/--max-chunks-depth-stdev further reduces false positives.
   2. We require part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
@@ -1016,9 +1016,9 @@ Profiling modes:
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-frags-reads         1      20    30    50     100   100
-    -p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
-    -d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+    -r/--min-chunks-reads        1      20    30    50     100   100
+    -p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
     -u/--min-uniq-reads          1      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
@@ -1031,7 +1031,7 @@ Taxonomy data:
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size.
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -1049,8 +1049,6 @@ Usage:
 Flags:
   -B, --binning-result string         ► Save extra binning result in CAMI report.
   -C, --cami-report string            ► Save extra CAMI-like report.
-      --chunk-size int                ► Number of lines to process for each thread, and 4 threads is
-                                      fast enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
       --debug string                  ► Debug output file.
   -F, --filter-low-pct float          ► Filter out predictions with the smallest relative abundances
                                       summing up X%. Range: [0,100).
@@ -1061,10 +1059,12 @@ Flags:
   -n, --keep-top-qcovs int            ► Keep matches with the top N qcovs for a query, 0 for all.
       --level string                  ► Level to estimate abundance at. Available values: species,
                                       strain/assembly. (default &quot;species&quot;)
+      --line-chunk-size int           ► Number of lines to process for each thread, and 4 threads is
+                                      fast enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
   -f, --max-fpr float                 ► Maximal false positive rate of a read in search result.
                                       (default 0.05)
-  -d, --max-frags-depth-stdev float   ► Maximal standard deviation of relative depths of all
-                                      fragments. (default 2)
+  -d, --max-chunks-depth-stdev float  ► Maximal standard deviation of relative depths of all
+                                      chunks. (default 2)
   -R, --max-mismatch-err float        ► Maximal error rate of a read being matched to a wrong
                                       reference, for determing the right reference for ambiguous reads.
                                       Range: (0, 1). (default 0.05)
@@ -1072,9 +1072,9 @@ Flags:
   -M, --metaphlan-report string       ► Save extra metaphlan-like report.
   -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
                                       reference for ambiguous reads. Range: (0, 1). (default 0.05)
-  -p, --min-frags-fraction float      ► Minimal fraction of matched reference fragments with reads &gt;=
-                                      -r/--min-frags-reads. (default 0.8)
-  -r, --min-frags-reads int           ► Minimal number of reads for a reference fragment. (default 50)
+  -p, --min-chunks-fraction float     ► Minimal fraction of matched reference chunks with reads &gt;=
+                                      -r/--min-chunks-reads. (default 0.8)
+  -r, --min-chunks-reads int          ► Minimal number of reads for a reference chunk. (default 50)
   -U, --min-hic-ureads int            ► Minimal number of high-confidence uniquely matched reads for a
                                       reference. (default 5)
   -P, --min-hic-ureads-prop float     ► Minimal proportion of high-confidence uniquely matched reads.
@@ -1092,7 +1092,7 @@ Flags:
                                       names.
       --no-amb-corr                   ► Do not correct ambiguous reads (just for benchmark).
       --norm-abund string             ► Method for normalize abundance of a reference by the
-                                      mean/min/max abundance in all fragments, available values: mean,
+                                      mean/min/max abundance in all chunks, available values: mean,
                                       min, max. (default &quot;mean&quot;)
   -o, --out-prefix string             ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
       --rank-prefix strings           ► Prefixes of taxon name in certain ranks, used with
@@ -1129,7 +1129,7 @@ Taxonomy data:
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size.
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -1137,11 +1137,11 @@ Usage:
   kmcp utils filter [flags]
 
 Flags:
-      --chunk-size int        ► Number of lines to process for each thread, and 4 threads is fast
-                              enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
   -h, --help                  help for filter
       --level string          ► Level to filter. available values: species, strain/assembly. (default
                               &quot;species&quot;)
+      --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
+                              enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
   -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
   -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
@@ -1194,7 +1194,7 @@ Output (BED6 format):
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --chunk-size.
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
 
@@ -1202,13 +1202,13 @@ Usage:
   kmcp utils merge-regions [flags]
 
 Flags:
-      --chunk-size int         ► Number of lines to process for each thread, and 4 threads is fast
-                               enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
   -h, --help                   help for merge-regions
   -I, --ignore-type            ► Merge species and assembly-specific regions.
   -f, --max-fpr float          ► Maximal false positive rate of a read in search result. (default 0.05)
   -g, --max-gap int            ► Maximal distance of starting positions of two adjacent regions, 0 for
                                no limitation, 1 for no merging.
+      --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
+                               enough. Type &quot;kmcp profile -h&quot; for details. (default 5000)
   -l, --min-overlap int        ► Minimal overlap of two adjacent regions, recommend K-1. (default 1)
   -t, --min-query-cov float    ► Minimal query coverage of a read in search result. (default 0.55)
   -a, --name-assembly string   ► Name of assembly-specific regions. (default &quot;assembly-specific&quot;)

@@ -920,9 +920,9 @@ done
 <pre><code>kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 </code></pre>
 <h4 id="searching-on-a-computer-cluster">Searching on a computer cluster</h4>
-<p>Here, we divided genomes of GTDB into 16 parts and build a database for 
-every part, so we can use computer cluster to accelerate the searching.
-The genbank-viral genomes are also diveded into 4 parts.</p>
+<p>Here, we split genomes of GTDB into 16 partitions and build a database for 
+every partition, so we can use computer cluster to accelerate the searching.
+The genbank-viral genomes are also diveded into 4 partition.</p>
 <p>A helper script <a href="https://github.com/shenwei356/easy_sbatch">easy_sbatch</a>
 is used for batch submitting Slurm jobs via script templates.</p>
 <pre><code># ---------------------------------------------------
@@ -1036,13 +1036,13 @@ fd kmcp.tsv.gz$ $reads/ \
  4. FPR,      False positive rate
  5. hits,     Number of matches
  6. target,   Identifier of target sequence
- 7. fragIdx,  Index of reference fragment
- 8. frags,    Number of reference fragments
+ 7. chunkIdx, Index of reference chunk
+ 8. chunks,   Number of reference chunks
  9. tLen,     Reference length
 10. kSize,    K-mer size
 11. mKmers,   Number of matched k-mers
 12. qCov,     Query coverage,  equals to: mKmers / qKmers
-13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference fragment
+13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
 14. jacc,     Jaccard index
 15. queryIdx, Index of query sequence, only for merging
 </code></pre>
@@ -1060,8 +1060,8 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <th align="left">FPR</th>
 <th align="left">hits</th>
 <th align="left">target</th>
-<th align="left">fragIdx</th>
-<th align="left">frags</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
 <th align="left">tLen</th>
 <th align="left">kSize</th>
 <th align="left">mKmers</th>
@@ -1236,11 +1236,11 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 </ul>
 <h4 id="methods"><strong>Methods</strong></h4>
 <ol>
-<li>Reference genomes can be splitted into fragments when computing
+<li>Reference genomes can be splitted into chunks when computing
     k-mers (sketches), which could help to increase the specificity
-    via a threshold, i.e., the minimal proportion of matched fragments
-    (<code>-p/--min-frags-fraction</code>). (<strong><em>highly recommended</em></strong>)
-    Another flag <code>-d/--max-frags-cov-stdev</code> further reduces false positives.</li>
+    via a threshold, i.e., the minimal proportion of matched chunks
+    (<code>-p/--min-chunks-fraction</code>). (<strong><em>highly recommended</em></strong>)
+    Another flag <code>-d/--max-chunks-cov-stdev</code> further reduces false positives.</li>
 <li>We require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
     the false positive rate.</li>
@@ -1285,9 +1285,9 @@ increase precision in cost of sensitivity.</li>
 <p>Using this flag will override the relevant options.</p>
 <pre><code>options                      m=0    m=1   m=2   m=3    m=4   m=5
 --------------------------   ----   ---   ---   ----   ---   ----
--r/--min-frags-reads         1      20    30    50     100   100
--p/--min-frags-fraction      0.2    0.5   0.7   0.8    1     1
--d/--max-frags-depth-stdev   10     10    3     2      2     1.5
+-r/--min-chunks-reads        1      20    30    50     100   100
+-p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
+-d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
 -u/--min-uniq-reads          1      20    20    20     50    50
 -U/--min-hic-ureads          1      5     5     5      10    10
 -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
@@ -1301,7 +1301,7 @@ increase precision in cost of sensitivity.</li>
 <p><strong>Performance notes</strong>:</p>
 <ol>
 <li>Searching results are parsed in parallel, and the number of
-    lines proceeded by a thread can be set by the flag <code>--chunk-size</code>.</li>
+    lines proceeded by a thread can be set by the flag <code>--line-chunk-size</code>.</li>
 <li>However using a lot of threads does not always accelerate
     processing, 4 threads with chunk size of 500-5000 is fast enough.</li>
 </ol>
@@ -1319,9 +1319,9 @@ kmcp profile \
     --taxdump          $taxdump \
     --level             species \
     --min-query-cov        0.55 \
-    --min-frags-reads        50 \
-    --min-frags-fraction     0.8 \
-    --max-frags-depth-stdev   2 \
+    --min-chunks-reads       50 \
+    --min-chunks-fraction   0.8 \
+    --max-chunks-depth-stdev  2 \
     --min-uniq-reads         10 \
     --min-hic-ureads          1 \
     --min-hic-ureads-qcov  0.75 \
@@ -1348,9 +1348,9 @@ kmcp profile \
 <pre><code> 1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of a reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
- 4. fragsFrac,          Genome fragments fraction
- 5. fragsRelDepth,      Relative depths of reference fragments
- 6. fragsRelDepthStd,   The strandard deviation of fragsRelDepth
+ 4. chunksFrac,         Genome chunks fraction
+ 5. chunksRelDepth,     Relative depths of reference chunks
+ 6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
  7. reads,              Total number of matched reads of this reference
  8. ureads,             Number of uniquely matched reads
  9. hicureads,          Number of uniquely matched reads with high-confidence
@@ -1369,9 +1369,9 @@ kmcp profile \
 <th align="left">ref</th>
 <th align="left">percentage</th>
 <th align="left">score</th>
-<th align="left">fragsFrac</th>
-<th align="left">fragsRelDepth</th>
-<th align="left">fragsRelDepthStd</th>
+<th align="left">chunksFrac</th>
+<th align="left">chunksRelDepth</th>
+<th align="left">chunksRelDepthStd</th>
 <th align="left">reads</th>
 <th align="left">ureads</th>
 <th align="left">hicureads</th>

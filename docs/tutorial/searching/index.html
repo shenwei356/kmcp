@@ -678,7 +678,7 @@ bringing a small database size and much faster searching speed
 <p>The database building process is similar to that of metagenomic profiling,
 with one difference:</p>
 <ol>
-<li>Reference genomes are not splitted into fragments which slow down searching speed.</li>
+<li>Reference genomes are not splitted into chunks which slow down searching speed.</li>
 </ol>
 <p>Taken GTDB for example:</p>
 <pre><code># mask low-complexity region
@@ -749,8 +749,8 @@ processed queries: 999424, speed: 2.47 million queries per minute
 <th align="left">FPR</th>
 <th align="left">hits</th>
 <th align="left">target</th>
-<th align="left">fragIdx</th>
-<th align="left">frags</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
 <th align="left">tLen</th>
 <th align="left">kSize</th>
 <th align="left">mKmers</th>
@@ -921,7 +921,7 @@ Here KMCP utilizes multiple sketches
 with few differences:</p>
 <ol>
 <li>K-mer sketches instead of all k-mers are computed.</li>
-<li>Reference genomes are not splitted into fragments.</li>
+<li>Reference genomes are not splitted into chunks.</li>
 <li>Smaller false positive rate (<code>-f</code>) and more than one hash functions (<code>-n</code>) are used to improve accuracy.</li>
 <li>Using bigger k-mer size: 31.</li>
 </ol>
@@ -973,8 +973,8 @@ For examples, setting a smaller scale like 10.</li>
 <th align="left">FPR</th>
 <th align="left">hits</th>
 <th align="left">target</th>
-<th align="left">fragIdx</th>
-<th align="left">frags</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
 <th align="left">tLen</th>
 <th align="left">kSize</th>
 <th align="left">mKmers</th>
