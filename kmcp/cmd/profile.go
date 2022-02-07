@@ -343,8 +343,15 @@ Taxonomic binning formats:
 			metaphlanReportFile = metaphlanReportFile + ".profile"
 		}
 
+		metaphlanReportVersion := getFlagString(cmd, "metaphlan-report-version")
+		switch metaphlanReportVersion {
+		case "2", "3":
+		default:
+			checkError(fmt.Errorf("invalid --metaphlan-report-version: %s", metaphlanReportVersion))
+		}
+
 		if (outputBinningResult || outputCamiReport || outputMetaphlanReport) && !mappingTaxids {
-			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are needed to output CAMI/MetaPhlan/binning report")
+			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are needed to output CAMI/MetaPhlAn/binning report")
 		}
 
 		showRanks := getFlagStringSlice(cmd, "show-rank")
@@ -579,7 +586,7 @@ Taxonomic binning formats:
 				log.Infof("    Sample ID     : %s", sampleID)
 			}
 			if outputMetaphlanReport {
-				log.Infof("  MetaPhlan format: %s", metaphlanReportFile)
+				log.Infof(" MetaPhlAn%s format: %s", metaphlanReportVersion, metaphlanReportFile)
 				log.Infof("    Sample ID     : %s", sampleID)
 				log.Infof("    Taxonomy ID   : %s", taxonomyID)
 			}
@@ -2357,6 +2364,11 @@ Taxonomic binning formats:
 
 			outfh2.WriteString(fmt.Sprintf("#SampleID\t%s\n", sampleID))
 
+			if metaphlanReportVersion == "2" {
+			} else if metaphlanReportVersion == "3" {
+				outfh2.WriteString("#clade_name\tNCBI_tax_id\trelative_abundance\tadditional_species\n")
+			}
+
 			var lineageNames string
 			filterByRank := len(showRanksMap) > 0
 			names := make([]string, 0, 8)
@@ -2377,7 +2389,11 @@ Taxonomic binning formats:
 					lineageNames = strings.Join(node.LineageNames, "|")
 				}
 
-				outfh2.WriteString(fmt.Sprintf("%s\t%.6f\n", lineageNames, node.Percentage))
+				if metaphlanReportVersion == "2" {
+					outfh2.WriteString(fmt.Sprintf("%s\t%.6f\n", lineageNames, node.Percentage))
+				} else if metaphlanReportVersion == "3" {
+					outfh2.WriteString(fmt.Sprintf("%s\t%d\t%.6f\t%s\n", lineageNames, node.Taxid, node.Percentage, ""))
+				}
 			}
 		}
 
@@ -2521,6 +2537,7 @@ func init() {
 	profileCmd.Flags().StringP("taxonomy-id", "", "", formatFlagUsage(`Taxonomy ID in result file.`))
 
 	profileCmd.Flags().StringP("metaphlan-report", "M", "", formatFlagUsage(`Save extra metaphlan-like report.`))
+	profileCmd.Flags().StringP("metaphlan-report-version", "", "3", formatFlagUsage(`Metaphlan report version (2 or 3)`))
 
 	profileCmd.Flags().StringP("cami-report", "C", "", formatFlagUsage(`Save extra CAMI-like report.`))
 

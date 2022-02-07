@@ -443,6 +443,7 @@ Flags:
                                       Range: (0, 1). (default 0.05)
       --max-qcov-gap float            ► Max qcov gap between adjacent matches. (default 0.2)
   -M, --metaphlan-report string       ► Save extra metaphlan-like report.
+      --metaphlan-report-version string   ► Metaphlan report version (2 or 3) (default "3")
   -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
                                       reference for ambiguous reads. Range: (0, 1). (default 0.05)
   -p, --min-chunks-fraction float     ► Minimal fraction of matched reference chunks with reads >=
