@@ -650,7 +650,7 @@
 <p>KMCP is a command-line tool consisting of several subcommands.</p>
 <pre><code class="language-text">
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.7.0
+    Version: v0.7.1
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -1070,6 +1070,7 @@ Flags:
                                       Range: (0, 1). (default 0.05)
       --max-qcov-gap float            ► Max qcov gap between adjacent matches. (default 0.2)
   -M, --metaphlan-report string       ► Save extra metaphlan-like report.
+      --metaphlan-report-version string   ► Metaphlan report version (2 or 3) (default &quot;3&quot;)
   -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
                                       reference for ambiguous reads. Range: (0, 1). (default 0.05)
   -p, --min-chunks-fraction float     ► Minimal fraction of matched reference chunks with reads &gt;=
