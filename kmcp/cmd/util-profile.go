@@ -165,7 +165,8 @@ type Target struct {
 
 	Percentage float64 // relative abundance
 
-	Stats *stats.Quantiler // for computing percentil of qcov of unique matches
+	Stats  *stats.Quantiler // for computing percentil of qcov of unique matches
+	StatsA *stats.Quantiler // for computing percentil of qcov of all matches
 
 	Score float64
 }

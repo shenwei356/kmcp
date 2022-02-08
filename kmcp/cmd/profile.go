@@ -99,9 +99,9 @@ Profiling modes:
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
     --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-chunks-reads         1      20    30    50     100   100
-    -p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
-    -d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
+    -r/--min-chunks-reads        1      20    30    50     100   100
+    -p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
     -u/--min-uniq-reads          1      20    20    20     50    50
     -U/--min-hic-ureads          1      5     5     5      10    10
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
@@ -258,6 +258,8 @@ Taxonomic binning formats:
 		default:
 			checkError(fmt.Errorf("invalid profiling mode: %d", mode))
 		}
+
+		mode0 := mode == 0
 
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
 		if lowAbcPct >= 100 {
@@ -715,6 +717,7 @@ Taxonomic binning formats:
 											UniqMatchHic: make([]float64, m.IdxNum),
 											// QLen:         make([]float64, m.IdxNum),
 											// RelDepth:  make([]float64, m.IdxNum),
+											StatsA: stats.NewQuantiler(),
 										}
 										profile[h] = &t0
 										t = &t0
@@ -727,10 +730,12 @@ Taxonomic binning formats:
 												t.UniqMatchHic[m.FragIdx]++
 											}
 										}
-										// t.QLen[m.FragIdx] += float64(m.QLen)
+										t.StatsA.Add(m.QCov)
 
 										first = false
 									}
+
+									// t.QLen[m.FragIdx] += float64(m.QLen)
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
 									// the sum is still one.
@@ -839,6 +844,7 @@ Taxonomic binning formats:
 								UniqMatchHic: make([]float64, m.IdxNum),
 								// QLen:         make([]float64, m.IdxNum),
 								// RelDepth:  make([]float64, m.IdxNum),
+								StatsA: stats.NewQuantiler(),
 							}
 							profile[h] = &t0
 							t = &t0
@@ -851,10 +857,12 @@ Taxonomic binning formats:
 									t.UniqMatchHic[m.FragIdx]++
 								}
 							}
-							// t.QLen[m.FragIdx] += float64(m.QLen)
+							t.StatsA.Add(m.QCov)
 
 							first = false
 						}
+
+						// t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 						// for a read matching multiple regions of a reference, distribute count to multiple regions,
 						// the sum is still one.
@@ -888,8 +896,10 @@ Taxonomic binning formats:
 			if t.SumUniqMatch < 1 { // no enough unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -900,8 +910,10 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < 1 { // no enough high-confidence unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
@@ -925,8 +937,10 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp { // low coverage
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1245,6 +1259,7 @@ Taxonomic binning formats:
 												QLen:         make([]float64, m.IdxNum),
 												RelDepth:     make([]float64, m.IdxNum),
 												// Stats:        stats.NewQuantiler(),
+												StatsA: stats.NewQuantiler(),
 											}
 											profile2[h] = &t0
 											t = &t0
@@ -1259,10 +1274,12 @@ Taxonomic binning formats:
 
 												// t.Stats.Add(m.QCov) // the best match on a subject
 											}
-											t.QLen[m.FragIdx] += float64(m.QLen)
+											t.StatsA.Add(m.QCov)
 
 											first = false
 										}
+
+										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 										// for a read matching multiple regions of a reference, distribute count to multiple regions,
 										// the sum is still one.
@@ -1291,7 +1308,8 @@ Taxonomic binning formats:
 											UniqMatchHic: make([]float64, m.IdxNum),
 											QLen:         make([]float64, m.IdxNum),
 											RelDepth:     make([]float64, m.IdxNum),
-											// Stats:        stats.NewQuantiler(),
+											// Stats: stats.NewQuantiler(),
+											StatsA: stats.NewQuantiler(),
 										}
 										profile2[h] = &t0
 										t = &t0
@@ -1304,12 +1322,14 @@ Taxonomic binning formats:
 												t.UniqMatchHic[m.FragIdx]++
 											}
 
-											//	t.Stats.Add(m.QCov) // the best match on a subject
+											// t.Stats.Add(m.QCov) // the best match on a subject
 										}
-										t.QLen[m.FragIdx] += float64(m.QLen)
+										t.StatsA.Add(m.QCov) // the best match on a subject
 
 										first = false
 									}
+
+									t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
 									// the sum is still one.
@@ -1462,6 +1482,7 @@ Taxonomic binning formats:
 									QLen:         make([]float64, m.IdxNum),
 									RelDepth:     make([]float64, m.IdxNum),
 									// Stats:        stats.NewQuantiler(),
+									StatsA: stats.NewQuantiler(),
 								}
 								profile2[h] = &t0
 								t = &t0
@@ -1476,10 +1497,12 @@ Taxonomic binning formats:
 
 									// t.Stats.Add(m.QCov) // the best match on a subject
 								}
-								t.QLen[m.FragIdx] += float64(m.QLen)
+								t.StatsA.Add(m.QCov) // the best match on a subject
 
 								first = false
 							}
+
+							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 							// for a read matching multiple regions of a reference, distribute count to multiple regions,
 							// the sum is still one.
@@ -1509,6 +1532,7 @@ Taxonomic binning formats:
 								QLen:         make([]float64, m.IdxNum),
 								RelDepth:     make([]float64, m.IdxNum),
 								// Stats:        stats.NewQuantiler(),
+								StatsA: stats.NewQuantiler(),
 							}
 							profile2[h] = &t0
 							t = &t0
@@ -1523,10 +1547,12 @@ Taxonomic binning formats:
 
 								// t.Stats.Add(m.QCov) // the best match on a subject
 							}
-							t.QLen[m.FragIdx] += float64(m.QLen)
+							t.StatsA.Add(m.QCov) // the best match on a subject
 
 							first = false
 						}
+
+						t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 						// for a read matching multiple regions of a reference, distribute count to multiple regions,
 						// the sum is still one.
@@ -1553,8 +1579,10 @@ Taxonomic binning formats:
 			if t.SumUniqMatch < minUReads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -1565,8 +1593,10 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < minHicUreads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
@@ -1574,8 +1604,10 @@ Taxonomic binning formats:
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.4f (%.0f/%.0f)\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
 				}
 				continue
 			}
@@ -1583,8 +1615,14 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if c >= minReads {
-					t.FragsProp++
+				if mode0 {
+					if c > 0 {
+						t.FragsProp++
+					}
+				} else {
+					if c >= minReads {
+						t.FragsProp++
+					}
 				}
 				t.SumMatch += c
 			}
@@ -1592,8 +1630,10 @@ Taxonomic binning formats:
 			if t.FragsProp < minFragsProp {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -1610,8 +1650,10 @@ Taxonomic binning formats:
 			if t.RelDepthStd > maxFragsDepthStdev {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), %s: %f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "high FragsDepthStdev", t.RelDepthStd)
+					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"high FragsDepthStdev", t.RelDepthStd)
 				}
 				continue
 			}
@@ -1781,20 +1823,30 @@ Taxonomic binning formats:
 											QLen:         make([]float64, m.IdxNum),
 											RelDepth:     make([]float64, m.IdxNum),
 											Stats:        stats.NewQuantiler(),
+											StatsA:       stats.NewQuantiler(),
 										}
 										profile3[h] = &t0
 										t = &t0
 									}
 
 									if first { // count once
-										t.QLen[m.FragIdx] += float64(m.QLen) * prop
 										if levelSpecies && theSameSpecies {
 											t.Stats.Add(m.QCov) // the best match on a subject
 										}
 										first = false
+
+										t.StatsA.Add(m.QCov)
 									}
 
-									t.Match[m.FragIdx] += prop / floatMsSize
+									if mode0 {
+										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
+
+										t.Match[m.FragIdx] += floatOne / floatMsSize
+									} else {
+										t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
+
+										t.Match[m.FragIdx] += prop / floatMsSize
+									}
 
 									if levelSpecies && theSameSpecies {
 										t.UniqMatch[m.FragIdx] += prop / floatMsSize
@@ -1828,6 +1880,7 @@ Taxonomic binning formats:
 											QLen:         make([]float64, m.IdxNum),
 											RelDepth:     make([]float64, m.IdxNum),
 											Stats:        stats.NewQuantiler(),
+											StatsA:       stats.NewQuantiler(),
 										}
 										profile3[h] = &t0
 										t = &t0
@@ -1842,7 +1895,7 @@ Taxonomic binning formats:
 											t.Stats.Add(m.QCov) // the best match on a subject
 										}
 
-										t.QLen[m.FragIdx] += float64(m.QLen)
+										t.StatsA.Add(m.QCov)
 										first = false
 
 										if outputBinningResult {
@@ -1850,6 +1903,8 @@ Taxonomic binning formats:
 											nB++
 										}
 									}
+
+									t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
@@ -1991,20 +2046,29 @@ Taxonomic binning formats:
 								QLen:         make([]float64, m.IdxNum),
 								RelDepth:     make([]float64, m.IdxNum),
 								Stats:        stats.NewQuantiler(),
+								StatsA:       stats.NewQuantiler(),
 							}
 							profile3[h] = &t0
 							t = &t0
 						}
 
 						if first { // count once
-							t.QLen[m.FragIdx] += float64(m.QLen) * prop
 							if levelSpecies && theSameSpecies {
 								t.Stats.Add(m.QCov) // the best match on a subject
 							}
 							first = false
+							t.StatsA.Add(m.QCov)
 						}
 
-						t.Match[m.FragIdx] += prop / floatMsSize
+						if mode0 {
+							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
+
+							t.Match[m.FragIdx] += floatOne / floatMsSize
+						} else {
+							t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
+
+							t.Match[m.FragIdx] += prop / floatMsSize
+						}
 
 						if levelSpecies && theSameSpecies {
 							t.UniqMatch[m.FragIdx] += prop / floatMsSize
@@ -2038,6 +2102,7 @@ Taxonomic binning formats:
 								QLen:         make([]float64, m.IdxNum),
 								RelDepth:     make([]float64, m.IdxNum),
 								Stats:        stats.NewQuantiler(),
+								StatsA:       stats.NewQuantiler(),
 							}
 							profile3[h] = &t0
 							t = &t0
@@ -2052,7 +2117,7 @@ Taxonomic binning formats:
 								t.Stats.Add(m.QCov) // the best match on a subject
 							}
 
-							t.QLen[m.FragIdx] += float64(m.QLen)
+							t.StatsA.Add(m.QCov)
 							first = false
 
 							if outputBinningResult {
@@ -2060,6 +2125,8 @@ Taxonomic binning formats:
 								nB++
 							}
 						}
+
+						t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 						t.Match[m.FragIdx] += floatOne / floatMsSize
 					}
@@ -2085,8 +2152,10 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatch < minUReads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough unique match", t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough unique match", t.SumUniqMatch)
 				}
 				continue
 			}
@@ -2096,16 +2165,20 @@ Taxonomic binning formats:
 			}
 			if t.SumUniqMatchHic < minHicUreads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match", t.SumUniqMatchHic)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough high-confidence unique match", t.SumUniqMatchHic)
 				}
 				continue
 			}
 
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.4f (%.0f/%.0f)\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
 				}
 				continue
 			}
@@ -2113,16 +2186,24 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if c >= minReads {
-					t.FragsProp++
+				if mode0 {
+					if c > 0 {
+						t.FragsProp++
+					}
+				} else {
+					if c >= minReads {
+						t.FragsProp++
+					}
 				}
 				t.SumMatch += c
 			}
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "low chunks fraction", t.FragsProp, t.Match)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"low chunks fraction", t.FragsProp, t.Match)
 				}
 				continue
 			}
@@ -2138,8 +2219,10 @@ Taxonomic binning formats:
 			_, t.RelDepthStd = MeanStdev(t.RelDepth)
 			if t.RelDepthStd > maxFragsDepthStdev {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), %s: %f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]), "high FragsDepthStdev", t.RelDepthStd)
+					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
+						t.Name, taxdb.Name(taxidMap[t.Name]),
+						t.StatsA.Percentile(90),
+						"high FragsDepthStdev", t.RelDepthStd)
 				}
 				continue
 			}
@@ -2204,7 +2287,7 @@ Taxonomic binning formats:
 			w.Close()
 		}()
 
-		if mode == 0 {
+		if mode0 {
 			sort.Slice(targets, func(i, j int) bool {
 				d := targets[i].Score*targets[i].FragsProp - targets[j].Score*targets[j].FragsProp
 				if d < 0 {
