@@ -1181,7 +1181,7 @@ is good enough.
         --out-dir refs-k21-n10
 
     # demo output
-    22:33:10.685 [INFO] kmcp v0.7.0
+    22:33:10.685 [INFO] kmcp v0.7.1
     22:33:10.685 [INFO]   https://github.com/shenwei356/kmcp
     22:33:10.685 [INFO] 
     22:33:10.685 [INFO] checking input files ...
@@ -1292,7 +1292,7 @@ and have improved the indexing and searching speed
         --out-dir refs.kmcp 
 
     # demo output
-    22:44:17.710 [INFO] kmcp v0.7.0
+    22:44:17.710 [INFO] kmcp v0.7.1
     22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
     22:44:17.710 [INFO] 
     22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt

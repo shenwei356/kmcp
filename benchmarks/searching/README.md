@@ -9,7 +9,7 @@ Softwares
 - [COBS](https://github.com/bingmann/cobs) ([1915fc0](https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15))
 - [Sourmash](https://github.com/dib-lab/sourmash) (v4.2.2)
 - [Mash](https://github.com/marbl/Mash) (v2.3)
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
+- KMCP ([v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1))
 
 Utilities
 

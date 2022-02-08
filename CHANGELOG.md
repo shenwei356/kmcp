@@ -1,12 +1,12 @@
 # Changelog
 
-### v0.7.1
+### v0.7.1 - 2022-02-08
 
-- kmcp: rename fragment to chunk
-- profile:
+- `profile`:
     - new flag `--metaphlan-report-version` and the default value is `3`. [#4](https://github.com/shenwei356/kmcp/issues/4)
-    - colum name renamed: from `fragsFrac`, `fragsRelDepth`, `fragsRelDepthStd` to `chunksFrac`, `chunksRelDepth`, `chunksRelDepthStd`.
-
+    - column name renamed: from `fragsFrac`, `fragsRelDepth`, `fragsRelDepthStd` to `chunksFrac`, `chunksRelDepth`, `chunksRelDepthStd`.
+    - fix computation of `chunksRelDepth`.
+    - slightly improve sensitivity for `-m 0`.
 ### v0.7.0 - 2022-01-24
 
 - commands:

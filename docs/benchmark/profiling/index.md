@@ -9,7 +9,7 @@
 - mOTUs 2.5.1
 - MetaPHlAn 2.9.21
 - Bracken 2.5
-- KMCP v0.7.0
+- KMCP v0.7.1
 
 **Databases:** RefSeq and Taxonomy snapshot provided by CAMI2 (2019-01-08)
 
@@ -23,7 +23,7 @@
 
 **Softwares:**
 
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
+- KMCP ([v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1))
 - mOTUs [3.0.1 (Jul 28, 2021)](https://github.com/motu-tool/mOTUs/releases/tag/3.0.1)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
@@ -52,7 +52,7 @@ Where KMCP* does not search against viral database.
 
 **Softwares:**
 
-- KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- KMCP [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
@@ -78,7 +78,7 @@ including the gold-standard profiles.
 
 **Softwares:**
 
-- KMCP [v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0)
+- KMCP [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
 - MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
@@ -96,7 +96,7 @@ including the gold-standard profiles.
 
 |                      |sensitivity|specificity|
 |:---------------------|----------:|----------:|
-|KMCP                  |81.43%     |100.00%    |
+|KMCP                  |84.29%     |90.91%     |
 |Kraken2+Bracken2      |80.00%     |81.82%     |
 |Kraken2+Braken2 (KMCP)|87.14%     |100.00%    |
 |Centrifuge (KMCP)     |87.14%     |72.73%     |

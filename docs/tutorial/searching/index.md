@@ -77,7 +77,7 @@ while it's much slower, >10X slower on SSD and should be much slower on HDD disk
 
     kmcp search -d gtdb-r202-k21.kmcp/ test.fq.gz -o result.tsv.gz
 
-    13:36:14.522 [INFO] kmcp v0.7.0
+    13:36:14.522 [INFO] kmcp v0.7.1
     13:36:14.522 [INFO]   https://github.com/shenwei356/kmcp
     13:36:14.522 [INFO] 
     13:36:14.522 [INFO] checking input files ...

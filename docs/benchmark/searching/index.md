@@ -6,7 +6,7 @@ Softwares
 
 - [COBS](https://github.com/bingmann/cobs) ([1915fc0](https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15))
 - [Sourmash](https://github.com/dib-lab/sourmash) (v4.2.2)
-- KMCP ([v0.7.0](https://github.com/shenwei356/kmcp/releases/tag/v0.7.0))
+- KMCP ([v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1))
 
 [GTDB r202 representative genomes](https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz) are used for tests:
 
