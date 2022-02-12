@@ -12,6 +12,7 @@
 - KMCP,  GTDB-RS202 (2021-04-27) + Genbank-viral (r246, 2021-12-06) + Refseq-fungi (r208, 2021-09-30), 2021-12-06
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 - Centrifuge, built with the genomes same to KMCP.
+- Kraken, built with the genomes same to KMCP.
 
 **We create the databases of GTDB and Refseq-fungi with a smaller false-positive rate `0.1` instead of `0.3`, and use a small query coverage threshhold `0.4` instead of `0.55`.**
 

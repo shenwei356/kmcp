@@ -14,6 +14,7 @@
 - Centrifuge, built with the genomes same to KMCP.
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
+- Kraken, built with the genomes same to KMCP.
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
@@ -90,6 +91,7 @@ We manually download the paired and unpaired reads for every sample, for example
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_paired.fastq.gz
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_unpaired.fastq.gz
 
+**Note that some files of MCA-S1 and MCA-S2 are corrupted.**
 
 ## KMCP
 
@@ -219,7 +221,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v db=$db -v dbdir=$dbdir \
-            'memusg -t -s "metaphlan --input_type fastq {p}_R1_001_t_paired.fastq.gz,{p}_R2_001_t_paired.fastq.gz -o {p}.mpa3.profile \
+            'memusg -t -s "metaphlan --add_viruses --input_type fastq {p}_R1_001_t_paired.fastq.gz,{p}_R2_001_t_paired.fastq.gz -o {p}.mpa3.profile \
                 -x {db} --bowtie2db {dbdir} \
                 --bowtie2out {p}.bowtie2.bz2 --nproc {j} --CAMI_format_output" >{p}.log 2>&1 '
 
@@ -266,19 +268,45 @@ Preparing tocami.py which convert Bracken output to CAMI format
 
 Steps
 
+    # --------------------------------------------------
+    # using kraken's PLUSPF database
+
+    reads=bracken-pe
+    
     # prepare folder and files.
-    mkdir -p bracken-pe
-    cd bracken-pe
+    mkdir -p $reads
+    cd $reads
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
-    
-    reads=bracken-pe
+
+    reads=bracken-pe    
     j=4
     J=40
     
-    db=/home/shenwei/ws/db/kraken/pluspf
+    db=/home/shenwei/ws/db/kraken/pluspf    
     readlen=150
     threshold=10
+    
+    
+    # --------------------------------------------------
+    # using kraken database built with GTDB, Genbank-viral, Refseq-fungi
+    
+    reads=bracken-kmcp
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=bracken-kmcp    
+    j=4
+    J=40
+    
+    db=/home/shenwei/ws/db/kraken/kmcp/kmcp
+    readlen=150
+    threshold=10
+    
     
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \

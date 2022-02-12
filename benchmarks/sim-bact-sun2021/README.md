@@ -16,6 +16,7 @@
 - mOTUs, 3.0.1 (2021-06-28), 2019-01
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
+- Kraken, built with the genomes same to KMCP.
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
