@@ -136,3 +136,75 @@ Build it!
      memusg -t -s "perl $(which buildDB.pl) --DB kmcp \
         --FASTAs kmcp.fa \
         --taxonomy kmcp-taxdump " > metamaps.b.log 2>&1
+        
+## Custom databases for DUDes
+
+https://github.com/pirovc/dudes
+
+Note the versions of python, numpy and pandas:
+
+    https://github.com/pirovc/dudes/issues/2
+    
+    conda create -n python=3.7 numpy=1.20 pandas=0.24
+    
+    you may edit the first line of DUDesDB.py or use python DUDesDB.py to use the local python.
+
+Prepare FASTA for DUDes:
+
+    time find refseq-fungi/ genbank-viral/ gtdb/ -name "*.fna.gz" \
+        | rush -j 40 'seqkit seq -i {}' > all.dudes.fasta
+        
+Prepare accession2taxid.tsv:
+
+    echo -e "accession\taccession.version\ttaxid\tgi" > accession2taxid.tsv
+    time for db in refseq-fungi genbank-viral gtdb; do    
+        find $db/ -name "*.fna.gz" \
+            | rush -k -v map=taxid.$db.map \
+                'taxid=$(grep {%..} {map} | cut -f 2); \
+                seqkit seq -n -i {} | awk "{print \$1\"\t\"\$1\"\t\"$taxid\"\t\"$taxid}"'
+    done | csvtk replace -t -p '\.\d+$' >> accession2taxid.tsv
+    
+Build it!
+
+    ln -s ~/ws/data/kmcp/genbank-viral/taxdump
+
+    memusg -t -s "python ~/app/dudes/DUDesDB.py -m av -f all.dudes.fasta -t 40 -o dudes-kmcp \
+        -n taxdump/nodes.dmp -a taxdump/names.dmp -g accession2taxid.tsv" > dudes.a.log 2>&1
+    
+    memusg -t -s "bowtie2-build --threads 40 --large-index -f all.dudes.fasta dudes-kmcp" > dudes.b.log 2>&1
+    
+## Custom databases for SLIMM
+     
+https://github.com/seqan/slimm/wiki
+
+Use fasta and accession2taxid.tsv for DUDes.
+
+Build it!
+
+    memusg -t -s " slimm_build -v -b 10000000 -nm taxdump/names.dmp -nd taxdump/nodes.dmp \
+        -o slimm-kmcp.sldb all.dudes.fasta accession2taxid.tsv.gz" > slimm.log 2>&1
+
+    # use the same bowtie2 index as DUDes 
+
+## Custom databases for CCMetagen
+
+not used. building index is very very slow.
+
+https://github.com/vrmarcelino/CCMetagen
+
+Prepare FASTA for KMA:
+
+    time for db in refseq-fungi genbank-viral gtdb; do    
+        outdir=$db.formated
+        mkdir -p $outdir
+        
+        find $db/ -name "*.fna.gz" \
+            | rush -k -v outdir=$outdir -v map=taxid.$db.map \
+                'taxid=$(grep {%..} {map} | cut -f 2); \
+                seqkit seq -i {} | seqkit replace -p "^(.+)" -r "$taxid|\$1"'
+    done > all.ccmetagen.fasta
+    
+Build it!
+
+    memusg -t -s "kma index -i all.ccmetagen.fasta -o ccmetagen-kmcp -NI -Sparse -" > ccmetagen.log 2>&1
+     

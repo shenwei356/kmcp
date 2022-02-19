@@ -32,15 +32,16 @@ These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
 
-|DB                      |source     |#species|#assemblies|parameters       |archive file                                                                                                                                                      |size     |
+|DB                      |source     |#species*|#assemblies|parameters       |archive file                                                                                                                                                      |size     |
 |:-----------------------|:----------|:-------|:----------|:----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |43252   |47894      |k=21, chunks=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |23604   |30691      |k=21, chunks=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
-|**Fungi**               |Refseq r208|161     |403        |k=21, chunks=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
-|**Viruses**             |GenBank 246|19584   |27936      |k=21, chunks=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
-|**Viruses**             |Refseq r208|7189    |11618      |k=21, chunks=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
+|**Bacteria and Archaea**|GTDB r202  |28073+  |47894      |k=21, chunks=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |1594+   |30691      |k=21, chunks=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
+|**Fungi**               |Refseq r208|398     |403        |k=21, chunks=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
+|**Viruses**             |GenBank 246|23632   |27936      |k=21, chunks=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
+|**Viruses**             |Refseq r208|11186   |11618      |k=21, chunks=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
 |**Human**               |CHM13      |1       |1          |k=21, chunks=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
+*based on NCBI taxonomy data 2021-12-06.
 
 **Taxonomy data**:
 
@@ -114,12 +115,12 @@ Mapping file:
 
     tar -zxvf ar122_metadata_r202.tar.gz  bac120_metadata_r202.tar.gz
     
-    # assembly accesion -> full head
+    # assembly accession -> full head
     find gtdb/ -name "*.fna.gz" \
         | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
         > name.map
         
-    # assembly accesion -> taxid
+    # assembly accession -> taxid
     (cat ar122_metadata_r202.tsv; sed 1d bac120_metadata_r202.tsv) \
         | csvtk cut -t -f accession,ncbi_taxid \
         | csvtk replace -t -p '^.._' \
@@ -129,34 +130,27 @@ Mapping file:
 
     
     # stats (optional)
-
-    # number of species/strains
-    cat taxid.map \
-        | taxonkit lineage -i 2 -r -n -L \
-        | csvtk freq -Ht -f 4 -nr \
-        | csvtk pretty -H -t \
-        | tee taxid.map.stats
-    species           43566
-    strain            4108
-    subspecies        111
-    forma specialis   58
-    no rank           26
-    isolate           24
-    serotype          1
+    cat taxid.map  \
+        | csvtk freq -Ht -f 2 -nr \
+        | taxonkit lineage -r -n -L --data-dir taxdump/ \
+        | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
+        | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
+        > taxid.map.stats.tsv
+        
     
     # number of unique species/strains
     cat taxid.map \
         | csvtk uniq -Ht -f 2 \
-        | taxonkit lineage -i 2 -r -n -L \
+        | taxonkit lineage --data-dir taxdump/ -i 2 -r -n -L \
         | csvtk freq -Ht -f 4 -nr \
         | csvtk pretty -H -t \
         | tee taxid.map.uniq.stats
-    species           24739
-    strain            4101
-    subspecies        89
+    species           24743
+    strain            4097
+    subspecies        90
     forma specialis   58
     no rank           26
-    isolate           24
+    isolate           23
     serotype          1
   
         
@@ -323,9 +317,9 @@ Downloading viral and fungi sequences:
     mkdir -p taxdump
     tar -zxvf taxdump.tar.gz -C taxdump
     
-    # assembly accesion -> taxid
+    # assembly accession -> taxid
     cut -f 1,6 assembly_summary.txt > taxid.map    
-    # assembly accesion -> name
+    # assembly accession -> name
     cut -f 1,8 assembly_summary.txt > name.map
     
     
@@ -536,9 +530,9 @@ Downloading viral sequences:
     mkdir -p taxdump
     tar -zxvf taxdump.tar.gz -C taxdump
     
-    # assembly accesion -> taxid
+    # assembly accession -> taxid
     cut -f 1,6 assembly_summary.txt > taxid.map    
-    # assembly accesion -> name
+    # assembly accession -> name
     cut -f 1,8 assembly_summary.txt > name.map
     
     
@@ -883,14 +877,14 @@ Uncompressing and renaming:
   
 Mapping file:
     
-    # assembly accesion -> taxid
+    # assembly accession -> taxid
     cat HumGut.tsv \
         | csvtk cut -t -f genome_file,ncbi_tax_id \
         | csvtk replace -f genome_file -t -p '\..+$' \
         | csvtk del-header \
         > taxid.map
         
-    # assembly accesion -> name
+    # assembly accession -> name
     cat HumGut.tsv \
         | csvtk cut -t -f genome_file,ncbi_organism_name \
         | csvtk replace -f genome_file -t -p '\..+$' \

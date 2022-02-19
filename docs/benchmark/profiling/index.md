@@ -108,10 +108,12 @@ including the gold-standard profiles.
 
 |          |Database size (GB)|Building time|Building memory (GB)|
 |:--------:|:----------------:|:-----------:|:------------------:|
-|KMCP      |66                |21 m         |14                  |
-|Kraken2   |300               |5 h 23 m     |255                 |
-|Bracken2  |4                 |4 h 45 m     |258                 |
-|Centrifuge|97                |44 h 35m     |522                 |
+|KMCP      |66                |21m          |14                  |
+|Kraken2   |300               |5h 23m       |255                 |
+|Bracken2  |4                 |4h 45m       |258                 |
+|Centrifuge|97                |44h 35m      |522                 |
+|DUDes     |318               |40h 48m      |922                 |
+|SLIMM     |317               |40h 34m      |922                 |
 |MetaPhlAn3|3                 |/            |/                   |
 |mOTUs3    |8                 |/            |/                   |
 

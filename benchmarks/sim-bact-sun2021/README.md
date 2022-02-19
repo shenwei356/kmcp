@@ -238,6 +238,56 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $newprofile
+        
+## MetaPHlAn_add_viruses
+
+    # prepare folder and files.
+    mkdir -p mpa3-pe-add-viruses
+    
+    cd mpa3-pe-add-viruses
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+    
+    reads=mpa3-pe-add-viruses
+    j=4
+    J=40
+    
+    dbdir=~/ws/db/mpa3/
+    db=mpa_v30_CHOCOPhlAn_201901
+    
+    /bin/rm -rf $reads/*.bz2
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v dbdir=$dbdir \
+            'memusg -t -s "metaphlan --add_viruses --input_type fastq {p}.left.fq.gz,{p}.right.fq.gz -o {p}.mpa3.profile \
+                -x {db} --bowtie2db {dbdir} \
+                --bowtie2out {p}.bowtie2.bz2 --nproc {j} --CAMI_format_output" >{p}.log 2>&1 '
+
+    profile=$reads.profile
+    fd mpa3.profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $profile
+        
+
+    # ------------------------------------------------------
+    # change taxonomy version
+    
+    taxdump=taxdump/
+    fd mpa3.profile$ $reads/ \
+        | rush -v taxdump=$taxdump \
+            'grep -E "^#|@" -v {} \
+                | csvtk grep -Ht -f 2 -p species \
+                | csvtk cut -Ht -f 1,5 \
+                | taxonkit profile2cami --data-dir {taxdump} -s {%:} \
+                > {.}.new.profile'
+                
+    newprofile=$reads.new.profile
+    fd mpa3.new.profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $newprofile
+    
     
 ## Bracken
 
@@ -366,3 +416,112 @@ Steps
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $profile
+
+## DUDes
+
+    # --------------------------------------------------
+    # using dudes database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=dudes-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=dudes-pe    
+    j=4
+    J=40
+    n=100 # number of alignments for a read to keep. The paper use -k60
+    
+    db=~/ws/db/dudes/dudes-kmcp
+    db2=~/ws/db/dudes/dudes-kmcp.npz
+    
+
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+            'memusg -t -s \
+                "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
+                    -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
+                >{p}.a.log 2>&1 '
+                
+    j=25
+    J=1
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db2 -v n=$n \
+            'memusg -t -s \
+                "DUDes.py -t {j} -s {p}.sam -d {db} -o {p}" \
+                >{p}.b.log 2>&1 '
+
+    # rename sample id
+    fd left.fq.gz$ $reads/ \
+        | rush 'sed -i "s/{/}\///; s/.sam$//;" {:}.out'
+                
+    profile=$reads.profile
+    fd .out$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $profile
+
+## SIMM
+
+    # --------------------------------------------------
+    # using slimm database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=slimm-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=slimm-pe    
+    j=4
+    J=40
+    n=100 # number of alignments for a read to keep
+    
+    db=~/ws/db/slimm/dudes-kmcp    
+    db2=~/ws/db/slimm/slimm-kmcp.sldb
+    
+
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+            'memusg -t -s \
+                "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
+                    -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
+                >{p}.a.log 2>&1 '
+                
+    j=25
+    J=1
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db2 -v n=$n \
+            'memusg -t -s \
+                "slimm -w 1000 -o {p} {db} {p}.sam" \
+                >{p}.b.log 2>&1 '
+
+    # ------------------------------------------------------
+    # convert profile table to cami format
+    
+    taxdump=taxdump/
+    fd left.fq.gz$ $reads/ \
+        | rush -v taxdump=$taxdump \
+            'csvtk grep -t -f taxa_level -p species {:}_profile.tsv \
+                | csvtk cut -t -f taxa_id,abundance \
+                | csvtk grep -t -f taxa_id -r -p "\*$" -v \
+                | sed 1d \
+                | taxonkit profile2cami --data-dir {taxdump} -s {%:} \
+                | taxonkit cami-filter \
+                > {:}.profile'
+                
+    newprofile=$reads.profile
+    fd profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $newprofile
+    

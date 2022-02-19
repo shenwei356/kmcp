@@ -33,18 +33,18 @@ Refseq-fungi
         --log $out.log
     cp taxid.map name.map $out/
     
-Refseq-viral
+Genbank-viral
 
     k=21
     scale=10
     
-    in=files.renamed
-    out=refseq-viral.smin$scale.kmcp
-    tmp=refseq-viral-k21-n5-d$scale
+    in=files.renamed.slim
+    out=genbank-viral.smin$scale.kmcp
+    tmp=genbank-viral-k21-n5-d$scale
     
     kmcp compute -I $in -O $tmp -k $k -n 5 -l 100 -B plasmid -D $scale \
         --log $tmp.log --force        
-    kmcp index -j 40 -I $tmp -O $out -n 3 -f 0.001 \
+    kmcp index -j 40 -I $tmp -O $out -n 1 -f 0.05 -x 100K -8 1M \
         --log $out.log
     cp taxid.map name.map $out/
 
@@ -74,7 +74,7 @@ Refseq-viral
         
     seqkit grep -n -i -v -r -p plasmid  $file -w 0 \
         | seqkit sliding --greedy --step $step --window $len -w 0 \
-        | kmcp search -j 40 -d refseq-viral.smin10.kmcp/ -o $file.kmcp@refseq-viral.tsv.gz
+        | kmcp search -j 40 -d genbank-viral.smin10.kmcp/ -o $file.kmcp@genbank-viral.tsv.gz
     
     # merging searching results
     kmcp merge $file.kmcp@*.tsv.gz -o $file.kmcp.tsv.gz
@@ -102,16 +102,14 @@ Refseq-viral
     
     mkdir -p uniq/viral
     cd uniq/viral
-    find ../../refseq-viral/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
+    find ../../genbank-viral/files.renamed.slim/ -name "*.fna.gz" | rush 'ln -s {}'
     cd ../../
     
     mkdir -p uniq/fungi
     cd uniq/fungi
     find ../../refseq-fungi/files.renamed/ -name "*.fna.gz" | rush 'ln -s {}'
     cd ../../
-    
-    
-    
+
     
     input=uniq/viral
     
@@ -120,11 +118,11 @@ Refseq-viral
     
     step=200
     len=500
-    dbs="gtdb.smin10.kmcp refseq-fungi.smin10.kmcp refseq-viral.smin10.kmcp"
+    dbs="gtdb.smin10.kmcp refseq-fungi.smin10.kmcp genbank-viral.smin10.kmcp"
     taxidmap=taxid.map
     taxdump=taxdump/
             
-    j=4
+    j=8
     J=40
     time find $input -name "*fna.gz" \
         | rush -j $j -v j=$J -v step=$step -v len=$len -v "dbs=$dbs" \
@@ -135,8 +133,7 @@ Refseq-viral
                     | kmcp search -q -j {j} -d $db -o {}.kmcp@$db.tsv.gz; \
             done; \
             kmcp merge -q {}.kmcp@*.tsv.gz \
-                | kmcp utils filter -q -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; \
-            /bin/rm {}.kmcp@*.tsv.gz; ' -c -C search.rush
+                | kmcp utils filter -q -T {taxidmap} -X {taxdump} -o {}.kmcp.uniq.tsv.gz; ' -c -C search.rush
     
     # merge regions
     time find $input -name "*.fna.gz" \
@@ -147,7 +144,7 @@ Refseq-viral
     # length summary
     time find $input -name "*.fna.gz" \
         | rush -k 'glen=$(seqkit stats -T {} | csvtk cut -t -f sum_len | csvtk del-header); \
-                len=$(awk "{print \$3-\$2}" {}.kmcp.uniq.tsv.gz.bed | csvtk summary -Ht -n 0  -f 1:sum); \
+                len=$(awk "{print \$3-\$2}" {}.kmcp.uniq.tsv.gz.bed | csvtk summary -Ht - 0  -f 1:sum); \
                 echo -ne "{%:},$len,$glen\n" ' \
         | csvtk add-header -n file,uniqs,genome -o $input.len.csv.gz
     
