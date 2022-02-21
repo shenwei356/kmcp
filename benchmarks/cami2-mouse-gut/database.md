@@ -8,6 +8,11 @@ Dataset homepage: https://data.cami-challenge.org/participate
 
 Prebuilt KMCP databases and corresponding genomes are available at [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=mAgObd).
 
+|kingdoms                |source           |# species|# assembly|file                        |size     |
+|:-----------------------|:----------------|:--------|:---------|:---------------------------|:--------|
+|**Bacteria and Archaea**|RefSeq 2019-01-08|7064     |9871      |refseq-cami2-k21-n10.db     |13.17 GB |
+|**Viruses**             |RefSeq 2019-01-08|7783     |8243      |refseq-cami2-virus-k21-n5.db|855.27 MB|
+
 ## Tools
 
 - [seqkit](https://github.com/shenwei356/seqkit)
@@ -109,7 +114,7 @@ Stats (optional):
         | taxonkit lineage -i 2 -r -n -L --data-dir taxdump/ \
         | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
         | csvtk add-header -t -n 'accession,taxid,name,rank,superkindom,phylum,class,order,family,genus,species' \
-        > taxid.map.lineage.tsv
+        > taxid.map.lineage.tsv        
     cat taxid.map.lineage.tsv \
         | csvtk freq -t -f species -nr \
         | csvtk head -t -n 10 \
@@ -213,7 +218,7 @@ prokaryotic data.
     # -------------------------------------------------------------
     # use another directory with soft links linked to original files
 
-    outdir=refseq-viral-cami2
+    outdir=refseq-cami2-viral
     mkdir $outdir
     cd $outdir
     find ../viral -name "*.fna.gz" | rush 'ln -s {}'
@@ -250,10 +255,10 @@ prokaryotic data.
     # -------------------------------------------------------------
     # create kmcp database
 
-    kmcp compute -j 40 -k 21 -n 5 -l 100 -I viral/ -O refseq-cami2-viral-k21-n5 \
+    kmcp compute -j 40 -k 21 -n 5 -l 100 -I refseq-cami2-viral/ -O refseq-cami2-viral-k21-n5 \
         --log refseq-cami2-viral-k21-n5.log
     
     kmcp index -I refseq-cami2-viral-k21-n5/ -O refseq-cami2-viral-k21-n5.db \
-        -j 40 -n 3 -f 0.001 -x 100k \
+        -j 40 -n 1 -f 0.05 -x 100k \
         --log refseq-cami2-viral-k21-n5.db.log
     

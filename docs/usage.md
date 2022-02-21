@@ -350,6 +350,9 @@ Methods:
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
+     You can also disable this step by the flag --no-amb-corr.
+     If the first stage produces thousands of candidates, you can also use
+     the flag --no-amb-corr to reduce analysis time.
   4. Multi-aligned queries are proportionally assigned to references
      with a similar strategy in Metalign.
   5. Input files are parsed fours times, therefore STDIN is not supported.
@@ -385,6 +388,7 @@ Profiling modes:
     - 3 (default)
     - 4 (high precision)
     - 5 (higher precision)
+
   Using this flag will override the relevant options.
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
@@ -397,6 +401,11 @@ Profiling modes:
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
 
+Notes on mode=0:
+  1. For detecting pathogens in samples of ultra-low depth, the flag
+     -v/--mode-0-ultra-low-depth can be used to increase the sensitivity of
+     targets with only a few reads. But note that the total reads number
+     and genome coverage will be overestimated.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -407,6 +416,9 @@ Performance notes:
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
+  3. If the stage 1/4 produces thousands of candidates, then stage 2/4 would
+     be very slow. You can use the flag --no-amb-corr to disable ambiguous
+     reads correction which has very little effect on the results.
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
@@ -420,65 +432,69 @@ Usage:
   kmcp profile [flags]
 
 Flags:
-  -B, --binning-result string         ► Save extra binning result in CAMI report.
-  -C, --cami-report string            ► Save extra CAMI-like report.
-      --debug string                  ► Debug output file.
-  -F, --filter-low-pct float          ► Filter out predictions with the smallest relative abundances
-                                      summing up X%. Range: [0,100).
-  -h, --help                          help for profile
-      --keep-main-match               ► Only keep main matches, abandon matches with sharply decreased
-                                      qcov (> --max-qcov-gap).
-      --keep-perfect-match            ► Only keep the perfect matches (qcov == 1) if there are.
-  -n, --keep-top-qcovs int            ► Keep matches with the top N qcovs for a query, 0 for all.
-      --level string                  ► Level to estimate abundance at. Available values: species,
-                                      strain/assembly. (default "species")
-      --line-chunk-size int           ► Number of lines to process for each thread, and 4 threads is
-                                      fast enough. Type "kmcp profile -h" for details. (default 5000)
-  -f, --max-fpr float                 ► Maximal false positive rate of a read in search result.
-                                      (default 0.05)
-  -d, --max-chunks-depth-stdev float  ► Maximal standard deviation of relative depths of all
-                                      chunks. (default 2)
-  -R, --max-mismatch-err float        ► Maximal error rate of a read being matched to a wrong
-                                      reference, for determing the right reference for ambiguous reads.
-                                      Range: (0, 1). (default 0.05)
-      --max-qcov-gap float            ► Max qcov gap between adjacent matches. (default 0.2)
-  -M, --metaphlan-report string       ► Save extra metaphlan-like report.
+  -B, --binning-result string             ► Save extra binning result in CAMI report.
+  -C, --cami-report string                ► Save extra CAMI-like report.
+      --debug string                      ► Debug output file.
+  -F, --filter-low-pct float              ► Filter out predictions with the smallest relative
+                                          abundances summing up X%. Range: [0,100).
+  -h, --help                              help for profile
+      --keep-main-match                   ► Only keep main matches, abandon matches with sharply
+                                          decreased qcov (> --max-qcov-gap).
+      --keep-perfect-match                ► Only keep the perfect matches (qcov == 1) if there are.
+  -n, --keep-top-qcovs int                ► Keep matches with the top N qcovs for a query, 0 for all.
+      --level string                      ► Level to estimate abundance at. Available values: species,
+                                          strain/assembly. (default "species")
+      --line-chunk-size int               ► Number of lines to process for each thread, and 4 threads
+                                          is fast enough. Type "kmcp profile -h" for details. (default 5000)
+  -d, --max-chunks-depth-stdev float      ► Maximal standard deviation of relative depths of all
+                                          chunks. (default 2)
+  -f, --max-fpr float                     ► Maximal false positive rate of a read in search result.
+                                          (default 0.05)
+  -R, --max-mismatch-err float            ► Maximal error rate of a read being matched to a wrong
+                                          reference, for determing the right reference for ambiguous
+                                          reads. Range: (0, 1). (default 0.05)
+      --max-qcov-gap float                ► Max qcov gap between adjacent matches. (default 0.2)
+  -M, --metaphlan-report string           ► Save extra metaphlan-like report.
       --metaphlan-report-version string   ► Metaphlan report version (2 or 3) (default "3")
-  -D, --min-dreads-prop float         ► Minimal proportion of distinct reads, for determing the right
-                                      reference for ambiguous reads. Range: (0, 1). (default 0.05)
-  -p, --min-chunks-fraction float     ► Minimal fraction of matched reference chunks with reads >=
-                                      -r/--min-chunks-reads. (default 0.8)
-  -r, --min-chunks-reads int          ► Minimal number of reads for a reference chunk. (default 50)
-  -U, --min-hic-ureads int            ► Minimal number of high-confidence uniquely matched reads for a
-                                      reference. (default 5)
-  -P, --min-hic-ureads-prop float     ► Minimal proportion of high-confidence uniquely matched reads.
-                                      (default 0.1)
-  -H, --min-hic-ureads-qcov float     ► Minimal query coverage of high-confidence uniquely matched
-                                      reads. (default 0.75)
-  -t, --min-query-cov float           ► Minimal query coverage of a read in search result. (default 0.55)
-  -u, --min-uniq-reads int            ► Minimal number of uniquely matched reads for a reference.
-                                      (default 20)
-  -m, --mode int                      ► Profiling mode, type "kmcp profile -h" for details. available
-                                      values: 0 (for pathogen detection), 1 (higherrecall), 2 (high
-                                      recall), 3 (default), 4 (high precision), 5 (higher precision).
-                                      (default 3)
-  -N, --name-map strings              ► Tabular two-column file(s) mapping reference IDs to reference
-                                      names.
-      --no-amb-corr                   ► Do not correct ambiguous reads (just for benchmark).
-      --norm-abund string             ► Method for normalize abundance of a reference by the
-                                      mean/min/max abundance in all chunks, available values: mean,
-                                      min, max. (default "mean")
-  -o, --out-prefix string             ► Out file prefix ("-" for stdout). (default "-")
-      --rank-prefix strings           ► Prefixes of taxon name in certain ranks, used with
-                                      --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
-  -s, --sample-id string              ► Sample ID in result file.
-  -S, --separator string              ► Separator of TaxIds and taxonomy names. (default ";")
-      --show-rank strings             ► Only show TaxIds and names of these ranks. (default
-                                      [superkingdom,phylum,class,order,family,genus,species,strain])
-  -X, --taxdump string                ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp,
-                                      optional with merged.dmp and delnodes.dmp.
-  -T, --taxid-map strings             ► Tabular two-column file(s) mapping reference IDs to TaxIds.
-      --taxonomy-id string            ► Taxonomy ID in result file.
+  -p, --min-chunks-fraction float         ► Minimal fraction of matched reference chunks with reads >=
+                                          -r/--min-chunks-reads. (default 0.8)
+  -r, --min-chunks-reads int              ► Minimal number of reads for a reference chunk. (default 50)
+  -D, --min-dreads-prop float             ► Minimal proportion of distinct reads, for determing the
+                                          right reference for ambiguous reads. Range: (0, 1). (default 0.05)
+  -U, --min-hic-ureads int                ► Minimal number of high-confidence uniquely matched reads
+                                          for a reference. (default 5)
+  -P, --min-hic-ureads-prop float         ► Minimal proportion of high-confidence uniquely matched
+                                          reads. (default 0.1)
+  -H, --min-hic-ureads-qcov float         ► Minimal query coverage of high-confidence uniquely matched
+                                          reads. (default 0.75)
+  -t, --min-query-cov float               ► Minimal query coverage of a read in search result.
+                                          (default 0.55)
+  -u, --min-uniq-reads int                ► Minimal number of uniquely matched reads for a reference.
+                                          (default 20)
+  -m, --mode int                          ► Profiling mode, type "kmcp profile -h" for details.
+                                          available values: 0 (for pathogen detection), 1
+                                          (higherrecall), 2 (high recall), 3 (default), 4 (high
+                                          precision), 5 (higher precision). (default 3)
+  -v, --mode-0-ultra-low-depth            ► Detect pathogens in samples of ultra-low depth. type "kmcp
+                                          profile -h" for details.
+  -N, --name-map strings                  ► Tabular two-column file(s) mapping reference IDs to
+                                          reference names.
+      --no-amb-corr                       ► Do not correct ambiguous reads. Use this flag to reduce
+                                          analysis time if the stage 1/4 produces thousands of candidates.
+      --norm-abund string                 ► Method for normalize abundance of a reference by the
+                                          mean/min/max abundance in all chunks, available values: mean,
+                                          min, max. (default "mean")
+  -o, --out-prefix string                 ► Out file prefix ("-" for stdout). (default "-")
+      --rank-prefix strings               ► Prefixes of taxon name in certain ranks, used with
+                                          --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
+  -s, --sample-id string                  ► Sample ID in result file.
+  -S, --separator string                  ► Separator of TaxIds and taxonomy names. (default ";")
+      --show-rank strings                 ► Only show TaxIds and names of these ranks. (default
+                                          [superkingdom,phylum,class,order,family,genus,species,strain])
+  -X, --taxdump string                    ► Directory of NCBI taxonomy dump files: names.dmp,
+                                          nodes.dmp, optional with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings                 ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+      --taxonomy-id string                ► Taxonomy ID in result file.
 
 ```
 

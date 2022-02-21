@@ -339,6 +339,9 @@ Demo result:
     the false positive rate.
 3. We also use the two-stage taxonomy assignment algorithm in [MegaPath](https://doi.org/10.1186/s12864-020-06875-6)
     to reduce the false positive of ambiguous matches.
+    You can also disable this step by the flag `--no-amb-corr`.
+    If the first stage produces thousands of candidates, you can also use
+    the flag `--no-amb-corr` to reduce analysis time.
 4. Multi-aligned queries are proportionally assigned to references
     with a similar strategy in [Metalign](https://doi.org/10.1186/s13059-020-02159-0).
 5. Input files are parsed 4 times, therefore STDIN is not supported.
@@ -389,6 +392,13 @@ Using this flag will override the relevant options.
     -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
 
 
+**Notes on mode=0**
+
+1. For detecting pathogens in samples of ultra-low depth, the flag
+     `-v/--mode-0-ultra-low-depth` can be used to increase the sensitivity of
+     targets with only a few reads. But note that the total reads number
+     and genome coverage will be overestimated.
+    
 **Taxonomy data**:
 
 1. Mapping references IDs to TaxIds: `-T/--taxid-map`
@@ -400,7 +410,9 @@ Using this flag will override the relevant options.
     lines proceeded by a thread can be set by the flag `--line-chunk-size`.
 2. However using a lot of threads does not always accelerate
     processing, 4 threads with chunk size of 500-5000 is fast enough.
-
+3. If the stage 1/4 produces thousands of candidates, then stage 2/4 would
+     be very slow. You can use the flag `--no-amb-corr` to disable ambiguous
+     reads correction which has very little effect on the results.
 
 
 #### **Commands**

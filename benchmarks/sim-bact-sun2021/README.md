@@ -438,7 +438,7 @@ Steps
     db=~/ws/db/dudes/dudes-kmcp
     db2=~/ws/db/dudes/dudes-kmcp.npz
     
-
+    # mapping with bowtie2
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
@@ -446,7 +446,8 @@ Steps
                 "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
                     -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
                 >{p}.a.log 2>&1 '
-                
+    
+    # profiling with dudes
     j=25
     J=1
     fd left.fq.gz$ $reads/ \
@@ -487,7 +488,7 @@ Steps
     db=~/ws/db/slimm/dudes-kmcp    
     db2=~/ws/db/slimm/slimm-kmcp.sldb
     
-
+    # mapping with bowtie2
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
@@ -495,7 +496,8 @@ Steps
                 "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
                     -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
                 >{p}.a.log 2>&1 '
-                
+    
+    # profiling with slimm
     j=25
     J=1
     fd left.fq.gz$ $reads/ \

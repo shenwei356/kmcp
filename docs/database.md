@@ -41,7 +41,7 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 |**Viruses**             |Refseq r208|11186   |11618      |k=21, chunks=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
 |**Human**               |CHM13      |1       |1          |k=21, chunks=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
-*based on NCBI taxonomy data 2021-12-06.
+*based on NCBI taxonomy data 2021-12-06. `+` is used because some species are unclassfied xxx.
 
 **Taxonomy data**:
 

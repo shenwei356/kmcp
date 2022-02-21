@@ -60,6 +60,9 @@ Methods:
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
+     You can also disable this step by the flag --no-amb-corr.
+     If the first stage produces thousands of candidates, you can also use
+     the flag --no-amb-corr to reduce analysis time.
   4. Multi-aligned queries are proportionally assigned to references
      with a similar strategy in Metalign.
   5. Input files are parsed fours times, therefore STDIN is not supported.
@@ -95,6 +98,7 @@ Profiling modes:
     - 3 (default)
     - 4 (high precision)
     - 5 (higher precision)
+
   Using this flag will override the relevant options.
 
     options                      m=0    m=1   m=2   m=3    m=4   m=5
@@ -107,6 +111,11 @@ Profiling modes:
     -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
 
+Notes on mode=0:
+  1. For detecting pathogens in samples of ultra-low depth, the flag
+     -v/--mode-0-ultra-low-depth can be used to increase the sensitivity of
+     targets with only a few reads. But note that the total reads number
+     and genome coverage will be overestimated.
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -117,6 +126,9 @@ Performance notes:
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with chunk size of 500-5000 is fast enough.
+  3. If the stage 1/4 produces thousands of candidates, then stage 2/4 would
+     be very slow. You can use the flag --no-amb-corr to disable ambiguous
+     reads correction which has very little effect on the results.
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
@@ -257,6 +269,11 @@ Taxonomic binning formats:
 			HicUreadsMinProp = 0.15
 		default:
 			checkError(fmt.Errorf("invalid profiling mode: %d", mode))
+		}
+
+		ultraLow := getFlagBool(cmd, "mode-0-ultra-low-depth")
+		if ultraLow && mode != 0 {
+			log.Warningf(`flag -v/--mode-0-ultra-low-depth better be used with -m 0. type "kmcp profile -h" for details`)
 		}
 
 		mode0 := mode == 0
@@ -1112,7 +1129,7 @@ Taxonomic binning formats:
 				}
 			}
 		} else if opt.Verbose || opt.Log2File {
-			log.Infof("  skipped by user with flag --no-amb-corr")
+			log.Infof("  skipped by user with the flag --no-amb-corr")
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -1615,7 +1632,7 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if mode0 {
+				if ultraLow { // if mode0 {
 					if c > 0 {
 						t.FragsProp++
 					}
@@ -1838,7 +1855,7 @@ Taxonomic binning formats:
 										t.StatsA.Add(m.QCov)
 									}
 
-									if mode0 {
+									if ultraLow { //  if mode0 {
 										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 										t.Match[m.FragIdx] += floatOne / floatMsSize
@@ -2060,7 +2077,7 @@ Taxonomic binning formats:
 							t.StatsA.Add(m.QCov)
 						}
 
-						if mode0 {
+						if ultraLow { // if mode0 {
 							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 							t.Match[m.FragIdx] += floatOne / floatMsSize
@@ -2186,7 +2203,7 @@ Taxonomic binning formats:
 			// ----------------------
 
 			for _, c = range t.Match {
-				if mode0 {
+				if ultraLow { // if mode0 {
 					if c > 0 {
 						t.FragsProp++
 					}
@@ -2642,11 +2659,13 @@ func init() {
 	// debug
 	profileCmd.Flags().StringP("debug", "", "", formatFlagUsage(`Debug output file.`))
 
-	profileCmd.Flags().BoolP("no-amb-corr", "", false, formatFlagUsage(`Do not correct ambiguous reads (just for benchmark).`))
+	profileCmd.Flags().BoolP("no-amb-corr", "", false, formatFlagUsage(`Do not correct ambiguous reads. Use this flag to reduce analysis time if the stage 1/4 produces thousands of candidates.`))
 
 	// modes
 	profileCmd.Flags().IntP("mode", "m", 3,
 		formatFlagUsage(`Profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision).`))
+
+	profileCmd.Flags().BoolP("mode-0-ultra-low-depth", "v", false, formatFlagUsage(`Detect pathogens in samples of ultra-low depth. type "kmcp profile -h" for details.`))
 
 }
 
