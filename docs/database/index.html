@@ -770,7 +770,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <th align="left">DB</th>
 <th align="left">source</th>
-<th align="left">#species</th>
+<th align="left">#species*</th>
 <th align="left">#assemblies</th>
 <th align="left">parameters</th>
 <th align="left">archive file</th>
@@ -781,7 +781,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <td align="left"><strong>Bacteria and Archaea</strong></td>
 <td align="left">GTDB r202</td>
-<td align="left">43252</td>
+<td align="left">28073+</td>
 <td align="left">47894</td>
 <td align="left">k=21, chunks=10</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI">gtdb.kmcp.tar.gz</a> (50.16 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa">md5</a>)</td>
@@ -790,7 +790,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <td align="left"><strong>Bacteria and Archaea</strong></td>
 <td align="left">HumGut</td>
-<td align="left">23604</td>
+<td align="left">1594+</td>
 <td align="left">30691</td>
 <td align="left">k=21, chunks=10</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.70 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>)</td>
@@ -799,7 +799,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <td align="left"><strong>Fungi</strong></td>
 <td align="left">Refseq r208</td>
-<td align="left">161</td>
+<td align="left">398</td>
 <td align="left">403</td>
 <td align="left">k=21, chunks=10</td>
 <td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78">refseq-fungi.kmcp.tar.gz</a> (3.67 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E">md5</a>)</td>
@@ -808,7 +808,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <td align="left"><strong>Viruses</strong></td>
 <td align="left">GenBank 246</td>
-<td align="left">19584</td>
+<td align="left">23632</td>
 <td align="left">27936</td>
 <td align="left">k=21, chunks=5</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8">genbank-viral.kmcp.tar.gz</a> (1.15 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X">md5</a>)</td>
@@ -817,7 +817,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <td align="left"><strong>Viruses</strong></td>
 <td align="left">Refseq r208</td>
-<td align="left">7189</td>
+<td align="left">11186</td>
 <td align="left">11618</td>
 <td align="left">k=21, chunks=5</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk">refseq-viral.kmcp.tar.gz</a> (967 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e">md5</a>)</td>
@@ -834,6 +834,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 </tr>
 </tbody>
 </table>
+<p>*based on NCBI taxonomy data 2021-12-06. <code>+</code> is used because some species are unclassfied xxx.</p>
 <p><strong>Taxonomy data</strong>:</p>
 <ul>
 <li>Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ">taxdump.tar.gz</a> (2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU">md5</a>)</li>
@@ -995,12 +996,12 @@ brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
 <p>Mapping file:</p>
 <pre><code>tar -zxvf ar122_metadata_r202.tar.gz  bac120_metadata_r202.tar.gz
 
-# assembly accesion -&gt; full head
+# assembly accession -&gt; full head
 find gtdb/ -name "*.fna.gz" \
     | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
     &gt; name.map
 
-# assembly accesion -&gt; taxid
+# assembly accession -&gt; taxid
 (cat ar122_metadata_r202.tsv; sed 1d bac120_metadata_r202.tsv) \
     | csvtk cut -t -f accession,ncbi_taxid \
     | csvtk replace -t -p '^.._' \
@@ -1010,34 +1011,27 @@ find gtdb/ -name "*.fna.gz" \
 
 
 # stats (optional)
+cat taxid.map  \
+    | csvtk freq -Ht -f 2 -nr \
+    | taxonkit lineage -r -n -L --data-dir taxdump/ \
+    | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
+    | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
+    &gt; taxid.map.stats.tsv
 
-# number of species/strains
-cat taxid.map \
-    | taxonkit lineage -i 2 -r -n -L \
-    | csvtk freq -Ht -f 4 -nr \
-    | csvtk pretty -H -t \
-    | tee taxid.map.stats
-species           43566
-strain            4108
-subspecies        111
-forma specialis   58
-no rank           26
-isolate           24
-serotype          1
 
 # number of unique species/strains
 cat taxid.map \
     | csvtk uniq -Ht -f 2 \
-    | taxonkit lineage -i 2 -r -n -L \
+    | taxonkit lineage --data-dir taxdump/ -i 2 -r -n -L \
     | csvtk freq -Ht -f 4 -nr \
     | csvtk pretty -H -t \
     | tee taxid.map.uniq.stats
-species           24739
-strain            4101
-subspecies        89
+species           24743
+strain            4097
+subspecies        90
 forma specialis   58
 no rank           26
-isolate           24
+isolate           23
 serotype          1
 </code></pre>
 <p>Building database (all k-mers, for profiling on short-reads):</p>
@@ -1045,7 +1039,7 @@ serotype          1
 
 # compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks with 100bp overlap
+#   reference genomes are split into 10 chunks with 100bp overlap
 #   k = 21
 kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
     --log gtdb-r202-k21-n10.log -j 32 --force
@@ -1069,7 +1063,7 @@ input=gtdb
 
 # compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks with 100bp overlap
+#   reference genomes are split into 10 chunks with 100bp overlap
 #   k = 21
 #   s = 16 # Closed Syncmers
 kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
@@ -1094,7 +1088,7 @@ input=gtdb
 
 # compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks with 100bp overlap
+#   reference genomes are split into 10 chunks with 100bp overlap
 #   k = 21
 #   D = 5 # FracMinhash
 kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
@@ -1119,7 +1113,7 @@ input=gtdb
 
 # compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks with 100bp overlap
+#   reference genomes are split into 10 chunks with 100bp overlap
 #   k = 21
 #   W = 5 # Minimizer
 kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
@@ -1154,7 +1148,7 @@ for f in $input.n$n-*; do
 
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks with 100bp overlap
+    #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
         --log $f-k21-n10.log -j 24 --force
@@ -1198,9 +1192,9 @@ time genome_updater.sh \
 mkdir -p taxdump
 tar -zxvf taxdump.tar.gz -C taxdump
 
-# assembly accesion -&gt; taxid
+# assembly accession -&gt; taxid
 cut -f 1,6 assembly_summary.txt &gt; taxid.map    
-# assembly accesion -&gt; name
+# assembly accession -&gt; name
 cut -f 1,8 assembly_summary.txt &gt; name.map
 
 
@@ -1403,9 +1397,9 @@ time genome_updater.sh \
 mkdir -p taxdump
 tar -zxvf taxdump.tar.gz -C taxdump
 
-# assembly accesion -&gt; taxid
+# assembly accession -&gt; taxid
 cut -f 1,6 assembly_summary.txt &gt; taxid.map    
-# assembly accesion -&gt; name
+# assembly accession -&gt; name
 cut -f 1,8 assembly_summary.txt &gt; name.map
 
 
@@ -1729,14 +1723,14 @@ mv ncbi_names.dmp taxdump/names.dmp
 mv ncbi_nodes.dmp taxdump/nodes.dmp
 </code></pre>
 <p>Mapping file:</p>
-<pre><code># assembly accesion -&gt; taxid
+<pre><code># assembly accession -&gt; taxid
 cat HumGut.tsv \
     | csvtk cut -t -f genome_file,ncbi_tax_id \
     | csvtk replace -f genome_file -t -p '\..+$' \
     | csvtk del-header \
     &gt; taxid.map
 
-# assembly accesion -&gt; name
+# assembly accession -&gt; name
 cat HumGut.tsv \
     | csvtk cut -t -f genome_file,ncbi_organism_name \
     | csvtk replace -f genome_file -t -p '\..+$' \
@@ -1798,7 +1792,7 @@ class     2
 <p>Building database:</p>
 <pre><code># compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks
+#   reference genomes are split into 10 chunks
 #   k = 21
 kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 -j 32 --force
 
@@ -1872,7 +1866,7 @@ cat taxid.map \
 <p>Building database:</p>
 <pre><code># compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks
+#   reference genomes are split into 10 chunks
 #   k = 21
 kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
 
@@ -1890,7 +1884,7 @@ cp taxid.map name.map progenomes.kmcp/
 <ol>
 <li>Genome files<ul>
 <li>(Gzip-compressed) FASTA/Q format.</li>
-<li>One genome per file with the reference identifier in the file name.</li>
+<li>One genome per file <strong>with the reference identifier in the file name</strong>.</li>
 </ul>
 </li>
 <li>TaxId mapping file (for metagenomic profiling)<ul>
@@ -1923,41 +1917,61 @@ for downstream analysis.</p>
 <p>Buiding small databases can also accelerate searching on a <em>computer cluster</em>,
 where every node searches a part of the database.</p>
 <h3 id="step-1-computing-k-mers">Step 1. Computing k-mers</h3>
-<p>Plain or gzip-compressed input genome sequence files better be saved in one directory,
-with multiple-level directories allowed. 
-The file extension could be <code>fa</code>, <code>fasta</code>, <code>fna</code>, <code>fq</code>, <code>fastq</code>, <code>fa.gz</code>, <code>fasta.gz</code>,
- <code>fna.gz</code>, <code>fq.gz</code> or <code>fastq.gz</code>.</p>
-<p><strong>Input files</strong> can be given as a list of FASTA/Q files via
-positional arguments or a directory (with multiple-level directories allowed) containing sequence files
-via the flag <code>-I/--in-dir</code>. A regular expression for matching
-sequencing files is available by the flag <code>-r/--file-regexp</code>.
-The default pattern matches files with extension of 
-<code>fa</code>, <code>fasta</code>, <code>fna</code>, <code>fq</code>, <code>fastq</code>, <code>fa.gz</code>, <code>fasta.gz</code>,
-<code>fna.gz</code>, <code>fq.gz</code> or <code>fastq.gz</code>.</p>
-<p>Unwanted sequence like plasmid sequences can be <strong>filtered out</strong> by
+<p><strong>Input:</strong></p>
+<ol>
+<li>Input plain or gzipped FASTA/Q files can be given via positional arguments or
+    the flag <code>-i/--infile-list</code> with the list of input files,</li>
+<li>Or a directory containing sequence files via the flag <code>-I/--in-dir</code>,
+    with multiple-level sub-directories allowed. A regular expression
+    for matching sequencing files is available via the flag <code>-r/--file-regexp</code>.
+    The default pattern matches files with extension of 
+    <code>fa</code>, <code>fasta</code>, <code>fna</code>, <code>fq</code>, <code>fastq</code>, <code>fa.gz</code>, <code>fasta.gz</code>,
+    <code>fna.gz</code>, <code>fq.gz</code> or <code>fastq.gz</code>.</li>
+</ol>
+<p>You may rename the sequence files for convenience using <a href="https://github.com/shenwei356/brename">brename</a>.
+because the sequence/genome identifier in the index and search results would be:</p>
+<ol>
+<li>
+<p>For the default mode (computing k-mers for the whole file):</p>
+<pre><code>the basename of file with common FASTA/Q file extension removed,
+captured via the flag -N/--ref-name-regexp.
+</code></pre>
+</li>
+<li>
+<p>For splitting sequence mode (see details below):</p>
+<pre><code>same to 1).
+</code></pre>
+</li>
+<li>
+<p>For computing k-mers for each sequence:</p>
+<pre><code>the sequence identifier.
+</code></pre>
+</li>
+</ol>
+<p>Unwanted sequences like plasmid sequences can be <strong>filtered out</strong> by
 the name via regular expression(s) (<code>-B/--seq-name-filter</code>).</p>
 <p><strong>How to compute k-mers</strong>:
 By default, <code>kmcp</code> computes k-mers (sketches) of every file,
 you can also use <code>--by-seq</code> to compute for every sequence,
-where sequence IDs in all input files better be distinct.
+where sequence IDs in all input files are better to be distinct.
 It also <strong>supports splitting sequences into chunks, this
-could increase the specificity in profiling result in cost
+could increase the specificity in profiling result in the cost
 of slower searching speed</strong>. </p>
 <p><strong>Splitting sequences</strong>:</p>
 <ol>
-<li>Sequences can be splitted into chunks by a chunk size 
+<li>Sequences can be split into chunks by a chunk size 
     (<code>-s/--split-size</code>) or number of chunks (<code>-n/--split-number</code>)
     with overlap (<code>-l/--split-overlap</code>).
     <strong><em>In this mode, the sequences of each genome should be saved in an
     individual file</em></strong>.</li>
 <li>When splitting by number of chunks, <strong>all sequences (except for
-    these mathching any regular expression given by <code>-B/--seq-name-filter</code>)
+    these matching any regular expression given by <code>-B/--seq-name-filter</code>)
     in a sequence file are concatenated with k-1 Ns before splitting</strong>.</li>
 <li>Both sequence/reference IDs and chunks indices are saved for later use,
     in form of meta/description data in <code>.unik</code> files, and will
     be reported in <code>kmcp search</code> results.</li>
 </ol>
-<p><strong>Meta data</strong>:</p>
+<p><strong>Metadata</strong>:</p>
 <ol>
 <li>Every outputted <code>.unik</code> file contains the sequence/reference ID,
     chunk index, number of chunks, and genome size of reference.</li>
@@ -1975,7 +1989,7 @@ is good enough. </p>
 </ul>
 </li>
 <li>K-mer sketchs (all using ntHash):<ul>
-<li>Scaled MinHash (<code>-k -D</code>), reviously named Scaled MinHash</li>
+<li>Scaled MinHash (<code>-k -D</code>), previously named Scaled MinHash</li>
 <li>Minimizer      (<code>-k -W</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
 <li>Closed Syncmer (<code>-k -S</code>), optionally scaling/down-sampling (<code>-D</code>)</li>
 </ul>
@@ -2009,7 +2023,7 @@ is good enough. </p>
 <p><strong>Commands</strong> (<a href="/usage/#compute">usage</a>):</p>
 <pre><code># compute k-mers
 #   sequence containing "plasmid" in name are ignored,
-#   reference genomes are splitted into 10 chunks,
+#   reference genomes are split into 10 chunks,
 #   k = 21
 kmcp compute --in-dir refs/ \
     --kmer 21 \
@@ -2019,7 +2033,7 @@ kmcp compute --in-dir refs/ \
     --out-dir refs-k21-n10
 
 # demo output
-22:33:10.685 [INFO] kmcp v0.7.1
+22:33:10.685 [INFO] kmcp v0.8.0
 22:33:10.685 [INFO]   https://github.com/shenwei356/kmcp
 22:33:10.685 [INFO] 
 22:33:10.685 [INFO] checking input files ...
@@ -2111,7 +2125,7 @@ processed files:  9 / 9 [======================================] ETA: 0s. done
 <h3 id="step-2-building-databases">Step 2. Building databases</h3>
 <p>KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
 Signature Index (<a href="https://arxiv.org/abs/1905.09624">COBS</a>). 
-We totally rewrite the algorithms, data structure and file format,
+We completely rewrite the algorithms, data structure, and file format,
 and have improved the indexing and searching speed
 (check <a href="/benchmark/searching">benchmark</a>).</p>
 <p><strong>Input</strong>:</p>
@@ -2120,22 +2134,22 @@ and have improved the indexing and searching speed
 </ul>
 <p><strong>Database size and searching accuracy</strong>:</p>
 <ol>
-<li><strong>Use <code>--dry-run</code> to adjust parameters and check final number of 
+<li><strong>Use <code>--dry-run</code> to adjust parameters and check the final number of 
     index files (#index-files) and the total file size</strong>.</li>
 <li><code>-f/--false-positive-rate</code>: the default value <code>0.3</code> is enough for a
-    query with tens of matched k-mers (see BIGSI/COBS paper).
-    Small values could largely increase the size of database.</li>
+    query with tens of k-mers (see BIGSI/COBS paper).
+    Small values could largely increase the size of the database.</li>
 <li><code>-n/--num-hash</code>: large values could reduce the database size,
-    in cost of slower searching speed. Values &lt;=4 is recommended.</li>
+    in the cost of slower searching speed. Values &lt;=4 are recommended.</li>
 <li>
-<p>Value of block size <code>-b/--block-size</code> better be multiple of 64.
+<p>The value of block size <code>-b/--block-size</code> is better to be multiple of 64.
     The default value is: </p>
 <pre><code>(#unikFiles/#threads + 7) / 8 * 8
 </code></pre>
 </li>
 <li>
 <p>Use flag <code>-x/--block-sizeX-kmers-t</code>, <code>-8/--block-size8-kmers-t</code>,
-    and <code>-1/--block-size1-kmers-t</code> to separately create index for
+    and <code>-1/--block-size1-kmers-t</code> to separately create indexes for
     inputs with huge number of k-mers, for precise control of
     database size.</p>
 </li>
@@ -2147,15 +2161,15 @@ and have improved the indexing and searching speed
 </ol>
 <p><strong>Performance tips</strong>:</p>
 <ol>
-<li>Number of blocks (<code>.uniki</code> files) better be smaller than or equal
-   to number of CPU cores for faster searching speed. 
+<li>The umber of blocks (<code>.uniki</code> files) is better to be smaller than or equal
+   to the number of CPU cores for faster searching speed. 
    <strong>We can set <code>-j/--threads</code> to control the blocks number</strong>.
    When more threads (&gt;= 1.3 * #blocks) are given, extra workers are
    automatically created.</li>
 <li><code>#threads</code> files are simultaneously opened, and the max number
     of opened files is limited by the flag <code>-F/--max-open-files</code>.
     You may use a small value of <code>-F/--max-open-files</code> for 
-    hard disk drive storage.</li>
+    hard disk drive storages.</li>
 <li>When the database is used in a new computer with more CPU cores,
    <code>kmcp search</code> could automatically scale to utilize as many cores
    as possible.</li>
@@ -2173,7 +2187,7 @@ kmcp index -I refs-k21-n10 \
     --out-dir refs.kmcp
 
 # demo output
-22:44:17.710 [INFO] kmcp v0.7.1
+22:44:17.710 [INFO] kmcp v0.8.0
 22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
 22:44:17.710 [INFO] 
 22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt

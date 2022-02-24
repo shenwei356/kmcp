@@ -831,7 +831,7 @@ See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.<
 </code></pre>
 </li>
 <li>
-<p>The values of <code>tCov</code> and <code>jacc</code> in results only apply for single size of k-mer.</p>
+<p>The values of <code>tCov</code> and <code>jacc</code> in results only apply to databases built with a single size of k-mer.</p>
 </li>
 </ol>
 <p><strong><code>kmcp search</code> and <code>kmcp profile</code> share some flags</strong>, therefore users
@@ -867,8 +867,8 @@ can't be loaded into memory</strong>.</li>
 </ol>
 <p><strong>Performance tips</strong>:</p>
 <ol>
-<li>Increase value of <code>-j/--threads</code> for acceleratation, but values larger
-  than the number of CPU cores won't bring extra speedup.</li>
+<li>Increase the value of <code>-j/--threads</code> for acceleratation, but values larger
+  than the the number of CPU cores won't bring extra speedup.</li>
 </ol>
 <h4 id="commands"><strong>Commands</strong></h4>
 <p>Single-end mode is recommended for pair-end reads, for higher sensitivity:</p>
@@ -885,8 +885,8 @@ for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
     kmcp search \
         --threads            32 \
         --db-dir            $db \
-        --min-kmers          30 \
-        --min-query-len      70 \
+        --min-kmers          10 \
+        --min-query-len      30 \
         --min-query-cov    0.55 \
         $read1   $read2         \
         --out-file         $sample.kmcp@$dbname.tsv.gz \
@@ -907,8 +907,8 @@ for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
     kmcp search \
         --threads            32 \
         --db-dir            $db \
-        --min-kmers          30 \
-        --min-query-len      70 \
+        --min-kmers          10 \
+        --min-query-len      30 \
         --min-query-cov    0.55 \
         --read1          $read1 \
         --read2          $read2 \
@@ -1030,12 +1030,12 @@ fd kmcp.tsv.gz$ $reads/ \
             --log {}.k.profile.log'
 </code></pre>
 <h4 id="searching-result-format">Searching result format</h4>
-<pre><code> 1. query,    Identifier of query sequence
+<pre><code> 1. query,    Identifier of the query sequence
  2. qLen,     Query length
- 3. qKmers,   K-mer number of query sequence
- 4. FPR,      False positive rate
+ 3. qKmers,   K-mer number of the query sequence
+ 4. FPR,      False positive rate of the match
  5. hits,     Number of matches
- 6. target,   Identifier of target sequence
+ 6. target,   Identifier of the target sequence
  7. chunkIdx, Index of reference chunk
  8. chunks,   Number of reference chunks
  9. tLen,     Reference length
@@ -1076,7 +1076,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">NC_000913.3_sliding:1244941-1245090</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">6</td>
 <td align="left">NC_012971.2</td>
 <td align="left">2</td>
@@ -1093,7 +1093,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">NC_000913.3_sliding:1244941-1245090</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">6</td>
 <td align="left">NC_000913.3</td>
 <td align="left">2</td>
@@ -1110,7 +1110,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">NC_000913.3_sliding:1244941-1245090</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">6</td>
 <td align="left">NC_018658.1</td>
 <td align="left">5</td>
@@ -1124,61 +1124,10 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">0</td>
 </tr>
 <tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">2.1127e-08</td>
-<td align="left">6</td>
-<td align="left">NZ_CP028116.1</td>
-<td align="left">2</td>
-<td align="left">10</td>
-<td align="left">5648177</td>
-<td align="left">31</td>
-<td align="left">79</td>
-<td align="left">0.6583</td>
-<td align="left">0.0002</td>
-<td align="left">0.0002</td>
-<td align="left">0</td>
-</tr>
-<tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">2.1127e-08</td>
-<td align="left">6</td>
-<td align="left">NZ_CP007592.1</td>
-<td align="left">3</td>
-<td align="left">10</td>
-<td align="left">5104557</td>
-<td align="left">31</td>
-<td align="left">69</td>
-<td align="left">0.5750</td>
-<td align="left">0.0001</td>
-<td align="left">0.0001</td>
-<td align="left">0</td>
-</tr>
-<tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">2.1127e-08</td>
-<td align="left">6</td>
-<td align="left">NC_002695.2</td>
-<td align="left">3</td>
-<td align="left">10</td>
-<td align="left">5498578</td>
-<td align="left">31</td>
-<td align="left">69</td>
-<td align="left">0.5750</td>
-<td align="left">0.0001</td>
-<td align="left">0.0001</td>
-<td align="left">0</td>
-</tr>
-<tr>
 <td align="left">NC_013654.1_sliding:344871-345020</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">8</td>
 <td align="left">NC_012971.2</td>
 <td align="left">0</td>
@@ -1195,7 +1144,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">NC_013654.1_sliding:344871-345020</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">8</td>
 <td align="left">NC_000913.3</td>
 <td align="left">0</td>
@@ -1212,7 +1161,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">NC_013654.1_sliding:344871-345020</td>
 <td align="left">150</td>
 <td align="left">120</td>
-<td align="left">2.1127e-08</td>
+<td align="left">1.5955e-26</td>
 <td align="left">8</td>
 <td align="left">NC_013654.1</td>
 <td align="left">0</td>
@@ -1223,6 +1172,57 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <td align="left">1.0000</td>
 <td align="left">0.0003</td>
 <td align="left">0.0003</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">1.5955e-26</td>
+<td align="left">8</td>
+<td align="left">NZ_CP007592.1</td>
+<td align="left">1</td>
+<td align="left">10</td>
+<td align="left">5104557</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">1.5955e-26</td>
+<td align="left">8</td>
+<td align="left">NC_018658.1</td>
+<td align="left">7</td>
+<td align="left">10</td>
+<td align="left">5273097</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">150</td>
+<td align="left">120</td>
+<td align="left">1.5955e-26</td>
+<td align="left">8</td>
+<td align="left">NZ_CP028116.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">5648177</td>
+<td align="left">31</td>
+<td align="left">120</td>
+<td align="left">1.0000</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
 <td align="left">1</td>
 </tr>
 </tbody>
@@ -1236,16 +1236,19 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 </ul>
 <h4 id="methods"><strong>Methods</strong></h4>
 <ol>
-<li>Reference genomes can be splitted into chunks when computing
+<li>Reference genomes can be split into chunks when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimal proportion of matched chunks
     (<code>-p/--min-chunks-fraction</code>). (<strong><em>highly recommended</em></strong>)
     Another flag <code>-d/--max-chunks-cov-stdev</code> further reduces false positives.</li>
-<li>We require part of the uniquely matched reads of a reference
+<li>We require a part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
     the false positive rate.</li>
 <li>We also use the two-stage taxonomy assignment algorithm in <a href="https://doi.org/10.1186/s12864-020-06875-6">MegaPath</a>
-    to reduce the false positive of ambiguous matches.</li>
+    to reduce the false positive of ambiguous matches.
+    You can also disable this step by the flag <code>--no-amb-corr</code>.
+    If the first stage produces thousands of candidates, you can also use
+    the flag <code>--no-amb-corr</code> to reduce analysis time.</li>
 <li>Multi-aligned queries are proportionally assigned to references
     with a similar strategy in <a href="https://doi.org/10.1186/s13059-020-02159-0">Metalign</a>.</li>
 <li>Input files are parsed 4 times, therefore STDIN is not supported.</li>
@@ -1267,7 +1270,7 @@ increase precision in cost of sensitivity.</li>
 </ul>
 </li>
 <li><code>-R/--max-mismatch-err</code> and <code>-D/--min-dreads-prop</code> is for determing
-    the right reference for ambigous reads.</li>
+    the right reference for ambigous reads with the algorithm in MegaPath.</li>
 <li><code>--keep-perfect-match</code> is not recommended, which decreases sensitivity.</li>
 <li><code>-n/--keep-top-qcovs</code>  is not recommended, which affects accuracy of
      abundance estimation.</li>
@@ -1283,16 +1286,25 @@ increase precision in cost of sensitivity.</li>
 <li><code>5</code> (higher precision)</li>
 </ul>
 <p>Using this flag will override the relevant options.</p>
-<pre><code>options                      m=0    m=1   m=2   m=3    m=4   m=5
---------------------------   ----   ---   ---   ----   ---   ----
--r/--min-chunks-reads        1      20    30    50     100   100
--p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
--d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
--u/--min-uniq-reads          1      20    20    20     50    50
--U/--min-hic-ureads          1      5     5     5      10    10
--H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
--P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
+<pre><code>options                       m=0    m=1   m=2   m=3    m=4   m=5
+---------------------------   ----   ---   ---   ----   ---   ----
+-r/--min-chunks-reads         1      20    30    50     100   100
+-p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
+-d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
+-u/--min-uniq-reads           1      20    20    20     50    50
+-U/--min-hic-ureads           1      5     5     5      10    10
+-H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+-P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
+--keep-main-matches           true                            
+--max-qcov-gap                0.4
 </code></pre>
+<p><strong>Notes on mode=0</strong></p>
+<ol>
+<li>For detecting pathogens in samples of ultra-low depth, the flag
+     <code>-v/--mode-0-ultra-low-depth</code> can be used to increase the sensitivity of
+     targets with only a few reads. But note that the total reads number
+     and genome coverage will be overestimated.</li>
+</ol>
 <p><strong>Taxonomy data</strong>:</p>
 <ol>
 <li>Mapping references IDs to TaxIds: <code>-T/--taxid-map</code></li>
@@ -1303,7 +1315,10 @@ increase precision in cost of sensitivity.</li>
 <li>Searching results are parsed in parallel, and the number of
     lines proceeded by a thread can be set by the flag <code>--line-chunk-size</code>.</li>
 <li>However using a lot of threads does not always accelerate
-    processing, 4 threads with chunk size of 500-5000 is fast enough.</li>
+    processing, 4 threads with a chunk size of 500-5000 is fast enough.</li>
+<li>If the stage 1/4 produces thousands of candidates, then stage 2/4 would
+     be very slow. You can use the flag <code>--no-amb-corr</code> to disable ambiguous
+     reads correction which has very little effect on the results.</li>
 </ol>
 <h4 id="commands_1"><strong>Commands</strong></h4>
 <pre><code># taxid mapping files, multiple files supported.
@@ -1322,8 +1337,8 @@ kmcp profile \
     --min-chunks-reads       50 \
     --min-chunks-fraction   0.8 \
     --max-chunks-depth-stdev  2 \
-    --min-uniq-reads         10 \
-    --min-hic-ureads          1 \
+    --min-uniq-reads         20 \
+    --min-hic-ureads          5 \
     --min-hic-ureads-qcov  0.75 \
     --min-hic-ureads-prop   0.1 \
     $sfile                      \
@@ -1337,7 +1352,7 @@ kmcp profile \
 <p><strong>Supported profiling output formats</strong>:</p>
 <ul>
 <li>KMCP      (<code>-o/--out-prefix</code>)</li>
-<li>CAMI      (<code>-M/--metaphlan-report</code>, sample name: <code>-s/--sample-id</code>)</li>
+<li>CAMI      (<code>-M/--metaphlan-report</code>, <code>--metaphlan-report-version</code>, sample name: <code>-s/--sample-id</code>, taxonomy data: <code>--taxonomy-id</code>)</li>
 <li>MetaPhlAn (<code>-C/--cami-report</code>, sample name: <code>-s/--sample-id</code>))</li>
 </ul>
 <p><strong>Supported taxonomic binning formats</strong>:</p>
@@ -1346,7 +1361,7 @@ kmcp profile \
 </ul>
 <p>KMCP format:</p>
 <pre><code> 1. ref,                Identifier of the reference genome
- 2. percentage,         Relative abundance of a reference
+ 2. percentage,         Relative abundance of the reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
  4. chunksFrac,         Genome chunks fraction
  5. chunksRelDepth,     Relative depths of reference chunks
@@ -1360,7 +1375,7 @@ kmcp profile \
 13. rank,               Taxonomic rank
 14. taxname,            Taxonomic name
 15. taxpath,            Complete lineage
-16. taxpathsn,          Corresponding TaxIds of taxons in the complete lineage
+16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 </code></pre>
 <p>Demo output:</p>
 <table>
@@ -1483,9 +1498,14 @@ kmcp profile \
 386585  strain  2|1224|1236|91347|543|561|562|386585    Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai    5.014025
 349741  strain  2|74201|203494|48461|1647988|239934|239935|349741   Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835   0.469811
 </code></pre>
-<p><a href="https://bioinf.shenwei.me/taxonkit/usage/#profile2cami"><code>taxonkit profile2cami</code></a> can also
-converts any metagenomic profile table with TaxIds to CAMI format.</p>
-<p>Metaphlan2 format (<code>--metaphlan-report</code>):</p>
+<p>Related tools:</p>
+<ul>
+<li><a href="https://bioinf.shenwei.me/taxonkit/usage/#profile2cami">taxonkit profile2cami</a> can
+convert any metagenomic profile table with TaxIds to CAMI format.</li>
+<li><a href="https://bioinf.shenwei.me/taxonkit/usage/#cami-filter">taxonkit cami-filter</a> can 
+remove taxa of given TaxIds and their descendants in CAMI metagenomic profile.</li>
+</ul>
+<p>Metaphlan3 format (<code>--metaphlan-report</code>):</p>
 <pre><code>#SampleID   
 #clade_name NCBI_tax_id relative_abundance  additional_species
 k__Bacteria 2   100.000000  

@@ -676,14 +676,14 @@
 <p><img alt="" src="kmcp-logo.png" /></p>
 <h2 id="what-can-we-do">What can we do?</h2>
 <h3 id="1-accurate-metagenomic-profiling">1. Accurate metagenomic profiling</h3>
-<p>KMCP adopts a novol metagenomic profiling strategy,
+<p>KMCP adopts a novel metagenomic profiling strategy,
 by splitting reference genomes into 10 chunks and mappings reads to these
 chunks via fast k-mer matching.
 KMCP performs well on both prokaryotic and viral organisms, with higher
 sensitivity and specificity than other k-mer-based tools
 (check the <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>).</p>
 <h3 id="2-fast-sequence-search-against-large-scales-of-genomic-datasets">2. Fast sequence search against large scales of genomic datasets</h3>
-<p>KMCP can be used for fast sequence search against large scales of genomic dataset
+<p>KMCP can be used for fast sequence search against large scales of genomic datasets
 as <a href="https://github.com/Phelimb/BIGSI">BIGSI</a> and <a href="https://github.com/bingmann/cobs">COBS</a> do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a smaller index size and much faster searching speed (<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">4x-10x faster than COBS</a>)
@@ -697,7 +697,7 @@ provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sca
 KMCP utilizes multiple k-mer sketches 
 (<a href="https://academic.oup.com/bioinformatics/article/20/18/3363/202143">Minimizer</a>, 
 <a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
-(previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>) and
+(previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>), and
 <a href="https://peerj.com/articles/10805/">Closed Syncmers</a>) for genome similarity estimation.
 <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-7x faster than Mash/Sourmash</a>
  (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
@@ -731,7 +731,7 @@ KMCP utilizes multiple k-mer sketches
 </ul>
 </li>
 <li><strong>Accurate taxonomic profiling</strong><ul>
-<li>Some k-mer based taxonomic profilers suffers from high false positive rates,
+<li>Some k-mer based taxonomic profilers suffer from high false positive rates,
   while <a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods">KMCP adopts multiple strategies</a>
   to <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">improve specificity and keeps high sensitivity at the same time</a>.</li>
 <li>Except for archaea and bacteria, <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages">KMCP performed well on <strong>virus/phages</strong></a>.</li>
@@ -787,7 +787,7 @@ in two packages for better searching performance.</p>
 <tbody>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#compute">compute</a></td>
-<td align="left">Generate k-mers (sketches) from FASTA/Q sequences</td>
+<td align="left">Generate k-mers (sketch) from FASTA/Q sequences</td>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index">index</a></td>
@@ -820,6 +820,14 @@ in two packages for better searching performance.</p>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-info">utils index-info</a></td>
 <td align="left">Print information of index file</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#icov2simi">utils cov2simi</a></td>
+<td align="left">Convert k-mer coverage to sequence similarity</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#query-fpr">utils query-fpr</a></td>
+<td align="left">Compute the maximal false positive rate of a query</td>
 </tr>
 </tbody>
 </table>

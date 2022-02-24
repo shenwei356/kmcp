@@ -1,0 +1,404 @@
+taxid	count	name	rank	superkindom	phylum	class	order	family	genus	species
+1003335	1	Kluyveromyces marxianus DMKU3-1042	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Kluyveromyces	Kluyveromyces marxianus
+1028729	1	Fusarium pseudograminearum CS3096	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium pseudograminearum
+1036611	1	Aspergillus versicolor CBS 583.65	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus versicolor
+1036612	1	Aspergillus sydowii CBS 593.65	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus sydowii
+1037660	1	Tilletiaria anomala UBC 951	strain	Eukaryota	Basidiomycota	Exobasidiomycetes	Georgefischeriales	Tilletiariaceae	Tilletiaria	Tilletiaria anomala
+1041607	1	Wickerhamomyces ciferrii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Phaffomycetaceae	Wickerhamomyces	Wickerhamomyces ciferrii
+1042311	1	Trichoderma asperellum CBS 433.97	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma asperellum
+1043002	1	Aureobasidium pullulans EXF-150	strain	Eukaryota	Ascomycota	Dothideomycetes	Dothideales	Saccotheciaceae	Aureobasidium	Aureobasidium pullulans
+1043003	1	Aureobasidium melanogenum CBS 110374	strain	Eukaryota	Ascomycota	Dothideomycetes	Dothideales	Saccotheciaceae	Aureobasidium	Aureobasidium melanogenum
+1043004	1	Aureobasidium namibiae CBS 147.97	strain	Eukaryota	Ascomycota	Dothideomycetes	Dothideales	Saccotheciaceae	Aureobasidium	Aureobasidium namibiae
+1043005	1	Aureobasidium subglaciale EXF-2481	strain	Eukaryota	Ascomycota	Dothideomycetes	Dothideales	Saccotheciaceae	Aureobasidium	Aureobasidium subglaciale
+1051616	1	Verticillium nonalfalfae	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Plectosphaerellaceae	Verticillium	Verticillium nonalfalfae
+105984	1	Apiotrichum porosum	species	Eukaryota	Basidiomycota	Tremellomycetes	Trichosporonales	Trichosporonaceae	Apiotrichum	Apiotrichum porosum
+1064592	1	Naumovozyma castellii CBS 4309	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Naumovozyma	Naumovozyma castellii
+1069201	1	Aspergillus luchuensis	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus luchuensis
+1069680	1	Pneumocystis murina B123	strain	Eukaryota	Ascomycota	Pneumocystidomycetes	Pneumocystidales	Pneumocystidaceae	Pneumocystis	Pneumocystis murina
+1071378	1	Naumovozyma dairenensis CBS 421	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Naumovozyma	Naumovozyma dairenensis
+1071380	1	Tetrapisispora blattae CBS 6284	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Tetrapisispora	Tetrapisispora blattae
+1071381	1	Tetrapisispora phaffii CBS 4417	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Tetrapisispora	Tetrapisispora phaffii
+1071382	1	Kazachstania africana CBS 2517	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Kazachstania	Kazachstania africana
+1071383	1	Kazachstania naganishii CBS 8797	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Kazachstania	Kazachstania naganishii
+1072389	1	Drepanopeziza brunnea f. sp. 'multigermtubi' MB_m1	strain	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Drepanopezizaceae	Drepanopeziza	Drepanopeziza brunnea
+1073089	1	Aspergillus wentii DTO 134E9	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus wentii
+1073090	1	Penicilliopsis zonata CBS 506.65	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicilliopsis	Penicilliopsis zonata
+1080233	1	Zasmidium cellare ATCC 36951	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Zasmidium	Zasmidium cellare
+1080349	1	Saccharomyces eubayanus	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Saccharomyces	Saccharomyces eubayanus
+1081103	1	Metarhizium album ARSEF 1941	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Metarhizium	Metarhizium album
+1081104	1	Cordyceps fumosorosea ARSEF 2679	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Cordycipitaceae	Cordyceps	Cordyceps fumosorosea
+1089451	1	Fusarium odoratissimum NRRL 54006	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium odoratissimum
+109264	1	Aspergillus bombycis	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus bombycis
+1093900	1	Phialemoniopsis curvata	species	Eukaryota	Ascomycota	Sordariomycetes	Xylariales		Phialemoniopsis	Phialemoniopsis curvata
+1094350	1	Geosmithia morbida	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Bionectriaceae	Geosmithia	Geosmithia morbida
+1095194	1	Colletotrichum karsti	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum karsti
+1095630	1	Hyaloscypha bicolor E	strain	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Hyaloscyphaceae	Hyaloscypha	Hyaloscypha bicolor
+1116229	1	Glarea lozoyensis ATCC 20868	strain	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Helotiaceae	Glarea	Glarea lozoyensis
+112416	1	Letharia columbiana	species	Eukaryota	Ascomycota	Lecanoromycetes	Lecanorales	Parmeliaceae	Letharia	Letharia columbiana
+112498	1	Ramularia collo-cygni	species	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Ramularia	Ramularia collo-cygni
+1130832	1	Rhodotorula toruloides NP11	strain	Eukaryota	Basidiomycota	Microbotryomycetes	Sporidiobolales	Sporidiobolaceae	Rhodotorula	Rhodotorula toruloides
+1136231	1	Candida orthopsilosis Co 90-125	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Candida	Candida orthopsilosis
+1141098	1	Pseudomassariella vexata	species	Eukaryota	Ascomycota	Sordariomycetes	Xylariales	Pseudomassariaceae	Pseudomassariella	Pseudomassariella vexata
+1150837	1	Didymella exigua CBS 183.55	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Didymellaceae	Didymella	Didymella exigua
+1159556	1	Ustilaginoidea virens	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Ustilaginoidea	Ustilaginoidea virens
+1160497	1	Aspergillus glaucus CBS 516.65	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus glaucus
+116603	1	Suillus plorans	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus plorans
+1168221	1	Coniosporium apollinis CBS 100218	strain	Eukaryota	Ascomycota	Dothideomycetes			Coniosporium	Coniosporium apollinis
+1168544	1	Cucurbitaria berberidis CBS 394.84	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Cucurbitariaceae	Cucurbitaria	Cucurbitaria berberidis
+1170230	1	Penicillium digitatum Pd1	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium digitatum
+1176127	1	Aplosporella prunicola CBS 121167	strain	Eukaryota	Ascomycota	Dothideomycetes	Botryosphaeriales	Aplosporellaceae	Aplosporella	Aplosporella prunicola
+1178016	1	Encephalitozoon romaleae SJ-2008	strain	Eukaryota	Microsporidia			Unikaryonidae	Encephalitozoon	Encephalitozoon romaleae
+1182541	1	Capronia coronata CBS 617.96	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Capronia	Capronia coronata
+1182542	1	Capronia epimyces CBS 606.96	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Capronia	Capronia epimyces
+1182543	1	Cladophialophora psammophila CBS 110553	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Cladophialophora	Cladophialophora psammophila
+1182544	1	Cladophialophora yegresii CBS 114405	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Cladophialophora	Cladophialophora yegresii
+1182545	1	Exophiala aquamarina CBS 119918	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala aquamarina
+1186058	1	Trichosporon asahii var. asahii CBS 2479	strain	Eukaryota	Basidiomycota	Tremellomycetes	Trichosporonales	Trichosporonaceae	Trichosporon	Trichosporon asahii
+1187904	1	Alternaria burnsii	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Alternaria	Alternaria burnsii
+1196081	1	Talaromyces amestolkiae	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Talaromyces	Talaromyces amestolkiae
+119953	1	Alternaria atra	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Alternaria	Alternaria atra
+120017	1	Ustilago hordei	species	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Ustilago	Ustilago hordei
+1209926	1	Colletotrichum orchidophilum	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum orchidophilum
+1209932	1	Colletotrichum scovillei	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum scovillei
+1215731	1	Colletotrichum aenigma	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum aenigma
+121627	1	Talaromyces rugulosus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Talaromyces	Talaromyces rugulosus
+1220188	1	Aspergillus tanneri	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus tanneri
+1220207	1	Aspergillus puulaauensis	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus puulaauensis
+1220924	1	Cyphellophora europaea CBS 101466	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Cyphellophoraceae	Cyphellophora	Cyphellophora europaea
+122368	1	Cercospora beticola	species	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Cercospora	Cercospora beticola
+1227346	1	Fusarium proliferatum ET1	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium proliferatum
+1229662	1	Pestalotiopsis fici W106-1	strain	Eukaryota	Ascomycota	Sordariomycetes	Xylariales	Sporocadaceae	Pestalotiopsis	Pestalotiopsis fici
+1230383	1	Malassezia sympodialis ATCC 42132	strain	Eukaryota	Basidiomycota	Malasseziomycetes	Malasseziales	Malasseziaceae	Malassezia	Malassezia sympodialis
+1231522	1	[Candida] duobushaemulonis	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Clavispora	[Candida] duobushaemulonis
+1245769	1	Lachancea lanzarotensis	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Lachancea	Lachancea lanzarotensis
+1263415	1	Endocarpon pusillum Z07020	strain	Eukaryota	Ascomycota	Eurotiomycetes	Verrucariales	Verrucariaceae	Endocarpon	Endocarpon pusillum
+1276141	1	Metarhizium brunneum ARSEF 3297	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Metarhizium	Metarhizium brunneum
+1277687	1	Pseudozyma flocculosa PF-1	strain	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Pseudozyma	Pseudozyma flocculosa
+1279043	1	Cladophialophora carrionii CBS 160.54	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Cladophialophora	Cladophialophora carrionii
+1279085	1	Fusarium fujikuroi IMI 58289	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium fujikuroi
+1280837	1	Meira miltonrushii	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Exobasidiales	Brachybasidiaceae	Meira	Meira miltonrushii
+1286976	1	Phaeoacremonium minimum UCRPA7	strain	Eukaryota	Ascomycota	Sordariomycetes	Togniniales	Togniniaceae	Phaeoacremonium	Phaeoacremonium minimum
+1295528	1	Cryptococcus wingfieldii CBS 7118	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus wingfieldii
+1295533	1	Cryptococcus amylolentus CBS 6039	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus amylolentus
+1296096	1	Kwoniella pini CBS 10737	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Kwoniella	Kwoniella pini
+1296100	1	Kwoniella bestiolae CBS 10118	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Kwoniella	Kwoniella bestiolae
+1296121	1	Kwoniella dejecticola CBS 10117	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Kwoniella	Kwoniella dejecticola
+1296122	1	Kwoniella mangroviensis CBS 8507	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Kwoniella	Kwoniella mangrovensis
+1299270	1	Wallemia ichthyophaga EXF-994	strain	Eukaryota	Basidiomycota	Wallemiomycetes	Wallemiales	Wallemiaceae	Wallemia	Wallemia ichthyophaga
+1305764	1	Pseudozyma hubeiensis SY62	strain	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Pseudozyma	Pseudozyma hubeiensis
+1314773	1	Sodiomyces alkalinus F11	strain	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Plectosphaerellaceae	Sodiomyces	Sodiomyces alkalinus
+1314785	1	Laetiporus sulphureus 93-53	strain	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Laetiporaceae	Laetiporus	Laetiporus sulphureus
+1314786	1	Dissoconium aciculare CBS 342.82	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Dissoconiaceae	Dissoconium	Dissoconium aciculare
+1316788	1	Lachnellula hyalina	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Lachnaceae	Lachnellula	Lachnellula hyalina
+132259	1	Aspergillus pseudotamarii	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus pseudotamarii
+1328760	1	Xylona heveae TC161	strain	Eukaryota	Ascomycota	Xylonomycetes	Xylonales	Xylonaceae	Xylona	Xylona heveae
+1340429	1	Rhizopus microsporus ATCC 52813	strain	Eukaryota	Mucoromycota	Mucoromycetes	Mucorales	Rhizopodaceae	Rhizopus	Rhizopus microsporus
+1341132	1	Aspergillus welwitschiae	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus welwitschiae
+1344418	1	Ascoidea rubescens DSM 1968	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Ascoideaceae	Ascoidea	Ascoidea rubescens
+13502	1	Brettanomyces nanus	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Brettanomyces	Brettanomyces nanus
+1354746	1	Ordospora colligata OC4	strain	Eukaryota	Microsporidia			Ordosporidae	Ordospora	Ordospora colligata
+1365824	1	Kalmanozyma brasiliensis GHG001	strain	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Kalmanozyma	Kalmanozyma brasiliensis
+1367422	1	Fonsecaea erecta	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Fonsecaea	Fonsecaea erecta
+1380566	1	Pochonia chlamydosporia 170	isolate	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Pochonia	Pochonia chlamydosporia
+1382522	1	Kuraishia capsulata CBS 1993	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales		Kuraishia	Kuraishia capsulata
+1388766	1	Aspergillus ruber CBS 135680	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus ruber
+1392243	1	Eremomyces bilateralis CBS 781.70	strain	Eukaryota	Ascomycota	Dothideomycetes	Eremomycetales	Eremomycetaceae	Eremomyces	Eremomyces bilateralis
+1392245	1	Dothidotthia symphoricarpi CBS 119687	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Dothidotthiaceae	Dothidotthia	Dothidotthia symphoricarpi
+1392248	1	Aspergillus campestris IBT 28561	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus campestris
+1392250	1	Aspergillus steynii IBT 23096	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus steynii
+1392255	1	Aspergillus novofumigatus IBT 16806	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus novofumigatus
+1392256	1	Aspergillus ochraceoroseus IBT 24754	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus ochraceoroseus
+139641	1	Botrytis byssoidea	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis byssoidea
+1397361	1	Sporothrix schenckii 1099-18	strain	Eukaryota	Ascomycota	Sordariomycetes	Ophiostomatales	Ophiostomataceae	Sporothrix	Sporothrix schenckii
+1398154	1	Sporothrix brasiliensis 5110	strain	Eukaryota	Ascomycota	Sordariomycetes	Ophiostomatales	Ophiostomataceae	Sporothrix	Sporothrix brasiliensis
+139825	1	Sparassis crispa	species	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Sparassidaceae	Sparassis	Sparassis crispa
+1408163	1	Rasamsonia emersonii CBS 393.64	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Rasamsonia	Rasamsonia emersonii
+1408657	1	Pneumocystis jirovecii RU7	strain	Eukaryota	Ascomycota	Pneumocystidomycetes	Pneumocystidales	Pneumocystidaceae	Pneumocystis	Pneumocystis jirovecii
+1408658	1	Pneumocystis carinii B80	strain	Eukaryota	Ascomycota	Pneumocystidomycetes	Pneumocystidales	Pneumocystidaceae	Pneumocystis	Pneumocystis carinii
+1441469	1	Talaromyces atroroseus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Talaromyces	Talaromyces atroroseus
+1442368	1	Fonsecaea pedrosoi CBS 271.37	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Fonsecaea	Fonsecaea pedrosoi
+1442369	1	Rhinocladiella mackenziei CBS 650.93	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Rhinocladiella	Rhinocladiella mackenziei
+1442370	1	Cladophialophora bantiana CBS 173.52	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Cladophialophora	Cladophialophora bantiana
+1442371	1	Fonsecaea multimorphosa CBS 102226	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Fonsecaea	Fonsecaea multimorphosa
+1448310	1	Aspergillus neoniger CBS 115656	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus neoniger
+1448311	1	Aspergillus vadensis CBS 113365	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus vadensis
+1448312	1	Aspergillus japonicus CBS 114.51	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus japonicus
+1448313	1	Aspergillus piperis CBS 112811	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus piperis
+1448314	1	Aspergillus eucalypticola CBS 122712	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus eucalypticola
+1448315	1	Aspergillus uvarum CBS 121591	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus uvarum
+1448316	1	Aspergillus ibericus CBS 121593	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus ibericus
+1448317	1	Aspergillus costaricaensis CBS 115574	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus costaricensis
+1448319	1	Aspergillus fijiensis CBS 313.89	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus fijiensis
+1448321	1	Aspergillus heteromorphus CBS 117.55	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus heteromorphus
+1448322	1	Aspergillus aculeatinus CBS 121060	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus aculeatinus
+1450172	1	Aaosphaeria arxii CBS 175.79	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales		Aaosphaeria	Aaosphaeria arxii
+1450533	1	Aspergillus niger CBS 101883	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus niger
+1450534	1	Aspergillus brunneoviolaceus CBS 621.78	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus brunneoviolaceus
+1450535	1	Aspergillus sclerotioniger CBS 115572	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus sclerotioniger
+1450536	1	Guyanagaster necrorhizus MCA 3950	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Physalacriaceae	Guyanagaster	Guyanagaster necrorhizus
+1450537	1	Aspergillus homomorphus CBS 101889	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus homomorphus
+1450539	1	Aspergillus saccharolyticus JOP 1030-1	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus saccharolyticus
+1460663	1	Paraphaeosphaeria sporulosa	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Didymosphaeriaceae	Paraphaeosphaeria	Paraphaeosphaeria sporulosa
+1463999	1	Botrytis sinoallii	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis sinoallii
+148305	1	Pyricularia grisea	species	Eukaryota	Ascomycota	Sordariomycetes	Magnaporthales	Pyriculariaceae	Pyricularia	Pyricularia grisea
+1485682	1	Mitosporidium daphniae	species	Eukaryota	Microsporidia				Mitosporidium	Mitosporidium daphniae
+149040	1	Mollisia scopiformis	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Mollisiaceae	Mollisia	Mollisia scopiformis
+1506151	1	Aspergillus pseudonomiae	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus pseudonomiae
+1509407	1	Aspergillus nomiae NRRL 13137	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus nomiae
+1517512	1	Aspergillus pseudoviridinutans	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus pseudoviridinutans
+1522189	1	Ceraceosorus guamensis	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Ceraceosorales	Ceraceosoraceae	Ceraceosorus	Ceraceosorus guamensis
+156630	1	Alternaria arborescens	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Alternaria	Alternaria arborescens
+1567544	1	Fusarium tjaetaba	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium tjaetaba
+1569628	1	Jaminaea rosea	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Microstromatales		Jaminaea	Jaminaea rosea
+1578925	1	Pyricularia pennisetigena	species	Eukaryota	Ascomycota	Sordariomycetes	Magnaporthales	Pyriculariaceae	Pyricularia	Pyricularia pennisetigena
+1664694	1	Phialophora attinorum	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Phialophora	Phialophora attinorum
+1684307	1	Pseudomicrostroma glucosiphilum	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Microstromatales		Pseudomicrostroma	Pseudomicrostroma glucosiphilum
+1734106	1	Kwoniella shandongensis	species	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Kwoniella	Kwoniella shandongensis
+1750568	1	Cantharellus anzutake	species	Eukaryota	Basidiomycota	Agaricomycetes	Cantharellales	Cantharellaceae	Cantharellus	Cantharellus anzutake
+1806994	1	Synchytrium microbalum	species	Eukaryota	Chytridiomycota	Chytridiomycetes	Synchytriales	Synchytriaceae	Synchytrium	Synchytrium microbalum
+1810919	1	Aspergillus mulundensis	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus mulundensis
+181124	1	Marasmius oreades	species	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Marasmiaceae	Marasmius	Marasmius oreades
+182096	1	Aspergillus chevalieri	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus chevalieri
+1835702	1	Penicillium arizonense	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium arizonense
+1858805	1	Dacryopinax primogenitus	species	Eukaryota	Basidiomycota	Dacrymycetes	Dacrymycetales	Dacrymycetaceae	Dacryopinax	Dacryopinax primogenitus
+1904413	1	Suillus clintonianus	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus clintonianus
+1912936	1	Suillus discolor	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus discolor
+1912939	1	Suillus fuscotomentosus	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus fuscotomentosus
+192010	1	Fusarium mangiferae	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium mangiferae
+1937702	1	Ogataea haglerorum	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Ogataea	Ogataea haglerorum
+1964551	1	Botrytis fragariae	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis fragariae
+209559	1	Aspergillus alliaceus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus alliaceus
+2126181	1	Mycena indigotica	species	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae	Mycena	Mycena indigotica
+212818	1	Exophiala mesophila	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala mesophila
+214684	1	Cryptococcus neoformans var. neoformans JEC21	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus neoformans
+215243	1	Exophiala oligosperma	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala oligosperma
+215250	1	Acaromyces ingoldii	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Exobasidiales	Cryptobasidiaceae	Acaromyces	Acaromyces ingoldii
+222929	1	Coccidioides posadasii C735 delta SOWgp	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales		Coccidioides	Coccidioides posadasii
+227321	1	Aspergillus nidulans FGSC A4	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus nidulans
+229533	1	Fusarium graminearum PH-1	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium graminearum
+231269	1	Fusarium coffeatum	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium coffeatum
+235443	1	Cryptococcus neoformans var. grubii H99	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus neoformans
+236234	1	Diplodia corticola	species	Eukaryota	Ascomycota	Dothideomycetes	Botryosphaeriales	Botryosphaeriaceae	Diplodia	Diplodia corticola
+237561	1	Candida albicans SC5314	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Candida	Candida albicans
+237631	1	Ustilago maydis 521	strain	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Ustilago	Ustilago maydis
+240176	1	Coprinopsis cinerea okayama7#130	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Psathyrellaceae	Coprinopsis	Coprinopsis cinerea
+242507	1	Pyricularia oryzae 70-15	strain	Eukaryota	Ascomycota	Sordariomycetes	Magnaporthales	Pyriculariaceae	Pyricularia	Pyricularia oryzae
+245834	1	Neohortaea acidophila	species	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Teratosphaeriaceae	Neohortaea	Neohortaea acidophila
+246410	1	Coccidioides immitis RS	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales		Coccidioides	Coccidioides immitis
+2478750	1	Botrytis deweyae	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis deweyae
+253628	1	Verruconis gallopava	species	Eukaryota	Ascomycota	Dothideomycetes	Venturiales	Sympoventuriaceae	Verruconis	Verruconis gallopava
+254056	1	Fonsecaea monophora	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Fonsecaea	Fonsecaea monophora
+2606893	1	Saprochaete ingens	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Dipodascaceae	Saprochaete	Saprochaete ingens
+264951	1	Paecilomyces variotii	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Thermoascaceae	Paecilomyces	Paecilomyces variotii
+2656787	1	Venustampulla echinocandica	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Pleuroascaceae	Venustampulla	Venustampulla echinocandica
+27291	1	Saccharomyces paradoxus	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Saccharomyces	Saccharomyces paradoxus
+27334	1	Penicillium expansum	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium expansum
+2754530	1	Protomyces lactucae-debilis	species	Eukaryota	Ascomycota	Taphrinomycetes	Taphrinales	Protomycetaceae	Protomyces	Protomyces lactucae-debilis
+280036	1	Sporisorium graminicola	species	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Sporisorium	Sporisorium graminicola
+283643	1	Cryptococcus neoformans var. neoformans B-3501A	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus neoformans
+284591	1	Yarrowia lipolytica CLIB122	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Dipodascaceae	Yarrowia	Yarrowia lipolytica
+284592	1	Debaryomyces hansenii CBS767	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Debaryomyces	Debaryomyces hansenii
+284811	1	Eremothecium gossypii ATCC 10895	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Eremothecium	Eremothecium gossypii
+284813	1	Encephalitozoon cuniculi GB-M1	isolate	Eukaryota	Microsporidia			Unikaryonidae	Encephalitozoon	Encephalitozoon cuniculi
+28985	1	Kluyveromyces lactis	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Kluyveromyces	Kluyveromyces lactis
+293939	1	Aspergillus lentulus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus lentulus
+294746	1	Meyerozyma guilliermondii ATCC 6260	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Meyerozyma	Meyerozyma guilliermondii
+294747	1	Candida tropicalis MYA-3404	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Candida	Candida tropicalis
+301207	1	Macroventuria anomochaeta	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Didymellaceae	Macroventuria	Macroventuria anomochaeta
+306901	1	Chaetomium globosum CBS 148.51	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Chaetomiaceae	Chaetomium	Chaetomium globosum
+306902	1	Clavispora lusitaniae ATCC 42720	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Clavispora	Clavispora lusitaniae
+318751	1	Westerdykella ornata	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Sporormiaceae	Westerdykella	Westerdykella ornata
+321614	1	Parastagonospora nodorum SN15	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Phaeosphaeriaceae	Parastagonospora	Parastagonospora nodorum
+322104	1	Scheffersomyces stipitis CBS 6054	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Scheffersomyces	Scheffersomyces stipitis
+326645	1	Daldinia childiae	species	Eukaryota	Ascomycota	Sordariomycetes	Xylariales	Hypoxylaceae	Daldinia	Daldinia childiae
+330879	1	Aspergillus fumigatus Af293	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus fumigatus
+331117	1	Aspergillus fischeri NRRL 181	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus fischeri
+33203	1	Purpureocillium lilacinum	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Ophiocordycipitaceae	Purpureocillium	Purpureocillium lilacinum
+332648	1	Botrytis cinerea B05.10	strain	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis cinerea
+332952	1	Aspergillus flavus NRRL3357	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus flavus
+334819	1	Fusarium verticillioides 7600	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium verticillioides
+336722	1	Zymoseptoria tritici IPO323	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Zymoseptoria	Zymoseptoria tritici
+336963	1	Uncinocarpus reesii 1704	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Onygenaceae	Uncinocarpus	Uncinocarpus reesii
+339724	1	Histoplasma capsulatum NAm1	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Ajellomycetaceae	Histoplasma	Histoplasma capsulatum
+341663	1	Aspergillus terreus NIH2624	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus terreus
+342668	1	Pseudogymnoascus verrucosus	species	Eukaryota	Ascomycota	Leotiomycetes		Pseudeurotiaceae	Pseudogymnoascus	Pseudogymnoascus verrucosus
+344612	1	Aspergillus clavatus NRRL 1	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus clavatus
+348802	1	Exophiala xenobiotica	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala xenobiotica
+367110	1	Neurospora crassa OR74A	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Sordariaceae	Neurospora	Neurospora crassa
+367775	1	Cryptococcus gattii WM276	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cryptococcaceae	Cryptococcus	Cryptococcus gattii VGI
+379508	1	Lodderomyces elongisporus NRRL YB-4239	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Lodderomyces	Lodderomyces elongisporus
+383855	1	Pseudocercospora fijiensis CIRAD86	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Pseudocercospora	Pseudocercospora fijiensis
+390896	1	Trematosphaeria pertusa	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Trematosphaeriaceae	Trematosphaeria	Trematosphaeria pertusa
+398673	1	Trichoderma gamsii	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma gamsii
+402676	1	Schizosaccharomyces japonicus yFS275	strain	Eukaryota	Ascomycota	Schizosaccharomycetes	Schizosaccharomycetales	Schizosaccharomycetaceae	Schizosaccharomyces	Schizosaccharomyces japonicus
+40302	1	Nosema ceranae	species	Eukaryota	Microsporidia			Nosematidae	Nosema	Nosema ceranae
+41047	1	Aspergillus thermomutatus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus thermomutatus
+41067	1	Aspergillus candidus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus candidus
+413071	1	Trichoderma virens Gv29-8	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma virens
+418459	1	Puccinia graminis f. sp. tritici CRL 75-36-700-3	strain	Eukaryota	Basidiomycota	Pucciniomycetes	Pucciniales	Pucciniaceae	Puccinia	Puccinia graminis
+418784	1	[Candida] pseudohaemulonii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Clavispora	[Candida] pseudohaemulonii
+42260	1	Zygotorulaspora mrakii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Zygotorulaspora	Zygotorulaspora mrakii
+425011	1	Aspergillus niger CBS 513.88	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus niger
+425265	1	Malassezia globosa CBS 7966	strain	Eukaryota	Basidiomycota	Malasseziomycetes	Malasseziales	Malasseziaceae	Malassezia	Malassezia globosa
+426418	1	Pyrenophora tritici-repentis Pt-1C-BFP	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Pyrenophora	Pyrenophora tritici-repentis
+426428	1	Fusarium oxysporum f. sp. lycopersici 4287	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium oxysporum
+42677	1	Fusarium subglutinans	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium subglutinans
+431241	1	Trichoderma reesei QM6a	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma reesei
+436907	1	Vanderwaltozyma polyspora DSM 70294	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Vanderwaltozyma	Vanderwaltozyma polyspora
+441959	1	Talaromyces stipitatus ATCC 10500	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Talaromyces	Talaromyces stipitatus
+441960	1	Talaromyces marneffei ATCC 18224	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Trichocomaceae	Talaromyces	Talaromyces marneffei
+45133	1	Lasiodiplodia theobromae	species	Eukaryota	Ascomycota	Dothideomycetes	Botryosphaeriales	Botryosphaeriaceae	Lasiodiplodia	Lasiodiplodia theobromae
+452589	1	Trichoderma atroviride IMI 206040	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma atroviride
+45286	1	Eremothecium sinecaudum	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Eremothecium	Eremothecium sinecaudum
+45357	1	[Candida] haemuloni	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Clavispora	[Candida] haemuloni
+45513	1	Scheffersomyces spartinae	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Scheffersomyces	Scheffersomyces spartinae
+45607	1	Wickerhamiella sorbophila	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Trichomonascaceae	Wickerhamiella	Wickerhamiella sorbophila
+456999	1	Rhizoctonia solani	species	Eukaryota	Basidiomycota	Agaricomycetes	Cantharellales	Ceratobasidiaceae	Rhizoctonia	Rhizoctonia solani
+460523	1	Ogataea polymorpha	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Ogataea	Ogataea polymorpha
+470096	1	Pseudovirgaria hyperparasitica	species	Eukaryota	Ascomycota	Dothideomycetes	Acrospermales	Acrospermaceae	Pseudovirgaria	Pseudovirgaria hyperparasitica
+48254	1	Torulaspora globosa	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Torulaspora	Torulaspora globosa
+483514	1	Schizosaccharomyces octosporus yFS286	strain	Eukaryota	Ascomycota	Schizosaccharomycetes	Schizosaccharomycetales	Schizosaccharomycetaceae	Schizosaccharomyces	Schizosaccharomyces octosporus
+48563	1	Suillus bovinus	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus bovinus
+48578	1	Suillus paluster	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus paluster
+48586	1	Suillus subalutaceus	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus subalutaceus
+48587	1	Suillus subaureus	species	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Suillaceae	Suillus	Suillus subaureus
+486041	1	Laccaria bicolor S238N-H82	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Tricholomataceae	Laccaria	Laccaria bicolor
+4896	1	Schizosaccharomyces pombe	species	Eukaryota	Ascomycota	Schizosaccharomycetes	Schizosaccharomycetales	Schizosaccharomycetaceae	Schizosaccharomyces	Schizosaccharomyces pombe
+4909	1	Pichia kudriavzevii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Pichia	Pichia kudriavzevii
+4950	1	Torulaspora delbrueckii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Torulaspora	Torulaspora delbrueckii
+4956	1	Zygosaccharomyces rouxii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Zygosaccharomyces	Zygosaccharomyces rouxii
+498019	1	[Candida] auris	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Clavispora	[Candida] auris
+498257	1	Verticillium dahliae VdLs.17	strain	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Plectosphaerellaceae	Verticillium	Verticillium dahliae
+4999	1	Kockovaella imperatae	species	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Cuniculitremaceae	Kockovaella	Kockovaella imperatae
+500485	1	Penicillium rubens Wisconsin 54-1255	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium rubens
+5007	1	Brettanomyces bruxellensis	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Brettanomyces	Brettanomyces bruxellensis
+502779	1	Paracoccidioides lutzii Pb01	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales		Paracoccidioides	Paracoccidioides lutzii
+502780	1	Paracoccidioides brasiliensis Pb18	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales		Paracoccidioides	Paracoccidioides brasiliensis
+5068	1	Aspergillus tubingensis	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus tubingensis
+5078	1	Penicillium griseofulvum	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium griseofulvum
+5082	1	Penicillium roqueforti	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium roqueforti
+510516	1	Aspergillus oryzae RIB40	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus oryzae
+510951	1	Neurospora tetrasperma FGSC 2508	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Sordariaceae	Neurospora	Neurospora tetrasperma
+515849	1	Podospora anserina S mat+	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Chaetomiaceae	Podospora	Podospora anserina
+526221	1	Verticillium alfalfae VaMs.102	strain	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Plectosphaerellaceae	Verticillium	Verticillium alfalfae
+5322	1	Pleurotus ostreatus	species	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Pleurotaceae	Pleurotus	Pleurotus ostreatus
+535722	1	Nannizzia gypsea CBS 118893	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Nannizzia	Nannizzia gypsea
+5454	1	Ascochyta rabiei	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Didymellaceae	Ascochyta	Ascochyta rabiei
+5467	1	Colletotrichum truncatum	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum truncatum
+5478	1	[Candida] glabrata	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Nakaseomyces	[Candida] glabrata
+5480	1	Candida parapsilosis	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Candida	Candida parapsilosis
+5481	1	Diutina rugosa	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales		Diutina	Diutina rugosa
+554155	1	Microsporum canis CBS 113480	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Microsporum	Microsporum canis
+559292	1	Saccharomyces cerevisiae S288C	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Saccharomyces	Saccharomyces cerevisiae
+559295	1	Lachancea thermotolerans CBS 6340	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Lachancea	Lachancea thermotolerans
+559298	1	Blastomyces gilchristii SLH14081	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Ajellomycetaceae	Blastomyces	Blastomyces gilchristii
+559305	1	Trichophyton rubrum CBS 118892	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Trichophyton	Trichophyton rubrum
+5599	1	Alternaria alternata	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Alternaria	Alternaria alternata
+560253	1	Letharia lupina	species	Eukaryota	Ascomycota	Lecanoromycetes	Lecanorales	Parmeliaceae	Letharia	Letharia lupina
+563466	1	Scedosporium apiospermum	species	Eukaryota	Ascomycota	Sordariomycetes	Microascales	Microascaceae	Scedosporium	Scedosporium apiospermum
+56646	1	Fusarium venenatum	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium venenatum
+569365	1	Cladophialophora immunda	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Cladophialophora	Cladophialophora immunda
+573729	1	Thermothelomyces thermophilus ATCC 42464	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Chaetomiaceae	Thermothelomyces	Thermothelomyces thermophilus
+573826	1	Candida dubliniensis CD36	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Candida	Candida dubliniensis
+574789	1	Mytilinidion resinicola	species	Eukaryota	Ascomycota	Dothideomycetes	Mytilinidiales	Mytilinidiaceae	Mytilinidion	Mytilinidion resinicola
+578455	1	Thermothielavioides terrestris NRRL 8126	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Chaetomiaceae	Thermothielavioides	Thermothielavioides terrestris
+578456	1	Tremella mesenterica DSM 1558	strain	Eukaryota	Basidiomycota	Tremellomycetes	Tremellales	Tremellaceae	Tremella	Tremella mesenterica
+578457	1	Serpula lacrymans var. lacrymans S7.9	strain	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Serpulaceae	Serpula	Serpula lacrymans
+578458	1	Schizophyllum commune H4-8	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Schizophyllaceae	Schizophyllum	Schizophyllum commune
+578459	1	Rhodotorula graminis WP1	strain	Eukaryota	Basidiomycota	Microbotryomycetes	Sporidiobolales	Sporidiobolaceae	Rhodotorula	Rhodotorula graminis
+58627	1	Debaryomyces fabryi	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Debaryomyces	Debaryomyces fabryi
+58853	1	Trichoderma citrinoviride	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma citrinoviride
+58919	1	Tilletiopsis washingtonensis	species	Eukaryota	Basidiomycota	Exobasidiomycetes	Entylomatales		Tilletiopsis	Tilletiopsis washingtonensis
+590646	1	Yamadazyma tenuis ATCC 10573	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Yamadazyma	Yamadazyma tenuis
+597362	1	Agaricus bisporus var. burnettii JB137-S8	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Agaricaceae	Agaricus	Agaricus bisporus
+599839	1	Fibroporia radiculosa	species	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales		Fibroporia	Fibroporia radiculosa
+60172	1	Penicillium solitum	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Penicillium	Penicillium solitum
+61262	1	Kazachstania barnettii	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Kazachstania	Kazachstania barnettii
+61395	1	Linderina pennispora	species	Eukaryota	Zoopagomycota	Kickxellomycetes	Kickxellales	Kickxellaceae	Linderina	Linderina pennispora
+61420	1	Aspergillus caelatus	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus caelatus
+619300	1	Spathaspora passalidarum NRRL Y-27907	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Spathaspora	Spathaspora passalidarum
+644223	1	Komagataella phaffii GS115	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Phaffomycetaceae	Komagataella	Komagataella phaffii
+644352	1	Gaeumannomyces tritici R3-111a-1	strain	Eukaryota	Ascomycota	Sordariomycetes	Magnaporthales	Magnaporthaceae	Gaeumannomyces	Gaeumannomyces tritici
+645133	1	Colletotrichum graminicola M1.001	strain	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum graminicola
+645134	1	Spizellomyces punctatus DAOM BR117	strain	Eukaryota	Chytridiomycota	Chytridiomycetes	Spizellomycetales	Spizellomycetaceae	Spizellomyces	Spizellomyces punctatus
+64571	1	Lobosporangium transversale	species	Eukaryota	Mucoromycota	Mortierellomycetes	Mortierellales	Mortierellaceae	Lobosporangium	Lobosporangium transversale
+650164	1	Phanerochaete carnosa HHB-10118-sp	strain	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Phanerochaetaceae	Phanerochaete	Phanerochaete carnosa
+653667	1	Schizosaccharomyces cryophilus OY26	strain	Eukaryota	Ascomycota	Schizosaccharomycetes	Schizosaccharomycetales	Schizosaccharomycetaceae	Schizosaccharomyces	Schizosaccharomyces cryophilus
+655819	1	Beauveria bassiana ARSEF 2860	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Cordycipitaceae	Beauveria	Beauveria bassiana
+655827	1	Metarhizium acridum CQMa 102	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Metarhizium	Metarhizium acridum
+655844	1	Metarhizium robertsii ARSEF 23	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Clavicipitaceae	Metarhizium	Metarhizium robertsii
+655863	1	Grosmannia clavigera kw1407	strain	Eukaryota	Ascomycota	Sordariomycetes	Ophiostomatales	Ophiostomataceae	Grosmannia	Grosmannia clavigera
+655981	1	Pseudogymnoascus destructans	species	Eukaryota	Ascomycota	Leotiomycetes		Pseudeurotiaceae	Pseudogymnoascus	Pseudogymnoascus destructans
+656061	1	Tuber melanosporum Mel28	strain	Eukaryota	Ascomycota	Pezizomycetes	Pezizales	Tuberaceae	Tuber	Tuber melanosporum
+660029	1	Fusarium oxysporum NRRL 32931	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium oxysporum
+660122	1	Fusarium vanettenii 77-13-4	no rank	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Nectriaceae	Fusarium	Fusarium vanettenii
+660469	1	Cryphonectria parasitica EP155	strain	Eukaryota	Ascomycota	Sordariomycetes	Diaporthales	Cryphonectriaceae	Cryphonectria	Cryphonectria parasitica
+663202	1	Trichophyton verrucosum HKI 0517	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Trichophyton	Trichophyton verrucosum
+663331	1	Trichophyton benhamiae CBS 112371	strain	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Trichophyton	Trichophyton benhamiae
+665024	1	Bipolaris maydis ATCC 48331	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Bipolaris	Bipolaris maydis
+665079	1	Sclerotinia sclerotiorum 1980 UF-70	isolate	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Sclerotinia	Sclerotinia sclerotiorum
+665912	1	Bipolaris sorokiniana ND90Pr	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Bipolaris	Bipolaris sorokiniana
+670483	1	Gloeophyllum trabeum ATCC 11539	strain	Eukaryota	Basidiomycota	Agaricomycetes	Gloeophyllales	Gloeophyllaceae	Gloeophyllum	Gloeophyllum trabeum
+670580	1	Postia placenta MAD-698-R-SB12	strain	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Dacryobolaceae	Postia	Postia placenta
+671144	1	Wallemia mellicola CBS 633.66	strain	Eukaryota	Basidiomycota	Wallemiomycetes	Wallemiales	Wallemiaceae	Wallemia	Wallemia mellicola
+671987	1	Exserohilum turcica Et28A	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Exserohilum	Exserohilum turcicum
+673940	1	Lindgomyces ingoldianus	species	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Lindgomycetaceae	Lindgomyces	Lindgomyces ingoldianus
+683960	1	Wickerhamomyces anomalus NRRL Y-366-8	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Phaffomycetaceae	Wickerhamomyces	Wickerhamomyces anomalus
+684364	1	Batrachochytrium dendrobatidis JAM81	strain	Eukaryota	Chytridiomycota	Chytridiomycetes	Rhizophydiales		Batrachochytrium	Batrachochytrium dendrobatidis
+690256	1	Colletotrichum fructicola	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum fructicola
+690259	1	Colletotrichum siamense	species	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum siamense
+690307	1	Aspergillus aculeatus ATCC 16872	strain	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus aculeatus
+692275	1	Sphaerulina musiva SO2202	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Mycosphaerellaceae	Sphaerulina	Sphaerulina musiva
+694068	1	Fomitiporia mediterranea MF3/22	strain	Eukaryota	Basidiomycota	Agaricomycetes	Hymenochaetales	Hymenochaetaceae	Fomitiporia	Fomitiporia mediterranea
+698492	1	Saitoella complicata NRRL Y-17804	strain	Eukaryota	Ascomycota				Saitoella	Saitoella complicata
+717646	1	Baudoinia panamericana UAMH 10762	strain	Eukaryota	Ascomycota	Dothideomycetes	Mycosphaerellales	Teratosphaeriaceae	Baudoinia	Baudoinia panamericana
+717944	1	Trametes versicolor FP-101664 SS1	strain	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Polyporaceae	Trametes	Trametes versicolor
+721885	1	Stereum hirsutum FP-91666 SS1	strain	Eukaryota	Basidiomycota	Agaricomycetes	Russulales	Stereaceae	Stereum	Stereum hirsutum
+732165	1	Dichomitus squalens LYAD-421 SS1	strain	Eukaryota	Basidiomycota	Agaricomycetes	Polyporales	Polyporaceae	Dichomitus	Dichomitus squalens
+74035	1	Arthroderma uncinatum	species	Eukaryota	Ascomycota	Eurotiomycetes	Onygenales	Arthrodermataceae	Arthroderma	Arthroderma uncinatum
+741275	1	Punctularia strigosozonata HHB-11173 SS5	strain	Eukaryota	Basidiomycota	Agaricomycetes	Corticiales	Punctulariaceae	Punctularia	Punctularia strigosozonata
+741705	1	Coniophora puteana RWD-64-598 SS2	strain	Eukaryota	Basidiomycota	Agaricomycetes	Boletales	Coniophoraceae	Coniophora	Coniophora puteana
+747089	1	Rhizophagus irregularis DAOM 181602=DAOM 197198	strain	Eukaryota	Mucoromycota	Glomeromycetes	Glomerales	Glomeraceae	Rhizophagus	Rhizophagus irregularis
+747525	1	Heterobasidion irregulare TC 32-1	strain	Eukaryota	Basidiomycota	Agaricomycetes	Russulales	Bondarzewiaceae	Heterobasidion	Heterobasidion irregulare
+747676	1	Melampsora larici-populina 98AG31	strain	Eukaryota	Basidiomycota	Pucciniomycetes	Pucciniales	Melampsoraceae	Melampsora	Melampsora larici-populina
+75553	1	Aspergillus viridinutans	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus viridinutans
+756982	1	Orbilia oligospora ATCC 24927	strain	Eukaryota	Ascomycota	Orbiliomycetes	Orbiliales	Orbiliaceae	Orbilia	Orbilia oligospora
+759272	1	Chaetomium thermophilum var. thermophilum DSM 1495	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Chaetomiaceae	Chaetomium	Chaetomium thermophilum
+759273	1	Colletotrichum higginsianum IMI 349063	strain	Eukaryota	Ascomycota	Sordariomycetes	Glomerellales	Glomerellaceae	Colletotrichum	Colletotrichum higginsianum
+763406	1	Pichia membranifaciens NRRL Y-2026	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Pichia	Pichia membranifaciens
+763407	1	Phycomyces blakesleeanus NRRL 1555(-)	strain	Eukaryota	Mucoromycota	Mucoromycetes	Mucorales	Phycomycetaceae	Phycomyces	Phycomyces blakesleeanus
+764103	1	Mixia osmundae IAM 14324	strain	Eukaryota	Basidiomycota	Mixiomycetes	Mixiales	Mixiaceae	Mixia	Mixia osmundae
+76775	1	Malassezia restricta	species	Eukaryota	Basidiomycota	Malasseziomycetes	Malasseziales	Malasseziaceae	Malassezia	Malassezia restricta
+77020	1	Malassezia pachydermatis	species	Eukaryota	Basidiomycota	Malasseziomycetes	Malasseziales	Malasseziaceae	Malassezia	Malassezia pachydermatis
+771870	1	Sordaria macrospora k-hell	strain	Eukaryota	Ascomycota	Sordariomycetes	Sordariales	Sordariaceae	Sordaria	Sordaria macrospora
+796027	1	Sugiyamaella lignohabitans	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Trichomonascaceae	Sugiyamaella	Sugiyamaella lignohabitans
+83186	1	Diaporthe citri	species	Eukaryota	Ascomycota	Sordariomycetes	Diaporthales	Diaporthaceae	Diaporthe	Diaporthe citri
+84753	1	Moesziomyces antarcticus	species	Eukaryota	Basidiomycota	Ustilaginomycetes	Ustilaginales	Ustilaginaceae	Moesziomyces	Moesziomyces antarcticus
+856822	1	Fonsecaea nubica	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Fonsecaea	Fonsecaea nubica
+857342	1	Amorphotheca resinae ATCC 22711	strain	Eukaryota	Ascomycota	Leotiomycetes		Myxotrichaceae	Amorphotheca	Amorphotheca resinae
+858893	1	Exophiala dermatitidis NIH/UT8656	strain	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala dermatitidis
+869754	1	Metschnikowia bicuspidata var. bicuspidata NRRL YB-4993	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Metschnikowiaceae	Metschnikowia	Metschnikowia bicuspidata
+870730	1	Ogataea angusta	species	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Ogataea	Ogataea angusta
+871575	1	Ogataea parapolymorpha DL-1	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Pichiaceae	Ogataea	Ogataea parapolymorpha
+87229	1	Botrytis porri	species	Eukaryota	Ascomycota	Leotiomycetes	Helotiales	Sclerotiniaceae	Botrytis	Botrytis porri
+876142	1	Encephalitozoon intestinalis ATCC 50506	strain	Eukaryota	Microsporidia			Unikaryonidae	Encephalitozoon	Encephalitozoon intestinalis
+879819	1	Cutaneotrichosporon oleaginosum	species	Eukaryota	Basidiomycota	Tremellomycetes	Trichosporonales	Trichosporonaceae	Cutaneotrichosporon	Cutaneotrichosporon oleaginosum
+881290	1	Nematocida parisii ERTm1	strain	Eukaryota	Microsporidia				Nematocida	Nematocida parisii
+907965	1	Encephalitozoon hellem ATCC 50504	strain	Eukaryota	Microsporidia			Unikaryonidae	Encephalitozoon	Encephalitozoon hellem
+91492	1	Aspergillus udagawae	species	Eukaryota	Ascomycota	Eurotiomycetes	Eurotiales	Aspergillaceae	Aspergillus	Aspergillus udagawae
+91928	1	Exophiala spinifera	species	Eukaryota	Ascomycota	Eurotiomycetes	Chaetothyriales	Herpotrichiellaceae	Exophiala	Exophiala spinifera
+930089	1	Bipolaris zeicola 26-R-13	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Bipolaris	Bipolaris zeicola
+930090	1	Bipolaris oryzae ATCC 44560	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Bipolaris	Bipolaris oryzae
+930091	1	Bipolaris victoriae FI3	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Pleosporaceae	Bipolaris	Bipolaris victoriae
+931890	1	Eremothecium cymbalariae DBVPG#7215	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Saccharomycetaceae	Eremothecium	Eremothecium cymbalariae
+936046	1	Agaricus bisporus var. bisporus H97	strain	Eukaryota	Basidiomycota	Agaricomycetes	Agaricales	Agaricaceae	Agaricus	Agaricus bisporus
+948595	1	Vavraia culicis subsp. floridensis	subspecies	Eukaryota	Microsporidia			Pleistophoridae	Vavraia	Vavraia culicis
+983644	1	Cordyceps militaris CM01	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Cordycipitaceae	Cordyceps	Cordyceps militaris
+983964	1	Trichoderma harzianum CBS 226.95	strain	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Hypocreaceae	Trichoderma	Trichoderma harzianum
+983966	1	Cyberlindnera jadinii NRRL Y-1542	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Phaffomycetaceae	Cyberlindnera	Cyberlindnera jadinii
+98403	1	Drechmeria coniospora	species	Eukaryota	Ascomycota	Sordariomycetes	Hypocreales	Ophiocordycipitaceae	Drechmeria	Drechmeria coniospora
+984485	1	Hyphopichia burtonii NRRL Y-1933	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Hyphopichia	Hyphopichia burtonii
+984486	1	Babjeviella inositovora NRRL Y-12698	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Babjeviella	Babjeviella inositovora
+984487	1	Suhomyces tanzawaensis NRRL Y-17324	strain	Eukaryota	Ascomycota	Saccharomycetes	Saccharomycetales	Debaryomycetaceae	Suhomyces	Suhomyces tanzawaensis
+985895	1	Leptosphaeria maculans JN3	strain	Eukaryota	Ascomycota	Dothideomycetes	Pleosporales	Leptosphaeriaceae	Leptosphaeria	Leptosphaeria maculans
+993615	1	Vittaforma corneae ATCC 50505	strain	Eukaryota	Microsporidia			Nosematidae	Vittaforma	Vittaforma corneae
