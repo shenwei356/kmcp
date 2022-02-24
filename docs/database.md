@@ -160,7 +160,7 @@ Building database (all k-mers, for profiling on short-reads):
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks with 100bp overlap
+    #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
         --log gtdb-r202-k21-n10.log -j 32 --force
@@ -185,7 +185,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks with 100bp overlap
+    #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   s = 16 # Closed Syncmers
     kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
@@ -210,7 +210,7 @@ Building database (k-mer sketches, for profiling on long-reads):
        
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks with 100bp overlap
+    #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   D = 5 # FracMinhash
     kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
@@ -235,7 +235,7 @@ Building database (k-mer sketches, for profiling on long-reads):
        
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks with 100bp overlap
+    #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   W = 5 # Minimizer
     kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
@@ -271,7 +271,7 @@ Building small databases (all k-mers, for profiling with a computer cluster):
         
         # compute k-mers
         #   sequence containing "plasmid" in name are ignored,
-        #   reference genomes are splitted into 10 chunks with 100bp overlap
+        #   reference genomes are split into 10 chunks with 100bp overlap
         #   k = 21
         kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
             --log $f-k21-n10.log -j 24 --force
@@ -948,7 +948,7 @@ Building database:
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks
+    #   reference genomes are split into 10 chunks
     #   k = 21
     kmcp compute -I fna/ -k 21 -n 10 -B plasmid -O humgut-k21-n10 -j 32 --force
 
@@ -1027,7 +1027,7 @@ Building database:
     
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks
+    #   reference genomes are split into 10 chunks
     #   k = 21
     kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
 
@@ -1046,7 +1046,7 @@ Files:
 
 1. Genome files
     - (Gzip-compressed) FASTA/Q format.
-    - One genome per file with the reference identifier in the file name.
+    - One genome per file **with the reference identifier in the file name**.
 2. TaxId mapping file (for metagenomic profiling)
     - Two-column (reference identifier and TaxId) tab-delimited.
 3. [NCBI taxonomy dump files](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz) (for metagenomic profiling)
@@ -1080,45 +1080,60 @@ where every node searches a part of the database.
 
 ### Step 1. Computing k-mers
 
-Plain or gzip-compressed input genome sequence files better be saved in one directory,
-with multiple-level directories allowed. 
-The file extension could be `fa`, `fasta`, `fna`, `fq`, `fastq`, `fa.gz`, `fasta.gz`,
- `fna.gz`, `fq.gz` or `fastq.gz`.
+**Input:**
 
-**Input files** can be given as a list of FASTA/Q files via
-positional arguments or a directory (with multiple-level directories allowed) containing sequence files
-via the flag `-I/--in-dir`. A regular expression for matching
-sequencing files is available by the flag `-r/--file-regexp`.
-The default pattern matches files with extension of 
-`fa`, `fasta`, `fna`, `fq`, `fastq`, `fa.gz`, `fasta.gz`,
-`fna.gz`, `fq.gz` or `fastq.gz`.
+1. Input plain or gzipped FASTA/Q files can be given via positional arguments or
+    the flag `-i/--infile-list` with the list of input files,
+2. Or a directory containing sequence files via the flag `-I/--in-dir`,
+    with multiple-level sub-directories allowed. A regular expression
+    for matching sequencing files is available via the flag `-r/--file-regexp`.
+    The default pattern matches files with extension of 
+    `fa`, `fasta`, `fna`, `fq`, `fastq`, `fa.gz`, `fasta.gz`,
+    `fna.gz`, `fq.gz` or `fastq.gz`.
 
-Unwanted sequence like plasmid sequences can be **filtered out** by
+
+You may rename the sequence files for convenience using [brename](https://github.com/shenwei356/brename).
+because the sequence/genome identifier in the index and search results would be:
+
+1. For the default mode (computing k-mers for the whole file):
+        
+        the basename of file with common FASTA/Q file extension removed,
+        captured via the flag -N/--ref-name-regexp.
+        
+2. For splitting sequence mode (see details below):
+        
+        same to 1).
+        
+3. For computing k-mers for each sequence:
+        
+        the sequence identifier.
+
+Unwanted sequences like plasmid sequences can be **filtered out** by
 the name via regular expression(s) (`-B/--seq-name-filter`).
 
 **How to compute k-mers**:
 By default, `kmcp` computes k-mers (sketches) of every file,
 you can also use `--by-seq` to compute for every sequence,
-where sequence IDs in all input files better be distinct.
+where sequence IDs in all input files are better to be distinct.
 It also **supports splitting sequences into chunks, this
-could increase the specificity in profiling result in cost
+could increase the specificity in profiling result in the cost
 of slower searching speed**. 
 
 **Splitting sequences**:
 
-1. Sequences can be splitted into chunks by a chunk size 
+1. Sequences can be split into chunks by a chunk size 
     (`-s/--split-size`) or number of chunks (`-n/--split-number`)
     with overlap (`-l/--split-overlap`).
     ***In this mode, the sequences of each genome should be saved in an
     individual file***.
 2. When splitting by number of chunks, **all sequences (except for
-    these mathching any regular expression given by `-B/--seq-name-filter`)
+    these matching any regular expression given by `-B/--seq-name-filter`)
     in a sequence file are concatenated with k-1 Ns before splitting**.
 3. Both sequence/reference IDs and chunks indices are saved for later use,
     in form of meta/description data in `.unik` files, and will
     be reported in `kmcp search` results.
 
-**Meta data**:
+**Metadata**:
 
 1. Every outputted `.unik` file contains the sequence/reference ID,
     chunk index, number of chunks, and genome size of reference.
@@ -1135,7 +1150,7 @@ is good enough.
 1. K-mer:
     - ntHash of k-mer (`-k`)
 2. K-mer sketchs (all using ntHash):
-    - Scaled MinHash (`-k -D`), reviously named Scaled MinHash
+    - Scaled MinHash (`-k -D`), previously named Scaled MinHash
     - Minimizer      (`-k -W`), optionally scaling/down-sampling (`-D`)
     - Closed Syncmer (`-k -S`), optionally scaling/down-sampling (`-D`)
 
@@ -1165,7 +1180,7 @@ is good enough.
 
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
-    #   reference genomes are splitted into 10 chunks,
+    #   reference genomes are split into 10 chunks,
     #   k = 21
     kmcp compute --in-dir refs/ \
         --kmer 21 \
@@ -1175,7 +1190,7 @@ is good enough.
         --out-dir refs-k21-n10
 
     # demo output
-    22:33:10.685 [INFO] kmcp v0.7.1
+    22:33:10.685 [INFO] kmcp v0.8.0
     22:33:10.685 [INFO]   https://github.com/shenwei356/kmcp
     22:33:10.685 [INFO] 
     22:33:10.685 [INFO] checking input files ...
@@ -1225,7 +1240,7 @@ Meta data in the `.unik` file can be showed using `kmcp utils unik-info`:
 
 KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
 Signature Index ([COBS](https://arxiv.org/abs/1905.09624)). 
-We totally rewrite the algorithms, data structure and file format,
+We completely rewrite the algorithms, data structure, and file format,
 and have improved the indexing and searching speed
 (check [benchmark](/benchmark/searching)).
 
@@ -1235,20 +1250,20 @@ and have improved the indexing and searching speed
 
 **Database size and searching accuracy**:
 
-0. **Use `--dry-run` to adjust parameters and check final number of 
+0. **Use `--dry-run` to adjust parameters and check the final number of 
     index files (#index-files) and the total file size**.
 1. `-f/--false-positive-rate`: the default value `0.3` is enough for a
-    query with tens of matched k-mers (see BIGSI/COBS paper).
-    Small values could largely increase the size of database.
+    query with tens of k-mers (see BIGSI/COBS paper).
+    Small values could largely increase the size of the database.
 2. `-n/--num-hash`: large values could reduce the database size,
-    in cost of slower searching speed. Values <=4 is recommended.
-3. Value of block size `-b/--block-size` better be multiple of 64.
+    in the cost of slower searching speed. Values <=4 are recommended.
+3. The value of block size `-b/--block-size` is better to be multiple of 64.
     The default value is: 
     
         (#unikFiles/#threads + 7) / 8 * 8
 
 4. Use flag `-x/--block-sizeX-kmers-t`, `-8/--block-size8-kmers-t`,
-    and `-1/--block-size1-kmers-t` to separately create index for
+    and `-1/--block-size1-kmers-t` to separately create indexes for
     inputs with huge number of k-mers, for precise control of
     database size.
 
@@ -1259,15 +1274,15 @@ and have improved the indexing and searching speed
 
 **Performance tips**:
 
-1. Number of blocks (`.uniki` files) better be smaller than or equal
-   to number of CPU cores for faster searching speed. 
+1. The umber of blocks (`.uniki` files) is better to be smaller than or equal
+   to the number of CPU cores for faster searching speed. 
    **We can set `-j/--threads` to control the blocks number**.
    When more threads (>= 1.3 * #blocks) are given, extra workers are
    automatically created.
 2. `#threads` files are simultaneously opened, and the max number
     of opened files is limited by the flag `-F/--max-open-files`.
     You may use a small value of `-F/--max-open-files` for 
-    hard disk drive storage.
+    hard disk drive storages.
 3. When the database is used in a new computer with more CPU cores,
    `kmcp search` could automatically scale to utilize as many cores
    as possible.
@@ -1286,7 +1301,7 @@ and have improved the indexing and searching speed
         --out-dir refs.kmcp 
 
     # demo output
-    22:44:17.710 [INFO] kmcp v0.7.1
+    22:44:17.710 [INFO] kmcp v0.8.0
     22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
     22:44:17.710 [INFO] 
     22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt

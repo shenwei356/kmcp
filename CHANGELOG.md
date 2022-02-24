@@ -1,5 +1,31 @@
 # Changelog
 
+### v0.8.0 - 2022-02-24
+
+- commands:
+    - new command `utils cov2simi`: Convert k-mer coverage to sequence similarity.
+    - new command `utils query-fpr`: Compute the maximal false positive rate of a query.
+- `compute`:
+    - update doc.
+    - add flags compatibility check.
+- `search`:
+    - **output the false positive rate of each match, rather than the FPR upper bound of the query**.
+      this could save some short queries with high similarity.
+    - **change default values of reads filter, because clinical data contain many short reads**.
+        - `-c/--min-uniq-reads`: `30` -> `10`.
+        - `-m/--min-query-len`: `70` -> `30`.
+    - update doc.
+- `profile`:
+    - rename flags:
+        - `--keep-main-matches` -> `--keep-main-matches`.
+        - `--keep-perfect-match` -> `--keep-perfect-matches`.
+    - change default values:
+        - `--max-qcov-gap`: `0.2` -> `0.4`.
+    - mode 0 (pathogen detection):
+        - switch on flag `--keep-main-matches`
+        - use `--max-qcov-gap 0.4`
+    - update doc.
+
 ### v0.7.1 - 2022-02-08
 
 - `profile`:
@@ -7,6 +33,7 @@
     - column name renamed: from `fragsFrac`, `fragsRelDepth`, `fragsRelDepthStd` to `chunksFrac`, `chunksRelDepth`, `chunksRelDepthStd`.
     - fix computation of `chunksRelDepth`.
     - slightly improve sensitivity for `-m 0`.
+
 ### v0.7.0 - 2022-01-24
 
 - commands:

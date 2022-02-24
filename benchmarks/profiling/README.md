@@ -2,12 +2,12 @@
 
 ## Softwares
 
-- KMCP [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
-- mOTUs [3.0.1 (Jul 28, 2021)](https://github.com/motu-tool/mOTUs/releases/tag/3.0.1)
-- MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
-- Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
-  Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
-- Centrifuge [v1.0.4](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- KMCP [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
+- mOTUs [3.0.1 (2021-07-28)](https://github.com/motu-tool/mOTUs/releases/tag/3.0.1)
+- MetaPhlAn [3.0.13 (2021-07-27)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
+- Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
+  Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+- Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 
 ## Databases and taxonomy version
 
@@ -16,6 +16,7 @@
 - mOTUs, 3.0.1 (2021-06-28), 2019-01
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
+- Kraken, built with the genomes same to KMCP.
 
 ## Datasets
 
@@ -529,3 +530,4 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
                 >{p}.log 2>&1 '
 
     stats centrifuge centrifuge-pe > centrifuge.stats
+

@@ -53,12 +53,16 @@ k, theshold of query coverage.
 l, number of k-mers.
 
 import math
-fpr = lambda p,k,l: math.exp(-l * (k - p) * (k - p) / 2 / (1 - p))
+fpr = lambda p,k,l: math.exp(-l * (k - p) * (k - p) / (2 * (1 - p))
 
 fpr(0.3, 0.8, 60)
 */
 func maxFPR(p float64, k float64, l int) float64 {
-	return math.Exp(-float64(l) * (k - p) * (k - p) / 2 / (1 - p))
+	return math.Exp(-float64(l) * (k - p) * (k - p) / (2 * (1 - p)))
+}
+
+func maxFPRf(p float64, k float64, l float64) float64 {
+	return math.Exp(-l * (k - p) * (k - p) / (2 * (1 - p)))
 }
 
 // get the two basic hash function values for data.

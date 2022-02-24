@@ -50,20 +50,34 @@ var computeCmd = &cobra.Command{
 	Short: "Generate k-mers (sketches) from FASTA/Q sequences",
 	Long: `Generate k-mers (sketches) from FASTA/Q sequences
 
+Input:
+  1. Input plain or gzipped FASTA/Q files can be given via positional
+     arguments or the flag -i/--infile-list with the list of input files,
+  2. Or a directory containing sequence files via the flag -I/--in-dir,
+     with multiple-level sub-directories allowed. A regular expression
+     for matching sequencing files is available via the flag -r/--file-regexp.
+
+  Attention:
+    You may rename the sequence files for convenience because the 
+  sequence/genome identifier in the index and search results would be:
+    1). For the default mode (computing k-mers for the whole file):
+          the basename of file with common FASTA/Q file extension removed,
+          captured via the flag -N/--ref-name-regexp.  
+    2). For splitting sequence mode (see details below):
+          same to 1).
+    3). For computing k-mers for each sequence:
+          the sequence identifier.
+
 Attentions:
-  1. Input files can be given as list of FASTA/Q files via
-     positional arguments or a directory containing sequence files
-     via the flag -I/--in-dir. A regular expression for matching
-     sequencing files is available by the flag -r/--file-regexp.
-  2. Unwanted sequence like plasmid can be filtered out by
+  1. Unwanted sequences like plasmid can be filtered out by
      the name via regular expressions (-B/--seq-name-filter).
-  3. By default, kmcp computes k-mers (sketches) of every file,
+  2. By default, kmcp computes k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
-     where sequence IDs in all input files better be distinct.
-  4. It also supports splitting sequences into chunks, this
-     could increase the specificity in profiling result in cost
+     where sequence IDs in all input files are better to be distinct.
+  3. It also supports splitting sequences into chunks, this
+     could increase the specificity in search results in the cost
      of slower searching speed.
-  5. Multiple sizes of k-mers are supported.
+  4. Multiple sizes of k-mers are supported.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -80,18 +94,18 @@ Splitting sequences:
      In this mode, the sequences of each genome should be saved in an
      individual file.
   2. When splitting by number of chunks, all sequences (except for
-     these mathching any regular expression given by -B/--seq-name-filter)
+     these matching any regular expression given by -B/--seq-name-filter)
      in a sequence file are concatenated with k-1 'N's before splitting.
   3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 
-Meta data:
+Metadata:
   1. Every outputted .unik file contains the sequence/reference ID,
      chunk index, number of chunks, and genome size of reference.
-  2. When parsing whole sequence files or splitting by number of chunks,
+  2. When parsing whole sequence files or splitting by the number of chunks,
      the identifier of a reference is the basename of the input file
      by default. It can also be extracted from the input file name via
-     -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for refseq records.
+     -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for RefSeq records.
 
 Output:
   1. All outputted .unik files are saved in ${outdir}, with path
@@ -105,8 +119,13 @@ Output:
      supposed to be.
 
 Performance tips:
-  1. Decrease value of -j/--threads for data in hard disk drives to
+  1. Decrease the value of -j/--threads for data in hard disk drives to
      reduce I/O pressure.
+
+Next step:
+  1. Check the summary file (${outdir}/_info.txt) to see if the reference
+     IDs (column "name") are what supposed to be.
+  2. Run "kmcp index" with the output directory.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -231,6 +250,9 @@ Performance tips:
 		}
 		if splitSize0 > 0 && splitNumber0 > 1 {
 			checkError(fmt.Errorf("flag -s/--split-size and -n/--split-number are incompatible"))
+		}
+		if bySeq && splitNumber0 > 1 {
+			checkError(fmt.Errorf("flag --by-seq and -n/--split-number are incompatible"))
 		}
 		splitSeq := splitSize0 > 0 || splitNumber0 > 1
 		if splitSeq {
@@ -956,7 +978,7 @@ func init() {
 		formatFlagUsage(`Only splitting sequences >= X bp.`))
 
 	computeCmd.Flags().BoolP("by-seq", "", false,
-		formatFlagUsage(`Compute k-mers (sketches) for every sequence, instead of the whole file.`))
+		formatFlagUsage(`Compute k-mers (sketches) for each sequence, instead of the whole file.`))
 
 	computeCmd.Flags().StringP("ref-name-regexp", "N", `(?i)(.+)\.(f[aq](st[aq])?|fna)(.gz)?$`,
 		formatFlagUsage(`Regular expression (must contains "(" and ")") for extracting reference name from filename.`))

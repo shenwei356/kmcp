@@ -2,11 +2,11 @@
 
 ## Softwares
 
-- KMCP [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
-- MetaPhlAn [3.0.13 (27 Jul, 2021)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
-- Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
-  Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
-- Centrifuge [v1.0.4](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- KMCP [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
+- MetaPhlAn [3.0.13 (2021-07-27)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
+- Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
+  Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+- Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 
 ## Databases and taxonomy version
 
@@ -29,7 +29,7 @@ to Linker Amplification for quantitative amplification of both dsDNA and ssDNA t
 > situations with either low abundance of ssDNA viruses (MCA, total ssDNA ∼2% of 
 > community) or high abundance of ssDNA viruses (MCB, total ssDNA ∼66% of community)
 
-> Roux S, Solonenko NE, Dang VT, Poulos BT, Schwenck SM, Goldsmith DB, Coleman ML, Breitbart M, Sullivan MB. 2016. Towards quantitative viromics for both double-stranded and single-stranded DNA viruses. PeerJ 4:e2777 https://doi.org/10.7717/peerj.2777
+> Roux S, Solonenko NE, Dang VT, Poulos BT, Schwenck SM, Goldsmith DB, Coleman ML, Breitbart M, Sullivan MB. 2016. Towards quantitative viromics for both double-stranded and single-stranded DNA viruses. PeerJ 4:e2777 https://doi.org/10.8.07/peerj.2777
 
 Phages (rank is based on NCBI taxonomy 2021-12-06)
 
@@ -83,13 +83,11 @@ After carefully checking, we renamed samples as below:
     MCA-G2   MCA-G3
     MCA-N2   MCA-N3
 
-We manually download the paired and unpaired reads for every sample, for example:
+We manually download the paired-end reads for every sample, for example:
 
-    $ ls reads/ | head -n 4
+    $ ls reads/ | head -n 2
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R1_001_t_paired.fastq.gz
-    MCA-G2_GGACTCCT-GCGTAAGA_L002_R1_001_t_unpaired.fastq.gz
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_paired.fastq.gz
-    MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_unpaired.fastq.gz
 
 **Note that some files of MCA-S1 and MCA-S2 are corrupted.**
 
@@ -127,7 +125,6 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
-                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -145,7 +142,6 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
-                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -163,7 +159,6 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
-                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush

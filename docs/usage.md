@@ -5,7 +5,7 @@ KMCP is a command-line tool consisting of several subcommands.
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.7.1
+    Version: v0.8.0
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -26,7 +26,7 @@ Available Commands:
   index          Construct database from k-mer files
   merge          Merge search results from multiple databases
   profile        Generate taxonomic profile from search results
-  search         Search sequence against a database
+  search         Search sequences against a database
   utils          Some utilities
   version        Print version information and check for update
 
@@ -47,20 +47,34 @@ Flags:
 ```text
 Generate k-mers (sketches) from FASTA/Q sequences
 
+Input:
+  1. Input plain or gzipped FASTA/Q files can be given via positional
+     arguments or the flag -i/--infile-list with the list of input files,
+  2. Or a directory containing sequence files via the flag -I/--in-dir,
+     with multiple-level sub-directories allowed. A regular expression
+     for matching sequencing files is available via the flag -r/--file-regexp.
+
+  Attention:
+    You may rename the sequence files for convenience because the 
+  sequence/genome identifier in the index and search results would be:
+    1). For the default mode (computing k-mers for the whole file):
+          the basename of file with common FASTA/Q file extension removed,
+          captured via the flag -N/--ref-name-regexp.  
+    2). For splitting sequence mode (see details below):
+          same to 1).
+    3). For computing k-mers for each sequence:
+          the sequence identifier.
+
 Attentions:
-  1. Input files can be given as list of FASTA/Q files via
-     positional arguments or a directory containing sequence files
-     via the flag -I/--in-dir. A regular expression for matching
-     sequencing files is available by the flag -r/--file-regexp.
-  2. Unwanted sequence like plasmid can be filtered out by
+  1. Unwanted sequences like plasmid can be filtered out by
      the name via regular expressions (-B/--seq-name-filter).
-  3. By default, kmcp computes k-mers (sketches) of every file,
+  2. By default, kmcp computes k-mers (sketches) of every file,
      you can also use --by-seq to compute for every sequence,
-     where sequence IDs in all input files better be distinct.
-  4. It also supports splitting sequences into chunks, this
-     could increase the specificity in profiling result in cost
+     where sequence IDs in all input files are better to be distinct.
+  3. It also supports splitting sequences into chunks, this
+     could increase the specificity in search results in the cost
      of slower searching speed.
-  5. Multiple sizes of k-mers are supported.
+  4. Multiple sizes of k-mers are supported.
 
 Supported k-mer (sketches) types:
   1. K-mer:
@@ -77,18 +91,18 @@ Splitting sequences:
      In this mode, the sequences of each genome should be saved in an
      individual file.
   2. When splitting by number of chunks, all sequences (except for
-     these mathching any regular expression given by -B/--seq-name-filter)
+     these matching any regular expression given by -B/--seq-name-filter)
      in a sequence file are concatenated with k-1 'N's before splitting.
   3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 
-Meta data:
+Metadata:
   1. Every outputted .unik file contains the sequence/reference ID,
      chunk index, number of chunks, and genome size of reference.
-  2. When parsing whole sequence files or splitting by number of chunks,
+  2. When parsing whole sequence files or splitting by the number of chunks,
      the identifier of a reference is the basename of the input file
      by default. It can also be extracted from the input file name via
-     -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for refseq records.
+     -N/--ref-name-regexp, e.g., "^(\w{3}_\d{9}\.\d+)" for RefSeq records.
 
 Output:
   1. All outputted .unik files are saved in ${outdir}, with path
@@ -102,18 +116,23 @@ Output:
      supposed to be.
 
 Performance tips:
-  1. Decrease value of -j/--threads for data in hard disk drives to
+  1. Decrease the value of -j/--threads for data in hard disk drives to
      reduce I/O pressure.
+
+Next step:
+  1. Check the summary file (${outdir}/_info.txt) to see if the reference
+     IDs (column "name") are what supposed to be.
+  2. Run "kmcp index" with the output directory.
 
 Usage:
   kmcp compute [flags]
 
 Flags:
-      --by-seq                    ► Compute k-mers (sketches) for every sequence, instead of the whole file.
+      --by-seq                    ► Compute k-mers (sketches) for each sequence, instead of the whole file.
       --circular                  ► Input sequences are circular.
   -c, --compress                  ► Output gzipped .unik files, it's slower and can save little space.
-  -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir, case
-                                  ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
+  -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
+                                  case ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
       --force                     ► Overwrite existed output directory.
   -h, --help                      help for compute
   -I, --in-dir string             ► Directory containing FASTA/Q files. Directory symlinks are followed.
@@ -128,10 +147,10 @@ Flags:
   -B, --seq-name-filter strings   ► List of regular expressions for filtering out sequences by
                                   header/name, case ignored.
   -m, --split-min-ref int         ► Only splitting sequences >= X bp. (default 1000)
-  -n, --split-number int          ► Fragment number for splitting sequences, incompatible with
+  -n, --split-number int          ► Chunk number for splitting sequences, incompatible with
                                   -s/--split-size.
-  -l, --split-overlap int         ► Fragment overlap for splitting sequences.
-  -s, --split-size int            ► Fragment size for splitting sequences, incompatible with
+  -l, --split-overlap int         ► Chunk overlap for splitting sequences.
+  -s, --split-size int            ► Chunk size for splitting sequences, incompatible with
                                   -n/--split-number.
   -S, --syncmer-s int             ► Length of the s-mer in Closed Syncmers.
 
@@ -143,25 +162,25 @@ Flags:
 ```text
 Construct database from k-mer files
 
-We build index for k-mers (sketches) with a modified compact bit-sliced
-signature index (COBS). We totally rewrite the algorithms, data structure
+We build the index for k-mers (sketches) with a modified compact bit-sliced
+signature index (COBS). We totally rewrite the algorithms, data structure,
 and file format, and have improved the indexing and searching speed.
 
-Attentions:
-  1. All input .unik files should be generated by "kmcp compute".
+Input:
+  The output directory generated by "kmcp compute".
 
 Database size and searching accuracy:
-  0. Use --dry-run to adjust parameters and check final number of 
+  0. Use --dry-run to adjust parameters and check the final number of 
      index files (#index-files) and the total file size.
   1. -f/--false-positive-rate: the default value 0.3 is enough for a
-     query with tens of matched k-mers (see BIGSI/COBS paper).
-     Small values could largely increase the size of database.
+     query with tens of k-mers (see BIGSI/COBS paper).
+     Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     in cost of slower searching speed. Values <=4 is recommended.
-  3. Value of block size -b/--block-size better be multiple of 64.
+     in cost of slower searching speed. Values <=4 are recommended.
+  3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
-     and -1/--block-size1-kmers-t to separately create index for
+     and -1/--block-size1-kmers-t to separately create indexes for
      inputs with huge number of k-mers, for precise control of
      database size.
 
@@ -173,15 +192,15 @@ Taxonomy data:
   2. Taxonomy information are only needed in "profile" command.
   
 Performance tips:
-  1. Number of blocks (.uniki files) better be smaller than or equal
-     to number of CPU cores for faster searching speed. 
+  1. The number of blocks (.uniki files) better to be smaller than
+     or equal to the number of CPU cores for faster searching speed. 
      We can set -j/--threads to control blocks number.
      When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
   2. #threads files are simultaneously opened, and max number
      of opened files is limited by the flag -F/--max-open-files.
      You may use a small value of -F/--max-open-files for 
-     hard disk drive storage.
+     hard disk drive storages.
   3. When the database is used in a new computer with more CPU cores,
      'kmcp search' could automatically scale to utilize as many cores
      as possible.
@@ -230,7 +249,7 @@ Attentions:
         kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
      - Single-end can be given as positional arguments or -1/-2.
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
-  2. A long query sequences may contain duplicated k-mers, which are
+  2. A long query sequence may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
   3. For long reads or contigs, you should split them into short reads
@@ -240,9 +259,6 @@ Attentions:
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
   2. -N/--name-map.
-
-Special attentions:
-  1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default)
@@ -261,9 +277,31 @@ Index files loading modes:
       - Only use this mode for small number of queries or a huge database that
         can't be loaded into memory.
 
+Output format:
+  Tab-delimited format with 15 columns:
+
+     1. query,    Identifier of the query sequence
+     2. qLen,     Query length
+     3. qKmers,   K-mer number of the query sequence
+     4. FPR,      False positive rate of the match
+     5. hits,     Number of matches
+     6. target,   Identifier of the target sequence
+     7. chunkIdx, Index of reference chunk
+     8. chunks,   Number of reference chunks
+     9. tLen,     Reference length
+    10. kSize,    K-mer size
+    11. mKmers,   Number of matched k-mers
+    12. qCov,     Query coverage,  equals to: mKmers / qKmers
+    13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
+    14. jacc,     Jaccard index
+    15. queryIdx, Index of query sequence, only for merging
+ 
+  The values of tCov and jacc in results only apply to databases built
+  with a single size of k-mer.
+
 Performance tips:
-  1. Increase value of -j/--threads for acceleratation, but values larger
-     than number of CPU cores won't bring extra speedup.
+  1. Increase the value of -j/--threads for acceleratation, but values larger
+     than the number of CPU cores won't bring extra speedup.
   2. When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
 
@@ -284,10 +322,10 @@ Flags:
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read "Index files loading modes" in "kmcp search -h".
-  -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 30)
+  -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 10)
   -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a query. (default 0.55)
-  -m, --min-query-len int          ► Minimal query length. (default 70)
+  -m, --min-query-len int          ► Minimal query length. (default 30)
   -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a target.
   -N, --name-map strings           ► Tabular two-column file(s) mapping names to user-defined values.
@@ -340,31 +378,32 @@ Flags:
 Generate taxonomic profile from search results
 
 Methods:
-  1. Reference genomes can be splitted into chunks when computing
+  1. Reference genomes can be split into chunks when computing
      k-mers (sketches), which could help to increase the specificity
      via a threshold, i.e., the minimal proportion of matched chunks
      (-p/--min-chunks-fraction). (***highly recommended***)
      Another flag -d/--max-chunks-depth-stdev further reduces false positives.
-  2. We require part of the uniquely matched reads of a reference
+  2. We require a part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
      You can also disable this step by the flag --no-amb-corr.
-     If the first stage produces thousands of candidates, you can also use
-     the flag --no-amb-corr to reduce analysis time.
+     If the stage 1/4 produces thousands of candidates, you can also use
+     the flag --no-amb-corr to reduce analysis time, which has very little
+     effect on the results
   4. Multi-aligned queries are proportionally assigned to references
      with a similar strategy in Metalign.
-  5. Input files are parsed fours times, therefore STDIN is not supported.
+  5. Input files are parsed four times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. Smaller -t/--min-qcov increase sensitivity in cost of higher false
+  *. Smaller -t/--min-qcov increase sensitivity in the cost of higher false
      positive rate (-f/--max-fpr) of a query.
-  *. We require part of the uniquely matched reads of a reference
+  *. We require a part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
@@ -373,11 +412,11 @@ Accuracy notes:
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
         increase precision in cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
-     the right reference for ambiguous reads.
-  *. --keep-perfect-match is not recommended, which decreases sensitivity. 
-  *. --keep-main-match is not recommended, which affects accuracy of
+     the right reference for ambiguous reads with the algorithm in MegaPath.
+  *. --keep-perfect-matches is not recommended, which decreases sensitivity. 
+  *. --keep-main-matches is not recommended, which affects accuracy of
      abundance estimation.
-  *. -n/--keep-top-qcovs  is not recommended, which affects accuracy of
+  *. -n/--keep-top-qcovs is not recommended, which affects accuracy of
      abundance estimation.
 
 Profiling modes:
@@ -391,21 +430,17 @@ Profiling modes:
 
   Using this flag will override the relevant options.
 
-    options                      m=0    m=1   m=2   m=3    m=4   m=5
-    --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-chunks-reads        1      20    30    50     100   100
-    -p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
-    -d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
-    -u/--min-uniq-reads          1      20    20    20     50    50
-    -U/--min-hic-ureads          1      5     5     5      10    10
-    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
-    -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
-
-Notes on mode=0:
-  1. For detecting pathogens in samples of ultra-low depth, the flag
-     -v/--mode-0-ultra-low-depth can be used to increase the sensitivity of
-     targets with only a few reads. But note that the total reads number
-     and genome coverage will be overestimated.
+    options                       m=0    m=1   m=2   m=3    m=4   m=5
+    ---------------------------   ----   ---   ---   ----   ---   ----
+    -r/--min-chunks-reads         1      20    30    50     100   100
+    -p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
+    -u/--min-uniq-reads           1      20    20    20     50    50
+    -U/--min-hic-ureads           1      5     5     5      10    10
+    -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+    -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
+    --keep-main-matches           true                            
+    --max-qcov-gap                0.4                             
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -415,15 +450,35 @@ Performance notes:
   1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
-     processing, 4 threads with chunk size of 500-5000 is fast enough.
-  3. If the stage 1/4 produces thousands of candidates, then stage 2/4 would
-     be very slow. You can use the flag --no-amb-corr to disable ambiguous
-     reads correction which has very little effect on the results.
+     processing, 4 threads with a chunk size of 500-5000 is fast enough.
+  3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
+     would be very slow. You can use the flag --no-amb-corr to disable
+     ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
-  2. CAMI      (-M/--metaphlan-report)
-  3. MetaPhlAn (-C/--cami-report)
+  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version, -s/--sample-id)
+  3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
+
+KMCP format:
+  Tab-delimited format with 16 columns:
+
+     1. ref,                Identifier of the reference genome
+     2. percentage,         Relative abundance of the reference
+     3. score,              The 90th percentile of qCov of uniquely matched reads
+     4. chunksFrac,         Genome chunks fraction
+     5. chunksRelDepth,     Relative depths of reference chunks
+     6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
+     7. reads,              Total number of matched reads of this reference
+     8. ureads,             Number of uniquely matched reads
+     9. hicureads,          Number of uniquely matched reads with high-confidence
+    10. refsize,            Reference size
+    11. refname,            Reference name, optional via name mapping file
+    12. taxid,              TaxId of the reference
+    13. rank,               Taxonomic rank
+    14. taxname,            Taxonomic name
+    15. taxpath,            Complete lineage
+    16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 
 Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
@@ -438,9 +493,9 @@ Flags:
   -F, --filter-low-pct float              ► Filter out predictions with the smallest relative
                                           abundances summing up X%. Range: [0,100).
   -h, --help                              help for profile
-      --keep-main-match                   ► Only keep main matches, abandon matches with sharply
+      --keep-main-matches                 ► Only keep main matches, abandon matches with sharply
                                           decreased qcov (> --max-qcov-gap).
-      --keep-perfect-match                ► Only keep the perfect matches (qcov == 1) if there are.
+      --keep-perfect-matches              ► Only keep the perfect matches (qcov == 1) if there are.
   -n, --keep-top-qcovs int                ► Keep matches with the top N qcovs for a query, 0 for all.
       --level string                      ► Level to estimate abundance at. Available values: species,
                                           strain/assembly. (default "species")
@@ -453,7 +508,7 @@ Flags:
   -R, --max-mismatch-err float            ► Maximal error rate of a read being matched to a wrong
                                           reference, for determing the right reference for ambiguous
                                           reads. Range: (0, 1). (default 0.05)
-      --max-qcov-gap float                ► Max qcov gap between adjacent matches. (default 0.2)
+      --max-qcov-gap float                ► Max qcov gap between adjacent matches. (default 0.4)
   -M, --metaphlan-report string           ► Save extra metaphlan-like report.
       --metaphlan-report-version string   ► Metaphlan report version (2 or 3) (default "3")
   -p, --min-chunks-fraction float         ► Minimal fraction of matched reference chunks with reads >=
@@ -475,8 +530,6 @@ Flags:
                                           available values: 0 (for pathogen detection), 1
                                           (higherrecall), 2 (high recall), 3 (default), 4 (high
                                           precision), 5 (higher precision). (default 3)
-  -v, --mode-0-ultra-low-depth            ► Detect pathogens in samples of ultra-low depth. type "kmcp
-                                          profile -h" for details.
   -N, --name-map strings                  ► Tabular two-column file(s) mapping reference IDs to
                                           reference names.
       --no-amb-corr                       ► Do not correct ambiguous reads. Use this flag to reduce
@@ -507,9 +560,11 @@ Usage:
   kmcp utils [command]
 
 Available Commands:
+  cov2simi      Convert k-mer coverage to sequence similarity
   filter        Filter search results and find species/assembly-specific queries
   index-info    Print information of index file
   merge-regions Merge species/assembly-specific regions
+  query-fpr     Compute the maximal false positive rate of a query
   unik-info     Print information of .unik file
 
 ```
@@ -527,7 +582,7 @@ Performance notes:
   1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
-     processing, 4 threads with chunk size of 500-5000 is fast enough.
+     processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 Usage:
   kmcp utils filter [flags]
@@ -537,7 +592,7 @@ Flags:
       --level string          ► Level to filter. available values: species, strain/assembly. (default
                               "species")
       --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
-                              enough. Type "kmcp profile -h" for details. (default 5000)
+                              enough. Type "kmcp utils filter -h" for details. (default 5000)
   -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
   -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
@@ -598,7 +653,7 @@ Performance notes:
   1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
-     processing, 4 threads with chunk size of 500-5000 is fast enough.
+     processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 Usage:
   kmcp utils merge-regions [flags]
@@ -610,7 +665,7 @@ Flags:
   -g, --max-gap int            ► Maximal distance of starting positions of two adjacent regions, 0 for
                                no limitation, 1 for no merging.
       --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
-                               enough. Type "kmcp profile -h" for details. (default 5000)
+                               enough. Type "kmcp utils merge-regions -h" for details. (default 5000)
   -l, --min-overlap int        ► Minimal overlap of two adjacent regions, recommend K-1. (default 1)
   -t, --min-query-cov float    ► Minimal query coverage of a read in search result. (default 0.55)
   -a, --name-assembly string   ► Name of assembly-specific regions. (default "assembly-specific")
@@ -645,6 +700,57 @@ Flags:
 
 ```
 
+## cov2simi
+
+```text
+Convert k-mer coverage to sequence similarity
+
+    similarity = 87.456 + 26.410*qcov - 22.008*qcov*qcov + 7.325*qcov*qcov*qcov
+
+Usage:
+  kmcp utils cov2simi [flags]
+
+Flags:
+  -h, --help                help for cov2simi
+  -o, --out-prefix string   ► Out file prefix ("-" for stdout). (default "-")
+  -t, --query-cov float     ► K-mer query coverage, i.e., proportion of matched k-mers and unique
+                            k-mers of a query. range: [0, 1]
+
+```
+
+## query-fpr
+
+```text
+Compute the the maximimal false positive rate of a query
+
+Solomon and Kingsford apply a Chernoff bound and show that the 
+false positive probability for a query is:
+
+    fpr ≤ exp( -n(t-f)^2 / (2(1-f)) )
+
+Where:
+
+    f,  the false positive rate of the bloom filters
+    t,  the minimal proportion of matched k-mers and unique k-mers of a query
+    n,  the number of unique k-mers of the query 
+
+Reference:
+  1. SBT: https://doi.org/10.1038/nbt.3442
+  2. COBS: https://arxiv.org/abs/1905.09624v2
+
+Usage:
+  kmcp utils query-fpr [flags]
+
+Flags:
+  -f, --false-positive-rate float   ► False positive rate of the bloom filters in the database. range:
+                                    (0, 1) (default 0.3)
+  -h, --help                        help for query-fpr
+  -t, --min-query-cov float         ► Minimal query coverage, i.e., proportion of matched k-mers and
+                                    unique k-mers of a query. range: [0, 1] (default 0.55)
+  -n, --num-kmers int               ► Number of unique k-mers of the query. (default 80)
+  -o, --out-prefix string           ► Out file prefix ("-" for stdout). (default "-")
+
+```
 
 ## autocompletion
 

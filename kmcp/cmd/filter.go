@@ -51,7 +51,7 @@ Performance notes:
   1. Searching results are parsed in parallel, and the number of
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
-     processing, 4 threads with chunk size of 500-5000 is fast enough.
+     processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -402,7 +402,7 @@ func init() {
 	utilsCmd.AddCommand(filterCmd)
 
 	filterCmd.Flags().IntP("line-chunk-size", "", 5000,
-		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
+		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp utils filter" for details.`))
 
 	filterCmd.Flags().BoolP("no-header-row", "H", false,
 		formatFlagUsage(`Do not print header row.`))

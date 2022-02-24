@@ -84,6 +84,7 @@ type Match struct {
 	TargetIdx  []uint32
 	GenomeSize []uint64
 	NumKmers   int // matched k-mers
+	FPR        float64
 
 	QCov         float64 // |A∩B|/|A|, coverage of query. i.e., Containment Index
 	TCov         float64 // |A∩B|/|B|, coverage of target
@@ -423,6 +424,7 @@ func NewUnikIndexDBSearchEngine(opt SearchOptions, dbPaths ...string) (*UnikInde
 								TargetIdx:  []uint32{_match.TargetIdx[j]},
 								GenomeSize: []uint64{_match.GenomeSize[j]},
 								NumKmers:   _match.NumKmers,
+								FPR:        _match.FPR,
 
 								QCov:         _match.QCov,
 								TCov:         _match.TCov,
@@ -674,7 +676,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	}
 
 	// the first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, nextraWorkers)
+	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, info.FPR, nextraWorkers)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -716,7 +718,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			go func(f string) {
 				defer wg.Done()
 
-				idx, err := NewUnixIndex(f, opt, nextraWorkers)
+				idx, err := NewUnixIndex(f, opt, info.FPR, nextraWorkers)
 				checkError(errors.Wrap(err, f))
 
 				if !idx.Header.Compatible(idx1.Header) {
@@ -977,7 +979,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 					}
 
 					// send result
-					queryResult.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
+					// queryResult.FPR = maxFPR(db.Info.FPR, opt.MinQueryCov, nKmers)
 					queryResult.DBId = db.DBId
 					queryResult.Matches = matches
 
@@ -1182,7 +1184,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex, error) {
+func NewUnixIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -7401,6 +7403,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 				// 		GenomeSize: gsizes[k],
 				// 		TargetIdx:  indices[k],
 				// 		NumKmers:   count,
+				//      FPR:        maxFPRf(fpr, t, nHashes),
 				// 		QCov:       t,
 				// 		TCov:       T,
 
@@ -7425,6 +7428,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7452,6 +7456,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7479,6 +7484,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7506,6 +7512,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7533,6 +7540,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7560,6 +7568,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7587,6 +7596,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 
@@ -7614,6 +7624,7 @@ func NewUnixIndex(file string, opt SearchOptions, nextraWorkers int) (*UnikIndex
 								GenomeSize: gsizes[k],
 								TargetIdx:  indices[k],
 								NumKmers:   count,
+								FPR:        maxFPRf(fpr, t, nHashes),
 								QCov:       t,
 								TCov:       T,
 

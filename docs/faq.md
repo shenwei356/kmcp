@@ -25,7 +25,7 @@ of sensitivity. `k = 21` is recommended for metagenomic profiling.
 ## How to add new genomes to the database?
 
 KMCP builds database very fast,
-you can eigher rebuilt the database after adding new genomes,
+you can either rebuilt the database after adding new genomes,
 or create a separate database with the new genomes,
 search against these databases, and [merge](/usage/#merge) the results.
 

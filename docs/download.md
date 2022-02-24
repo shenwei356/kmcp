@@ -15,20 +15,20 @@ in two packages for better searching performance.
 
 ## Current Version
 
-- [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1) - 2021-02-08 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
+- [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0) - 2022-02-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
 
 ### Links
 
 OS     |Arch      |File, 中国镜像                                                                                                                                                                                  |Download Count
 :------|:---------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_linux_amd64.tar.gz)
-macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_darwin_amd64.tar.gz)
-Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.7.1/kmcp_windows_amd64.exe.tar.gz)
+Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_linux_amd64.tar.gz)
+macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_darwin_amd64.tar.gz)
+Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.0/kmcp_windows_amd64.exe.tar.gz)
 
 
 *Notes:*
 
-- please open an issuse to request binaries for other platforms.
+- please open an issue to request binaries for other platforms.
 - run `kmcp version` to check update !!!
 - run `kmcp autocompletion` to update shell autocompletion script !!!
 
@@ -41,13 +41,13 @@ Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwe
 
 #### Method 2: Download binaries
 
-[Download](https://github.com/shenwei356/kmcp/releases) compressed
+[Download](https://github.com/shenwei356/kmcp/releases) the compressed
 executable file of your operating system,
 and decompress it with `tar -zxvf *.tar.gz` command or other tools.
 And then:
 
 - **For Linux-like systems**
-    - If you have root privilege simply copy it to `/usr/local/bin`:
+    - If you have root privilege, simply copy it to `/usr/local/bin`:
 
             sudo cp kmcp /usr/local/bin/
 
@@ -86,6 +86,32 @@ fish:
     kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 ## Release History
+
+### [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0) - 2022-02-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
+
+- commands:
+    - new command `utils cov2simi`: Convert k-mer coverage to sequence similarity.
+    - new command `utils query-fpr`: Compute the maximal false positive rate of a query.
+- `compute`:
+    - update doc.
+    - add flags compatibility check.
+- `search`:
+    - **output the false positive rate of each match, rather than the FPR upper bound of the query**.
+      this could save some short queries with high similarity.
+    - - **change default values of reads filter, because clinical data contain many short reads**.
+        - `-c/--min-uniq-reads`: `30` -> `10`.
+        - `-m/--min-query-len`: `70` -> `30`.
+    - update doc.
+- `profile`:
+    - rename flags:
+        - `--keep-main-matches` -> `--keep-main-matches`.
+        - `--keep-perfect-match` -> `--keep-perfect-matches`.
+    - change default values:
+        - `--max-qcov-gap`: `0.2` -> `0.4`.
+    - mode 0 (pathogen detection):
+        - switch on flag `--keep-main-matches`
+        - use `--max-qcov-gap 0.4`
+    - update doc.
 
 ### [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1) - 2022-02-08 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.7.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
 

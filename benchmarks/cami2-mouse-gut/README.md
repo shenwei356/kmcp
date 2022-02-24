@@ -7,14 +7,14 @@ Benchmark results of other tools are downloaded from: https://zenodo.org/search?
 
 ## Softwares
 
-- kmcp [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
+- kmcp [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
 - motus 2.5.1
 - metaphlan 2.9.21
 - bracken 2.5
 
 ## Databases
 
-[Prebuilt databases](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=ivNZNK):
+[Prebuilt databases and the reference genomes](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=ivNZNK):
 
 - DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjV62KmQmOojxwBRr?e=lp5a9F), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWISqJGcxQD39FCv?e=CQ0E8d)
 - DB for viruses: [refseq-cami2-viral-k21-n5.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVyYFIHY01PtDMcx?e=AO7xkY), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWDTIXL4eMpZNVA0?e=1YXKkk)
@@ -29,7 +29,7 @@ Reference genomes (Bacteria and Archaea):
 
 1. Microbial genomes were extracted from CAMI2 RefSeq snapshot (`2019-01-08`) using
 corresponding taxonomy information .
-2. For every species, at most 5 assemblies (sorted by assembly accession) were kept.
+2. **For every species, at most 5 assemblies (sorted by assembly accession) were kept**.
 
 Reference genomes (Viruses):
 

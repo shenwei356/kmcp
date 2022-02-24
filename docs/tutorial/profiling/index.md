@@ -77,7 +77,7 @@ and the results can be fastly merged for downstream analysis.
 
         seqkit sliding -s 100 -W 300
 
-4. The values of `tCov` and `jacc` in results only apply for single size of k-mer.
+4. The values of `tCov` and `jacc` in results only apply to databases built with a single size of k-mer.
 
 **`kmcp search` and `kmcp profile` share some flags**, therefore users
 can use stricter criteria in `kmcp profile`.
@@ -106,8 +106,8 @@ can use stricter criteria in `kmcp profile`.
 
 **Performance tips**:
 
-1. Increase value of `-j/--threads` for acceleratation, but values larger
-  than the number of CPU cores won't bring extra speedup.
+1. Increase the value of `-j/--threads` for acceleratation, but values larger
+  than the the number of CPU cores won't bring extra speedup.
 
 #### **Commands**
 
@@ -126,8 +126,8 @@ Single-end mode is recommended for pair-end reads, for higher sensitivity:
         kmcp search \
             --threads            32 \
             --db-dir            $db \
-            --min-kmers          30 \
-            --min-query-len      70 \
+            --min-kmers          10 \
+            --min-query-len      30 \
             --min-query-cov    0.55 \
             $read1   $read2         \
             --out-file         $sample.kmcp@$dbname.tsv.gz \
@@ -150,8 +150,8 @@ Pair-end reads:
         kmcp search \
             --threads            32 \
             --db-dir            $db \
-            --min-kmers          30 \
-            --min-query-len      70 \
+            --min-kmers          10 \
+            --min-query-len      30 \
             --min-query-cov    0.55 \
             --read1          $read1 \
             --read2          $read2 \
@@ -281,12 +281,12 @@ is used for batch submitting Slurm jobs via script templates.
 
 
 ```
- 1. query,    Identifier of query sequence
+ 1. query,    Identifier of the query sequence
  2. qLen,     Query length
- 3. qKmers,   K-mer number of query sequence
- 4. FPR,      False positive rate
+ 3. qKmers,   K-mer number of the query sequence
+ 4. FPR,      False positive rate of the match
  5. hits,     Number of matches
- 6. target,   Identifier of target sequence
+ 6. target,   Identifier of the target sequence
  7. chunkIdx, Index of reference chunk
  8. chunks,   Number of reference chunks
  9. tLen,     Reference length
@@ -305,18 +305,17 @@ if using `csvtk` for analysis. e.g.,
 
 Demo result:
 
-
 |#query                             |qLen|qKmers|FPR       |hits|target       |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
 |:----------------------------------|:---|:-----|:---------|:---|:------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP028116.1|2       |10    |5648177|31   |79    |0.6583|0.0002|0.0002|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NZ_CP007592.1|3       |10    |5104557|31   |69    |0.5750|0.0001|0.0001|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |2.1127e-08|6   |NC_002695.2  |3       |10    |5498578|31   |69    |0.5750|0.0001|0.0001|0       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |2.1127e-08|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP007592.1|1       |10    |5104557|31   |120   |1.0000|0.0002|0.0002|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_018658.1  |7       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP028116.1|0       |10    |5648177|31   |120   |1.0000|0.0002|0.0002|1       |
 
 
 ### Step 4. Profiling
@@ -329,12 +328,12 @@ Demo result:
 
 #### **Methods**
 
-1. Reference genomes can be splitted into chunks when computing
+1. Reference genomes can be split into chunks when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimal proportion of matched chunks
     (`-p/--min-chunks-fraction`). (***highly recommended***)
     Another flag `-d/--max-chunks-cov-stdev` further reduces false positives.
-2. We require part of the uniquely matched reads of a reference
+2. We require a part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
     the false positive rate.
 3. We also use the two-stage taxonomy assignment algorithm in [MegaPath](https://doi.org/10.1186/s12864-020-06875-6)
@@ -363,7 +362,7 @@ Three-rounds profiling:
     - `-P/--min-hic-ureads-prop`, minimal proportion, higher values
     increase precision in cost of sensitivity.
 - `-R/--max-mismatch-err` and `-D/--min-dreads-prop` is for determing
-    the right reference for ambigous reads.
+    the right reference for ambigous reads with the algorithm in MegaPath.
 - `--keep-perfect-match` is not recommended, which decreases sensitivity.
 - `-n/--keep-top-qcovs`  is not recommended, which affects accuracy of
      abundance estimation.
@@ -381,15 +380,17 @@ We preset six profiling modes, availabe with the flag `-m/--mode`.
 
 Using this flag will override the relevant options.
 
-    options                      m=0    m=1   m=2   m=3    m=4   m=5
-    --------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-chunks-reads        1      20    30    50     100   100
-    -p/--min-chunks-fraction     0.2    0.5   0.7   0.8    1     1
-    -d/--max-chunks-depth-stdev  10     10    3     2      2     1.5
-    -u/--min-uniq-reads          1      20    20    20     50    50
-    -U/--min-hic-ureads          1      5     5     5      10    10
-    -H/--min-hic-ureads-qcov     0.55   0.7   0.7   0.75   0.8   0.8
-    -P/--min-hic-ureads-prop     0.01   0.1   0.2   0.1    0.1   0.15
+    options                       m=0    m=1   m=2   m=3    m=4   m=5
+    ---------------------------   ----   ---   ---   ----   ---   ----
+    -r/--min-chunks-reads         1      20    30    50     100   100
+    -p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
+    -u/--min-uniq-reads           1      20    20    20     50    50
+    -U/--min-hic-ureads           1      5     5     5      10    10
+    -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+    -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
+    --keep-main-matches           true                            
+    --max-qcov-gap                0.4
 
 
 **Notes on mode=0**
@@ -409,7 +410,7 @@ Using this flag will override the relevant options.
 1. Searching results are parsed in parallel, and the number of
     lines proceeded by a thread can be set by the flag `--line-chunk-size`.
 2. However using a lot of threads does not always accelerate
-    processing, 4 threads with chunk size of 500-5000 is fast enough.
+    processing, 4 threads with a chunk size of 500-5000 is fast enough.
 3. If the stage 1/4 produces thousands of candidates, then stage 2/4 would
      be very slow. You can use the flag `--no-amb-corr` to disable ambiguous
      reads correction which has very little effect on the results.
@@ -433,8 +434,8 @@ Using this flag will override the relevant options.
         --min-chunks-reads       50 \
         --min-chunks-fraction   0.8 \
         --max-chunks-depth-stdev  2 \
-        --min-uniq-reads         10 \
-        --min-hic-ureads          1 \
+        --min-uniq-reads         20 \
+        --min-hic-ureads          5 \
         --min-hic-ureads-qcov  0.75 \
         --min-hic-ureads-prop   0.1 \
         $sfile                      \
@@ -449,7 +450,7 @@ Using this flag will override the relevant options.
 **Supported profiling output formats**:
 
 - KMCP      (`-o/--out-prefix`)
-- CAMI      (`-M/--metaphlan-report`, sample name: `-s/--sample-id`)
+- CAMI      (`-M/--metaphlan-report`, `--metaphlan-report-version`, sample name: `-s/--sample-id`, taxonomy data: `--taxonomy-id`)
 - MetaPhlAn (`-C/--cami-report`, sample name: `-s/--sample-id`))
 
 **Supported taxonomic binning formats**:
@@ -461,7 +462,7 @@ KMCP format:
 
 ```
  1. ref,                Identifier of the reference genome
- 2. percentage,         Relative abundance of a reference
+ 2. percentage,         Relative abundance of the reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
  4. chunksFrac,         Genome chunks fraction
  5. chunksRelDepth,     Relative depths of reference chunks
@@ -475,7 +476,7 @@ KMCP format:
 13. rank,               Taxonomic rank
 14. taxname,            Taxonomic name
 15. taxpath,            Complete lineage
-16. taxpathsn,          Corresponding TaxIds of taxons in the complete lineage
+16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 ```
 
 Demo output:
@@ -512,10 +513,14 @@ Demo output:
     386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	5.014025
     349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.469811
 
-[`taxonkit profile2cami`](https://bioinf.shenwei.me/taxonkit/usage/#profile2cami) can also
-converts any metagenomic profile table with TaxIds to CAMI format.
+Related tools:
+
+- [taxonkit profile2cami](https://bioinf.shenwei.me/taxonkit/usage/#profile2cami) can
+convert any metagenomic profile table with TaxIds to CAMI format.
+- [taxonkit cami-filter](https://bioinf.shenwei.me/taxonkit/usage/#cami-filter) can 
+remove taxa of given TaxIds and their descendants in CAMI metagenomic profile.
     
-Metaphlan2 format (`--metaphlan-report`):
+Metaphlan3 format (`--metaphlan-report`):
 
     #SampleID	
     #clade_name	NCBI_tax_id	relative_abundance	additional_species

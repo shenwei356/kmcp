@@ -51,7 +51,7 @@ Attentions:
         kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
      - Single-end can be given as positional arguments or -1/-2.
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
-  2. A long query sequences may contain duplicated k-mers, which are
+  2. A long query sequence may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
   3. For long reads or contigs, you should split them into short reads
@@ -61,9 +61,6 @@ Attentions:
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
   2. -N/--name-map.
-
-Special attentions:
-  1. The values of tCov and jacc in results only apply to single size of k-mer.
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default)
@@ -82,9 +79,31 @@ Index files loading modes:
       - Only use this mode for small number of queries or a huge database that
         can't be loaded into memory.
 
+Output format:
+  Tab-delimited format with 15 columns:
+
+     1. query,    Identifier of the query sequence
+     2. qLen,     Query length
+     3. qKmers,   K-mer number of the query sequence
+     4. FPR,      False positive rate of the match
+     5. hits,     Number of matches
+     6. target,   Identifier of the target sequence
+     7. chunkIdx, Index of reference chunk
+     8. chunks,   Number of reference chunks
+     9. tLen,     Reference length
+    10. kSize,    K-mer size
+    11. mKmers,   Number of matched k-mers
+    12. qCov,     Query coverage,  equals to: mKmers / qKmers
+    13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
+    14. jacc,     Jaccard index
+    15. queryIdx, Index of query sequence, only for merging
+ 
+  The values of tCov and jacc in results only apply to databases built
+  with a single size of k-mer.
+
 Performance tips:
-  1. Increase value of -j/--threads for acceleratation, but values larger
-     than number of CPU cores won't bring extra speedup.
+  1. Increase the value of -j/--threads for acceleratation, but values larger
+     than the number of CPU cores won't bring extra speedup.
   2. When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
 
@@ -161,7 +180,7 @@ Performance tips:
 		}
 
 		if queryCov < 0 || queryCov > 1 {
-			checkError(fmt.Errorf("value of -t/--query-cov should be in range [0, 1]"))
+			checkError(fmt.Errorf("value of -t/--min-query-cov should be in range [0, 1]"))
 		}
 		if targetCov < 0 || targetCov > 1 {
 			checkError(fmt.Errorf("value of -T/-target-cov should be in range [0, 1]"))
@@ -409,7 +428,8 @@ Performance tips:
 					query = result.QueryID
 					qLen = strconv.Itoa(result.QueryLen)
 					qKmers = strconv.Itoa(result.NumKmers)
-					FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+					// FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+					FPR = "0"
 					hits = "0"
 
 					kSize = strconv.Itoa(result.K)
@@ -468,7 +488,7 @@ Performance tips:
 				query = result.QueryID
 				qLen = strconv.Itoa(result.QueryLen)
 				qKmers = strconv.Itoa(result.NumKmers)
-				FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+				// FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
 				hits = strconv.Itoa(len(*result.Matches))
 
 				kSize = strconv.Itoa(result.K)
@@ -484,6 +504,7 @@ Performance tips:
 					qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
 					tCov = strconv.FormatFloat(match.TCov, 'f', 4, 64)
 					jacc = strconv.FormatFloat(match.JaccardIndex, 'f', 4, 64)
+					FPR = strconv.FormatFloat(match.FPR, 'e', 4, 64)
 
 					outfh.Write(query)
 					outfh.WriteByte('\t')
@@ -610,7 +631,7 @@ Performance tips:
 					query = result.QueryID
 					qLen = strconv.Itoa(result.QueryLen)
 					qKmers = strconv.Itoa(result.NumKmers)
-					FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
+					// FPR = strconv.FormatFloat(result.FPR, 'e', 4, 64)
 					hits = strconv.Itoa(len(*result.Matches))
 
 					kSize = strconv.Itoa(result.K)
@@ -626,6 +647,7 @@ Performance tips:
 						qCov = strconv.FormatFloat(match.QCov, 'f', 4, 64)
 						tCov = strconv.FormatFloat(match.TCov, 'f', 4, 64)
 						jacc = strconv.FormatFloat(match.JaccardIndex, 'f', 4, 64)
+						FPR = strconv.FormatFloat(match.FPR, 'e', 4, 64)
 
 						outfh.Write(query)
 						outfh.WriteByte('\t')
@@ -976,9 +998,9 @@ func init() {
 	searchCmd.Flags().StringP("query-id", "", "",
 		formatFlagUsage(`Custom query Id when using the whole file as a query.`))
 
-	searchCmd.Flags().IntP("min-kmers", "c", 30, formatFlagUsage(`Minimal number of matched k-mers (sketches).`))
+	searchCmd.Flags().IntP("min-kmers", "c", 10, formatFlagUsage(`Minimal number of matched k-mers (sketches).`))
 
-	searchCmd.Flags().IntP("min-query-len", "m", 70, formatFlagUsage(`Minimal query length.`))
+	searchCmd.Flags().IntP("min-query-len", "m", 30, formatFlagUsage(`Minimal query length.`))
 
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55,
 		formatFlagUsage(`Minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query.`))

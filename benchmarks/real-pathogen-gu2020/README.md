@@ -2,10 +2,10 @@
 
 ## Softwares
 
-- KMCP [v0.7.1](https://github.com/shenwei356/kmcp/releases/tag/v0.7.1)
-- Kraken [v2.1.2](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
-  Bracken [v2.6.2](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
-- Centrifuge [v1.0.4](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- KMCP [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
+- Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
+  Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
+- Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 
 ## Databases and taxonomy version
 
@@ -14,7 +14,11 @@
 - Centrifuge, built with the genomes same to KMCP.
 - Kraken, built with the genomes same to KMCP.
 
-**We create the databases of GTDB and Refseq-fungi with a smaller false-positive rate `0.1` instead of `0.3`, and use a small query coverage threshhold `0.4` instead of `0.55`.**
+**We create databases of GTDB and Refseq-fungi with a smaller false-positive rate `0.1` instead of `0.3`,
+and use `2` hash functions instead of `1`.
+The size of GTDB database increase fom 58 to 109GB, and that of Refseq-fungi from 4.2 to 7.9GB.
+We use a small query coverage threshhold `0.4` instead of `0.55` during searching and profiling,
+and use the re-built mode 0 (pathogen detection) in profiling.**
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
@@ -110,7 +114,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -d {db} {} \
+            'kmcp search -t 0.4 -d {db} {} \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -127,7 +131,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -d {db} {} \
+            'kmcp search -t 0.4 -d {db} {} \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush

@@ -7,7 +7,7 @@
 
 ### 1. Accurate metagenomic profiling
 
-KMCP adopts a novol metagenomic profiling strategy,
+KMCP adopts a novel metagenomic profiling strategy,
 by splitting reference genomes into 10 chunks and mappings reads to these
 chunks via fast k-mer matching.
 KMCP performs well on both prokaryotic and viral organisms, with higher
@@ -16,7 +16,7 @@ sensitivity and specificity than other k-mer-based tools
 
 ### 2. Fast sequence search against large scales of genomic datasets
 
-KMCP can be used for fast sequence search against large scales of genomic dataset
+KMCP can be used for fast sequence search against large scales of genomic datasets
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a smaller index size and much faster searching speed ([4x-10x faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result))
@@ -33,7 +33,7 @@ provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sca
 KMCP utilizes multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
-(previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)) and
+(previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)), and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
 [KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
@@ -59,7 +59,7 @@ KMCP utilizes multiple k-mer sketches
     - [**HPC cluster could linearly accelerate searching**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#analysis-time-and-storage-requirement) with each computation node hosting a database built with a part of reference genomes.
     - Computers with limited main memory would also support searching by building small databases.
 - **Accurate taxonomic profiling**
-    - Some k-mer based taxonomic profilers suffers from high false positive rates,
+    - Some k-mer based taxonomic profilers suffer from high false positive rates,
       while [KMCP adopts multiple strategies](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods)
       to [improve specificity and keeps high sensitivity at the same time](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
     - Except for archaea and bacteria, [KMCP performed well on **virus/phages**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages).
@@ -109,15 +109,17 @@ in two packages for better searching performance.
 
 |subcommand                                                                |function                                                        |
 |:-------------------------------------------------------------------------|:---------------------------------------------------------------|
-|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketches) from FASTA/Q sequences               |
+|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketch) from FASTA/Q sequences                 |
 |[index](https://bioinf.shenwei.me/kmcp/usage/#index)                      |Construct database from k-mer files                             |
-|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequences against a database                              |
+|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequences against a database                             |
 |[merge](https://bioinf.shenwei.me/kmcp/usage/#merge)                      |Merge search results from multiple databases                    |
 |[profile](https://bioinf.shenwei.me/kmcp/usage/#profile)                  |Generate taxonomic profile from search results                  |
 |[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
 |[utils merge-regions](https://bioinf.shenwei.me/kmcp/usage/#merge-regions)|Merge species/assembly-specific regions                         |
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |
 |[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index file                                 |
+|[utils cov2simi](https://bioinf.shenwei.me/kmcp/usage/#icov2simi)         |Convert k-mer coverage to sequence similarity                   |
+|[utils query-fpr](https://bioinf.shenwei.me/kmcp/usage/#query-fpr)        |Compute the maximal false positive rate of a query              |
 
 ## Quickstart
 
