@@ -1,4 +1,4 @@
-# KMCP: accurate metagenomic profiling of both prokaryotic and viral organisms by pseudo-mapping
+# KMCP: accurate metagenomic profiling of both prokaryotic and viral populations by pseudo-mapping
 
 
 ![](kmcp-logo.png)
