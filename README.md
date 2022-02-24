@@ -10,7 +10,7 @@
 KMCP adopts a novel metagenomic profiling strategy,
 by splitting reference genomes into 10 chunks and mappings reads to these
 chunks via fast k-mer matching.
-KMCP performs well on both prokaryotic and viral organisms, with higher
+KMCP performs well on both prokaryotic and viral populations, with higher
 sensitivity and specificity than other k-mer-based tools
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
