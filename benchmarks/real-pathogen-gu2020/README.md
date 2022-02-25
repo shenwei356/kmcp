@@ -262,7 +262,7 @@ Steps
             'memusg -t -s \
                 "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed  \
                     {} --report {p}.kreport > /dev/null; \
-                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\"; do \
+                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\" \"D\"; do \
                     est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l \$r -t {threshold} \
                     -i {p}.kreport -o {p}.bracken.level-\$r ; \
                 done; \
