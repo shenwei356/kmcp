@@ -138,7 +138,9 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         fd kmcp.tsv.gz$ $reads/ \
             | csvtk sort -H -k 1:N \
             | rush -v X=$X -v T=$T -v m=$m \
-                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} \
+                    --show-rank superkingdom,phylum,class,order,family,genus,species \
+                    --log {}.k-m{m}.profile.log' 
         
         profile=$reads.c-m$m.profile
         fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \

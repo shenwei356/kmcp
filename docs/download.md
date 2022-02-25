@@ -98,7 +98,7 @@ fish:
 - `search`:
     - **output the false positive rate of each match, rather than the FPR upper bound of the query**.
       this could save some short queries with high similarity.
-    - - **change default values of reads filter, because clinical data contain many short reads**.
+    - **change default values of reads filter, because clinical data contain many short reads**.
         - `-c/--min-uniq-reads`: `30` -> `10`.
         - `-m/--min-query-len`: `70` -> `30`.
     - update doc.
