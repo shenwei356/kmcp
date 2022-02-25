@@ -900,9 +900,7 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 <li><code>search</code>:<ul>
 <li><strong>output the false positive rate of each match, rather than the FPR upper bound of the query</strong>.
   this could save some short queries with high similarity.</li>
-<li>
-<ul>
-<li><strong>change default values of reads filter, because clinical data contain many short reads</strong>.</li>
+<li><strong>change default values of reads filter, because clinical data contain many short reads</strong>.<ul>
 <li><code>-c/--min-uniq-reads</code>: <code>30</code> -&gt; <code>10</code>.</li>
 <li><code>-m/--min-query-len</code>: <code>70</code> -&gt; <code>30</code>.</li>
 </ul>
