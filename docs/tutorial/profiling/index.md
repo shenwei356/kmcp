@@ -391,14 +391,6 @@ Using this flag will override the relevant options.
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
     --max-qcov-gap                0.4
-
-
-**Notes on mode=0**
-
-1. For detecting pathogens in samples of ultra-low depth, the flag
-     `-v/--mode-0-ultra-low-depth` can be used to increase the sensitivity of
-     targets with only a few reads. But note that the total reads number
-     and genome coverage will be overestimated.
     
 **Taxonomy data**:
 
