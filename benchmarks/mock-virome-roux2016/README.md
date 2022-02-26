@@ -83,13 +83,19 @@ After carefully checking, we renamed samples as below:
     MCA-G2   MCA-G3
     MCA-N2   MCA-N3
 
-We manually download the paired-end reads for every sample, for example:
+We manually download the paired-end and single-end reads for every sample, for example:
 
-    $ ls reads/ | head -n 2
+    $ ls reads/ | head -n 8
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R1_001_t_paired.fastq.gz
+    MCA-G2_GGACTCCT-GCGTAAGA_L002_R1_001_t_unpaired.fastq.gz
     MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_paired.fastq.gz
+    MCA-G2_GGACTCCT-GCGTAAGA_L002_R2_001_t_unpaired.fastq.gz
+    MCA-G3_TAGGCATG-GCGTAAGA_L002_R1_001_t_paired.fastq.gz
+    MCA-G3_TAGGCATG-GCGTAAGA_L002_R1_001_t_unpaired.fastq.gz
+    MCA-G3_TAGGCATG-GCGTAAGA_L002_R2_001_t_paired.fastq.gz
+    MCA-G3_TAGGCATG-GCGTAAGA_L002_R2_001_t_unpaired.fastq.g
 
-**Note that some files of MCA-S1 and MCA-S2 are corrupted.**
+**Note that some files of MCA-S1 and MCA-S2 are corrupted even after re-download, so we do not include these two samples.**
 
 ## KMCP
 
@@ -99,9 +105,11 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     # ------------------------------------------------------------------------
     # prepare folder and files
     
+    reads=kmcp-pese
+    
     # prepare folder and files.
-    mkdir -p kmcp-se
-    cd kmcp-se
+    mkdir -p $reads
+    cd $reads
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
@@ -109,7 +117,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     # ------------------------------------------------------------------------
     # search
       
-    reads=kmcp-se
+    reads=kmcp-pese
     j=4
     J=40
     
@@ -125,6 +133,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
+                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -142,6 +151,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
+                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -159,6 +169,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
             'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
+                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -167,7 +178,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     # ------------------------------------------------------------------------
     # merge results
     
-    reads=kmcp-se
+    reads=kmcp-pese
     j=16
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
@@ -200,14 +211,16 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
 
     
 ## MetaPhlAn
-
+    
+    reads=mpa3-pese
+    
     # prepare folder and files.
-    mkdir -p mpa3-pe
-    cd mpa3-pe
+    mkdir -p $reads
+    cd $reads
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
     
-    reads=mpa3-pe
+    reads=mpa3-pese
     j=4
     J=40
     
@@ -218,8 +231,8 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v db=$db -v dbdir=$dbdir \
-            'memusg -t -s "metaphlan --add_viruses --input_type fastq {p}_R1_001_t_paired.fastq.gz,{p}_R2_001_t_paired.fastq.gz -o {p}.mpa3.profile \
-                -x {db} --bowtie2db {dbdir} \
+            'memusg -t -s "metaphlan --add_viruses --input_type fastq {p}_R1_001_t_paired.fastq.gz,{p}_R2_001_t_paired.fastq.gz,{p}_R1_001_t_unpaired.fastq.gz,{p}_R2_001_t_unpaired.fastq.gz \
+                 -o {p}.mpa3.profile -x {db} --bowtie2db {dbdir} \
                 --bowtie2out {p}.bowtie2.bz2 --nproc {j} --CAMI_format_output" >{p}.log 2>&1 '
 
     profile=$reads.profile
@@ -249,6 +262,24 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     
 ## Bracken
 
+We use the [read_merger.pl](https://github.com/DerrickWood/kraken/blob/master/scripts/read_merger.pl)
+from Kraken1 to merge paired-end reads, then feed Kraken2 with the merged PE reads and unpaired reads,
+following:
+
+- https://github.com/DerrickWood/kraken2/issues/214
+- https://github.com/DerrickWood/kraken/issues/52
+
+Two lines are modified in the script:
+
+- Line 94, We change the default delimiter from `|` to `x`:
+
+        $delimiter = 'x';
+
+- Line 35, We initialize the `$output_format` with `""`, to mute the warning message:
+
+        my $output_format = "";
+
+
 Preparing tocami.py which convert Bracken output to CAMI format
 
     # wget https://raw.githubusercontent.com/hzi-bifo/cami2_pipelines/master/bin/tocami.py
@@ -268,7 +299,7 @@ Steps
     # --------------------------------------------------
     # using kraken's PLUSPF database
 
-    reads=bracken-pe
+    reads=bracken-pese
     
     # prepare folder and files.
     mkdir -p $reads
@@ -276,7 +307,7 @@ Steps
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
-    reads=bracken-pe    
+    reads=bracken-pese
     j=4
     J=40
     
@@ -288,7 +319,7 @@ Steps
     # --------------------------------------------------
     # using kraken database built with GTDB, Genbank-viral, Refseq-fungi
     
-    reads=bracken-kmcp
+    reads=bracken-kmcp-pese
     
     # prepare folder and files.
     mkdir -p $reads
@@ -296,7 +327,7 @@ Steps
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
-    reads=bracken-kmcp    
+    reads=bracken-kmcp-pese
     j=4
     J=40
     
@@ -304,19 +335,18 @@ Steps
     readlen=150
     threshold=10
     
-    
+    # time and memory are not recorded with memusg here
     fd R1_001_t_paired.fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v db=$db -v db=$db -v readlen=$readlen -v threshold=$threshold \
-            'memusg -t -s \
-                "kraken2 --db {db} --threads {j} --memory-mapping --gzip-compressed --paired  \
-                    {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz --report {p}.kreport > /dev/null; \
-                for r in \"S\" \"G\" \"F\" \"O\" \"C\" \"P\" \"D\"; do \
-                    est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l \$r -t {threshold} \
-                    -i {p}.kreport -o {p}.bracken.level-\$r ; \
+            'kraken2 --db {db} --threads {j} --memory-mapping  \
+                    <(zcat {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz && read_merger.pl --fq --gz {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz ) \
+                    --report {p}.kreport > /dev/null; \
+                for r in S G F O C P D; do \
+                    est_abundance.py -k {db}/database${readlen}mers.kmer_distrib -l $r -t {threshold} \
+                    -i {p}.kreport -o {p}.bracken.level-$r ; \
                 done; \
-                cat {p}.bracken.level-* > {p}.bracken " \
-                >{p}.log 2>&1 '
+                cat {p}.bracken.level-* > {p}.bracken '
 
     # ------------------------------------------------------
     # convert to CAMI format
@@ -334,7 +364,7 @@ Steps
     # --------------------------------------------------
     # using centrifuge database built with GTDB, Genbank-viral, Refseq-fungi
 
-    reads=centrifuge-pe
+    reads=centrifuge-pese
     
     # prepare folder and files.
     mkdir -p $reads
@@ -342,7 +372,7 @@ Steps
     fd fastq.gz$ ../reads | rush 'ln -s {}'
     cd ..
 
-    reads=centrifuge-pe    
+    reads=centrifuge-pese
     j=4
     J=40
     
@@ -355,6 +385,7 @@ Steps
             'memusg -t -s \
                 "centrifuge -t -p {j} --mm -x {db} \
                     -q -1 {p}_R1_001_t_paired.fastq.gz -2 {p}_R2_001_t_paired.fastq.gz \
+                    -U {p}_R1_001_t_unpaired.fastq.gz,{p}_R2_001_t_unpaired.fastq.gz \
                     --report-file {p}.cf-report.tsv -S {}.cf.tsv" \
                 >{p}.log 2>&1 '
 
