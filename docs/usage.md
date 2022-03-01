@@ -288,7 +288,7 @@ Index files loading modes:
         The speedup is more significant for smaller databases.
       - Please switch on this flag when searching on computer clusters,
         where the default mmap mode would be very slow for network-attached
-        storage (NAS).
+        storages (NAS).
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -330,7 +330,7 @@ Examples:
   2. Paired-end mode
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            -1 sample_1.fq.gz -2 sample_2.fq.gz
-  3. In computer cluster, where databases are saved in NAS storage.
+  3. In computer cluster, where databases are saved in NAS storages.
        kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz
 
@@ -339,7 +339,7 @@ Usage:
 
 Flags:
   -d, --db-dir string              ► Database directory created by "kmcp index". Please add
-                                   -w/--load-whole-db for databases on network-attached storage (NAS),
+                                   -w/--load-whole-db for databases on network-attached storages (NAS),
                                    e.g., a computer cluster environment.
   -D, --default-name-map           ► Load ${db}/__name_mapping.tsv for mapping name first.
   -S, --do-not-sort                ► Do not sort matches of a query.
@@ -349,7 +349,7 @@ Flags:
   -u, --kmer-dedup-threshold int   ► Remove duplicated kmers for a query with >= X k-mers. (default 256)
   -w, --load-whole-db              ► Load all index files into memory, it's faster for small databases
                                    but needs more memory. Use this for databases on network-attached
-                                   storage (NAS). Please read "Index files loading modes" in "kmcp
+                                   storages (NAS). Please read "Index files loading modes" in "kmcp
                                    search -h".
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.

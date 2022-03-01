@@ -116,7 +116,7 @@ Examples:
   2. Paired-end mode
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            -1 sample_1.fq.gz -2 sample_2.fq.gz
-  3. In computer cluster, where databases are saved in NAS storage.
+  3. In computer cluster, where databases are saved in NAS storages.
        kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz
 `,
@@ -989,10 +989,10 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "",
-		formatFlagUsage(`Database directory created by "kmcp index". Please add -w/--load-whole-db for databases on network-attached storage (NAS), e.g., a computer cluster environment.`))
+		formatFlagUsage(`Database directory created by "kmcp index". Please add -w/--load-whole-db for databases on network-attached storages (NAS), e.g., a computer cluster environment.`))
 
 	searchCmd.Flags().BoolP("load-whole-db", "w", false,
-		formatFlagUsage(`Load all index files into memory, it's faster for small databases but needs more memory. Use this for databases on network-attached storage (NAS). Please read "Index files loading modes" in "kmcp search -h".`))
+		formatFlagUsage(`Load all index files into memory, it's faster for small databases but needs more memory. Use this for databases on network-attached storages (NAS). Please read "Index files loading modes" in "kmcp search -h".`))
 
 	searchCmd.Flags().BoolP("low-mem", "", false,
 		formatFlagUsage(`Do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. Please read "Index files loading modes" in "kmcp search -h".`))
