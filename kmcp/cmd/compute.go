@@ -127,6 +127,14 @@ Next step:
      IDs (column "name") are what supposed to be.
   2. Run "kmcp index" with the output directory.
 
+Examples:
+  1. From few sequence files:
+        kmcp compute -k 21 -n 5 -l 100 -O tmp-k21-n5-l100 NC_045512.2.fna.gz
+  2. From a list file:
+        kmcp compute -k 21 -n 10 -l 100 -O tmp-k21-10-l100 -i list.txt
+  3. From a directory containing many sequence files:
+        kmcp compute -k 21 -n 10 -l 100 -B plasmid \
+            -O gtdb-k21-n10-l100 -I gtdb-genomes/
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -985,6 +993,9 @@ func init() {
 
 	computeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{},
 		formatFlagUsage(`List of regular expressions for filtering out sequences by header/name, case ignored.`))
+
+	computeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>"))
+
 }
 
 var reIgnoreCaseStr = "(?i)"

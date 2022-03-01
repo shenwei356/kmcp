@@ -124,8 +124,17 @@ Next step:
      IDs (column "name") are what supposed to be.
   2. Run "kmcp index" with the output directory.
 
+Examples:
+  1. From few sequence files:
+        kmcp compute -k 21 -n 5 -l 100 -O tmp-k21-n5-l100 NC_045512.2.fna.gz
+  2. From a list file:
+        kmcp compute -k 21 -n 10 -l 100 -O tmp-k21-10-l100 -i list.txt
+  3. From a directory containing many sequence files:
+        kmcp compute -k 21 -n 10 -l 100 -B plasmid \
+            -O gtdb-k21-n10-l100 -I gtdb-genomes/
+
 Usage:
-  kmcp compute [flags]
+  kmcp compute [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>
 
 Flags:
       --by-seq                    ► Compute k-mers (sketches) for each sequence, instead of the whole file.
@@ -205,8 +214,15 @@ Performance tips:
      'kmcp search' could automatically scale to utilize as many cores
      as possible.
 
+Examples:
+  1. For bacteria genomes:
+       kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l100/ -O gtdb.kmcp
+  2. For viruses, use -x and -8 to control index size of the largest chunks:
+       kmcp index -f 0.05 -n 1 -j 32 -x 100K -8 1M \
+           -I genbank-viral-k21-n5-l100/ -O genbank-viral.kmcp
+
 Usage:
-  kmcp index [flags]
+  kmcp index [flags] [-f <fpr>] [-n <hashes>] [-j <blocks>] -I <compute output> -O <kmcp db>
 
 Flags:
   -a, --alias string                 ► Database alias/name. (default: basename of --out-dir). You can
@@ -233,7 +249,7 @@ Flags:
   -I, --in-dir string                ► Directory containing .unik files. Directory symlinks are followed.
   -F, --max-open-files int           ► Maximal number of opened files, please use a small value for
                                      hard disk drive storage. (default 256)
-  -n, --num-hash int                 ► Number of hashes functions in bloom filters. (default 1)
+  -n, --num-hash int                 ► Number of hash functions in bloom filters. (default 1)
   -O, --out-dir string               ► Output directory. (default: ${indir}.kmcp-db)
 
 ```
@@ -249,6 +265,7 @@ Attentions:
         kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
      - Single-end can be given as positional arguments or -1/-2.
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+    **Single-end mode is recommended for paired-end reads, for higher sensitivity**.
   2. A long query sequence may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
@@ -269,8 +286,9 @@ Index files loading modes:
         And Multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
-      - It's highly recommended when searching on computer clusters,
-        where the default mmap mode would be very slow (in my test).
+      - Please switch on this flag when searching on computer clusters,
+        where the default mmap mode would be very slow for network-attached
+        storage (NAS).
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -305,11 +323,24 @@ Performance tips:
   2. When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
 
+Examples:
+  1. Single-end mode (recommended)
+       kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
+           sample_1.fq.gz sample_2.fq.gz sample_1_unpaired.fq.gz sample_2_unpaired.fq.gz
+  2. Paired-end mode
+       kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
+           -1 sample_1.fq.gz -2 sample_2.fq.gz
+  3. In computer cluster, where databases are saved in NAS storage.
+       kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
+           sample_1.fq.gz sample_2.fq.gz
+
 Usage:
-  kmcp search [flags]
+  kmcp search [flags] [-w] -d <kmcp db> [-t <min-query-cov>] [read1.fq.gz] [read2.fq.gz] [unpaired.fq.gz] [-o read.tsv.gz]
 
 Flags:
-  -d, --db-dir string              ► Database directory created by "kmcp index".
+  -d, --db-dir string              ► Database directory created by "kmcp index". Please add
+                                   -w/--load-whole-db for databases on network-attached storage (NAS),
+                                   e.g., a computer cluster environment.
   -D, --default-name-map           ► Load ${db}/__name_mapping.tsv for mapping name first.
   -S, --do-not-sort                ► Do not sort matches of a query.
   -h, --help                       help for search
@@ -317,8 +348,9 @@ Flags:
   -K, --keep-unmatched             ► Keep unmatched query sequence information.
   -u, --kmer-dedup-threshold int   ► Remove duplicated kmers for a query with >= X k-mers. (default 256)
   -w, --load-whole-db              ► Load all index files into memory, it's faster for small databases
-                                   but needs more memory. Please read "Index files loading modes" in
-                                   "kmcp search -h".
+                                   but needs more memory. Use this for databases on network-attached
+                                   storage (NAS). Please read "Index files loading modes" in "kmcp
+                                   search -h".
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read "Index files loading modes" in "kmcp search -h".
@@ -356,8 +388,11 @@ Input:
   *. When only one input given, we just copy and write to the input file.
      This is friendly to workflows which assume multiple inputs are given.
 
+Example:
+   kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
+
 Usage:
-  kmcp merge [flags]
+  kmcp merge [flags] [-o read.tsv.gz] [<search results> ...]
 
 Flags:
   -n, --field-hits int       ► Field of hits. (default 5)
@@ -367,7 +402,6 @@ Flags:
   -o, --out-file string      ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
                              (default "-")
   -s, --sort-by string       ► Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index). (default "qcov")
-
 
 ```
 
@@ -457,7 +491,7 @@ Performance notes:
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
-  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version, -s/--sample-id)
+  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version, -s/--sample-id, --taxonomy-id)
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
@@ -483,8 +517,12 @@ KMCP format:
 Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
 
+Examples:
+  kmcp profile -X taxdump/ -T taxid.map sample.kmcp.tsv.gz \
+      -o sample.k.profile -C sample.c.profile -s sample
+
 Usage:
-  kmcp profile [flags]
+  kmcp profile [flags] [-X <taxdump dir>] [-T <taxid.map>] [-o <kmcp profile>] <search results>
 
 Flags:
   -B, --binning-result string             ► Save extra binning result in CAMI report.

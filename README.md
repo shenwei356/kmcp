@@ -128,16 +128,20 @@ in two packages for better searching performance.
         --in-dir genomes/ --out-dir genomes-k21-n10
 
     # index k-mers
-    kmcp index --in-dir genomes-k21-n10/ --out-dir genomes.kmcp
+    kmcp index --false-positive-rate 0.1 --num-hash 1 \
+        --in-dir genomes-k21-n10/ --out-dir genomes.kmcp
     
     # delete temporary files
     # rm -rf genomes-k21-n10/
     
     # search    
-    kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.tsv.gz
+    kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.kmcp@db1.kmcp.tsv.gz
+
+    # merge search results
+    kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
     # profile and binning
-    kmcp profile search.tsv.gz \
+    kmcp profile search.kmcp.tsv.gz \
         --taxid-map        taxid.map \
         --taxdump          taxdump/ \
         --out-prefix       search.tsv.gz.k.profile \

@@ -66,7 +66,7 @@ and the results can be fastly merged for downstream analysis.
 
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
 
-    **Single-end mode is recommended for pair-end reads, for higher sensitivity**.
+    **Single-end mode is recommended for paired-end reads, for higher sensitivity**.
     See [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
 
 2. A long query sequences may contain duplicated k-mers, which are
@@ -111,7 +111,7 @@ can use stricter criteria in `kmcp profile`.
 
 #### **Commands**
 
-Single-end mode is recommended for pair-end reads, for higher sensitivity:
+**Single-end mode is recommended for paired-end reads, for higher sensitivity**:
 
     # ---------------------------------------------------
     # single-end (recommended)

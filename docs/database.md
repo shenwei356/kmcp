@@ -2,7 +2,7 @@
 
 ## Prebuilt databases
 
-All prebuilt database are available at:
+All prebuilt databases and the used reference genomes are available at:
 
 - [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) for global users.
 - [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) for Chinese users, [a command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is recommended.

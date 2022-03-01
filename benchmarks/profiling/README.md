@@ -8,6 +8,8 @@
 - Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
 - Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- DUDes [v0.08 (2017-11-08)](https://github.com/pirovc/dudes/releases/tag/dudes_v0.08)
+- SLIMM [v0.3.4 (2018-09-04)](https://github.com/seqan/slimm/releases/tag/v0.3.4)
 
 ## Databases and taxonomy version
 
@@ -17,6 +19,8 @@
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 - Kraken, built with the genomes same to KMCP.
+- DUDes, built with the genomes same to KMCP.
+- SLIMM, built with the genomes same to KMCP.
 
 ## Datasets
 
@@ -531,3 +535,86 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
 
     stats centrifuge centrifuge-pe > centrifuge.stats
 
+## DUDes
+
+    # --------------------------------------------------
+    # using dudes database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=dudes-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=dudes-pe    
+    j=4
+    J=40
+    n=100 # number of alignments for a read to keep. The paper use -k60
+    
+    db=~/ws/db/dudes/dudes-kmcp
+    db2=~/ws/db/dudes/dudes-kmcp.npz
+    
+    # mapping with bowtie2
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+            'memusg -t -s \
+                "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
+                    -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
+                >{p}.a.log 2>&1 '
+    
+    # profiling with dudes
+    j=25
+    J=1
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db2 -v n=$n \
+            'memusg -t -s \
+                "DUDes.py -t {j} -s {p}.sam -d {db} -o {p}" \
+                >{p}.b.log 2>&1 '
+
+    stats dudes dudes-pe > dudes.stats
+    
+## SIMM
+
+    # --------------------------------------------------
+    # using slimm database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=slimm-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=slimm-pe    
+    j=4
+    J=40
+    n=100 # number of alignments for a read to keep
+    
+    db=~/ws/db/slimm/dudes-kmcp    
+    db2=~/ws/db/slimm/slimm-kmcp.sldb
+    
+    # mapping with bowtie2
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+            'memusg -t -s \
+                "bowtie2 --mm -p {j} -x {db} --no-unal --very-fast -k {n} -q \
+                    -1 {p}.left.fq.gz -2 {p}.right.fq.gz -S {p}.sam" \
+                >{p}.a.log 2>&1 '
+    
+    # profiling with slimm
+    j=25
+    J=1
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db2 -v n=$n \
+            'memusg -t -s \
+                "slimm -w 1000 -o {p} {db} {p}.sam" \
+                >{p}.b.log 2>&1 '
+
+    stats slimm slimm-pe > slimm.stats

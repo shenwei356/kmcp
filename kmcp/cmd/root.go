@@ -79,7 +79,7 @@ func init() {
 
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-	RootCmd.SetUsageTemplate(usageTemplate)
+	RootCmd.SetUsageTemplate(usageTemplate(""))
 }
 
 func formatFlagUsage(s string) string {
@@ -93,9 +93,10 @@ func formatFlagUsage(s string) string {
 	// return "  " + s
 }
 
-var usageTemplate = `Usage:{{if .Runnable}}
+func usageTemplate(s string) string {
+	return fmt.Sprintf(`Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+  {{.CommandPath}} [command]{{end}} %s{{if gt (len .Aliases) 0}}
 
 Aliases:
   {{.NameAndAliases}}{{end}}{{if .HasExample}}
@@ -116,4 +117,5 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
-`
+`, s)
+}

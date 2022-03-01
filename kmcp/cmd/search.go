@@ -51,6 +51,7 @@ Attentions:
         kmcp search -d db -1 read_1.fq.gz -2 read_2.fq.gz -o read.tsv.gz
      - Single-end can be given as positional arguments or -1/-2.
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
+    **Single-end mode is recommended for paired-end reads, for higher sensitivity**.
   2. A long query sequence may contain duplicated k-mers, which are
      not removed for short sequences by default. You may modify the
      value of -u/--kmer-dedup-threshold to remove duplicates.
@@ -71,8 +72,9 @@ Index files loading modes:
         And Multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
-      - It's highly recommended when searching on computer clusters,
-        where the default mmap mode would be very slow (in my test).
+      - Please switch on this flag when searching on computer clusters,
+        where the default mmap mode would be very slow for network-attached
+        storage (NAS).
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -107,6 +109,16 @@ Performance tips:
   2. When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
 
+Examples:
+  1. Single-end mode (recommended)
+       kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
+           sample_1.fq.gz sample_2.fq.gz sample_1_unpaired.fq.gz sample_2_unpaired.fq.gz
+  2. Paired-end mode
+       kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
+           -1 sample_1.fq.gz -2 sample_2.fq.gz
+  3. In computer cluster, where databases are saved in NAS storage.
+       kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
+           sample_1.fq.gz sample_2.fq.gz
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -977,10 +989,10 @@ func init() {
 
 	// database option
 	searchCmd.Flags().StringP("db-dir", "d", "",
-		formatFlagUsage(`Database directory created by "kmcp index".`))
+		formatFlagUsage(`Database directory created by "kmcp index". Please add -w/--load-whole-db for databases on network-attached storage (NAS), e.g., a computer cluster environment.`))
 
 	searchCmd.Flags().BoolP("load-whole-db", "w", false,
-		formatFlagUsage(`Load all index files into memory, it's faster for small databases but needs more memory. Please read "Index files loading modes" in "kmcp search -h".`))
+		formatFlagUsage(`Load all index files into memory, it's faster for small databases but needs more memory. Use this for databases on network-attached storage (NAS). Please read "Index files loading modes" in "kmcp search -h".`))
 
 	searchCmd.Flags().BoolP("low-mem", "", false,
 		formatFlagUsage(`Do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. Please read "Index files loading modes" in "kmcp search -h".`))
@@ -1034,6 +1046,8 @@ func init() {
 	searchCmd.Flags().BoolP("do-not-sort", "S", false,
 		formatFlagUsage(`Do not sort matches of a query.`))
 	// searchCmd.Flags().BoolP("immediate-output", "I", false, "print output immediately, do not use write buffer")
+
+	searchCmd.SetUsageTemplate(usageTemplate("[-w] -d <kmcp db> [-t <min-query-cov>] [read1.fq.gz] [read2.fq.gz] [unpaired.fq.gz] [-o read.tsv.gz]"))
 
 }
 

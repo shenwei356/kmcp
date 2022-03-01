@@ -155,6 +155,10 @@ KMCP format:
 Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
 
+Examples:
+  kmcp profile -X taxdump/ -T taxid.map sample.kmcp.tsv.gz \
+      -o sample.k.profile -C sample.c.profile -s sample
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -2655,6 +2659,7 @@ func init() {
 	profileCmd.Flags().IntP("mode", "m", 3,
 		formatFlagUsage(`Profiling mode, type "kmcp profile -h" for details. available values: 0 (for pathogen detection), 1 (higherrecall), 2 (high recall), 3 (default), 4 (high precision), 5 (higher precision).`))
 
+	profileCmd.SetUsageTemplate(usageTemplate("[-X <taxdump dir>] [-T <taxid.map>] [-o <kmcp profile>] <search results>"))
 }
 
 // s = lambda qcov: 87.456 + 26.410*qcov - 22.008*qcov*qcov + 7.325*qcov*qcov*qcov

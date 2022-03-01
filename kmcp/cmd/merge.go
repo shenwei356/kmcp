@@ -47,6 +47,9 @@ Input:
   *. When only one input given, we just copy and write to the input file.
      This is friendly to workflows which assume multiple inputs are given.
 
+Example:
+   kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -341,6 +344,9 @@ func init() {
 	mergeCmd.Flags().StringP("sort-by", "s", "qcov", formatFlagUsage(`Sort hits by "qcov", "tcov" or "jacc" (Jaccard Index).`))
 
 	mergeCmd.Flags().BoolP("no-header-row", "H", false, formatFlagUsage(`Do not print header row.`))
+
+	mergeCmd.SetUsageTemplate(usageTemplate("[-o read.tsv.gz] [<search results> ...]"))
+
 }
 
 // do not use, it's slower

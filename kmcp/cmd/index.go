@@ -97,6 +97,13 @@ Performance tips:
      'kmcp search' could automatically scale to utilize as many cores
      as possible.
 
+Examples:
+  1. For bacteria genomes:
+       kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l100/ -O gtdb.kmcp
+  2. For viruses, use -x and -8 to control index size of the largest chunks:
+       kmcp index -f 0.05 -n 1 -j 32 -x 100K -8 1M \
+           -I genbank-viral-k21-n5-l100/ -O genbank-viral.kmcp
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)
@@ -1435,6 +1442,9 @@ func init() {
 
 	indexCmd.Flags().BoolP("dry-run", "", false,
 		formatFlagUsage(`Dry run, useful for adjusting parameters (highly recommended).`))
+
+	indexCmd.SetUsageTemplate(usageTemplate("[-f <fpr>] [-n <hashes>] [-j <blocks>] -I <compute output> -O <kmcp db>"))
+
 }
 
 // batch8 contains data from 8 files, just for keeping order of all files of a block
