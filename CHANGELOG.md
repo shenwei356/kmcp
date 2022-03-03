@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.8.1 - 2022-03-03
+
+- update help message, show common usages, add examples, add notes to important options.
+
 ### v0.8.0 - 2022-02-24
 
 - commands:

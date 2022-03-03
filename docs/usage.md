@@ -391,7 +391,7 @@ Input:
      This is friendly to workflows which assume multiple inputs are given.
 
 Example:
-   kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
+    kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
 Usage:
   kmcp merge [flags] [-o read.tsv.gz] [<search results> ...]
@@ -520,11 +520,18 @@ Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
 
 Examples:
-  kmcp profile -X taxdump/ -T taxid.map sample.kmcp.tsv.gz \
-      -o sample.k.profile -C sample.c.profile -s sample
+  1. Default mode:
+       kmcp profile -X taxdump/ -T taxid.map -m 3 \
+           sample.kmcp.tsv.gz -o sample.k.profile \
+           -C sample.c.profile -s sample
+  2. For pathogen detection (you may create databases with lower FPR,
+     e.g., kmcp index -f 0.1 -n 2 for bacteria and fungi genomes,
+     and search with low k-mer coverage threshold -t 0.4):
+       kmcp profile -X taxdump/ -T taxid.map -m 3 -t 0.4 \
+           sample.kmcp.tsv.gz -o sample.k.profile
 
 Usage:
-  kmcp profile [flags] [-X <taxdump dir>] [-T <taxid.map>] [-o <kmcp profile>] <search results>
+  kmcp profile [flags] [-X <taxdump dir>] [-T <taxid.map>] [-m <mode>] [-o <kmcp profile>] <search results>
 
 Flags:
   -B, --binning-result string             ► Save extra binning result in CAMI report.

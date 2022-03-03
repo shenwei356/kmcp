@@ -48,7 +48,7 @@ Input:
      This is friendly to workflows which assume multiple inputs are given.
 
 Example:
-   kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
+    kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
