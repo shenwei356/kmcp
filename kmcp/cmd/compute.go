@@ -75,7 +75,7 @@ Attentions:
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files are better to be distinct.
   3. It also supports splitting sequences into chunks, this
-     could increase the specificity in search results in the cost
+     could increase the specificity in search results at the cost
      of slower searching speed.
   4. Multiple sizes of k-mers are supported.
 

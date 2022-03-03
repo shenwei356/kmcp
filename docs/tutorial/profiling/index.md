@@ -351,7 +351,7 @@ Three-rounds profiling:
 
 **Accuracy notes**:
 
-- Smaller `-t/--min-qcov` increase sensitivity in cost of higher false
+- Smaller `-t/--min-qcov` increase sensitivity at the cost of higher false
     positive rate (`-f/--max-fpr`) of a query.
 - And we require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence to decrease
@@ -360,7 +360,7 @@ Three-rounds profiling:
     - `-U/--min-hic-ureads`,      minimal number, `>= 1`
     - `-H/--min-hic-ureads-qcov`, minimal query coverage, `>= -t/--min-qcov`
     - `-P/--min-hic-ureads-prop`, minimal proportion, higher values
-    increase precision in cost of sensitivity.
+    increase precision at the cost of sensitivity.
 - `-R/--max-mismatch-err` and `-D/--min-dreads-prop` is for determing
     the right reference for ambigous reads with the algorithm in MegaPath.
 - `--keep-perfect-match` is not recommended, which decreases sensitivity.

@@ -72,7 +72,7 @@ Attentions:
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files are better to be distinct.
   3. It also supports splitting sequences into chunks, this
-     could increase the specificity in search results in the cost
+     could increase the specificity in search results at the cost
      of slower searching speed.
   4. Multiple sizes of k-mers are supported.
 
@@ -185,7 +185,7 @@ Database size and searching accuracy:
      query with tens of k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     in cost of slower searching speed. Values <=4 are recommended.
+     at the cost of slower searching speed. Values <=4 are recommended.
   3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
@@ -437,7 +437,7 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. Smaller -t/--min-qcov increase sensitivity in the cost of higher false
+  *. Smaller -t/--min-qcov increase sensitivity at the cost of higher false
      positive rate (-f/--max-fpr) of a query.
   *. We require a part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
@@ -446,7 +446,7 @@ Accuracy notes:
      *. -U/--min-hic-ureads,      minimal number, >= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
-        increase precision in cost of sensitivity.
+        increase precision at the cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambiguous reads with the algorithm in MegaPath.
   *. --keep-perfect-matches is not recommended, which decreases sensitivity. 

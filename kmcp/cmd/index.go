@@ -68,7 +68,7 @@ Database size and searching accuracy:
      query with tens of k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     in cost of slower searching speed. Values <=4 are recommended.
+     at the cost of slower searching speed. Values <=4 are recommended.
   3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
@@ -1426,7 +1426,7 @@ func init() {
 		formatFlagUsage(`If k-mers of single .unik file exceeds this threshold, an individual index is created for this file. Supported units: K, M, G.`))
 
 	// smaller big sizes is more important and brings extra speedup.
-	// indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed in cost of bigger database and high memory occupation`)
+	// indexCmd.Flags().BoolP("faster", "", false, `roundup size of index files to increase searching speed at the cost of bigger database and high memory occupation`)
 
 	// indexCmd.Flags().IntP("num-repititions", "R", 1, `[RAMBO] number of repititions`)
 	// indexCmd.Flags().IntP("num-buckets", "B", 0, `[RAMBO] number of buckets per repitition, 0 for one set per bucket`)

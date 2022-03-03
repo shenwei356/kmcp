@@ -23,7 +23,7 @@ where every node searches a part of the database.
 
 Multiple k-mer sizes are supported, but one value is good enough.
 
-Bigger k-mer sizes bring high specificity in cost of decrease
+Bigger k-mer sizes bring high specificity at the cost of decrease
 of sensitivity. `k = 21` is recommended for metagenomic profiling.
 
 ### How to add new genomes to the database?
