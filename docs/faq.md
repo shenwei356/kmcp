@@ -89,6 +89,41 @@ Yes you can. But note that KMCP search is CPU- and RAM-intense. So please to **l
 
 ## Profiling
 
+### Where is the taxid.map?
+
+Each prebuilt database contains a `taxid.map` file in its directory.
+You can concatenate them into a big one:
+
+    $ cat gtdb.kmcp/taxid.map refseq-viral.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    
+    $ head -n 5 taxid.map
+    GCA_004025655.1 10243
+    GCA_004025395.1 10243
+    GCA_004025355.1 10243
+    GCA_003971405.1 10243
+    GCA_003971385.1 10243
+    
+Or set the options `-T/--taxid-map` multiple times:
+
+    kmcp profile -T gtdb.kmcp/taxid.map -T refseq-viral.kmcp/taxid.map -T refseq-fungi.kmcp/taxid.map ...
+
+For other custom databases, you may need to create one.
+
+### Unknown taxid?
+
+> 19:54:54.632 [ERRO] unknown taxid for NZ_CP028116.1, please check taxid mapping file(s)
+
+If the `kmcp profile` reports this, you may need to check if the taxid mapping file contain all the reference IDs.
+And make sure the reference IDs match these in the database, the later ones are list in: 
+
+    $ head -n 5 $kmcp_db_dir/R001/__name_mapping.tsv
+    NC_013654.1     NC_013654.1
+    NC_000913.3     NC_000913.3
+    NC_010655.1     NC_010655.1
+    NC_012971.2     NC_012971.2
+    NC_011750.1     NC_011750.1
+
+
 ### How to tune some options when using preset profiling modes?
 
 Sorry it's not supported due to the limitation of the command-line argument parsers.

@@ -411,16 +411,20 @@ Using this flag will override the relevant options.
 #### **Commands**
 
     # taxid mapping files, multiple files supported.
-    taxid_map=gtdb.kmcp/taxid.map,refseq-viral.kmcp/taxid.map,refseq-fungi.kmcp
+    taxid_map=gtdb.kmcp/taxid.map,refseq-viral.kmcp/taxid.map,refseq-fungi.kmcp/taxid.map
+    
+    # or concatenate them into a big taxid.map
+    #    cat gtdb.kmcp/taxid.map refseq-viral.kmcp/taxid.map refseq-fungi.kmcp/taxid.map > taxid.map
+    # taxid_map=taxid.map
 
     # taxdump directory
-    taxdump=taxdump/
+    taxdump=taxdump
 
     sfile=$file.kmcp.tsv.gz
     
     kmcp profile \
         --taxid-map      $taxid_map \
-        --taxdump          $taxdump \
+        --taxdump         $taxdump/ \
         --level             species \
         --min-query-cov        0.55 \
         --min-chunks-reads       50 \
