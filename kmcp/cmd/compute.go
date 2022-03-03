@@ -235,10 +235,10 @@ Examples:
 		reSeqNameStrs := getFlagStringSlice(cmd, "seq-name-filter")
 		reSeqNames := make([]*regexp.Regexp, 0, len(reSeqNameStrs))
 		for _, kw := range reSeqNameStrs {
-			if !reIgnoreCase.MatchString(reRefNameStr) {
+			if !reIgnoreCase.MatchString(kw) {
 				kw = reIgnoreCaseStr + kw
 			}
-			re, err := regexp.Compile("(?i)" + kw)
+			re, err := regexp.Compile(kw)
 			if err != nil {
 				checkError(errors.Wrapf(err, "failed to parse regular expression for matching sequence header: %s", kw))
 			}
