@@ -516,6 +516,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#where-is-the-taxidmap" class="md-nav__link">
+    Where is the taxid.map?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-taxid" class="md-nav__link">
+    Unknown taxid?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-tune-some-options-when-using-preset-profiling-modes" class="md-nav__link">
     How to tune some options when using preset profiling modes?
   </a>
@@ -666,6 +680,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#where-is-the-taxidmap" class="md-nav__link">
+    Where is the taxid.map?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-taxid" class="md-nav__link">
+    Unknown taxid?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-tune-some-options-when-using-preset-profiling-modes" class="md-nav__link">
     How to tune some options when using preset profiling modes?
   </a>
@@ -776,6 +804,35 @@ processed queries: 1253376, speed: 8.127 million queries per minute
 <h3 id="can-i-run-multiple-kmcp-processes-in-a-machine">Can I run multiple KMCP processes in a machine?</h3>
 <p>Yes you can. But note that KMCP search is CPU- and RAM-intense. So please to <strong>limit the number of CPUs cores to use for each process</strong> with the falg <code>-j/--threads</code>, of which the default value is the available CPUs cores of the machine.</p>
 <h2 id="profiling">Profiling</h2>
+<h3 id="where-is-the-taxidmap">Where is the taxid.map?</h3>
+<p>Each prebuilt database contains a <code>taxid.map</code> file in its directory.
+You can concatenate them into a big one:</p>
+<pre><code>$ cat gtdb.kmcp/taxid.map refseq-viral.kmcp/taxid.map refseq-fungi.kmcp/taxid.map &gt; taxid.map
+
+$ head -n 5 taxid.map
+GCA_004025655.1 10243
+GCA_004025395.1 10243
+GCA_004025355.1 10243
+GCA_003971405.1 10243
+GCA_003971385.1 10243
+</code></pre>
+<p>Or set the options <code>-T/--taxid-map</code> multiple times:</p>
+<pre><code>kmcp profile -T gtdb.kmcp/taxid.map -T refseq-viral.kmcp/taxid.map -T refseq-fungi.kmcp/taxid.map ...
+</code></pre>
+<p>For other custom databases, you may need to create one.</p>
+<h3 id="unknown-taxid">Unknown taxid?</h3>
+<blockquote>
+<p>19:54:54.632 [ERRO] unknown taxid for NZ_CP028116.1, please check taxid mapping file(s)</p>
+</blockquote>
+<p>If the <code>kmcp profile</code> reports this, you may need to check if the taxid mapping file contain all the reference IDs.
+And make sure the reference IDs match these in the database, the later ones are list in: </p>
+<pre><code>$ head -n 5 $kmcp_db_dir/R001/__name_mapping.tsv
+NC_013654.1     NC_013654.1
+NC_000913.3     NC_000913.3
+NC_010655.1     NC_010655.1
+NC_012971.2     NC_012971.2
+NC_011750.1     NC_011750.1
+</code></pre>
 <h3 id="how-to-tune-some-options-when-using-preset-profiling-modes">How to tune some options when using preset profiling modes?</h3>
 <p>Sorry it's not supported due to the limitation of the command-line argument parsers.
 You need explicitly set all relevant options of the mode.</p>
