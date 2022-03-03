@@ -9,7 +9,7 @@ require (
 	github.com/grailbio/base v0.0.10 // indirect
 	github.com/iafan/cwalk v0.0.0-20210125030640-586a8832a711
 	github.com/klauspost/pgzip v1.2.5
-	github.com/mattn/go-colorable v0.1.11
+	github.com/mattn/go-colorable v0.1.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/shenwei356/bio v0.6.1
@@ -19,7 +19,7 @@ require (
 	github.com/shenwei356/unik/v5 v5.0.1
 	github.com/shenwei356/util v0.5.0
 	github.com/shenwei356/xopen v0.1.0
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.3.0
 	github.com/tatsushid/go-prettytable v0.0.0-20141013043238-ed2d14c29939
 	github.com/twotwotwo/sorts v0.0.0-20160814051341-bf5c1f2b8553
 	github.com/vbauerster/mpb/v5 v5.4.0

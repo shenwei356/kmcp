@@ -676,7 +676,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 	}
 
 	// the first idx
-	idx1, err := NewUnixIndex(filepath.Join(path, info.Files[0]), opt, info.FPR, nextraWorkers)
+	idx1, err := NewUnikIndex(filepath.Join(path, info.Files[0]), opt, info.FPR, nextraWorkers)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -718,7 +718,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			go func(f string) {
 				defer wg.Done()
 
-				idx, err := NewUnixIndex(f, opt, info.FPR, nextraWorkers)
+				idx, err := NewUnikIndex(f, opt, info.FPR, nextraWorkers)
 				checkError(errors.Wrap(err, f))
 
 				if !idx.Header.Compatible(idx1.Header) {
@@ -1183,8 +1183,8 @@ func (idx *UnikIndex) String() string {
 	return fmt.Sprintf("%s: %s", idx.Path, idx.Header.String())
 }
 
-// NewUnixIndex create a index from file.
-func NewUnixIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int) (*UnikIndex, error) {
+// NewUnikIndex create a index from file.
+func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, err
