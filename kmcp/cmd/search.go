@@ -61,7 +61,6 @@ Attentions:
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
-  2. -N/--name-map.
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default)
@@ -1024,7 +1023,7 @@ func init() {
 	searchCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))
 
 	searchCmd.Flags().StringSliceP("name-map", "N", []string{},
-		formatFlagUsage(`Tabular two-column file(s) mapping names to user-defined values. Don't use this if you will use the result for metagenomic profiling, this option would significantly increase the size of result file.`))
+		formatFlagUsage(`Tabular two-column file(s) mapping reference IDs to user-defined values. Don't use this if you will use the result for metagenomic profiling which needs the original reference IDs.`))
 
 	searchCmd.Flags().BoolP("default-name-map", "D", false, formatFlagUsage(`Load ${db}/__name_mapping.tsv for mapping name first.`))
 

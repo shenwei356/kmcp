@@ -275,7 +275,6 @@ Attentions:
 
 Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
-  2. -N/--name-map.
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default)
@@ -360,9 +359,9 @@ Flags:
   -m, --min-query-len int          ► Minimal query length. (default 30)
   -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a target.
-  -N, --name-map strings           ► Tabular two-column file(s) mapping names to user-defined values.
-                                   Don't use this if you will use the result for metagenomic profiling,
-                                   this option would significantly increase the size of result file.
+  -N, --name-map strings           ► Tabular two-column file(s) mapping reference IDs to user-defined
+                                   values. Don't use this if you will use the result for metagenomic
+                                   profiling which needs the original reference IDs.
   -H, --no-header-row              ► Do not print header row.
   -o, --out-file string            ► Out file, supports and recommends a ".gz" suffix ("-" for
                                    stdout). (default "-")

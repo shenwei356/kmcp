@@ -84,7 +84,6 @@ can use stricter criteria in `kmcp profile`.
 
 1. `-t/--min-query-cov`, minimal query coverage, i.e., 
    proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity))
-2. `-N/--name-map`, tabular two-column file(s) mapping names to user-defined values.
 
 **Index files loading modes**:
 
