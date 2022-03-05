@@ -31,15 +31,13 @@ for downstream analysis**.
 These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
-
-|DB                      |source     |#species*|#assemblies|parameters       |archive file                                                                                                                                                      |size     |
-|:-----------------------|:----------|:-------|:----------|:----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
-|**Bacteria and Archaea**|GTDB r202  |28073+  |47894      |k=21, chunks=10  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |1594+   |30691      |k=21, chunks=10  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
-|**Fungi**               |Refseq r208|398     |403        |k=21, chunks=10  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
-|**Viruses**             |GenBank 246|23632   |27936      |k=21, chunks=5   |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
-|**Viruses**             |Refseq r208|11186   |11618      |k=21, chunks=5   |[refseq-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk) (967 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e))  |2.00 GB  |
-|**Human**               |CHM13      |1       |1          |k=21, chunks=1024|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
+|DB                      |source     |#species|#assemblies|parameters                          |archive file                                                                                                                                                      |size     |
+|:-----------------------|:----------|:-------|:----------|:-----------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|**Bacteria and Archaea**|GTDB r202  |28073+  |47894      |k=21, chunks=10; fpr=0.3, hashes=1  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa))        |58.02 GB |
+|**Bacteria and Archaea**|HumGut     |1594+   |30691      |k=21, chunks=10; fpr=0.3, hashes=1  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm))      |21.52 GB |
+|**Fungi**               |Refseq r208|398     |403        |k=21, chunks=10; fpr=0.3, hashes=1  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)) |4.18 GB  |
+|**Viruses**             |GenBank 246|23632   |27936      |k=21, chunks=5; fpr=0.05, hashes=1  |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X))|3.75 GB  |
+|**Human**               |CHM13      |1       |1          |k=21, chunks=1024; fpr=0.3, hashes=1|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE))   |946 MB   |
 
 *based on NCBI taxonomy data 2021-12-06. `+` is used because some species are unclassfied xxx.
 

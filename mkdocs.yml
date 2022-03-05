@@ -18,9 +18,8 @@ theme:
     palette:
         primary: teal
         accent: blue grey
-    icon:
-        logo: material/school
-    favicon: favicon.ico
+    logo: favicon.svg
+    favicon: favicon.svg
     feature:
         navigation.tabs: false
 extra:

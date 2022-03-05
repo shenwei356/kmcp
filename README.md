@@ -7,11 +7,14 @@
 
 ### 1. Accurate metagenomic profiling
 
-KMCP adopts a novel metagenomic profiling strategy,
-by splitting reference genomes into 10 chunks and mappings reads to these
-chunks via fast k-mer matching.
-KMCP performs well on both prokaryotic and viral populations, with higher
-sensitivity and specificity than other k-mer-based tools
+KMCP adopts a novel metagenomic profiling strategy
+by splitting reference genomes into 10 or 5 chunks and mappings reads to these
+chunks via fast k-mer matching, denoted as ***pseudo-mapping***.
+
+Benchmarking results on both simulated and real data indicate that KMCP not only
+allows for accurate taxonomic profiling of archaea, bacteria, and viral populations
+from metagenomic shotgun sequence data, but also provides confident pathogen detection
+in infectious clinical samples of low depth
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
 ### 2. Fast sequence search against large scales of genomic datasets
@@ -24,12 +27,12 @@ bringing a smaller index size and much faster searching speed ([4x-10x faster th
  
 ### 3. Fast genome similarity estimation
 
-KMCP can be used for fast similarity estimation of assemblies/genomes against known reference genomes.
+KMCP can also be used for fast similarity estimation of assemblies/genomes against known reference genomes.
 
 Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 [Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
-provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sourmash).
 KMCP utilizes multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
@@ -44,6 +47,7 @@ KMCP utilizes multiple k-mer sketches
 - **Easy to install**
     - [Statically linked executable binaries for multiple platforms](https://bioinf.shenwei.me/kmcp/download) (Linux/Windows/macOS, amd64).
     - No dependencies, no configurations.
+    - `conda install -c bioconda kmcp`
 - **Easy to use**
     - Supporting [shell autocompletion](https://bioinf.shenwei.me/kmcp/usage/#autocompletion).
     - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage) and [tutorials](https://bioinf.shenwei.me/kmcp/tutorial/).
@@ -107,13 +111,13 @@ in two packages for better searching performance.
 
 ## Commands
 
-|subcommand                                                                |function                                                        |
+|Subcommand                                                                |Function                                                        |
 |:-------------------------------------------------------------------------|:---------------------------------------------------------------|
-|[compute](https://bioinf.shenwei.me/kmcp/usage/#compute)                  |Generate k-mers (sketch) from FASTA/Q sequences                 |
-|[index](https://bioinf.shenwei.me/kmcp/usage/#index)                      |Construct database from k-mer files                             |
-|[search](https://bioinf.shenwei.me/kmcp/usage/#search)                    |Search sequences against a database                             |
-|[merge](https://bioinf.shenwei.me/kmcp/usage/#merge)                      |Merge search results from multiple databases                    |
-|[profile](https://bioinf.shenwei.me/kmcp/usage/#profile)                  |Generate taxonomic profile from search results                  |
+|[**compute**](https://bioinf.shenwei.me/kmcp/usage/#compute)              |Generate k-mers (sketch) from FASTA/Q sequences                 |
+|[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)                  |Construct database from k-mer files                             |
+|[**search**](https://bioinf.shenwei.me/kmcp/usage/#search)                |Search sequences against a database                             |
+|[**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)                  |Merge search results from multiple databases                    |
+|[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate taxonomic profile from search results                  |
 |[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
 |[utils merge-regions](https://bioinf.shenwei.me/kmcp/usage/#merge-regions)|Merge species/assembly-specific regions                         |
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |
