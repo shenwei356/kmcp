@@ -39,11 +39,11 @@ bringing a small database size and much faster searching speed
 The database building process is similar to that of metagenomic profiling,
 with one difference:
 
-1. Reference genomes are not splitted into chunks which slow down searching speed.
+1. Reference genomes are not splitted into chunks.
 
 Taken GTDB for example:
 
-    # mask low-complexity region
+    # mask low-complexity region (optional)
     mkdir -p gtdb.masked
     find gtdb/ -name "*.fna.gz" \
         | rush 'dustmasker -in <(zcat {}) -outfmt fasta \
@@ -51,9 +51,9 @@ Taken GTDB for example:
             | gzip -c > gtdb.masked/{%}'
 
     # compute k-mers
-    #   sequence containing "plasmid" in name are ignored,
+    #   sequences containing "plasmid" in name are ignored,
     #   k = 21
-    kmcp compute -I gtdb.masked/ -k 21 -B plasmid -O gtdb-r202-k21 --force
+    kmcp compute -I gtdb.masked/ -k 21 -B plasmid -O gtdb-r202-k21
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
@@ -67,11 +67,14 @@ Taken GTDB for example:
 
 The size of database is 56GB. 
 
+### Step 2. Searching
+
 By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
-
-### Step 2. Searching
+**Please switch on this flag when searching on computer clusters,
+where the default mmap mode would be very slow for network-attached
+storage (NAS)**
 
 `kmcp search` supports FASTA/Q format from STDIN or files ([usage](/usage/#search)).
 
@@ -115,7 +118,7 @@ The result is tab-delimited.
 |S0R0/2|150 |130   |3.1777e-06|4   |GCF_001434585.1|6       |10    |2221511|21   |87    |0.6692|0.0004|0.0004|1       |
 |S0R0/2|150 |130   |2.4002e-05|4   |GCF_001438655.1|5       |10    |2038820|21   |83    |0.6385|0.0004|0.0004|1       |
 
-Reference IDs (column `target`) can be optionally mapped to their names when searching:
+Reference IDs (column `target`) can be optionally mapped to their names during searching:
 
     kmcp search -d gtdb-r202-k21.kmcp/ -N name.map test.fq.gz -o result.tsv.gz
     
@@ -164,7 +167,7 @@ with few differences:
 1. K-mer sketches instead of all k-mers are computed.
 2. Reference genomes are not splitted into chunks.
 3. Smaller false positive rate (`-f`) and more than one hash functions (`-n`) are used to improve accuracy.
-4. Using bigger k-mer size: 31.
+4. Using a bigger k-mer size: 31.
 
 Supported k-mer (sketches) types:
 
@@ -201,7 +204,9 @@ For examples, setting a smaller scale like 10.
 
 The searching process is simple and [very fast](https://bioinf.shenwei.me/kmcp/benchmark) (<1 second).
 
-    kmcp search --query-whole-file -d gtdb.minhash.kmcp/ contigs.fasta -o result.tsv
+    kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
+        --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+        --query-id genomme1 contigs.fasta -o result.tsv
 
 The output is in tab-delimited format:
 
@@ -225,29 +230,36 @@ The output is in tab-delimited format:
 
 A full search result:
 
-|#query                             |qLen   |qKmers|FPR         |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:----------------------------------|:------|:-----|:-----------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NODE_1_length_106749_cov_161.610981|4563649|9052  |3.1514e-176 |1   |GCF_900460465.1|0       |1     |4777134|31   |8942  |0.9878|0.9933|0.9813|0       |
+|#query  |qLen   |qKmers|FPR        |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:-------|:------|:-----|:----------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|genomme1|9488952|18737 |0.0000e+00 |2   |GCF_000742135.1|0       |1     |5545784|31   |8037  |0.4289|0.7365|0.3719|0       |
+|genomme1|9488952|18737 |3.1964e-183|2   |GCF_000392875.1|0       |1     |2881400|31   |3985  |0.2127|0.7062|0.1954|0       |
 
 Reference IDs can be optionally mapped to their names, let's print the main columns only:
 
-    kmcp search --query-whole-file -d gtdb.minhash.kmcp/ -N gtdb.minhash.kmcp/name.map \
-        contigs.fasta --quiet \
+    kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
+        --name-map name.map \
+        --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+        --query-id genomme1 contigs.fasta \
         | csvtk rename -t -C $ -f 1 -n query \
         | csvtk cut -t -f query,jacc,target \
         > result.tsv
     
-|query                              |jacc  |target                                                                          |
-|:----------------------------------|:-----|:-------------------------------------------------------------------------------|
-|NODE_1_length_106749_cov_161.610981|0.9813|NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence|
+|query   |jacc  |target                                                                                          |
+|:-------|:-----|:-----------------------------------------------------------------------------------------------|
+|genomme1|0.3719|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
+|genomme1|0.1954|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|
 
 Using closed syncmer:
 
-    kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ -N gtdb.syncmer.kmcp/name.map \
-        contigs.fasta --quiet \
+    kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ \
+        --name-map name.map \
+        --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+        --query-id genomme1 contigs.fasta \
         | csvtk rename -t -C $ -f 1 -n query \
         | csvtk cut -t -f query,jacc,target
-        
-|query                              |jacc  |target                                                                          |
-|:----------------------------------|:-----|:-------------------------------------------------------------------------------|
-|NODE_1_length_106749_cov_161.610981|0.9383|NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence|
+
+|query   |jacc  |target                                                                                          |
+|:-------|:-----|:-----------------------------------------------------------------------------------------------|
+|genomme1|0.3712|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
+|genomme1|0.1974|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|

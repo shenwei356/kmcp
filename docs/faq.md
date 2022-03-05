@@ -114,7 +114,7 @@ For other custom databases, you may need to create one.
 > 19:54:54.632 [ERRO] unknown taxid for NZ_CP028116.1, please check taxid mapping file(s)
 
 If the `kmcp profile` reports this, you may need to check if the taxid mapping file contain all the reference IDs.
-And make sure the reference IDs match these in the database, the later ones are list in: 
+And make sure the reference IDs match these in the database, the later ones are listed in: 
 
     $ head -n 5 $kmcp_db_dir/R001/__name_mapping.tsv
     NC_013654.1     NC_013654.1
@@ -123,8 +123,18 @@ And make sure the reference IDs match these in the database, the later ones are 
     NC_012971.2     NC_012971.2
     NC_011750.1     NC_011750.1
 
+There's another case: you used `--name-map` in `kmcp search`.
+Please don't do this if you will use the search result for metagenomic
+profiling which needs the original reference IDs. We add a note now:
 
-### How to tune some options when using preset profiling modes?
+```
+-N, --name-map strings  ► Tabular two-column file(s) mapping reference IDs to user-defined
+                        values. Don't use this if you will use the result for metagenomic
+                        profiling which needs the original reference IDs.
+
+```
+
+### How to tune parts of options when using preset profiling modes?
 
 Sorry it's not supported due to the limitation of the command-line argument parsers.
 You need explicitly set all relevant options of the mode.

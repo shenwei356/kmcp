@@ -63,12 +63,12 @@ Shared flags between "search" and "profile":
   1. -t/--min-query-cov.
 
 Index files loading modes:
-  1. Using memory-mapped index files with mmap (default)
+  1. Using memory-mapped index files with mmap (default):
       - Faster startup speed when index files are buffered in memory.
       - Multiple KMCP processes can share the memory.
   2. Loading the whole index files into memory (-w/--load-whole-db):
       - This mode occupies a little more memory.
-        And Multiple KMCP processes can not share the database in memory.
+        And multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
       - Please switch on this flag when searching on computer clusters,

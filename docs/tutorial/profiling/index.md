@@ -12,7 +12,6 @@
 ## Datasets
 
 - Short reads, single or paired end.
-- Long reads (PacBio HIFI).
 
 ## Steps
 
@@ -69,7 +68,7 @@ and the results can be fastly merged for downstream analysis.
     **Single-end mode is recommended for paired-end reads, for higher sensitivity**.
     See [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
 
-2. A long query sequences may contain duplicated k-mers, which are
+2. A long query sequence may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
     value of `-u/--kmer-dedup-threshold` (default `256`) to remove duplicates.
 3. For long reads or contigs, you should split them into short reads
@@ -83,20 +82,21 @@ and the results can be fastly merged for downstream analysis.
 can use stricter criteria in `kmcp profile`.
 
 1. `-t/--min-query-cov`, minimal query coverage, i.e., 
-   proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity))
+   proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity)
 
-**Index files loading modes**:
+#### **Index files loading modes**
 
-1. Using memory-mapped index files with `mmap` (default)
+1. Using memory-mapped index files with `mmap` (default):
     - Faster startup speed when index files are buffered in memory.
     - Multiple KMCP processes can share the memory.
 2. Loading the whole index files into memory (`-w/--load-whole-db`):
     - This mode occupies a little more memory.
-    And Multiple KMCP processes can not share the database in memory.
+    And multiple KMCP processes can not share the database in memory.
     - **It's slightly faster due to the use of physically contiguous memory.
     The speedup is more significant for smaller databases**.
-    - **It's highly recommended when searching on computer clusters**,
-    where the default mmap mode would be very slow (in my test).
+    - **Please switch on this flag when searching on computer clusters,
+        where the default mmap mode would be very slow for network-attached
+        storage (NAS)**.
 3. Low memory mode (`--low-mem`):
     - Do not load all index files into memory nor use mmap, using file seeking.
     - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -119,6 +119,7 @@ can use stricter criteria in `kmcp profile`.
     read2=sample_2.fq.gz
     sample=sample
 
+    # 1. searching results against multiple databases
     for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         dbname=$(basename $db)
 
@@ -133,6 +134,8 @@ can use stricter criteria in `kmcp profile`.
             --log              $sample.kmcp@$dbname.tsv.gz.log
     done
     
+    # 2. Merging search results against multiple databases
+    kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 
 Pair-end reads:
 
@@ -143,6 +146,7 @@ Pair-end reads:
     read2=sample_2.fq.gz
     sample=sample
     
+    # 1. searching results against multiple databases
     for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         dbname=$(basename $db)
 
@@ -158,11 +162,50 @@ Pair-end reads:
             --log            $sample.kmcp@$dbname.tsv.gz.log
     done
 
-    
-Merging searching results on multiple database:
-
+    # 2. Merging search results against multiple databases
     kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
     
+#### Search result format
+
+Tab-delimited format with 15 columns:
+
+```
+ 1. query,    Identifier of the query sequence
+ 2. qLen,     Query length
+ 3. qKmers,   K-mer number of the query sequence
+ 4. FPR,      False positive rate of the match
+ 5. hits,     Number of matches
+ 6. target,   Identifier of the target sequence
+ 7. chunkIdx, Index of reference chunk
+ 8. chunks,   Number of reference chunks
+ 9. tLen,     Reference length
+10. kSize,    K-mer size
+11. mKmers,   Number of matched k-mers
+12. qCov,     Query coverage,  equals to: mKmers / qKmers
+13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
+14. jacc,     Jaccard index
+15. queryIdx, Index of query sequence, only for merging
+```
+
+Note: The header line starts with `#`, you need to assign another comment charactor
+if using `csvtk` for analysis. e.g.,
+
+    csvtk filter2 -C '$' -t -f '$qCov > 0.7' mock.fastq.gz.kmcp.gz
+
+Demo result:
+
+|#query                             |qLen|qKmers|FPR       |hits|target       |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:----------------------------------|:---|:-----|:---------|:---|:------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
+|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP007592.1|1       |10    |5104557|31   |120   |1.0000|0.0002|0.0002|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_018658.1  |7       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|1       |
+|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP028116.1|0       |10    |5648177|31   |120   |1.0000|0.0002|0.0002|1       |
+
 #### Searching on a computer cluster
 
 Here, we split genomes of GTDB into 16 partitions and build a database for 
@@ -276,46 +319,6 @@ is used for batch submitting Slurm jobs via script templates.
             'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
                 --log {}.k.profile.log' 
     
-#### Searching result format
-
-
-```
- 1. query,    Identifier of the query sequence
- 2. qLen,     Query length
- 3. qKmers,   K-mer number of the query sequence
- 4. FPR,      False positive rate of the match
- 5. hits,     Number of matches
- 6. target,   Identifier of the target sequence
- 7. chunkIdx, Index of reference chunk
- 8. chunks,   Number of reference chunks
- 9. tLen,     Reference length
-10. kSize,    K-mer size
-11. mKmers,   Number of matched k-mers
-12. qCov,     Query coverage,  equals to: mKmers / qKmers
-13. tCov,     Target coverage, equals to: mKmers / K-mer number of reference chunk
-14. jacc,     Jaccard index
-15. queryIdx, Index of query sequence, only for merging
-```
-
-Note: The header line starts with `#`, you need to assign another comment charactor
-if using `csvtk` for analysis. e.g.,
-
-    csvtk filter2 -C '$' -t -f '$qCov > 0.7' mock.fastq.gz.kmcp.gz
-
-Demo result:
-
-|#query                             |qLen|qKmers|FPR       |hits|target       |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:----------------------------------|:---|:-----|:---------|:---|:------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP007592.1|1       |10    |5104557|31   |120   |1.0000|0.0002|0.0002|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_018658.1  |7       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP028116.1|0       |10    |5648177|31   |120   |1.0000|0.0002|0.0002|1       |
-
 
 ### Step 4. Profiling
 
@@ -453,7 +456,9 @@ Using this flag will override the relevant options.
 - CAMI      (`-B/--binning-result`)
 
 
-KMCP format:
+**KMCP format**:
+
+Tab-delimited format with 16 columns:
 
 ```
  1. ref,                Identifier of the reference genome
