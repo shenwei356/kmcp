@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="../favicon.ico">
+      <link rel="icon" href="../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Databases - KMCP</title>
+        <title>Databases - KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -770,7 +768,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <tr>
 <th align="left">DB</th>
 <th align="left">source</th>
-<th align="left">#species*</th>
+<th align="left">#species</th>
 <th align="left">#assemblies</th>
 <th align="left">parameters</th>
 <th align="left">archive file</th>
@@ -783,7 +781,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <td align="left">GTDB r202</td>
 <td align="left">28073+</td>
 <td align="left">47894</td>
-<td align="left">k=21, chunks=10</td>
+<td align="left">k=21, chunks=10; fpr=0.3, hashes=1</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI">gtdb.kmcp.tar.gz</a> (50.16 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa">md5</a>)</td>
 <td align="left">58.02 GB</td>
 </tr>
@@ -792,7 +790,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <td align="left">HumGut</td>
 <td align="left">1594+</td>
 <td align="left">30691</td>
-<td align="left">k=21, chunks=10</td>
+<td align="left">k=21, chunks=10; fpr=0.3, hashes=1</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.70 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>)</td>
 <td align="left">21.52 GB</td>
 </tr>
@@ -801,7 +799,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <td align="left">Refseq r208</td>
 <td align="left">398</td>
 <td align="left">403</td>
-<td align="left">k=21, chunks=10</td>
+<td align="left">k=21, chunks=10; fpr=0.3, hashes=1</td>
 <td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78">refseq-fungi.kmcp.tar.gz</a> (3.67 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E">md5</a>)</td>
 <td align="left">4.18 GB</td>
 </tr>
@@ -810,25 +808,16 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <td align="left">GenBank 246</td>
 <td align="left">23632</td>
 <td align="left">27936</td>
-<td align="left">k=21, chunks=5</td>
+<td align="left">k=21, chunks=5; fpr=0.05, hashes=1</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8">genbank-viral.kmcp.tar.gz</a> (1.15 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X">md5</a>)</td>
 <td align="left">3.75 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Viruses</strong></td>
-<td align="left">Refseq r208</td>
-<td align="left">11186</td>
-<td align="left">11618</td>
-<td align="left">k=21, chunks=5</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQj5zEDzlN9kCYzT?e=bZNzAk">refseq-viral.kmcp.tar.gz</a> (967 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQBrtR3Ol5GsJ6e3?e=wAgY1e">md5</a>)</td>
-<td align="left">2.00 GB</td>
 </tr>
 <tr>
 <td align="left"><strong>Human</strong></td>
 <td align="left">CHM13</td>
 <td align="left">1</td>
 <td align="left">1</td>
-<td align="left">k=21, chunks=1024</td>
+<td align="left">k=21, chunks=1024; fpr=0.3, hashes=1</td>
 <td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U">human-chm13.kmcp.tar.gz</a> (818 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE">md5</a>)</td>
 <td align="left">946 MB</td>
 </tr>
@@ -1955,7 +1944,7 @@ By default, <code>kmcp</code> computes k-mers (sketches) of every file,
 you can also use <code>--by-seq</code> to compute for every sequence,
 where sequence IDs in all input files are better to be distinct.
 It also <strong>supports splitting sequences into chunks, this
-could increase the specificity in profiling result in the cost
+could increase the specificity in profiling result at the cost
 of slower searching speed</strong>. </p>
 <p><strong>Splitting sequences</strong>:</p>
 <ol>
@@ -2141,7 +2130,7 @@ and have improved the indexing and searching speed
     query with tens of k-mers (see BIGSI/COBS paper).
     Small values could largely increase the size of the database.</li>
 <li><code>-n/--num-hash</code>: large values could reduce the database size,
-    in the cost of slower searching speed. Values &lt;=4 are recommended.</li>
+    at the cost of slower searching speed. Values &lt;=4 are recommended.</li>
 <li>
 <p>The value of block size <code>-b/--block-size</code> is better to be multiple of 64.
     The default value is: </p>

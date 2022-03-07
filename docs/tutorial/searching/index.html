@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="../../favicon.ico">
+      <link rel="icon" href="../../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Sequence and genome searching - KMCP</title>
+        <title>Sequence and genome searching - KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../../favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -678,10 +676,10 @@ bringing a small database size and much faster searching speed
 <p>The database building process is similar to that of metagenomic profiling,
 with one difference:</p>
 <ol>
-<li>Reference genomes are not splitted into chunks which slow down searching speed.</li>
+<li>Reference genomes are not splitted into chunks.</li>
 </ol>
 <p>Taken GTDB for example:</p>
-<pre><code># mask low-complexity region
+<pre><code># mask low-complexity region (optional)
 mkdir -p gtdb.masked
 find gtdb/ -name "*.fna.gz" \
     | rush 'dustmasker -in &lt;(zcat {}) -outfmt fasta \
@@ -689,9 +687,9 @@ find gtdb/ -name "*.fna.gz" \
         | gzip -c &gt; gtdb.masked/{%}'
 
 # compute k-mers
-#   sequence containing "plasmid" in name are ignored,
+#   sequences containing "plasmid" in name are ignored,
 #   k = 21
-kmcp compute -I gtdb.masked/ -k 21 -B plasmid -O gtdb-r202-k21 --force
+kmcp compute -I gtdb.masked/ -k 21 -B plasmid -O gtdb-r202-k21
 
 # build database
 #   number of index files: 32, for server with &gt;= 32 CPU cores
@@ -704,10 +702,13 @@ kmcp index -j 32 -I gtdb-r202-k21 -O gtdb-r202-k21-n 1 -f 0.3
 cp name.map gtdb-r202-k21.kmcp/
 </code></pre>
 <p>The size of database is 56GB. </p>
+<h3 id="step-2-searching">Step 2. Searching</h3>
 <p>By default, <code>kmcp search</code> loads the whole database into main memory (RAM) for fast searching.
 Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
-while it's much slower, &gt;10X slower on SSD and should be much slower on HDD disks.</p>
-<h3 id="step-2-searching">Step 2. Searching</h3>
+while it's much slower, &gt;10X slower on SSD and should be much slower on HDD disks.
+<strong>Please switch on this flag when searching on computer clusters,
+where the default mmap mode would be very slow for network-attached
+storage (NAS)</strong></p>
 <p><code>kmcp search</code> supports FASTA/Q format from STDIN or files (<a href="/usage/#search">usage</a>).</p>
 <pre><code>kmcp search -d gtdb.kmcp/ test.fq.gz -o result.tsv.gz
 
@@ -848,7 +849,7 @@ while it's much slower, &gt;10X slower on SSD and should be much slower on HDD d
 </tr>
 </tbody>
 </table>
-<p>Reference IDs (column <code>target</code>) can be optionally mapped to their names when searching:</p>
+<p>Reference IDs (column <code>target</code>) can be optionally mapped to their names during searching:</p>
 <pre><code>kmcp search -d gtdb-r202-k21.kmcp/ -N name.map test.fq.gz -o result.tsv.gz
 </code></pre>
 <p>Or after searching using <code>csvtk</code>:</p>
@@ -923,7 +924,7 @@ with few differences:</p>
 <li>K-mer sketches instead of all k-mers are computed.</li>
 <li>Reference genomes are not splitted into chunks.</li>
 <li>Smaller false positive rate (<code>-f</code>) and more than one hash functions (<code>-n</code>) are used to improve accuracy.</li>
-<li>Using bigger k-mer size: 31.</li>
+<li>Using a bigger k-mer size: 31.</li>
 </ol>
 <p>Supported k-mer (sketches) types:</p>
 <ol>
@@ -961,7 +962,9 @@ For examples, setting a smaller scale like 10.</li>
 </ul>
 <h3 id="step-2-searching_1">Step 2. Searching</h3>
 <p>The searching process is simple and <a href="https://bioinf.shenwei.me/kmcp/benchmark">very fast</a> (&lt;1 second).</p>
-<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ contigs.fasta -o result.tsv
+<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
+    --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+    --query-id genomme1 contigs.fasta -o result.tsv
 </code></pre>
 <p>The output is in tab-delimited format:</p>
 <pre><code> 1. query,    Identifier of the query sequence
@@ -1003,27 +1006,46 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">NODE_1_length_106749_cov_161.610981</td>
-<td align="left">4563649</td>
-<td align="left">9052</td>
-<td align="left">3.1514e-176</td>
-<td align="left">1</td>
-<td align="left">GCF_900460465.1</td>
+<td align="left">genomme1</td>
+<td align="left">9488952</td>
+<td align="left">18737</td>
+<td align="left">0.0000e+00</td>
+<td align="left">2</td>
+<td align="left">GCF_000742135.1</td>
 <td align="left">0</td>
 <td align="left">1</td>
-<td align="left">4777134</td>
+<td align="left">5545784</td>
 <td align="left">31</td>
-<td align="left">8942</td>
-<td align="left">0.9878</td>
-<td align="left">0.9933</td>
-<td align="left">0.9813</td>
+<td align="left">8037</td>
+<td align="left">0.4289</td>
+<td align="left">0.7365</td>
+<td align="left">0.3719</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">genomme1</td>
+<td align="left">9488952</td>
+<td align="left">18737</td>
+<td align="left">3.1964e-183</td>
+<td align="left">2</td>
+<td align="left">GCF_000392875.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2881400</td>
+<td align="left">31</td>
+<td align="left">3985</td>
+<td align="left">0.2127</td>
+<td align="left">0.7062</td>
+<td align="left">0.1954</td>
 <td align="left">0</td>
 </tr>
 </tbody>
 </table>
 <p>Reference IDs can be optionally mapped to their names, let's print the main columns only:</p>
-<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ -N gtdb.minhash.kmcp/name.map \
-    contigs.fasta --quiet \
+<pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
+    --name-map name.map \
+    --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+    --query-id genomme1 contigs.fasta \
     | csvtk rename -t -C $ -f 1 -n query \
     | csvtk cut -t -f query,jacc,target \
     &gt; result.tsv
@@ -1038,15 +1060,22 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">NODE_1_length_106749_cov_161.610981</td>
-<td align="left">0.9813</td>
-<td align="left">NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence</td>
+<td align="left">genomme1</td>
+<td align="left">0.3719</td>
+<td align="left">NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence</td>
+</tr>
+<tr>
+<td align="left">genomme1</td>
+<td align="left">0.1954</td>
+<td align="left">NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence</td>
 </tr>
 </tbody>
 </table>
 <p>Using closed syncmer:</p>
-<pre><code>kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ -N gtdb.syncmer.kmcp/name.map \
-    contigs.fasta --quiet \
+<pre><code>kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ \
+    --name-map name.map \
+    --query-whole-file --sort-by jacc --min-query-cov 0.2 \
+    --query-id genomme1 contigs.fasta \
     | csvtk rename -t -C $ -f 1 -n query \
     | csvtk cut -t -f query,jacc,target
 </code></pre>
@@ -1060,9 +1089,14 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">NODE_1_length_106749_cov_161.610981</td>
-<td align="left">0.9383</td>
-<td align="left">NZ_UAVH01000012.1 Yersinia pestis strain NCTC5923, whole genome shotgun sequence</td>
+<td align="left">genomme1</td>
+<td align="left">0.3712</td>
+<td align="left">NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence</td>
+</tr>
+<tr>
+<td align="left">genomme1</td>
+<td align="left">0.1974</td>
+<td align="left">NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence</td>
 </tr>
 </tbody>
 </table>

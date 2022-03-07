@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="../favicon.ico">
+      <link rel="icon" href="../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Usage - KMCP</title>
+        <title>Usage - KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -678,7 +676,7 @@
 <p>KMCP is a command-line tool consisting of several subcommands.</p>
 <pre><code class="language-text">
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.8.0
+    Version: v0.8.1
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -741,7 +739,7 @@ Attentions:
      you can also use --by-seq to compute for every sequence,
      where sequence IDs in all input files are better to be distinct.
   3. It also supports splitting sequences into chunks, this
-     could increase the specificity in search results in the cost
+     could increase the specificity in search results at the cost
      of slower searching speed.
   4. Multiple sizes of k-mers are supported.
 
@@ -850,7 +848,7 @@ Database size and searching accuracy:
      query with tens of k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     in cost of slower searching speed. Values &lt;=4 are recommended.
+     at the cost of slower searching speed. Values &lt;=4 are recommended.
   3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
@@ -937,15 +935,14 @@ Attentions:
 
 Shared flags between &quot;search&quot; and &quot;profile&quot;:
   1. -t/--min-query-cov.
-  2. -N/--name-map.
 
 Index files loading modes:
-  1. Using memory-mapped index files with mmap (default)
+  1. Using memory-mapped index files with mmap (default):
       - Faster startup speed when index files are buffered in memory.
       - Multiple KMCP processes can share the memory.
   2. Loading the whole index files into memory (-w/--load-whole-db):
       - This mode occupies a little more memory.
-        And Multiple KMCP processes can not share the database in memory.
+        And multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
       - Please switch on this flag when searching on computer clusters,
@@ -1022,9 +1019,9 @@ Flags:
   -m, --min-query-len int          ► Minimal query length. (default 30)
   -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a target.
-  -N, --name-map strings           ► Tabular two-column file(s) mapping names to user-defined values.
-                                   Don't use this if you will use the result for metagenomic profiling,
-                                   this option would significantly increase the size of result file.
+  -N, --name-map strings           ► Tabular two-column file(s) mapping reference IDs to user-defined
+                                   values. Don't use this if you will use the result for metagenomic
+                                   profiling which needs the original reference IDs.
   -H, --no-header-row              ► Do not print header row.
   -o, --out-file string            ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for
                                    stdout). (default &quot;-&quot;)
@@ -1050,7 +1047,7 @@ Input:
      This is friendly to workflows which assume multiple inputs are given.
 
 Example:
-   kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
+    kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
 Usage:
   kmcp merge [flags] [-o read.tsv.gz] [&lt;search results&gt; ...]
@@ -1092,7 +1089,7 @@ Reference:
   2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
-  *. Smaller -t/--min-qcov increase sensitivity in the cost of higher false
+  *. Smaller -t/--min-qcov increase sensitivity at the cost of higher false
      positive rate (-f/--max-fpr) of a query.
   *. We require a part of the uniquely matched reads of a reference
      having high similarity, i.e., with high confidence for decreasing
@@ -1101,7 +1098,7 @@ Accuracy notes:
      *. -U/--min-hic-ureads,      minimal number, &gt;= 1
      *. -H/--min-hic-ureads-qcov, minimal query coverage, &gt;= -t/--min-qcov
      *. -P/--min-hic-ureads-prop, minimal proportion, higher values
-        increase precision in cost of sensitivity.
+        increase precision at the cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambiguous reads with the algorithm in MegaPath.
   *. --keep-perfect-matches is not recommended, which decreases sensitivity. 
@@ -1142,13 +1139,21 @@ Performance notes:
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
-  3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
+ *3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
      would be very slow. You can use the flag --no-amb-corr to disable
      ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
-  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version, -s/--sample-id, --taxonomy-id)
+     Note that: abundances are only computed for target references rather than
+     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format.
+  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
+                -s/--sample-id, --taxonomy-id)
+     Related tools (https://github.com/shenwei356/taxonkit):
+       - taxonkit profile2cami: convert any metagenomic profile table with
+         TaxIds to CAMI format. Use this if you forget to output CAMI format.
+       - taxonkit cami-filter: remove taxa of given TaxIds and their
+         descendants in CAMI metagenomic profile.
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
@@ -1175,11 +1180,18 @@ Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
 
 Examples:
-  kmcp profile -X taxdump/ -T taxid.map sample.kmcp.tsv.gz \
-      -o sample.k.profile -C sample.c.profile -s sample
+  1. Default mode:
+       kmcp profile -X taxdump/ -T taxid.map -m 3 \
+           sample.kmcp.tsv.gz -o sample.k.profile \
+           -C sample.c.profile -s sample
+  2. For pathogen detection (you may create databases with lower FPR,
+     e.g., kmcp index -f 0.1 -n 2 for bacteria and fungi genomes,
+     and search with low k-mer coverage threshold -t 0.4):
+       kmcp profile -X taxdump/ -T taxid.map -m 3 -t 0.4 \
+           sample.kmcp.tsv.gz -o sample.k.profile
 
 Usage:
-  kmcp profile [flags] [-X &lt;taxdump dir&gt;] [-T &lt;taxid.map&gt;] [-o &lt;kmcp profile&gt;] &lt;search results&gt;
+  kmcp profile [flags] [-X &lt;taxdump dir&gt;] [-T &lt;taxid.map&gt;] [-m &lt;mode&gt;] [-o &lt;kmcp profile&gt;] &lt;search results&gt;
 
 Flags:
   -B, --binning-result string             ► Save extra binning result in CAMI report.

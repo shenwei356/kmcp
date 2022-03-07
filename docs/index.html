@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="favicon.ico">
+      <link rel="icon" href="favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>KMCP</title>
+        <title>KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -676,11 +674,13 @@
 <p><img alt="" src="kmcp-logo.png" /></p>
 <h2 id="what-can-we-do">What can we do?</h2>
 <h3 id="1-accurate-metagenomic-profiling">1. Accurate metagenomic profiling</h3>
-<p>KMCP adopts a novel metagenomic profiling strategy,
-by splitting reference genomes into 10 chunks and mappings reads to these
-chunks via fast k-mer matching.
-KMCP performs well on both prokaryotic and viral populations, with higher
-sensitivity and specificity than other k-mer-based tools
+<p>KMCP adopts a novel metagenomic profiling strategy
+by splitting reference genomes into 10 or 5 chunks and mappings reads to these
+chunks via fast k-mer matching, denoted as <strong><em>pseudo-mapping</em></strong>.</p>
+<p>Benchmarking results on both simulated and real data indicate that KMCP not only
+allows for accurate taxonomic profiling of archaea, bacteria, and viral populations
+from metagenomic shotgun sequence data, but also provides confident pathogen detection
+in infectious clinical samples of low depth
 (check the <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>).</p>
 <h3 id="2-fast-sequence-search-against-large-scales-of-genomic-datasets">2. Fast sequence search against large scales of genomic datasets</h3>
 <p>KMCP can be used for fast sequence search against large scales of genomic datasets
@@ -689,11 +689,11 @@ We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algo
 bringing a smaller index size and much faster searching speed (<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">4x-10x faster than COBS</a>)
  (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
 <h3 id="3-fast-genome-similarity-estimation">3. Fast genome similarity estimation</h3>
-<p>KMCP can be used for fast similarity estimation of assemblies/genomes against known reference genomes.</p>
+<p>KMCP can also be used for fast similarity estimation of assemblies/genomes against known reference genomes.</p>
 <p>Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 <a href="https://github.com/marbl/Mash">Mash</a> and <a href="https://github.com/sourmash-bio/sourmash">Sourmash</a>
-provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Scaled MinHash) (Sourmash).
+provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sourmash).
 KMCP utilizes multiple k-mer sketches 
 (<a href="https://academic.oup.com/bioinformatics/article/20/18/3363/202143">Minimizer</a>, 
 <a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
@@ -706,6 +706,7 @@ KMCP utilizes multiple k-mer sketches
 <li><strong>Easy to install</strong><ul>
 <li><a href="https://bioinf.shenwei.me/kmcp/download">Statically linked executable binaries for multiple platforms</a> (Linux/Windows/macOS, amd64).</li>
 <li>No dependencies, no configurations.</li>
+<li><code>conda install -c bioconda kmcp</code></li>
 </ul>
 </li>
 <li><strong>Easy to use</strong><ul>
@@ -780,29 +781,29 @@ in two packages for better searching performance.</p>
 <table>
 <thead>
 <tr>
-<th align="left">subcommand</th>
-<th align="left">function</th>
+<th align="left">Subcommand</th>
+<th align="left">Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#compute">compute</a></td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#compute"><strong>compute</strong></a></td>
 <td align="left">Generate k-mers (sketch) from FASTA/Q sequences</td>
 </tr>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index">index</a></td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index"><strong>index</strong></a></td>
 <td align="left">Construct database from k-mer files</td>
 </tr>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#search">search</a></td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#search"><strong>search</strong></a></td>
 <td align="left">Search sequences against a database</td>
 </tr>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge">merge</a></td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge"><strong>merge</strong></a></td>
 <td align="left">Merge search results from multiple databases</td>
 </tr>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#profile">profile</a></td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#profile"><strong>profile</strong></a></td>
 <td align="left">Generate taxonomic profile from search results</td>
 </tr>
 <tr>

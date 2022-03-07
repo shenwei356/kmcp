@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="../favicon.ico">
+      <link rel="icon" href="../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>FAQs - KMCP</title>
+        <title>FAQs - KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -530,8 +528,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#how-to-tune-some-options-when-using-preset-profiling-modes" class="md-nav__link">
-    How to tune some options when using preset profiling modes?
+  <a href="#how-to-tune-parts-of-options-when-using-preset-profiling-modes" class="md-nav__link">
+    How to tune parts of options when using preset profiling modes?
   </a>
   
 </li>
@@ -694,8 +692,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#how-to-tune-some-options-when-using-preset-profiling-modes" class="md-nav__link">
-    How to tune some options when using preset profiling modes?
+  <a href="#how-to-tune-parts-of-options-when-using-preset-profiling-modes" class="md-nav__link">
+    How to tune parts of options when using preset profiling modes?
   </a>
   
 </li>
@@ -738,7 +736,7 @@ where every node searches a part of the database.</p>
 <h2 id="database-building">Database building</h2>
 <h3 id="what-k-mer-size-should-i-use-to-build-the-database">What k-mer size should I use to build the database?</h3>
 <p>Multiple k-mer sizes are supported, but one value is good enough.</p>
-<p>Bigger k-mer sizes bring high specificity in cost of decrease
+<p>Bigger k-mer sizes bring high specificity at the cost of decrease
 of sensitivity. <code>k = 21</code> is recommended for metagenomic profiling.</p>
 <h3 id="how-to-add-new-genomes-to-the-database">How to add new genomes to the database?</h3>
 <p>KMCP builds database very fast,
@@ -825,7 +823,7 @@ GCA_003971385.1 10243
 <p>19:54:54.632 [ERRO] unknown taxid for NZ_CP028116.1, please check taxid mapping file(s)</p>
 </blockquote>
 <p>If the <code>kmcp profile</code> reports this, you may need to check if the taxid mapping file contain all the reference IDs.
-And make sure the reference IDs match these in the database, the later ones are list in: </p>
+And make sure the reference IDs match these in the database, the later ones are listed in: </p>
 <pre><code>$ head -n 5 $kmcp_db_dir/R001/__name_mapping.tsv
 NC_013654.1     NC_013654.1
 NC_000913.3     NC_000913.3
@@ -833,7 +831,15 @@ NC_010655.1     NC_010655.1
 NC_012971.2     NC_012971.2
 NC_011750.1     NC_011750.1
 </code></pre>
-<h3 id="how-to-tune-some-options-when-using-preset-profiling-modes">How to tune some options when using preset profiling modes?</h3>
+<p>There's another case: you used <code>--name-map</code> in <code>kmcp search</code>.
+Please don't do this if you will use the search result for metagenomic
+profiling which needs the original reference IDs. We add a note now:</p>
+<pre><code>-N, --name-map strings  ► Tabular two-column file(s) mapping reference IDs to user-defined
+                        values. Don't use this if you will use the result for metagenomic
+                        profiling which needs the original reference IDs.
+
+</code></pre>
+<h3 id="how-to-tune-parts-of-options-when-using-preset-profiling-modes">How to tune parts of options when using preset profiling modes?</h3>
 <p>Sorry it's not supported due to the limitation of the command-line argument parsers.
 You need explicitly set all relevant options of the mode.</p>
 

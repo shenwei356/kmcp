@@ -12,12 +12,12 @@
         <meta name="author" content="Wei Shen">
       
       
-      <link rel="icon" href="../../favicon.ico">
+      <link rel="icon" href="../../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Taxonomic profiling - KMCP</title>
+        <title>Taxonomic profiling - KMCP - Metagenomic Profiler</title>
       
     
     
@@ -80,10 +80,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="KMCP" class="md-header__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -93,7 +92,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP
+            KMCP - Metagenomic Profiler
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +177,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="KMCP" class="md-nav__button md-logo" aria-label="KMCP" data-md-component="logo">
+    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+  <img src="../../favicon.svg" alt="logo">
 
     </a>
-    KMCP
+    KMCP - Metagenomic Profiler
   </label>
   
     <div class="md-nav__source">
@@ -382,6 +380,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#index-files-loading-modes" class="md-nav__link">
+    Index files loading modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands" class="md-nav__link">
     Commands
   </a>
@@ -389,15 +394,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
-    Searching on a computer cluster
+  <a href="#search-result-format" class="md-nav__link">
+    Search result format
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#searching-result-format" class="md-nav__link">
-    Searching result format
+  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
+    Searching on a computer cluster
   </a>
   
 </li>
@@ -659,6 +664,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#index-files-loading-modes" class="md-nav__link">
+    Index files loading modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands" class="md-nav__link">
     Commands
   </a>
@@ -666,15 +678,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
-    Searching on a computer cluster
+  <a href="#search-result-format" class="md-nav__link">
+    Search result format
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#searching-result-format" class="md-nav__link">
-    Searching result format
+  <a href="#searching-on-a-computer-cluster" class="md-nav__link">
+    Searching on a computer cluster
   </a>
   
 </li>
@@ -771,7 +783,6 @@
 <h2 id="datasets">Datasets</h2>
 <ul>
 <li>Short reads, single or paired end.</li>
-<li>Long reads (PacBio HIFI).</li>
 </ul>
 <h2 id="steps">Steps</h2>
 <h3 id="step-1-preprocessing-reads">Step 1. Preprocessing reads</h3>
@@ -820,7 +831,7 @@ and the results can be fastly merged for downstream analysis.</p>
 See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.</p>
 </li>
 <li>
-<p>A long query sequences may contain duplicated k-mers, which are
+<p>A long query sequence may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
     value of <code>-u/--kmer-dedup-threshold</code> (default <code>256</code>) to remove duplicates.</p>
 </li>
@@ -838,23 +849,23 @@ See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.<
 can use stricter criteria in <code>kmcp profile</code>.</p>
 <ol>
 <li><code>-t/--min-query-cov</code>, minimal query coverage, i.e., 
-   proportion of matched k-mers and unique k-mers of a query (default <code>0.55</code>, close to <code>~96.5%</code> sequence similarity))</li>
-<li><code>-N/--name-map</code>, tabular two-column file(s) mapping names to user-defined values.</li>
+   proportion of matched k-mers and unique k-mers of a query (default <code>0.55</code>, close to <code>~96.5%</code> sequence similarity)</li>
 </ol>
-<p><strong>Index files loading modes</strong>:</p>
+<h4 id="index-files-loading-modes"><strong>Index files loading modes</strong></h4>
 <ol>
-<li>Using memory-mapped index files with <code>mmap</code> (default)<ul>
+<li>Using memory-mapped index files with <code>mmap</code> (default):<ul>
 <li>Faster startup speed when index files are buffered in memory.</li>
 <li>Multiple KMCP processes can share the memory.</li>
 </ul>
 </li>
 <li>Loading the whole index files into memory (<code>-w/--load-whole-db</code>):<ul>
 <li>This mode occupies a little more memory.
-And Multiple KMCP processes can not share the database in memory.</li>
+And multiple KMCP processes can not share the database in memory.</li>
 <li><strong>It's slightly faster due to the use of physically contiguous memory.
 The speedup is more significant for smaller databases</strong>.</li>
-<li><strong>It's highly recommended when searching on computer clusters</strong>,
-where the default mmap mode would be very slow (in my test).</li>
+<li><strong>Please switch on this flag when searching on computer clusters,
+    where the default mmap mode would be very slow for network-attached
+    storage (NAS)</strong>.</li>
 </ul>
 </li>
 <li>Low memory mode (<code>--low-mem</code>):<ul>
@@ -879,6 +890,7 @@ read1=sample_1.fq.gz
 read2=sample_2.fq.gz
 sample=sample
 
+# 1. searching results against multiple databases
 for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
     dbname=$(basename $db)
 
@@ -892,6 +904,9 @@ for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         --out-file         $sample.kmcp@$dbname.tsv.gz \
         --log              $sample.kmcp@$dbname.tsv.gz.log
 done
+
+# 2. Merging search results against multiple databases
+kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 </code></pre>
 <p>Pair-end reads:</p>
 <pre><code># ---------------------------------------------------
@@ -901,6 +916,7 @@ read1=sample_1.fq.gz
 read2=sample_2.fq.gz
 sample=sample
 
+# 1. searching results against multiple databases
 for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
     dbname=$(basename $db)
 
@@ -915,121 +931,12 @@ for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         --out-file       $sample.kmcp@$dbname.tsv.gz \
         --log            $sample.kmcp@$dbname.tsv.gz.log
 done
+
+# 2. Merging search results against multiple databases
+kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 </code></pre>
-<p>Merging searching results on multiple database:</p>
-<pre><code>kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
-</code></pre>
-<h4 id="searching-on-a-computer-cluster">Searching on a computer cluster</h4>
-<p>Here, we split genomes of GTDB into 16 partitions and build a database for 
-every partition, so we can use computer cluster to accelerate the searching.
-The genbank-viral genomes are also diveded into 4 partition.</p>
-<p>A helper script <a href="https://github.com/shenwei356/easy_sbatch">easy_sbatch</a>
-is used for batch submitting Slurm jobs via script templates.</p>
-<pre><code># ---------------------------------------------------
-# searching
-
-
-j=32
-reads=reads
-
-# -----------------
-# gtdb
-
-dbprefix=~/ws/db/kmcp/gtdb.n16-
-
-for file in $reads/*.left.fq.gz; do
-    prefix=$(echo $file | sed 's/.left.fq.gz//')
-    read1=$file
-    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
-
-    ls -d $dbprefix*.kmcp \
-        | easy_sbatch \
-            -c $j -J $(basename $prefix) \
-            "kmcp search         \
-                --load-whole-db  \
-                --threads   $j   \
-                --db-dir    {}   \
-                $read1 $read2    \
-                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
-                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
-                --quiet "
-done
-
-# -----------------
-# viral
-
-dbprefix=~/ws/db/kmcp/genbank-viral.n4-
-
-for file in $reads/*.left.fq.gz; do
-    prefix=$(echo $file | sed 's/.left.fq.gz//')
-    read1=$file
-    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
-
-    ls -d $dbprefix*.kmcp \
-        | easy_sbatch \
-            -c $j -J $(basename $prefix) \
-            "kmcp search         \
-                --load-whole-db  \
-                --threads   $j   \
-                --db-dir    {}   \
-                $read1 $read2    \
-                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
-                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
-                --quiet "
-done
-
-# -----------------
-# fungi
-
-dbprefix=~/ws/db/kmcp/refseq-fungi
-
-for file in $reads/*.left.fq.gz; do
-    prefix=$(echo $file | sed 's/.left.fq.gz//')
-    read1=$file
-    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
-
-    ls -d $dbprefix*.kmcp \
-        | easy_sbatch \
-            -c $j -J $(basename $prefix) \
-            "kmcp search         \
-                --load-whole-db  \
-                --threads   $j   \
-                --db-dir    {}   \
-                $read1 $read2    \
-                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
-                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
-                --quiet "
-done
-
-
-# ---------------------------------------------------
-# wait all job being done
-
-
-
-# ---------------------------------------------------
-# merge result and profiling
-
-# merge results
-# there's no need to submit to slurm, which could make it slower, cause the bottleneck is file IO
-for file in $reads/*.left.fq.gz; do
-    prefix=$(echo $file | sed 's/.left.fq.gz//')
-
-    echo $prefix; date
-    kmcp merge $prefix.kmcp@*.tsv.gz --out-file $prefix.kmcp.tsv.gz \
-        --quiet --log $prefix.kmcp.tsv.gz.merge.log
-done
-
-# profiling
-X=taxdump/
-T=taxid.map
-
-fd kmcp.tsv.gz$ $reads/ \
-    | rush -v X=$X -v T=$T \
-        'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
-            --log {}.k.profile.log'
-</code></pre>
-<h4 id="searching-result-format">Searching result format</h4>
+<h4 id="search-result-format">Search result format</h4>
+<p>Tab-delimited format with 15 columns:</p>
 <pre><code> 1. query,    Identifier of the query sequence
  2. qLen,     Query length
  3. qKmers,   K-mer number of the query sequence
@@ -1227,6 +1134,116 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 </tr>
 </tbody>
 </table>
+<h4 id="searching-on-a-computer-cluster">Searching on a computer cluster</h4>
+<p>Here, we split genomes of GTDB into 16 partitions and build a database for 
+every partition, so we can use computer cluster to accelerate the searching.
+The genbank-viral genomes are also diveded into 4 partition.</p>
+<p>A helper script <a href="https://github.com/shenwei356/easy_sbatch">easy_sbatch</a>
+is used for batch submitting Slurm jobs via script templates.</p>
+<pre><code># ---------------------------------------------------
+# searching
+
+
+j=32
+reads=reads
+
+# -----------------
+# gtdb
+
+dbprefix=~/ws/db/kmcp/gtdb.n16-
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+# -----------------
+# viral
+
+dbprefix=~/ws/db/kmcp/genbank-viral.n4-
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+# -----------------
+# fungi
+
+dbprefix=~/ws/db/kmcp/refseq-fungi
+
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+    read1=$file
+    read2=$(echo $file | sed 's/left.fq.gz/right.fq.gz/')
+
+    ls -d $dbprefix*.kmcp \
+        | easy_sbatch \
+            -c $j -J $(basename $prefix) \
+            "kmcp search         \
+                --load-whole-db  \
+                --threads   $j   \
+                --db-dir    {}   \
+                $read1 $read2    \
+                --out-file  $prefix.kmcp@\$(basename {}).tsv.gz \
+                --log       $prefix.kmcp@\$(basename {}).tsv.gz.log \
+                --quiet "
+done
+
+
+# ---------------------------------------------------
+# wait all job being done
+
+
+
+# ---------------------------------------------------
+# merge result and profiling
+
+# merge results
+# there's no need to submit to slurm, which could make it slower, cause the bottleneck is file IO
+for file in $reads/*.left.fq.gz; do
+    prefix=$(echo $file | sed 's/.left.fq.gz//')
+
+    echo $prefix; date
+    kmcp merge $prefix.kmcp@*.tsv.gz --out-file $prefix.kmcp.tsv.gz \
+        --quiet --log $prefix.kmcp.tsv.gz.merge.log
+done
+
+# profiling
+X=taxdump/
+T=taxid.map
+
+fd kmcp.tsv.gz$ $reads/ \
+    | rush -v X=$X -v T=$T \
+        'kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
+            --log {}.k.profile.log'
+</code></pre>
 <h3 id="step-4-profiling">Step 4. Profiling</h3>
 <h4 id="input"><strong>Input</strong></h4>
 <ul>
@@ -1257,7 +1274,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <p><img src="profiling-steps.jpg" alt="" width="500"/></p>
 <p><strong>Accuracy notes</strong>:</p>
 <ul>
-<li>Smaller <code>-t/--min-qcov</code> increase sensitivity in cost of higher false
+<li>Smaller <code>-t/--min-qcov</code> increase sensitivity at the cost of higher false
     positive rate (<code>-f/--max-fpr</code>) of a query.</li>
 <li>And we require part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence to decrease
@@ -1266,7 +1283,7 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 <li><code>-U/--min-hic-ureads</code>,      minimal number, <code>&gt;= 1</code></li>
 <li><code>-H/--min-hic-ureads-qcov</code>, minimal query coverage, <code>&gt;= -t/--min-qcov</code></li>
 <li><code>-P/--min-hic-ureads-prop</code>, minimal proportion, higher values
-increase precision in cost of sensitivity.</li>
+increase precision at the cost of sensitivity.</li>
 </ul>
 </li>
 <li><code>-R/--max-mismatch-err</code> and <code>-D/--min-dreads-prop</code> is for determing
@@ -1348,7 +1365,9 @@ kmcp profile \
 <h4 id="profiling-result-formats">Profiling result formats</h4>
 <p><strong>Supported profiling output formats</strong>:</p>
 <ul>
-<li>KMCP      (<code>-o/--out-prefix</code>)</li>
+<li>KMCP      (<code>-o/--out-prefix</code>). 
+  <strong>Note that: abundances are only computed for target references rather than
+     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format</strong>.</li>
 <li>CAMI      (<code>-M/--metaphlan-report</code>, <code>--metaphlan-report-version</code>, sample name: <code>-s/--sample-id</code>, taxonomy data: <code>--taxonomy-id</code>)</li>
 <li>MetaPhlAn (<code>-C/--cami-report</code>, sample name: <code>-s/--sample-id</code>))</li>
 </ul>
@@ -1356,7 +1375,8 @@ kmcp profile \
 <ul>
 <li>CAMI      (<code>-B/--binning-result</code>)</li>
 </ul>
-<p>KMCP format:</p>
+<p><strong>KMCP format</strong>:</p>
+<p>Tab-delimited format with 16 columns:</p>
 <pre><code> 1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of the reference
  3. score,              The 90th percentile of qCov of uniquely matched reads
