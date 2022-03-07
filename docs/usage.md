@@ -486,13 +486,21 @@ Performance notes:
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
-  3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
+ *3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
      would be very slow. You can use the flag --no-amb-corr to disable
      ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
-  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version, -s/--sample-id, --taxonomy-id)
+     Note that: abundances are only computed for target references rather than
+     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format.
+  2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
+                -s/--sample-id, --taxonomy-id)
+     Related tools (https://github.com/shenwei356/taxonkit):
+       - taxonkit profile2cami: convert any metagenomic profile table with
+         TaxIds to CAMI format. Use this if you forget to output CAMI format.
+       - taxonkit cami-filter: remove taxa of given TaxIds and their
+         descendants in CAMI metagenomic profile.
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:

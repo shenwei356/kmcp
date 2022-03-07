@@ -447,7 +447,9 @@ Using this flag will override the relevant options.
 
 **Supported profiling output formats**:
 
-- KMCP      (`-o/--out-prefix`)
+- KMCP      (`-o/--out-prefix`). 
+  **Note that: abundances are only computed for target references rather than
+     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format**.
 - CAMI      (`-M/--metaphlan-report`, `--metaphlan-report-version`, sample name: `-s/--sample-id`, taxonomy data: `--taxonomy-id`)
 - MetaPhlAn (`-C/--cami-report`, sample name: `-s/--sample-id`))
 

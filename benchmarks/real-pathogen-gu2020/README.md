@@ -46,7 +46,7 @@ We download the 99 Illumina short-reads datasets from [PRJNA558701](https://www.
 in which 92 samples has detailed information in the supplementary table 1.
 And 87 samples are verified by culture or 16S rRNA gene qPCR.
 
-Run accession and corresponding sample names are listed in [acc2sample.tsv](https://github.com/shenwei356/kmcp/blob/main/benchmarks/pathogen-gu2020/acc2sample.tsv).
+Run accession and corresponding sample names are listed in [acc2sample.tsv](https://github.com/shenwei356/kmcp/blob/main/benchmarks/real-pathogen-gu2020/acc2sample.tsv).
 
 Download reads using SRAtoolkit:
 
