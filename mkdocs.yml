@@ -1,4 +1,4 @@
-site_name: KMCP
+site_name: KMCP - Metagenomic Profiler
 nav:
 - Home: index.md
 - Download: download.md

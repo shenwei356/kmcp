@@ -15,7 +15,7 @@ in two packages for better searching performance.
 
 ## Current Version
 
-- [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-02-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
+- [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
 
 ### Links
 
@@ -86,7 +86,7 @@ fish:
 
 ## Release History
 
-### [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-02-24 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
+### [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
 
 - update help message, show common usages, add examples, add notes to important options.
 
