@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -761,6 +762,9 @@ Examples:
 		// ---------------------------------------------------------------
 		// send query
 
+		ks := sg.DBs[0].Info.Ks
+		nnn := bytes.Repeat([]byte{'N'}, ks[len(ks)-1]-1) // overlap of k-1 bp
+
 		if pairedEnd {
 			var id uint64
 
@@ -838,11 +842,14 @@ Examples:
 
 				id++
 			}
+			if id == 0 {
+				log.Warningf("no invalid sequences in files: %s, %s", read1, read2)
+			}
 		} else {
 			var fastxReader *fastx.Reader
 			var record *fastx.Record
 
-			var id uint64
+			var id0, id uint64
 			for _, file := range files {
 				if outputLog {
 					log.Infof("reading sequence file: %s", file)
@@ -878,7 +885,13 @@ Examples:
 							first = false
 						} else {
 							sequence.Seq = append(sequence.Seq, record.Seq.Seq...)
+							sequence.Seq = append(sequence.Seq, nnn...)
 						}
+					}
+
+					if sequence == nil { // invalid input
+						log.Warningf("no invalid sequences in file: %s", file)
+						continue
 					}
 
 					query := poolQuery.Get().(*Query)
@@ -898,6 +911,7 @@ Examples:
 					continue
 				}
 
+				id0 = id
 				var n, ns, nt int
 				for {
 					record, err = fastxReader.Read()
@@ -952,6 +966,10 @@ Examples:
 					// }
 
 					id++
+				}
+
+				if id0 == id {
+					log.Warningf("no invalid sequences in file: %s", file)
 				}
 			}
 		}

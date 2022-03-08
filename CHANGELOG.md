@@ -1,5 +1,13 @@
 # Changelog
 
+### v0.8.2 - 2022-03-07
+
+- `search`: 
+    - flag `-g/--query-whole-file`:
+        - fix panic for invalid input.
+        - add intervals of `n` of `k-1` bp.
+    - add warning for invalid input.
+
 ### v0.8.1 - 2022-03-07
 
 - update help message, show common usages, add examples, add notes to important options.
