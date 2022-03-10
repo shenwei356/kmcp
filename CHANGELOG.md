@@ -5,7 +5,7 @@
 - `search`: 
     - flag `-g/--query-whole-file`:
         - fix panic for invalid input.
-        - add intervals of `n` of `k-1` bp.
+        - add gaps of `k-1` bp before concatatenating seqs.
     - add warning for invalid input.
 
 ### v0.8.1 - 2022-03-07
