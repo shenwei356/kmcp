@@ -137,6 +137,44 @@ Build it!
         --FASTAs kmcp.fa \
         --taxonomy kmcp-taxdump " > metamaps.b.log 2>&1
         
+## Custom databases for ganon
+
+https://github.com/pirovc/ganon
+
+```--seq-info-file```
+
+    seqid <tab> seq.len <tab> taxid [<tab> specialization]
+
+Prepare seq-info-file
+
+    time for db in refseq-fungi genbank-viral gtdb; do   
+        find $db/ -name "*.fna.gz" \
+            | rush -k -v map=taxid.$db.map \
+                'taxid=$(grep {%..} {map} | cut -f 2); \
+                seqkit fx2tab -n -l -i {} | awk "{print \$1\"\t\"\$2\"\t\"$taxid}"'
+    done > seq-info-file.tsv
+    
+Prepare genomes directory cause `--input-directory` accept only one value:
+
+    mkdir genomes; cd genomes
+    fd .fna.gz$ ../gtdb/ ../refseq-fungi/ ../genbank-viral/ | rush 'ln -s {}'
+    cd ..
+
+Build it!
+
+    # index size: 195 GB 
+    # time:43min10s, mem: 197GB
+    memusg -t -s "ganon build \
+        -d ganon-kmcp \
+        -t 40 \
+        -r species \
+        --input-directory genomes \
+        --input-extension .fna.gz \
+        --seq-info-file   seq-info-file.tsv \
+        --taxdump-file taxdump/nodes.dmp taxdump/names.dmp taxdump/merged.dmp" \
+    > ganon.log 2>&1
+
+
 ## Custom databases for DUDes
 
 https://github.com/pirovc/dudes

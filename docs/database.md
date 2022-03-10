@@ -9,6 +9,10 @@ All prebuilt databases and the used reference genomes are available at:
   **Please click the "kmcp+105 more files" link to browse directories and files, and choose an indiviual file to download**.
   [A command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is available for download a single file with the link listed in tables below.
 
+<p style="color:Tomato;">Please check file integrity with `md5sum` after download the files:</p>
+
+    md5sum -c gtdb.kmcp.md5.txt
+  
 **Hardware requirements**
 
 - Prebuilt databases were built for computers with >= 32 CPU cores

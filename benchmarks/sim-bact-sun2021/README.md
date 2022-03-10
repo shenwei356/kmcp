@@ -533,3 +533,31 @@ Steps
         | rush -j 1 'cat {}' \
         > $newprofile
     
+## ganon
+
+    # --------------------------------------------------
+    # using ganon database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=ganon-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=ganon-pe    
+    j=4
+    J=40
+    n=100 # number of alignments for a read to keep
+    
+    db=~/ws/db/ganon/ganon-kmcp    
+    
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+            'memusg -t -s \
+                "ganon classify -d {db} -t {j} \
+                    -p {p}.left.fq.gz {p}.right.fq.gz -o {p}" \
+                >{p}.a.log 2>&1 '
+    
