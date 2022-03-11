@@ -345,10 +345,10 @@ Examples:
 		taxonomyDataDir := getFlagString(cmd, "taxdump")
 
 		if len(taxidMappingFiles) > 0 && taxonomyDataDir == "" {
-			checkError(fmt.Errorf("flag -X/--taxonomy-dir is needed when -T/--taxid-map given"))
+			checkError(fmt.Errorf("flag -X/--taxdump is needed when -T/--taxid-map given"))
 		}
 		if len(taxidMappingFiles) == 0 && taxonomyDataDir != "" {
-			checkError(fmt.Errorf("flag -T/--taxid-map is needed when -X/--taxonomy-dir given"))
+			checkError(fmt.Errorf("flag -T/--taxid-map is needed when -X/--taxdump given"))
 		}
 		if len(taxidMappingFiles) == 0 || taxonomyDataDir == "" {
 			log.Warningf("TaxID mapping files (-T/--taxid-map) and taxonomy dump files are recommended to add taxonomy information")

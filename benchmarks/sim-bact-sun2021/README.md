@@ -549,15 +549,32 @@ Steps
     reads=ganon-pe    
     j=4
     J=40
-    n=100 # number of alignments for a read to keep
     
     db=~/ws/db/ganon/ganon-kmcp    
     
     fd left.fq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
-        | rush -j $j -v j=$J -v 'p={:}' -v db=$db -v n=$n \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
             'memusg -t -s \
                 "ganon classify -d {db} -t {j} \
-                    -p {p}.left.fq.gz {p}.right.fq.gz -o {p}" \
-                >{p}.a.log 2>&1 '
+                    -p {p}.left.fq.gz {p}.right.fq.gz -o {p}; \
+                ganon table -l percentage --header taxid -r species -i {p}.tre -o {p}.tsv " \
+                >{p}.log 2>&1 '
     
+    # ------------------------------------------------------
+    # convert profile table to cami format
+    
+    taxdump=taxdump/
+    fd left.fq.gz$ $reads/ \
+        | rush -v taxdump=$taxdump -v 'p={:}' \
+            'sed 1d {p}.tsv \
+                | taxonkit profile2cami --data-dir {taxdump} -s {%:} \
+                | taxonkit cami-filter \
+                > {:}.profile'
+                
+    newprofile=$reads.profile
+    fd profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $newprofile
+  

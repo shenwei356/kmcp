@@ -246,3 +246,6 @@ Build it!
 
     memusg -t -s "kma index -i all.ccmetagen.fasta -o ccmetagen-kmcp -NI -Sparse -" > ccmetagen.log 2>&1
      
+## kaiju
+
+https://kaiju.binf.ku.dk/database/kaiju_db_refseq_2021-02-26.tgz

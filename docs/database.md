@@ -7,11 +7,11 @@ All prebuilt databases and the used reference genomes are available at:
 - [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) for global users.
 - [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) for Chinese users.
   **Please click the "kmcp+105 more files" link to browse directories and files, and choose an indiviual file to download**.
-  [A command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is available for download a single file with the link listed in tables below.
+  [A command-line tool](https://github.com/Mikubill/cowtransfer-uploader) is also available for downloading a single file with the link listed in tables below.
 
 <p style="color:Tomato;">Please check file integrity with `md5sum` after download the files:</p>
 
-    md5sum -c gtdb.kmcp.md5.txt
+    md5sum -c gtdb.kmcp.tar.gz.md5.txt
   
 **Hardware requirements**
 
@@ -37,13 +37,15 @@ for downstream analysis**.
 These databases are created following [steps below](#building-databases).
 Users can also [build custom databases](#building-custom-databases), it's simple and fast.
 
+
 |DB                      |source     |#species|#assemblies|parameters                             |archive file                                                                                                                                                                                                                                                                                               |size     |
 |:-----------------------|:----------|:-------|:----------|:--------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
 |**Bacteria and Archaea**|GTDB r202  |28073+  |47894      |k=21, chunks=10;<br>fpr=0.3, hashes=1  |[gtdb.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjRewpV1B37CO1Ghe?e=g0cwiI) (50.16 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQmv5Nn4bt3hUSpN?e=H0PxRa)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/2604afd9c2704b) ([md5](https://shenwei356.cowtransfer.com/s/75737ae002fc45))        |58.02 GB |
-|**Bacteria and Archaea**|HumGut     |1594+   |30691      |k=21, chunks=10;<br>fpr=0.3, hashes=1  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.70 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/1ff6a48d00bc46) ([md5](https://shenwei356.cowtransfer.com/s/e16e1c91fd8041))      |21.52 GB |
+|**Bacteria and Archaea**|HumGut     |1594+   |30691      |k=21, chunks=10;<br>fpr=0.3, hashes=1  |[humgut.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt) (18.77 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/0b88a8ef2cff42) ([md5](https://shenwei356.cowtransfer.com/s/a04127a6bfb648))      |21.52 GB |
 |**Fungi**               |Refseq r208|398     |403        |k=21, chunks=10;<br>fpr=0.3, hashes=1  |[refseq-fungi.kmcp.tar.gz](https://1drv.ms/t/s!Ag89cZ8NYcqtjROm3VsX6PVrxHe5?e=PO1N78) (3.67 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjQM4tAbFU2bFS07e?e=0CwT1E)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/0e471aabced942) ([md5](https://shenwei356.cowtransfer.com/s/73df097c486248)) |4.18 GB  |
 |**Viruses**             |GenBank 246|23632   |27936      |k=21, chunks=5;<br>fpr=0.05, hashes=1  |[genbank-viral.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjkI5lQI-ygIiDe-B?e=Viaev8) (1.15 GB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjkEqcjvzQczfIAMr?e=LBsj4X)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/12f8c444321546) ([md5](https://shenwei356.cowtransfer.com/s/b641aa678ed641))|3.75 GB  |
 |**Human**               |CHM13      |1       |1          |k=21, chunks=1024;<br>fpr=0.3, hashes=1|[human-chm13.kmcp.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U) (818 MB, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE)),<br>[CowTransfer link](https://shenwei356.cowtransfer.com/s/07e614a36b1a4b) ([md5](https://shenwei356.cowtransfer.com/s/c91d4c98677645))   |946 MB   |
+
 
 *based on NCBI taxonomy data 2021-12-06. `+` is used because some species are unclassfied xxx.
 
@@ -886,14 +888,14 @@ Mapping file:
     # assembly accession -> taxid
     cat HumGut.tsv \
         | csvtk cut -t -f genome_file,ncbi_tax_id \
-        | csvtk replace -f genome_file -t -p '\..+$' \
+        | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
         | csvtk del-header \
         > taxid.map
         
     # assembly accession -> name
     cat HumGut.tsv \
         | csvtk cut -t -f genome_file,ncbi_organism_name \
-        | csvtk replace -f genome_file -t -p '\..+$' \
+        | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
         | csvtk del-header \
         > name.map
     
@@ -934,7 +936,7 @@ Stats:
     
     cat HumGut.tsv \
         | csvtk cut -t -f genome_file,gtdbtk_tax_id \
-        | csvtk replace -f genome_file -t -p '\..+$' \
+        | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
         | csvtk del-header \
         > taxid-gtdb.map
         
