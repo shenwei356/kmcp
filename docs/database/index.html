@@ -743,11 +743,11 @@
 <li><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC">OneDrive</a> for global users.</li>
 <li><a href="https://shenwei356.cowtransfer.com/s/c7220dd5901c42">CowTransfer</a> for Chinese users.
   <strong>Please click the "kmcp+105 more files" link to browse directories and files, and choose an indiviual file to download</strong>.
-  <a href="https://github.com/Mikubill/cowtransfer-uploader">A command-line tool</a> is available for download a single file with the link listed in tables below.</li>
+  <a href="https://github.com/Mikubill/cowtransfer-uploader">A command-line tool</a> is also available for downloading a single file with the link listed in tables below.</li>
 </ul>
 <p style="color:Tomato;">Please check file integrity with `md5sum` after download the files:</p>
 
-<pre><code>md5sum -c gtdb.kmcp.md5.txt
+<pre><code>md5sum -c gtdb.kmcp.tar.gz.md5.txt
 </code></pre>
 <p><strong>Hardware requirements</strong></p>
 <ul>
@@ -797,7 +797,7 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <td align="left">1594+</td>
 <td align="left">30691</td>
 <td align="left">k=21, chunks=10;<br>fpr=0.3, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.70 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/1ff6a48d00bc46">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/e16e1c91fd8041">md5</a>)</td>
+<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.77 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/0b88a8ef2cff42">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/a04127a6bfb648">md5</a>)</td>
 <td align="left">21.52 GB</td>
 </tr>
 <tr>
@@ -1723,14 +1723,14 @@ mv ncbi_nodes.dmp taxdump/nodes.dmp
 <pre><code># assembly accession -&gt; taxid
 cat HumGut.tsv \
     | csvtk cut -t -f genome_file,ncbi_tax_id \
-    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
     | csvtk del-header \
     &gt; taxid.map
 
 # assembly accession -&gt; name
 cat HumGut.tsv \
     | csvtk cut -t -f genome_file,ncbi_organism_name \
-    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
     | csvtk del-header \
     &gt; name.map
 </code></pre>
@@ -1770,7 +1770,7 @@ serotype     1
 
 cat HumGut.tsv \
     | csvtk cut -t -f genome_file,gtdbtk_tax_id \
-    | csvtk replace -f genome_file -t -p '\..+$' \
+    | csvtk replace -f genome_file -t -p '\.fna\.gz$' \
     | csvtk del-header \
     &gt; taxid-gtdb.map
 
