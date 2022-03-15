@@ -10,6 +10,7 @@
 - Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 - DUDes [v0.08 (2017-11-08)](https://github.com/pirovc/dudes/releases/tag/dudes_v0.08)
 - SLIMM [v0.3.4 (2018-09-04)](https://github.com/seqan/slimm/releases/tag/v0.3.4)
+- Ganon [1.1.2](https://github.com/pirovc/ganon/releases/tag/1.1.2)
 
 ## Databases and taxonomy version
 
@@ -21,6 +22,7 @@
 - Kraken, built with the genomes same to KMCP.
 - DUDes, built with the genomes same to KMCP.
 - SLIMM, built with the genomes same to KMCP.
+- Ganon, built with the genomes same to KMCP.
 
 ## Datasets
 
@@ -618,3 +620,34 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
                 >{p}.b.log 2>&1 '
 
     stats slimm slimm-pe > slimm.stats
+
+## ganon
+
+    # --------------------------------------------------
+    # using ganon database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=ganon-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=ganon-pe    
+    j=4
+    J=40
+    
+    db=~/ws/db/ganon/ganon-kmcp    
+    
+    fd left.fq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'memusg -t -s \
+                "ganon classify -d {db} -t {j} \
+                    -p {p}.left.fq.gz {p}.right.fq.gz -o {p}; \
+                ganon table -l percentage --header taxid -r species -i {p}.tre -o {p}.tsv " \
+                >{p}.log 2>&1 '
+
+    stats ganon ganon-pe > ganon.stats
+    

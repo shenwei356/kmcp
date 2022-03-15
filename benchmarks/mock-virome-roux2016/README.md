@@ -7,6 +7,7 @@
 - Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
 - Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- Ganon [1.1.2](https://github.com/pirovc/ganon/releases/tag/1.1.2)
 
 ## Databases and taxonomy version
 
@@ -15,6 +16,7 @@
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 - Kraken, built with the genomes same to KMCP.
+- Ganon, built with the genomes same to KMCP.
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
@@ -405,3 +407,51 @@ Steps
         | csvtk sort -H -k 1:N \
         | rush -j 1 'cat {}' \
         > $profile
+        
+## ganon
+
+    # --------------------------------------------------
+    # using ganon database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=ganon-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=ganon-pe    
+    j=4
+    J=40
+    
+    db=~/ws/db/ganon/ganon-kmcp    
+    
+    fd R1_001_t_paired.fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v db=$db \
+            'memusg -t -s \
+                "ganon classify -d {db} -t {j} \
+                    -o {p} -s {p}_R1_001_t_paired.fastq.gz -2 {p}_R2_001_t_paired.fastq.gz \
+                    {p}_R1_001_t_unpaired.fastq.gz,{p}_R2_001_t_unpaired.fastq.gz; \
+                ganon table -l percentage --header taxid -r species -i {p}.tre -o {p}.tsv " \
+                >{p}.log 2>&1 '
+    
+    # ------------------------------------------------------
+    # convert profile table to cami format
+    
+    taxdump=taxdump/
+    fd R1_001_t_paired.fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v db=$db -v taxdump=$taxdump \
+            'sed 1d {p}.tsv \
+                | taxonkit profile2cami --data-dir {taxdump} -s {%@(^......)} \
+                | taxonkit cami-filter \
+                > {:}.profile'
+                
+    newprofile=$reads.profile
+    fd profile$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j 1 'cat {}' \
+        > $newprofile
+ 

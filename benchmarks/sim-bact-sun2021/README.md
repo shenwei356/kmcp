@@ -10,6 +10,7 @@
 - Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
 - DUDes [v0.08 (2017-11-08)](https://github.com/pirovc/dudes/releases/tag/dudes_v0.08)
 - SLIMM [v0.3.4 (2018-09-04)](https://github.com/seqan/slimm/releases/tag/v0.3.4)
+- Ganon [1.1.2](https://github.com/pirovc/ganon/releases/tag/1.1.2)
 
 ## Databases and taxonomy version
 
@@ -21,6 +22,7 @@
 - Kraken, built with the genomes same to KMCP.
 - DUDes, built with the genomes same to KMCP.
 - SLIMM, built with the genomes same to KMCP.
+- Ganon, built with the genomes same to KMCP.
 
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.

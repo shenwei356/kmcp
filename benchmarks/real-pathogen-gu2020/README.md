@@ -6,6 +6,7 @@
 - Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
 - Centrifuge [v1.0.4 (2021-08-17)](https://github.com/DaehwanKimLab/centrifuge/releases/tag/v1.0.4)
+- Ganon [1.1.2](https://github.com/pirovc/ganon/releases/tag/1.1.2)
 
 ## Databases and taxonomy version
 
@@ -13,6 +14,7 @@
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 - Centrifuge, built with the genomes same to KMCP.
 - Kraken, built with the genomes same to KMCP.
+- Ganon, built with the genomes same to KMCP.
 
 **We create databases of GTDB and Refseq-fungi with a smaller false-positive rate `0.1` instead of `0.3`,
 and use `2` hash functions instead of `1`.
@@ -336,3 +338,38 @@ Steps
             | csvtk filter2 -t -f "\$numReads >= 2" \
             | csvtk sort -t -k numReads:nr \
             | csvtk pretty -t > {}.txt'
+
+## ganon
+
+    # --------------------------------------------------
+    # using ganon database built with GTDB, Genbank-viral, Refseq-fungi
+
+    reads=ganon-pe
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+    reads=ganon-pe    
+    j=4
+    J=40
+    
+    db=~/ws/db/ganon/ganon-kmcp    
+    
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'memusg -t -s \
+                "ganon classify -d {db} -t {j} \
+                    -s {} -o {p}; \
+                ganon table -l number --min-count 2 --header name -r species -i {p}.tre -o {p}.tsv " \
+                >{p}.log 2>&1 '
+
+    # sort 
+    fd fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={:}' -v db=$db \
+            'csvtk rename -t -f 1,2 -n "species,reads" {p}.tsv \
+                | csvtk sort -t -k 2:nr > {p}.sorted.tsv '
