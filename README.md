@@ -72,7 +72,7 @@ KMCP utilizes multiple k-mer sketches
     - Some k-mer based taxonomic profilers suffer from high false positive rates,
       while [KMCP adopts multiple strategies](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods)
       to [improve specificity and keeps high sensitivity at the same time](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
-    - Except for archaea and bacteria, [KMCP performed well on **virus/phages**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages).
+    - In addition to archaea and bacteria, [KMCP performed well on **viruses/phages**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages).
     - [KMCP also provides **confident infectious pathogen detection**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#87-metagenomic-samples-of-infected-body-fluids-bacteria-pathogens-low-coverage).
     - [Preset six modes for multiple scenarios](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes).
     - [Supports CAMI and MetaPhlAn profiling format](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats).
