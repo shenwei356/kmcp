@@ -23,6 +23,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/shenwei356/bio/taxdump"
@@ -44,6 +45,52 @@ type MatchResult struct {
 	QCov    float64
 }
 
+var float64powm10 = []float64{
+	1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9,
+	1e-10, 1e-11, 1e-12, 1e-13, 1e-14, 1e-15, 1e-16, 1e-17, 1e-18, 1e-19,
+	1e-20, 1e-21, 1e-22,
+}
+
+func parseQcov(value string) float64 {
+	if value[0] == '1' {
+		return 1
+	}
+
+	var v float64
+	for i, b := range value[2:] {
+		v += float64powm10[i] * float64(b-'0')
+	}
+	return v
+}
+
+var float64pow10 = []float64{
+	1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
+	1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
+	1e20, 1e21, 1e22,
+}
+
+func parseFPR(value string) float64 {
+	var v float64
+	v += float64(value[0] - '0')
+
+	var ie int
+	for i, b := range value[2:] {
+		if b == 'e' {
+			ie = i
+			break
+		}
+		v += float64powm10[i] * float64(b-'0')
+	}
+	ie += 2
+	var e float64
+	lm1 := len(value) - 1
+	end := len(value) - ie - 2
+	for i := 0; i < end; i++ {
+		e += float64pow10[i] * float64(value[lm1-i]-'0')
+	}
+	return v * math.Pow10(-int(e))
+}
+
 func parseMatchResult(line string, numFields int, items *[]string, maxPFR float64, minQcov float64) (*MatchResult, bool) {
 	stringSplitNByByte(line, '\t', numFields, items)
 	if len(*items) < numFields {
@@ -54,20 +101,33 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 
 	var err error
 
-	// too slow
+	// slow
 	m.FPR, err = strconv.ParseFloat((*items)[3], 64)
 	if err != nil {
 		checkError(fmt.Errorf("failed to parse FPR: %s", (*items)[3]))
 	}
+	// did not bring final speedup
+	// if len((*items)[3]) < 2 {
+	// 	checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[3]))
+	// }
+	// m.FPR = parseFPR((*items)[3])
+
 	if m.FPR > maxPFR {
 		return m, false
 	}
 
-	// too slow
+	// slow
 	m.QCov, err = strconv.ParseFloat((*items)[11], 64)
 	if err != nil {
 		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[11]))
 	}
+
+	// did not bring final speedup
+	// if len((*items)[11]) < 2 {
+	// 	checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[11]))
+	// }
+	// m.QCov = parseQcov((*items)[11])
+
 	if m.QCov < minQcov {
 		return m, false
 	}

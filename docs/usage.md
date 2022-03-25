@@ -455,7 +455,7 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset six profiling modes, availabe with the flag -m/--mode:
+  We preset six profiling modes, available with the flag -m/--mode:
     - 0 (for pathogen detection)
     - 1 (higher recall)
     - 2 (high recall)
