@@ -92,7 +92,7 @@ Accuracy notes:
      abundance estimation.
 
 Profiling modes:
-  We preset six profiling modes, availabe with the flag -m/--mode:
+  We preset six profiling modes, available with the flag -m/--mode:
     - 0 (for pathogen detection)
     - 1 (higher recall)
     - 2 (high recall)
@@ -100,7 +100,7 @@ Profiling modes:
     - 4 (high precision)
     - 5 (higher precision)
 
-  Using this flag will override the relevant options.
+  You can still change the values of some options below as usual.
 
     options                       m=0    m=1   m=2   m=3    m=4   m=5
     ---------------------------   ----   ---   ---   ----   ---   ----
@@ -217,6 +217,116 @@ Examples:
 		}
 		// ---------------- debug ---------
 
+		// ---------------- preset modes ----------------
+		type profileParams struct {
+			minReads           float64
+			minFragsProp       float64
+			maxFragsDepthStdev float64
+
+			minUReads        float64
+			minHicUreads     float64
+			hicUreadsMinQcov float64
+			HicUreadsMinProp float64
+
+			keepMainMatch bool
+			maxScoreGap   float64
+		}
+
+		presetParams := make([]profileParams, 6)
+
+		presetParams[0] = profileParams{
+			minReads:           1,
+			minFragsProp:       0.2,
+			maxFragsDepthStdev: 10,
+			minUReads:          1,
+			minHicUreads:       1,
+			hicUreadsMinQcov:   0.55,
+			HicUreadsMinProp:   0.01,
+			keepMainMatch:      true,
+			maxScoreGap:        0.4,
+		}
+
+		presetParams[1] = profileParams{
+			minReads:           20,
+			minFragsProp:       0.5,
+			maxFragsDepthStdev: 10,
+			minUReads:          20,
+			minHicUreads:       5,
+			hicUreadsMinQcov:   0.7,
+			HicUreadsMinProp:   0.1,
+			keepMainMatch:      false,
+			maxScoreGap:        0.4,
+		}
+
+		presetParams[2] = profileParams{
+			minReads:           30,
+			minFragsProp:       0.7,
+			maxFragsDepthStdev: 3,
+			minUReads:          20,
+			minHicUreads:       5,
+			hicUreadsMinQcov:   0.7,
+			HicUreadsMinProp:   0.2,
+			keepMainMatch:      false,
+			maxScoreGap:        0.4,
+		}
+
+		presetParams[3] = profileParams{
+			minReads:           float64(minReads0),
+			minFragsProp:       minFragsProp0,
+			maxFragsDepthStdev: maxFragsDepthStdev0,
+			minUReads:          float64(minUReads0),
+			minHicUreads:       float64(minHicUreads0),
+			hicUreadsMinQcov:   hicUreadsMinQcov0,
+			HicUreadsMinProp:   HicUreadsMinProp0,
+			keepMainMatch:      keepMainMatch0,
+			maxScoreGap:        maxScoreGap0,
+		}
+
+		presetParams[4] = profileParams{
+			minReads:           100,
+			minFragsProp:       1,
+			maxFragsDepthStdev: 2,
+			minUReads:          50,
+			minHicUreads:       10,
+			hicUreadsMinQcov:   0.8,
+			HicUreadsMinProp:   0.1,
+			keepMainMatch:      false,
+			maxScoreGap:        0.4,
+		}
+
+		presetParams[5] = profileParams{
+			minReads:           100,
+			minFragsProp:       1,
+			maxFragsDepthStdev: 1.5,
+			minUReads:          50,
+			minHicUreads:       10,
+			hicUreadsMinQcov:   0.8,
+			HicUreadsMinProp:   0.15,
+			keepMainMatch:      false,
+			maxScoreGap:        0.4,
+		}
+
+		mode := getFlagNonNegativeInt(cmd, "mode")
+		if mode > 5 {
+			checkError(fmt.Errorf("invalid profiling mode: %d", mode))
+		}
+
+		mode0 := mode == 0
+
+		para := presetParams[mode]
+
+		minReads := para.minReads
+		minFragsProp := para.minFragsProp
+		maxFragsDepthStdev := para.maxFragsDepthStdev
+		minUReads := para.minUReads
+		minHicUreads := para.minHicUreads
+		hicUreadsMinQcov := para.hicUreadsMinQcov
+		HicUreadsMinProp := para.HicUreadsMinProp
+		keepMainMatch := para.keepMainMatch
+		maxScoreGap := para.maxScoreGap
+
+		// ---------------- preset modes ----------------
+
 		noAmbCorr := getFlagBool(cmd, "no-amb-corr")
 
 		outFile := getFlagString(cmd, "out-prefix")
@@ -225,31 +335,94 @@ Examples:
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
 		topNScore := getFlagNonNegativeInt(cmd, "keep-top-qcovs")
 		keepFullMatch := getFlagBool(cmd, "keep-perfect-matches")
-		keepMainMatch := getFlagBool(cmd, "keep-main-matches")
-		maxScoreGap := getFlagFloat64(cmd, "max-qcov-gap")
 
-		var minReads float64
-		var minFragsProp float64
-		var maxFragsDepthStdev float64
-		var minUReads float64
-		var minHicUreads float64
-		var hicUreadsMinQcov float64
-		var HicUreadsMinProp float64
+		var _minReads float64
+		var _minFragsProp float64
+		var _maxFragsDepthStdev float64
+		var _minUReads float64
+		var _minHicUreads float64
+		var _hicUreadsMinQcov float64
+		var _HicUreadsMinProp float64
+		var _keepMainMatch bool
+		var _maxScoreGap float64
 
-		minReads = float64(getFlagPositiveInt(cmd, "min-chunks-reads"))
-		minUReads = float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
-		minFragsProp = getFlagNonNegativeFloat64(cmd, "min-chunks-fraction")
-		maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-chunks-depth-stdev")
-
-		minHicUreads = float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
-		if minHicUreads > minUReads {
-			minUReads = minHicUreads
+		_minReads = float64(getFlagPositiveInt(cmd, "min-chunks-reads"))
+		_minFragsProp = getFlagNonNegativeFloat64(cmd, "min-chunks-fraction")
+		if _minFragsProp > 1 {
+			checkError(fmt.Errorf("the value of -P/--min-hic-ureads-prop (%f) should be in range of [0, 1]", _minFragsProp))
 		}
-		hicUreadsMinQcov = getFlagPositiveFloat64(cmd, "min-hic-ureads-qcov")
-		if hicUreadsMinQcov < minQcov {
-			hicUreadsMinQcov = minQcov
+
+		_maxFragsDepthStdev = getFlagPositiveFloat64(cmd, "max-chunks-depth-stdev")
+
+		_minUReads = float64(getFlagPositiveInt(cmd, "min-uniq-reads"))
+
+		_minHicUreads = float64(getFlagPositiveInt(cmd, "min-hic-ureads"))
+		if _minHicUreads > _minUReads {
+			_minUReads = _minHicUreads
 		}
-		HicUreadsMinProp = getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
+
+		_hicUreadsMinQcov = getFlagPositiveFloat64(cmd, "min-hic-ureads-qcov")
+		if _hicUreadsMinQcov > 1 || _hicUreadsMinQcov < minQcov {
+			checkError(fmt.Errorf("the value of -H/--min-hic-ureads-qcov (%f) should be in range of [<-t/--min-query-cov>, 1]", _hicUreadsMinQcov))
+		}
+
+		_HicUreadsMinProp = getFlagPositiveFloat64(cmd, "min-hic-ureads-prop")
+
+		_keepMainMatch = getFlagBool(cmd, "keep-main-matches")
+		_maxScoreGap = getFlagFloat64(cmd, "max-qcov-gap")
+
+		if false {
+			minReads = _minReads
+			minFragsProp = _minFragsProp
+			maxFragsDepthStdev = _maxFragsDepthStdev
+			minUReads = _minUReads
+			minHicUreads = _minHicUreads
+			hicUreadsMinQcov = _hicUreadsMinQcov
+			HicUreadsMinProp = _HicUreadsMinProp
+			keepMainMatch = _keepMainMatch
+			maxScoreGap = _maxScoreGap
+		} else {
+			// only change the value when a new value is given
+			if minReads != _minReads && cmd.Flags().Lookup("min-chunks-reads").Changed {
+				minReads = _minReads
+			}
+			if minFragsProp != _minFragsProp && cmd.Flags().Lookup("min-chunks-fraction").Changed {
+				minFragsProp = _minFragsProp
+			}
+			if maxFragsDepthStdev != _maxFragsDepthStdev && cmd.Flags().Lookup("max-chunks-depth-stdev").Changed {
+				maxFragsDepthStdev = _maxFragsDepthStdev
+			}
+			if minUReads != _minUReads && cmd.Flags().Lookup("min-uniq-reads").Changed {
+				minUReads = _minUReads
+			}
+			if minHicUreads != _minHicUreads && cmd.Flags().Lookup("min-hic-ureads").Changed {
+				minHicUreads = _minHicUreads
+			}
+			if hicUreadsMinQcov != _hicUreadsMinQcov && cmd.Flags().Lookup("min-hic-ureads-qcov").Changed {
+				hicUreadsMinQcov = _hicUreadsMinQcov
+			}
+			if HicUreadsMinProp != _HicUreadsMinProp && cmd.Flags().Lookup("min-hic-ureads-prop").Changed {
+				HicUreadsMinProp = _HicUreadsMinProp
+			}
+			if keepMainMatch != _keepMainMatch && cmd.Flags().Lookup("keep-main-matches").Changed {
+				keepMainMatch = _keepMainMatch
+			}
+			if maxScoreGap != _maxScoreGap && cmd.Flags().Lookup("max-qcov-gap").Changed {
+				maxScoreGap = _maxScoreGap
+			}
+
+		}
+
+		// fmt.Println("mode", mode)
+		// fmt.Println("-r/--min-chunks-reads", minReads)
+		// fmt.Println("-p/--min-chunks-fraction", minFragsProp)
+		// fmt.Println("-d/--max-chunks-depth-stdev", maxFragsDepthStdev)
+		// fmt.Println("-u/--min-uniq-reads", minUReads)
+		// fmt.Println("-U/--min-hic-ureads", minHicUreads)
+		// fmt.Println("-H/--min-hic-ureads-qcov", hicUreadsMinQcov)
+		// fmt.Println("-P/--min-hic-ureads-prop", HicUreadsMinProp)
+		// fmt.Println("--keep-main-matches", keepMainMatch)
+		// fmt.Println("--max-qcov-gap", maxScoreGap)
 
 		minDReadsProp := getFlagPositiveFloat64(cmd, "min-dreads-prop")
 		if minDReadsProp > 1 {
@@ -259,59 +432,6 @@ Examples:
 		if maxMismatchErr >= 1 {
 			checkError(fmt.Errorf("the value of -R/--max-mismatch-err (%f) should be in range of (0, 1)", maxMismatchErr))
 		}
-
-		mode := getFlagNonNegativeInt(cmd, "mode")
-		switch mode {
-		case 3:
-		case 0:
-			minReads = 1
-			minFragsProp = 0.2
-			maxFragsDepthStdev = 10
-			minUReads = 1
-			minHicUreads = 1
-			hicUreadsMinQcov = 0.55
-			HicUreadsMinProp = 0.1
-
-			keepMainMatch = true
-			maxScoreGap = 0.4
-		case 1:
-			minReads = 20
-			minFragsProp = 0.5
-			maxFragsDepthStdev = 10
-			minUReads = 20
-			minHicUreads = 5
-			hicUreadsMinQcov = 0.7
-			HicUreadsMinProp = 0.1
-		case 2:
-			minReads = 30
-			minFragsProp = 0.7
-			maxFragsDepthStdev = 3
-			minUReads = 20
-			minHicUreads = 5
-			hicUreadsMinQcov = 0.7
-			HicUreadsMinProp = 0.2
-		case 4:
-			minReads = 100
-			minFragsProp = 1
-			maxFragsDepthStdev = 2
-			minUReads = 50
-			minHicUreads = 10
-			hicUreadsMinQcov = 0.8
-			HicUreadsMinProp = 0.1
-		case 5:
-			minReads = 100
-			minFragsProp = 1
-			maxFragsDepthStdev = 1.5
-			minUReads = 50
-			minHicUreads = 10
-			hicUreadsMinQcov = 0.8
-			HicUreadsMinProp = 0.15
-		default:
-			checkError(fmt.Errorf("invalid profiling mode: %d", mode))
-		}
-
-		mode0 := mode == 0
-
 		lowAbcPct := getFlagNonNegativeFloat64(cmd, "filter-low-pct")
 		if lowAbcPct >= 100 {
 			checkError(fmt.Errorf("the value of -F/--filter-low-pct (%f) should be in range of [0, 100)", lowAbcPct))
@@ -2584,32 +2704,32 @@ func init() {
 	profileCmd.Flags().BoolP("keep-perfect-matches", "", false,
 		formatFlagUsage(`Only keep the perfect matches (qcov == 1) if there are.`))
 
-	profileCmd.Flags().BoolP("keep-main-matches", "", false,
+	profileCmd.Flags().BoolP("keep-main-matches", "", keepMainMatch0,
 		formatFlagUsage(`Only keep main matches, abandon matches with sharply decreased qcov (> --max-qcov-gap).`))
 
-	profileCmd.Flags().Float64P("max-qcov-gap", "", 0.4,
+	profileCmd.Flags().Float64P("max-qcov-gap", "", maxScoreGap0,
 		formatFlagUsage(`Max qcov gap between adjacent matches.`))
 
 	// for matches against a reference
-	profileCmd.Flags().IntP("min-chunks-reads", "r", 50,
+	profileCmd.Flags().IntP("min-chunks-reads", "r", minReads0,
 		formatFlagUsage(`Minimal number of reads for a reference chunk.`))
 
-	profileCmd.Flags().IntP("min-uniq-reads", "u", 20,
+	profileCmd.Flags().IntP("min-uniq-reads", "u", minUReads0,
 		formatFlagUsage(`Minimal number of uniquely matched reads for a reference.`))
 
-	profileCmd.Flags().Float64P("min-chunks-fraction", "p", 0.8,
+	profileCmd.Flags().Float64P("min-chunks-fraction", "p", minFragsProp0,
 		formatFlagUsage(`Minimal fraction of matched reference chunks with reads >= -r/--min-chunks-reads.`))
 
-	profileCmd.Flags().Float64P("max-chunks-depth-stdev", "d", 2,
+	profileCmd.Flags().Float64P("max-chunks-depth-stdev", "d", maxFragsDepthStdev0,
 		formatFlagUsage(`Maximal standard deviation of relative depths of all chunks.`))
 
-	profileCmd.Flags().IntP("min-hic-ureads", "U", 5,
+	profileCmd.Flags().IntP("min-hic-ureads", "U", minHicUreads0,
 		formatFlagUsage(`Minimal number of high-confidence uniquely matched reads for a reference.`))
 
-	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", 0.75,
+	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", hicUreadsMinQcov0,
 		formatFlagUsage(`Minimal query coverage of high-confidence uniquely matched reads.`))
 
-	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", 0.1,
+	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", HicUreadsMinProp0,
 		formatFlagUsage(`Minimal proportion of high-confidence uniquely matched reads.`))
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
@@ -2675,6 +2795,17 @@ func init() {
 
 	profileCmd.SetUsageTemplate(usageTemplate("[-X <taxdump dir>] [-T <taxid.map>] [-m <mode>] [-o <kmcp profile>] <search results>"))
 }
+
+// default values of some parameters
+var minReads0 int = 50
+var minFragsProp0 float64 = 0.8
+var maxFragsDepthStdev0 float64 = 2
+var minUReads0 int = 20
+var minHicUreads0 int = 5
+var hicUreadsMinQcov0 float64 = 0.75
+var HicUreadsMinProp0 float64 = 0.1
+var keepMainMatch0 bool = false
+var maxScoreGap0 float64 = 0.4
 
 // s = lambda qcov: 87.456 + 26.410*qcov - 22.008*qcov*qcov + 7.325*qcov*qcov*qcov
 func similarity(qcov float64) float64 {

@@ -81,6 +81,7 @@ Profiling
             $f \
             --level strain \
             --min-query-cov 0.8 \
+            --min-hic-ureads-qcov 0.8 \
             --min-chunks-reads 20 \
             --min-uniq-reads 5 \
             --out-prefix $f.kmcp.profile \

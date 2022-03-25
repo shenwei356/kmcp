@@ -463,7 +463,7 @@ Profiling modes:
     - 4 (high precision)
     - 5 (higher precision)
 
-  Using this flag will override the relevant options.
+  You can still change the values of some options below as usual.
 
     options                       m=0    m=1   m=2   m=3    m=4   m=5
     ---------------------------   ----   ---   ---   ----   ---   ----
