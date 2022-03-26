@@ -94,7 +94,7 @@ fish:
         - add gaps of `k-1` bp before concatatenating seqs.
     - add warning for invalid input.
 - `profile`:
-    - ***allow changing parts of the parameters for preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
+    - ***allow modifying parts of parameters in preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
     - decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
       *the profiling results generated with mode 3 in the manuscript are not affected*.
 
