@@ -15,15 +15,15 @@ in two packages for better searching performance.
 
 ## Current Version
 
-- [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
+### [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2) - 2022-03-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
 
 ### Links
 
 OS     |Arch      |File, 中国镜像                                                                                                                                                                                  |Download Count
 :------|:---------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_linux_amd64.tar.gz)
-macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_darwin_amd64.tar.gz)
-Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.1/kmcp_windows_amd64.exe.tar.gz)
+Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz)
+macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz)
+Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz)
 
 *Notes:*
 
@@ -85,6 +85,18 @@ fish:
     kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 ## Release History
+
+### [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2) - 2022-03-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
+
+- `search`: 
+    - flag `-g/--query-whole-file`:
+        - fix panic for invalid input.
+        - add gaps of `k-1` bp before concatatenating seqs.
+    - add warning for invalid input.
+- `profile`:
+    - ***allow changing parts of the parameters for preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
+    - decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
+      the profiling results in the manuscript are not affected which are generated with mode 3.
 
 ### [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
 
