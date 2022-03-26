@@ -247,11 +247,11 @@ Examples:
 		}
 
 		presetParams[1] = profileParams{
-			minReads:           20,
-			minFragsProp:       0.5,
-			maxFragsDepthStdev: 10,
-			minUReads:          20,
-			minHicUreads:       5,
+			minReads:           5,
+			minFragsProp:       0.6,
+			maxFragsDepthStdev: 2,
+			minUReads:          2,
+			minHicUreads:       1,
 			hicUreadsMinQcov:   0.7,
 			HicUreadsMinProp:   0.1,
 			keepMainMatch:      false,
@@ -259,11 +259,11 @@ Examples:
 		}
 
 		presetParams[2] = profileParams{
-			minReads:           30,
+			minReads:           10,
 			minFragsProp:       0.7,
-			maxFragsDepthStdev: 3,
-			minUReads:          20,
-			minHicUreads:       5,
+			maxFragsDepthStdev: 2,
+			minUReads:          5,
+			minHicUreads:       2,
 			hicUreadsMinQcov:   0.7,
 			HicUreadsMinProp:   0.2,
 			keepMainMatch:      false,
