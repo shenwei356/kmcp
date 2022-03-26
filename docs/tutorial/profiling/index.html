@@ -1293,7 +1293,7 @@ increase precision at the cost of sensitivity.</li>
      abundance estimation.</li>
 </ul>
 <h4 id="profiling-modes">Profiling modes</h4>
-<p>We preset six profiling modes, availabe with the flag <code>-m/--mode</code>.</p>
+<p>We preset six profiling modes, available with the flag <code>-m/--mode</code>.</p>
 <ul>
 <li><code>0</code> (for pathogen detection)</li>
 <li><code>1</code> (higher recall)</li>
@@ -1302,14 +1302,14 @@ increase precision at the cost of sensitivity.</li>
 <li><code>4</code> (high precision)</li>
 <li><code>5</code> (higher precision)</li>
 </ul>
-<p>Using this flag will override the relevant options.</p>
+<p>You can still change the values of some options below as usual.</p>
 <pre><code>options                       m=0    m=1   m=2   m=3    m=4   m=5
 ---------------------------   ----   ---   ---   ----   ---   ----
--r/--min-chunks-reads         1      20    30    50     100   100
--p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
--d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
--u/--min-uniq-reads           1      20    20    20     50    50
--U/--min-hic-ureads           1      5     5     5      10    10
+-r/--min-chunks-reads         1      5     10    50     100   100
+-p/--min-chunks-fraction      0.2    0.6   0.7   0.8    1     1
+-d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
+-u/--min-uniq-reads           1      2     5     20     50    50
+-U/--min-hic-ureads           1      1     2     5      10    10
 -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
 -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
 --keep-main-matches           true                            
