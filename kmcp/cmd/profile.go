@@ -104,15 +104,15 @@ Profiling modes:
 
     options                       m=0    m=1   m=2   m=3    m=4   m=5
     ---------------------------   ----   ---   ---   ----   ---   ----
-    -r/--min-chunks-reads         1      20    30    50     100   100
-    -p/--min-chunks-fraction      0.2    0.5   0.7   0.8    1     1
-    -d/--max-chunks-depth-stdev   10     10    3     2      2     1.5
-    -u/--min-uniq-reads           1      20    20    20     50    50
-    -U/--min-hic-ureads           1      5     5     5      10    10
+    -r/--min-chunks-reads         1      5     10    50     100   100
+    -p/--min-chunks-fraction      0.2    0.6   0.7   0.8    1     1
+    -d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
+    -u/--min-uniq-reads           1      2     5     20     50    50
+    -U/--min-hic-ureads           1      1     2     5      10    10
     -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
-    --max-qcov-gap                0.4                             
+    --max-qcov-gap                0.4                          
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
