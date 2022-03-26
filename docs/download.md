@@ -96,7 +96,7 @@ fish:
 - `profile`:
     - ***allow changing parts of the parameters for preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
     - decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
-      the profiling results in the manuscript are not affected which are generated with mode 3.
+      *the profiling results generated with mode 3 in the manuscript are not affected*.
 
 ### [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
 
