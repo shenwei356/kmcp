@@ -133,6 +133,8 @@ in two packages for better searching performance.
 
 ## Quickstart
 
+![](kmcp-workflow.jpg)
+
     # compute k-mers
     kmcp compute -k 21 --split-number 10 --split-overlap 100 \
         --in-dir genomes/ --out-dir genomes-k21-n10
@@ -147,7 +149,7 @@ in two packages for better searching performance.
     # search    
     kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.kmcp@db1.kmcp.tsv.gz
 
-    # merge search results
+    # merge search results against multiple databases
     kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
     # profile and binning

@@ -1,5 +1,7 @@
 # Usage
 
+![](kmcp-workflow.jpg)
+
 KMCP is a command-line tool consisting of several subcommands.
 
 ```text
