@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.8.2 - 2022-03-07
+### v0.8.2 - 2022-03-26
 
 - `search`: 
     - flag `-g/--query-whole-file`:
@@ -8,7 +8,9 @@
         - add gaps of `k-1` bp before concatatenating seqs.
     - add warning for invalid input.
 - `profile`:
-    - *allow changing parts of the parameters for preset profiling modes*. [#5](https://github.com/shenwei356/kmcp/issues/5)
+    - ***allow changing parts of the parameters for preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
+    - decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
+      the profiling results in the manuscript are not affected which are generated with the mode 3.
 
 ### v0.8.1 - 2022-03-07
 
