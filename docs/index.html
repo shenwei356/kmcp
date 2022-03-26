@@ -853,6 +853,7 @@ in two packages for better searching performance.</p>
 </tbody>
 </table>
 <h2 id="quickstart">Quickstart</h2>
+<p><img alt="" src="kmcp-workflow.jpg" /></p>
 <pre><code># compute k-mers
 kmcp compute -k 21 --split-number 10 --split-overlap 100 \
     --in-dir genomes/ --out-dir genomes-k21-n10
@@ -867,7 +868,7 @@ kmcp index --false-positive-rate 0.1 --num-hash 1 \
 # search    
 kmcp search --db-dir genomes.kmcp/ test.fa.gz --out-file search.kmcp@db1.kmcp.tsv.gz
 
-# merge search results
+# merge search results against multiple databases
 kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 
 # profile and binning
