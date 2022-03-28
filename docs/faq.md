@@ -136,5 +136,7 @@ profiling which needs the original reference IDs. We add a note now:
 
 ### How to tune parts of options when using preset profiling modes?
 
-Sorry it's not supported due to the limitation of the command-line argument parsers.
-You need explicitly set all relevant options of the mode.
+<s>Sorry it's not supported due to the limitation of the command-line argument parsers.
+You need explicitly set all relevant options of the mode.</s>
+
+It's available since v0.8.2.
