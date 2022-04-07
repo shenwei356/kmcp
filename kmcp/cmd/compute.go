@@ -571,7 +571,7 @@ Examples:
 					}
 
 					if lenSum == 0 {
-						log.Warningf("skipping %s: no invalid sequences", file)
+						log.Warningf("skipping %s: no valid sequences", file)
 						log.Info()
 						return
 					}
@@ -815,7 +815,7 @@ Examples:
 				n = len(codes)
 
 				if n == 0 {
-					log.Warningf("skipping %s: no invalid sequences", file)
+					log.Warningf("skipping %s: no valid sequences", file)
 					log.Info()
 					return
 				}

@@ -843,7 +843,7 @@ Examples:
 				id++
 			}
 			if id == 0 {
-				log.Warningf("no invalid sequences in files: %s, %s", read1, read2)
+				log.Warningf("no valid sequences in files: %s, %s", read1, read2)
 			}
 		} else {
 			var fastxReader *fastx.Reader
@@ -890,7 +890,7 @@ Examples:
 					}
 
 					if sequence == nil { // invalid input
-						log.Warningf("no invalid sequences in file: %s", file)
+						log.Warningf("no valid sequences in file: %s", file)
 						continue
 					}
 
@@ -969,7 +969,7 @@ Examples:
 				}
 
 				if id0 == id {
-					log.Warningf("no invalid sequences in file: %s", file)
+					log.Warningf("no valid sequences in file: %s", file)
 				}
 			}
 		}
