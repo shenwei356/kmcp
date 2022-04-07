@@ -3,8 +3,8 @@
 ## Requirements
 
 - Database
-    - [Prebuilt databases](/database/#prebuilt-databases) are available.
-    - Or [build custom databases](/database/#custom-database).
+    - [Prebuilt databases](/kmcp/database/#prebuilt-databases) are available.
+    - Or [build custom databases](/kmcp/database/#custom-database).
 - Hardware.
     - CPU: ≥ 32 cores preferred.
     - RAM: ≥ 64 GB, depends on file size of the maximal database.

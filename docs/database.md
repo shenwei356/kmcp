@@ -64,7 +64,7 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 ### B). Databases for genome similarity estimation
 
-Check the [tutorial](/tutorial/searching).
+Check the [tutorial](/kmcp/tutorial/searching).
 
 FracMinHash (Scaled MinHash):
 
@@ -104,7 +104,7 @@ Tools:
 - [seqkit](https://github.com/shenwei356/seqkit/releases) for FASTA file processing.
 - [csvtk](https://github.com/shenwei356/csvtk/releases) for tsv/csv data manipulations.
 - [taxonkit](https://github.com/shenwei356/taxonkit/releases) for NCBI taxonomy data manipulations.
-- [kmcp](/download) for metagenomic profiling.
+- [kmcp](/kmcp/download) for metagenomic profiling.
 
 Files:
 
@@ -1067,7 +1067,7 @@ Files:
 
 Tools:
 
-- [kmcp](/download) for metagenomic profiling.
+- [kmcp](/kmcp/download) for metagenomic profiling.
 - [rush](https://github.com/shenwei356/rush/releases) for executing jobs in parallel.
 - [brename](https://github.com/shenwei356/brename/releases) for batching renaming files (optional)
 
@@ -1186,7 +1186,7 @@ is good enough.
 1. Decrease value of `-j/--threads` for data in hard disk drives (HDD) to
     reduce I/O pressure.
 
-**Commands** ([usage](/usage/#compute)):
+**Commands** ([usage](/kmcp/usage/#compute)):
 
     # compute k-mers
     #   sequence containing "plasmid" in name are ignored,
@@ -1253,7 +1253,7 @@ KMCP builds index for k-mers (sketches) with a modified Compact Bit-sliced
 Signature Index ([COBS](https://arxiv.org/abs/1905.09624)). 
 We completely rewrite the algorithms, data structure, and file format,
 and have improved the indexing and searching speed
-(check [benchmark](/benchmark/searching)).
+(check [benchmark](/kmcp/benchmark/searching)).
 
 **Input**:
 
@@ -1298,7 +1298,7 @@ and have improved the indexing and searching speed
    `kmcp search` could automatically scale to utilize as many cores
    as possible.
 
-**Commands** ([usage](/usage/#compute)):
+**Commands** ([usage](/kmcp/usage/#compute)):
 
     # build database
     #   number of index files: 32, for server with >= 32 CPU cores
@@ -1384,4 +1384,4 @@ Output:
 |:-----------------------------|:--|:--------|:---------|:-------|:--------|
 |refs.kmcp/R001/_block001.uniki|21 |true     |1         |746442  |8        |
 
-What's next? Check the [tutorials](/tutorial).
+What's next? Check the [tutorials](/kmcp/tutorial).

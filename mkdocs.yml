@@ -1,4 +1,5 @@
 site_name: KMCP - Metagenomic Profiler
+site_url: https://bioinf.shenwei.me/kmcp
 nav:
 - Home: index.md
 - Download: download.md

@@ -32,7 +32,7 @@ as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingm
 
 KMCP reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a small database size and much faster searching speed
- (check the [benchmark](/benchmark/searching)).
+ (check the [benchmark](/kmcp/benchmark/searching)).
 
 ### Step 1. Building databases
 
@@ -76,7 +76,7 @@ while it's much slower, >10X slower on SSD and should be much slower on HDD disk
 where the default mmap mode would be very slow for network-attached
 storage (NAS)**
 
-`kmcp search` supports FASTA/Q format from STDIN or files ([usage](/usage/#search)).
+`kmcp search` supports FASTA/Q format from STDIN or files ([usage](/kmcp/usage/#search)).
 
     kmcp search -d gtdb.kmcp/ test.fq.gz -o result.tsv.gz
 
