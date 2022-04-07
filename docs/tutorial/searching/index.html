@@ -12,6 +12,8 @@
         <meta name="author" content="Wei Shen">
       
       
+        <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/tutorial/searching/">
+      
       <link rel="icon" href="../../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
@@ -671,7 +673,7 @@
 as <a href="https://github.com/Phelimb/BIGSI">BIGSI</a> and <a href="https://github.com/bingmann/cobs">COBS</a> do.</p>
 <p>KMCP reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a small database size and much faster searching speed
- (check the <a href="/benchmark/searching">benchmark</a>).</p>
+ (check the <a href="/kmcp/benchmark/searching">benchmark</a>).</p>
 <h3 id="step-1-building-databases">Step 1. Building databases</h3>
 <p>The database building process is similar to that of metagenomic profiling,
 with one difference:</p>
@@ -709,7 +711,7 @@ while it's much slower, &gt;10X slower on SSD and should be much slower on HDD d
 <strong>Please switch on this flag when searching on computer clusters,
 where the default mmap mode would be very slow for network-attached
 storage (NAS)</strong></p>
-<p><code>kmcp search</code> supports FASTA/Q format from STDIN or files (<a href="/usage/#search">usage</a>).</p>
+<p><code>kmcp search</code> supports FASTA/Q format from STDIN or files (<a href="/kmcp/usage/#search">usage</a>).</p>
 <pre><code>kmcp search -d gtdb.kmcp/ test.fq.gz -o result.tsv.gz
 
 22:21:26.017 [INFO] kmcp v0.8.0
