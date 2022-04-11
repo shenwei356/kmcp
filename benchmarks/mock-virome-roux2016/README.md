@@ -2,7 +2,7 @@
 
 ## Softwares
 
-- KMCP [v0.8.0](https://github.com/shenwei356/kmcp/releases/tag/v0.8.0)
+- KMCP [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
 - MetaPhlAn [3.0.13 (2021-07-27)](https://github.com/biobakery/MetaPhlAn/releases/tag/3.0.13)
 - Kraken [v2.1.2 (2021-05-10)](https://github.com/DerrickWood/kraken2/releases/tag/v2.1.2),
   Bracken [v2.6.2 (2021-03-22)](https://github.com/jenniferlu717/Bracken/releases/tag/v2.6.2)
@@ -31,7 +31,7 @@ to Linker Amplification for quantitative amplification of both dsDNA and ssDNA t
 > situations with either low abundance of ssDNA viruses (MCA, total ssDNA ∼2% of 
 > community) or high abundance of ssDNA viruses (MCB, total ssDNA ∼66% of community)
 
-> Roux S, Solonenko NE, Dang VT, Poulos BT, Schwenck SM, Goldsmith DB, Coleman ML, Breitbart M, Sullivan MB. 2016. Towards quantitative viromics for both double-stranded and single-stranded DNA viruses. PeerJ 4:e2777 https://doi.org/10.8.07/peerj.2777
+> Roux S, Solonenko NE, Dang VT, Poulos BT, Schwenck SM, Goldsmith DB, Coleman ML, Breitbart M, Sullivan MB. 2016. Towards quantitative viromics for both double-stranded and single-stranded DNA viruses. PeerJ 4:e2777 https://doi.org/10.8.27/peerj.2777
 
 Phages (rank is based on NCBI taxonomy 2021-12-06)
 

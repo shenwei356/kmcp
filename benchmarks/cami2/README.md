@@ -1,3 +1,40 @@
+# Benchmarks on datasets from CAMI2 challenge
+
+We created KMCP databaes with the RefSeq and Taxonomy snapshot provided by CAMI2 (2019-01-08).
+
+Gold standard and profiles of other tools were  downloaded from: https://zenodo.org/record/5006866.
+Sequence datasets were download from: https://data.cami-challenge.org/participate.
+
+## Softwares
+
+- kmcp [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
+
+## Databases
+
+[Prebuilt databases and the reference genomes](https://1drv.ms/u/s!Ag89cZ8NYcqtjVVADr8r--fnKFt-?e=ivNZNK):
+
+- DB for bacteria: [refseq-cami2-k21-n10.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjV62KmQmOojxwBRr?e=lp5a9F), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWISqJGcxQD39FCv?e=CQ0E8d)
+- DB for viruses: [refseq-cami2-viral-k21-n5.db.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVyYFIHY01PtDMcx?e=AO7xkY), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWDTIXL4eMpZNVA0?e=1YXKkk)
+- TaxId mapping: [taxid.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVvZBPDumqTp0LLX?e=2OGhTe), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWXOc2bP9cmE2H9C?e=yyZnaB);
+  [taxid-viral.map](https://1drv.ms/u/s!Ag89cZ8NYcqtjVclRm9-rd-K2MA3?e=6aOgqm), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWZR9Zfs7m33k_lV?e=ALSUe0)
+- [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjVjXKnxzq-sUb8Cw?e=7AwTnG), [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjWQf06gXeM0rLHJ9?e=dxSW9g)
+
+**Attention**: the CAMI2 RefSeq snapshot did not include viruses,
+and CAMI2 toy mouse gut dataset did not contain viral reads either.
+
+Reference genomes (Bacteria and Archaea):
+
+1. Microbial genomes were extracted from CAMI2 RefSeq snapshot (`2019-01-08`) using
+corresponding taxonomy information .
+2. **For every species, at most 5 assemblies (sorted by assembly accession) were kept**.
+
+Reference genomes (Viruses):
+
+1. Current RefSeq virual `assembly_summary.txt` was downloaded, and filter
+records before `2019-01-08`.
+2. All viral reference genomes were downloaded for database building.
+
+[Databases building steps](./database.md).
 
 ## KMCP
 
