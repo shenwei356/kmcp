@@ -116,7 +116,7 @@ Uncompressing and renaming:
  
     # uncompress
     mkdir -p gtdb
-    tar -zxvf gtdb_genomes_reps_r202.tar.gz -O gtdb
+    tar -zxvf gtdb_genomes_reps_r202.tar.gz -C gtdb
     
     # rename
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
@@ -185,6 +185,51 @@ Building database (all k-mers, for profiling on short-reads):
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
+    
+Building small databases (all k-mers, for profiling with a computer cluster or computer with limited RAM):
+    
+    input=gtdb
+    
+    find $input -name "*.fna.gz" > $input.files.txt
+    
+    # sort files by genome size, so we can split them into chunks with similar genome sizes
+    cp $input.files.txt $input.files0.txt
+    cat $input.files0.txt \
+        | rush -k 'echo -e {}"\t"$(seqkit stats -T {} | sed 1d | cut -f 5)' \
+        > $input.files0.size.txt
+    cat $input.files0.size.txt \
+        | csvtk sort -Ht -k 2:nr \
+        | csvtk cut -t -f 1 \
+        > $input.files.txt
+    
+    # number of databases
+    n=16
+        
+    # split into $n chunks using round robin distribution
+    split -n r/$n -d  $input.files.txt $input.n$n-
+    
+    # create database for every chunks
+    for f in $input.n$n-*; do 
+        echo $f
+        
+        # compute k-mers
+        #   sequence containing "plasmid" in name are ignored,
+        #   reference genomes are split into 10 chunks with 100bp overlap
+        #   k = 21
+        kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+            --log $f-k21-n10.log -j 24 --force
+
+        # build database
+        #   number of index files: 24, for server with >= 24 CPU cores
+        #   bloom filter parameter:
+        #     number of hash function: 1
+        #     false positive rate: 0.3
+        kmcp index -j 24 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
+            --log $f.kmcp.log
+        
+        # cp taxid and name mapping file to database directory
+        cp taxid.map name.map $f.kmcp/
+    done
     
 Building database (k-mer sketches, for profiling on long-reads):
     
@@ -261,61 +306,26 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.mini5.kmcp/
-    
-Building small databases (all k-mers, for profiling with a computer cluster):
-    
-    input=gtdb
-    
-    find $input -name "*.fna.gz" > $input.files.txt
-    
-    
-    # number of databases
-    n=16
-        
-    # split into $n chunks
-    split -n l/$n $chunksize -d  $input.files.txt $input.n$n-
-    
-    # create database for every chunks
-    for f in $input.n$n-*; do 
-        echo $f
-        
-        # compute k-mers
-        #   sequence containing "plasmid" in name are ignored,
-        #   reference genomes are split into 10 chunks with 100bp overlap
-        #   k = 21
-        kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
-            --log $f-k21-n10.log -j 24 --force
 
-        # build database
-        #   number of index files: 24, for server with >= 24 CPU cores
-        #   bloom filter parameter:
-        #     number of hash function: 1
-        #     false positive rate: 0.3
-        kmcp index -j 24 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
-            --log $f.kmcp.log
-        
-        # cp taxid and name mapping file to database directory
-        cp taxid.map name.map $f.kmcp/
-    done
 
 ### RefSeq viral or fungi
 
 Tools
 
-- [genome_updater](https://github.com/pirovc/genome_updater) for downloading genomes from NCBI.
+- [genome_updater](https://github.com/pirovc/genome_updater) (0.4.1) for downloading genomes from NCBI.
 
 Downloading viral and fungi sequences:
 
-    # name=fungi
-    name=viral
+    name=fungi
+    # name=viral
     
     # -k for dry-run
     # -i for fix
     time genome_updater.sh \
         -d "refseq"\
         -g $name \
-        -c "all" \
-        -l "all" \
+        -c "" \
+        -l "" \
         -f "genomic.fna.gz" \
         -o "refseq-$name" \
         -t 12 \
@@ -524,11 +534,15 @@ Downloading viral sequences:
 
     # -k for dry-run
     # -i for fix
+    # keep at most 5 genomes for a taxid:
+    #    genome_updater v0.4.1: -A 5 -c "" -l ""
+    #    genome_updater v0.2.5: -j taxids:5 -c "all" -l "all"
     time genome_updater.sh \
         -d "genbank"\
+        -A 5 \
         -g $name \
-        -c "all" \
-        -l "all" \
+        -c "" \
+        -l "" \
         -f "genomic.fna.gz" \
         -o "genbank-$name" \
         -t 12 \
@@ -573,7 +587,7 @@ Downloading viral sequences:
     brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
         
         
-keep at most 5 genomes for a taxid:
+Keep at most 5 genomes for a taxid (optional)
 
 
     # -----------------------------------------------------------------
@@ -635,6 +649,49 @@ Building database (all k-mers, for profiling on short-reads):
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.kmcp/
 
+Building small databases (all k-mers, for profiling with a computer cluster or computer with limited RAM):
+    
+    name=genbank-viral
+    
+    input=files.renamed.slim
+    
+    find $input -name "*.fna.gz" > $input.files.txt
+    
+    # sort files by genome size, so we can split them into chunks with similar genome sizes
+    cp $input.files.txt $input.files0.txt
+    cat $input.files0.txt \
+        | rush -k 'echo -e {}"\t"$(seqkit stats -T {} | sed 1d | cut -f 5)' \
+        > $input.files0.size.txt
+    cat $input.files0.size.txt \
+        | csvtk sort -Ht -k 2:nr \
+        | csvtk cut -t -f 1 \
+        > $input.files.txt
+        
+    # number of databases
+    n=4
+        
+    # split into $n chunks using round robin distribution
+    split -n r/$n -d  $input.files.txt $name.n$n-
+    
+    # create database for every chunks
+    for f in $name.n$n-*; do 
+        echo $f
+  
+        kmcp compute -i $f -O $f-k21-n5 \
+            -k 21 --seq-name-filter plasmid \
+            --split-number 5 --split-overlap 100 \
+            --log $f-k21-n5.log -j 24 --force
+        
+        # viral genomes are small:
+        #   using small false positive rate: 0.001
+        #   using more hash functions: 3
+        kmcp index -I $f-k21-n5/ -O $f.kmcp \
+            -j 24 -f 0.05 -n 1 -x 100K -8 1M \
+            --log $f.kmcp.log --force
+        
+        # cp taxid and name mapping file to database directory
+        cp taxid.map name.map $f.kmcp/
+    done
 
 Building database (k-mer sketches, for profiling on long-reads):
 
@@ -698,57 +755,27 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map genbank-viral.mini5.kmcp/
-    
-Building small databases (all k-mers, for profiling with a computer cluster):
-    
-    name=genbank-viral
-    
-    input=files.renamed.slim
-    
-    find $input -name "*.fna.gz" > $input.files.txt
-    
-    
-    # number of databases
-    n=4
-        
-    # split into $n chunks
-    split -n l/$n $chunksize -d  $input.files.txt $name.n$n-
-    
-    # create database for every chunks
-    for f in $name.n$n-*; do 
-        echo $f
   
-        kmcp compute -i $f -O $f-k21-n5 \
-            -k 21 --seq-name-filter plasmid \
-            --split-number 5 --split-overlap 100 \
-            --log $f-k21-n5.log -j 32 --force
-        
-        # viral genomes are small:
-        #   using small false positive rate: 0.001
-        #   using more hash functions: 3
-        kmcp index -I $f-k21-n5/ -O $f.kmcp \
-            -j 32 -f 0.05 -n 1 -x 100K -8 1M \
-            --log $f.kmcp.log --force
-        
-        # cp taxid and name mapping file to database directory
-        cp taxid.map name.map $f.kmcp/
-    done
-    
-
     
 ### Human genome
 
 
 Downloading human genome file from [CHM13](https://github.com/marbl/CHM13):
 
-    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.3_CHM13_T2T_v1.1/GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    # v1.1: wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.3_CHM13_T2T_v1.1/GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    
+    # v2.0
+    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.4_T2T-CHM13v2.0/GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz
     
 Building database (all k-mers, < 6min):
-
-    input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    
+    # v1.1: input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
+    
+    # v2.0
+    input=GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz
     
     # splitting human genome into 1024 chunks.
-    # The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.3' from the file name.
+    # The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.4' from the file name.
     kmcp compute $input -O human-chm13-k21-n1024 \
         --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
         -k 21 \
@@ -762,10 +789,10 @@ Building database (all k-mers, < 6min):
         --log human-chm13.kmcp.log --force
     
     # taxid.map
-    echo -ne "GCA_009914755.3\t9606\n" > taxid.map
+    echo -ne "GCA_009914755.4\t9606\n" > taxid.map
     
     # name.mapp
-    echo -ne "GCA_009914755.3\tHomo sapiens isolate CHM13\n" > name.map
+    echo -ne "GCA_009914755.4\tHomo sapiens isolate CHM13\n" > name.map
     
     # cp name mapping file to database directory
     cp taxid.map name.map human-chm13.kmcp/
