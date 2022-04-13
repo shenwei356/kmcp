@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.8.3 - 2022-00-00
+
+- `search`:
+    - fix log. [#8](https://github.com/shenwei356/kmcp/issues/8)
+
 ### v0.8.2 - 2022-03-26
 
 - `search`: 

@@ -395,7 +395,6 @@ Examples:
 			log.Infof("  minimum  matched k-mers: %d", minCount)
 			log.Infof("  minimum  query coverage: %f", queryCov)
 			log.Infof("  minimum target coverage: %f", targetCov)
-			log.Infof("  minimum target coverage: %f", targetCov)
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
 			log.Info("searching ...")
