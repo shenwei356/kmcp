@@ -127,7 +127,7 @@ Mapping file:
     
     # assembly accession -> full head
     find gtdb/ -name "*.fna.gz" \
-        | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
+        | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit sort --quiet -lr {} | head -n 1 | seqkit seq -n)\n" ' \
         > name.map
         
     # assembly accession -> taxid
