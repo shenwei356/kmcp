@@ -585,7 +585,7 @@ Examples:
 
 			bytesize.FullUnit = false
 			log.Infof("  block-sizeX-kmers-t: %s", bytesize.ByteSize(kmerThresholdX))
-			log.Infof("  block-sizeX        : %s", bytesize.ByteSize(blockSizeX))
+			log.Infof("  block-sizeX        : %d", blockSizeX)
 			log.Infof("  block-size8-kmers-t: %s", bytesize.ByteSize(kmerThreshold8))
 			log.Infof("  block-size1-kmers-t: %s", bytesize.ByteSize(kmerThreshold1))
 			bytesize.FullUnit = true

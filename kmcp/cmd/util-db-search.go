@@ -769,11 +769,13 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				queryResult.Matches = nil
 
 				if len(query.Seq.Seq) < minLen { // skip short query
-					queryResult.NumKmers = 0
+					if !(query.Seq2 != nil && len(query.Seq2.Seq) >= minLen) {
+						queryResult.NumKmers = 0
 
-					query.Ch <- queryResult
-					<-tokens
-					return
+						query.Ch <- queryResult
+						<-tokens
+						return
+					}
 				}
 
 				// compute kmers
@@ -842,7 +844,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 				//  --------------------------------------------------
 
 				// sequence shorter than k, or too few k-mer sketchs.
-				if kmers == nil || len(*kmers) < db.Options.MinMatched {
+				if len(*kmers) < db.Options.MinMatched {
 					if !trySE {
 						poolKmers.Put(kmers)
 					} else {
@@ -1049,7 +1051,7 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 	}
 	if err != nil {
 		if err == sketches.ErrShortSeq {
-			return nil, nil
+			return kmers, nil
 		}
 		return nil, err
 	}
