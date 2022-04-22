@@ -349,16 +349,49 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases-prokaryotic-genome-collections" class="md-nav__link">
+    Building databases (prokaryotic genome collections)
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases (prokaryotic genome collections)">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
-  <a href="#humgut" class="md-nav__link">
-    HumGut
+  <a href="#humgut-30691-clusters" class="md-nav__link">
+    HumGut (30,691 clusters)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#progenomes2" class="md-nav__link">
-    proGenomes2
+  <a href="#progenomes2-12000-species" class="md-nav__link">
+    proGenomes2 (12,000 species)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases-viral-genome-collections" class="md-nav__link">
+    Building databases (viral genome collections)
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases (viral genome collections)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mgv-54118-species" class="md-nav__link">
+    MGV (54,118 species)
   </a>
   
 </li>
@@ -675,16 +708,49 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases-prokaryotic-genome-collections" class="md-nav__link">
+    Building databases (prokaryotic genome collections)
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases (prokaryotic genome collections)">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
-  <a href="#humgut" class="md-nav__link">
-    HumGut
+  <a href="#humgut-30691-clusters" class="md-nav__link">
+    HumGut (30,691 clusters)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#progenomes2" class="md-nav__link">
-    proGenomes2
+  <a href="#progenomes2-12000-species" class="md-nav__link">
+    proGenomes2 (12,000 species)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-databases-viral-genome-collections" class="md-nav__link">
+    Building databases (viral genome collections)
+  </a>
+  
+    <nav class="md-nav" aria-label="Building databases (viral genome collections)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mgv-54118-species" class="md-nav__link">
+    MGV (54,118 species)
   </a>
   
 </li>
@@ -999,7 +1065,7 @@ brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
 
 # assembly accession -&gt; full head
 find gtdb/ -name "*.fna.gz" \
-    | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit head -n 1 {} | seqkit seq -n)\n" ' \
+    | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit sort --quiet -lr {} | head -n 1 | seqkit seq -n)\n" ' \
     &gt; name.map
 
 # assembly accession -&gt; taxid
@@ -1728,8 +1794,13 @@ kmcp index -I refseq-$name-k31-S21/ -O refseq-$name.syncmer.kmcp \
 # cp name mapping file to database directory
 cp name.map refseq-$name.syncmer.kmcp/
 </code></pre>
-<h3 id="humgut">HumGut</h3>
+<h2 id="building-databases-prokaryotic-genome-collections">Building databases (prokaryotic genome collections)</h2>
+<h3 id="humgut-30691-clusters">HumGut (30,691 clusters)</h3>
 <p><a href="http://arken.nmbu.no/~larssn/humgut/">HumGut</a> is a comprehensive Human Gut prokaryotic genomes collection filtered by metagenome data.</p>
+<blockquote>
+<p>In this work, we aimed to create a collection of the most prevalent healthy human gut prokaryotic genomes,
+ to be used as a reference database, including both MAGs from the human gut and ordinary RefSeq genomes.</p>
+</blockquote>
 <p>Dataset</p>
 <ul>
 <li>Genomes: <a href="http://arken.nmbu.no/~larssn/humgut/HumGut.tar.gz">HumGut.tar.gz</a></li>
@@ -1834,9 +1905,9 @@ kmcp index -j 32 -I humgut-k21-n10 -O humgut.kmcp -n 1 -f 0.3
 
 cp taxid.map taxid-gtdb.map humgut.kmcp/
 </code></pre>
-<h3 id="progenomes2">proGenomes2</h3>
+<h3 id="progenomes2-12000-species">proGenomes2 (12,000 species)</h3>
 <p><a href="https://progenomes.embl.de/">proGenomes</a> v2.1 provides 84,096 consistently annotated bacterial
-and archaeal genomes from over 12000 species</p>
+and archaeal genomes from over 12000 species.</p>
 <p>Dataset:</p>
 <ul>
 <li>Representative genomes: <a href="https://progenomes.embl.de/data/repGenomes/freeze12.contigs.representatives.fasta.gz">contigs.representatives.fasta.gz</a></li>
@@ -1907,6 +1978,174 @@ kmcp compute -I genomes/ -k 21 -n 10 -B plasmid -O progenomes-k21-n10 --force
 kmcp index -j 32 -I progenomes-k21-n10 -O progenomes.kmcp -n 1 -f 0.3
 
 cp taxid.map name.map progenomes.kmcp/
+</code></pre>
+<h2 id="building-databases-viral-genome-collections">Building databases (viral genome collections)</h2>
+<h3 id="mgv-54118-species">MGV (54,118 species)</h3>
+<blockquote>
+<p>Bacteriophages have important roles in the ecology of the human gut microbiome but are under-represented in reference data-
+bases. To address this problem, we assembled the Metagenomic Gut Virus catalogue that comprises 189,680 viral genomes
+from 11,810 publicly available human stool metagenomes. Over 75% of genomes represent double-stranded DNA phages that
+infect members of the Bacteroidia and Clostridia classes. Based on sequence clustering we identified 54,118 candidate viral spe-
+cies, 92% of which were not found in existing databases. The Metagenomic Gut Virus catalogue improves detection of viruses
+in stool metagenomes and accounts for nearly 40% of CRISPR spacers found in human gut Bacteria and Archaea. We also pro-
+duced a catalogue of 459,375 viral protein clusters to explore the functional potential of the gut virome. This revealed tens of
+thousands of diversity-generating retroelements, which use error-prone reverse transcription to mutate target genes and may
+be involved in the molecular arms race between phages and their bacterial hosts.</p>
+<p>https://doi.org/10.1038/s41564-021-00928-6
+https://portal.nersc.gov/MGV/</p>
+</blockquote>
+<p>Basic information (optional)</p>
+<pre><code>$ seqkit  stats mgv_contigs.fna 
+file             format  type  num_seqs        sum_len  min_len   avg_len  max_len
+mgv_contigs.fna  FASTA   DNA    189,680  8,803,222,510    1,244  46,410.9  553,716
+
+# Genome completeness
+Complete: n=26,030
+&gt;90% complete: n=53,220
+50-90% complete: n=110,430
+
+$ seqkit  seq -n mgv_contigs.fna | head -n 3
+MGV-GENOME-0364295
+MGV-GENOME-0364296
+MGV-GENOME-0364303
+</code></pre>
+<p>Stats (optional)</p>
+<pre><code>cat mgv_contig_info.tsv \
+    | csvtk cut -t -f completeness \
+    | csvtk plot hist -o completeness.hist.png
+
+# Complete
+$ cat mgv_contig_info.tsv \
+    | csvtk filter2 -t -f '$completeness == 100' \
+    | csvtk nrows 
+32577
+
+# &gt;90% complete
+$ cat mgv_contig_info.tsv \
+    | csvtk filter2 -t -f '$completeness &gt;= 90' \
+    | csvtk nrows 
+78814  # &lt; 79250
+
+# checkv_quality
+$ cat mgv_contig_info.tsv \
+    | csvtk cut -t -f checkv_quality \
+    | csvtk freq -t -nr | more
+checkv_quality  frequency
+Medium-quality  110430
+High-quality    53220
+Complete        26030
+
+# &gt;90% complete &amp;&amp; checkv_quality == High-quality/Complete
+$ cat mgv_contig_info.tsv \
+    | csvtk filter2 -t -f '$completeness &gt;= 90 &amp;&amp; $checkv_quality != "Medium-quality"' \
+    | csvtk nrows 
+78813
+</code></pre>
+<p>Stats of high-quality genomes (optional)</p>
+<pre><code># high-quality genomes
+cat mgv_contig_info.tsv \
+    | csvtk filter2 -t -f '$completeness &gt;= 90 &amp;&amp; $checkv_quality != "Medium-quality"' \
+    &gt; mgv.hq.tsv
+
+# number of families
+cat mgv.hq.tsv \
+    | csvtk freq -t -f ictv_family -nr \
+    | csvtk nrow -t
+19
+
+# number of species
+cat mgv.hq.tsv \
+    | csvtk freq -t -f votu_id -nr \
+    | csvtk nrow -t
+26779
+
+# baltimore
+cat mgv.hq.tsv \
+    | csvtk freq -t -f baltimore -nr \
+    | csvtk pretty -t
+baltimore   frequency
+---------   ---------
+dsDNA       76527
+ssDNA       2215
+NULL        62
+DNA         7
+dsDNA-RT    1
+ssRNA-RT    1
+
+# prophage?
+cat mgv.hq.tsv \
+    | csvtk freq -t -f prophage -nr \
+    | csvtk pretty -t
+prophage   frequency
+--------   ---------
+No         58366
+Yes        20447
+
+# species with both prophage and lytic phages
+cat mgv.hq.tsv \
+    | csvtk freq -t -f votu_id,prophage \
+    | csvtk freq -t -f votu_id \
+    | csvtk filter2 -t -f '$frequency &gt; 1' \
+    | csvtk nrow -t
+2745
+</code></pre>
+<p>Prepare genomes:</p>
+<pre><code># ID
+cat mgv_contig_info.tsv \
+    | csvtk filter2 -t -f '$completeness &gt;= 90 &amp;&amp; $checkv_quality != "Medium-quality"' \
+    | csvtk cut -t -f contig_id \
+    | csvtk del-header \
+    &gt; mgv.hq.tsv.id
+
+# extract sequences
+seqkit grep -f mgv.hq.tsv.id mgv_contigs.fna -o mgv.hq.fasta.gz
+
+# split into files with one genome
+seqkit split2 -s 1 mgv.hq.fasta.gz -O mgv
+
+# rename with 
+find mgv/ -name "*.fasta.gz" \
+    | rush -j 20 'mv {} {/}/$(seqkit seq -ni {}).fa.gz'
+</code></pre>
+<p>Create taxdump files and <code>taxid.map</code> with taxonkit (version &gt;= v0.11.0):</p>
+<pre><code>cat mgv_contig_info.tsv \
+    | csvtk cut -t -f contig_id,votu_id,ictv_order,ictv_family,ictv_genus \
+    | csvtk del-header \
+    &gt; mgv.taxonmy.tsv
+
+taxonkit create-taxdump mgv.taxonmy.tsv --out-dir mgv-taxdump --force \
+    --field-accession 1 --field-species 2 \
+    --field-order 3 --field-family 4 --field-genus 5
+
+cp mgv-taxdump/taxid.map .
+
+# name.map
+cat mgv-taxdump/taxid.map \
+    | taxonkit lineage --data-dir mgv-taxdump/ -i 2 \
+    | cut -f 1,3 \
+    &gt; name.map
+
+head -n 5 name.map 
+MGV-GENOME-0364295      Caudovirales;crAss-phage;OTU-61123
+MGV-GENOME-0364296      Caudovirales;crAss-phage;OTU-61123
+MGV-GENOME-0364303      Caudovirales;crAss-phage;OTU-05782
+MGV-GENOME-0364311      Caudovirales;crAss-phage;OTU-01114
+MGV-GENOME-0364312      Caudovirales;crAss-phage;OTU-23935
+</code></pre>
+<p>Building database:</p>
+<pre><code># compute k-mers
+#   reference genomes are split into 5 chunks
+#   k = 21
+kmcp compute -I mgv/ -k 21 -n 5 -O mgv-k21-n5 --force
+
+# viral genomes are small:
+#   using small false positive rate: 0.05
+#   still using one hash function: 1
+kmcp index -j 32 -I mgv-k21-n5 -O mgv.kmcp \
+    -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+    --log mgv.kmcp.log
+
+cp taxid.map name.map mgv.kmcp/
 </code></pre>
 <h2 id="building-custom-databases">Building custom databases</h2>
 <p>Files:</p>
