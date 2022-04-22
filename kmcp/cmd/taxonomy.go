@@ -73,7 +73,7 @@ func loadTaxonomy(opt *Options, path string) *taxdump.Taxonomy {
 		defer wg.Done()
 		existed, err = pathutil.Exists(filepath.Join(path, "delnodes.dmp"))
 		if err != nil {
-			checkError(fmt.Errorf("err on checking file merged.dmp: %s", err))
+			checkError(fmt.Errorf("err on checking file delnodes.dmp: %s", err))
 		}
 		if existed {
 			err = t.LoadDeletedNodesFromNCBI(filepath.Join(path, "delnodes.dmp"))

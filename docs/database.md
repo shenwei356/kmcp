@@ -887,10 +887,15 @@ Building database (Closed Syncmer):
     # cp name mapping file to database directory
     cp name.map refseq-$name.syncmer.kmcp/
 
-### HumGut
 
+## Building databases (prokaryotic genome collections)
+
+### HumGut (30,691 clusters)
 
 [HumGut](http://arken.nmbu.no/~larssn/humgut/) is a comprehensive Human Gut prokaryotic genomes collection filtered by metagenome data.
+
+>  In this work, we aimed to create a collection of the most prevalent healthy human gut prokaryotic genomes,
+>  to be used as a reference database, including both MAGs from the human gut and ordinary RefSeq genomes.
 
 Dataset
 
@@ -998,10 +1003,10 @@ Building database:
     
     cp taxid.map taxid-gtdb.map humgut.kmcp/
 
-### proGenomes2
+### proGenomes2 (12,000 species)
 
 [proGenomes](https://progenomes.embl.de/) v2.1 provides 84,096 consistently annotated bacterial
-and archaeal genomes from over 12000 species
+and archaeal genomes from over 12000 species.
 
 Dataset:
 
@@ -1077,6 +1082,186 @@ Building database:
     
     cp taxid.map name.map progenomes.kmcp/
         
+
+
+## Building databases (viral genome collections)
+
+### MGV (54,118 species)
+
+> Bacteriophages have important roles in the ecology of the human gut microbiome but are under-represented in reference data-
+> bases. To address this problem, we assembled the Metagenomic Gut Virus catalogue that comprises 189,680 viral genomes
+> from 11,810 publicly available human stool metagenomes. Over 75% of genomes represent double-stranded DNA phages that
+> infect members of the Bacteroidia and Clostridia classes. Based on sequence clustering we identified 54,118 candidate viral spe-
+> cies, 92% of which were not found in existing databases. The Metagenomic Gut Virus catalogue improves detection of viruses
+> in stool metagenomes and accounts for nearly 40% of CRISPR spacers found in human gut Bacteria and Archaea. We also pro-
+> duced a catalogue of 459,375 viral protein clusters to explore the functional potential of the gut virome. This revealed tens of
+> thousands of diversity-generating retroelements, which use error-prone reverse transcription to mutate target genes and may
+> be involved in the molecular arms race between phages and their bacterial hosts.
+> 
+> https://doi.org/10.1038/s41564-021-00928-6
+> https://portal.nersc.gov/MGV/
+
+Basic information (optional)
+
+    $ seqkit  stats mgv_contigs.fna 
+    file             format  type  num_seqs        sum_len  min_len   avg_len  max_len
+    mgv_contigs.fna  FASTA   DNA    189,680  8,803,222,510    1,244  46,410.9  553,716
+
+    # Genome completeness
+    Complete: n=26,030
+    >90% complete: n=53,220
+    50-90% complete: n=110,430
+    
+    $ seqkit  seq -n mgv_contigs.fna | head -n 3
+    MGV-GENOME-0364295
+    MGV-GENOME-0364296
+    MGV-GENOME-0364303
+
+Stats (optional)
+    
+    cat mgv_contig_info.tsv \
+        | csvtk cut -t -f completeness \
+        | csvtk plot hist -o completeness.hist.png
+
+    # Complete
+    $ cat mgv_contig_info.tsv \
+        | csvtk filter2 -t -f '$completeness == 100' \
+        | csvtk nrows 
+    32577
+    
+    # >90% complete
+    $ cat mgv_contig_info.tsv \
+        | csvtk filter2 -t -f '$completeness >= 90' \
+        | csvtk nrows 
+    78814  # < 79250
+    
+    # checkv_quality
+    $ cat mgv_contig_info.tsv \
+        | csvtk cut -t -f checkv_quality \
+        | csvtk freq -t -nr | more
+    checkv_quality  frequency
+    Medium-quality  110430
+    High-quality    53220
+    Complete        26030
+    
+    # >90% complete && checkv_quality == High-quality/Complete
+    $ cat mgv_contig_info.tsv \
+        | csvtk filter2 -t -f '$completeness >= 90 && $checkv_quality != "Medium-quality"' \
+        | csvtk nrows 
+    78813
+    
+    
+Stats of high-quality genomes (optional)
+
+    # high-quality genomes
+    cat mgv_contig_info.tsv \
+        | csvtk filter2 -t -f '$completeness >= 90 && $checkv_quality != "Medium-quality"' \
+        > mgv.hq.tsv
+    
+    # number of families
+    cat mgv.hq.tsv \
+        | csvtk freq -t -f ictv_family -nr \
+        | csvtk nrow -t
+    19
+    
+    # number of species
+    cat mgv.hq.tsv \
+        | csvtk freq -t -f votu_id -nr \
+        | csvtk nrow -t
+    26779
+    
+    # baltimore
+    cat mgv.hq.tsv \
+        | csvtk freq -t -f baltimore -nr \
+        | csvtk pretty -t
+    baltimore   frequency
+    ---------   ---------
+    dsDNA       76527
+    ssDNA       2215
+    NULL        62
+    DNA         7
+    dsDNA-RT    1
+    ssRNA-RT    1
+    
+    # prophage?
+    cat mgv.hq.tsv \
+        | csvtk freq -t -f prophage -nr \
+        | csvtk pretty -t
+    prophage   frequency
+    --------   ---------
+    No         58366
+    Yes        20447
+    
+    # species with both prophage and lytic phages
+    cat mgv.hq.tsv \
+        | csvtk freq -t -f votu_id,prophage \
+        | csvtk freq -t -f votu_id \
+        | csvtk filter2 -t -f '$frequency > 1' \
+        | csvtk nrow -t
+    2745
+
+
+Prepare genomes:
+
+    # ID
+    cat mgv_contig_info.tsv \
+        | csvtk filter2 -t -f '$completeness >= 90 && $checkv_quality != "Medium-quality"' \
+        | csvtk cut -t -f contig_id \
+        | csvtk del-header \
+        > mgv.hq.tsv.id
+
+    # extract sequences
+    seqkit grep -f mgv.hq.tsv.id mgv_contigs.fna -o mgv.hq.fasta.gz
+    
+    # split into files with one genome
+    seqkit split2 -s 1 mgv.hq.fasta.gz -O mgv
+    
+    # rename with 
+    find mgv/ -name "*.fasta.gz" \
+        | rush -j 20 'mv {} {/}/$(seqkit seq -ni {}).fa.gz'
+        
+Create taxdump files and `taxid.map` with taxonkit (version >= v0.11.0):
+
+    cat mgv_contig_info.tsv \
+        | csvtk cut -t -f contig_id,votu_id,ictv_order,ictv_family,ictv_genus \
+        | csvtk del-header \
+        > mgv.taxonmy.tsv
+
+    taxonkit create-taxdump mgv.taxonmy.tsv --out-dir mgv-taxdump --force \
+        --field-accession 1 --field-species 2 \
+        --field-order 3 --field-family 4 --field-genus 5
+    
+    cp mgv-taxdump/taxid.map .
+    
+    # name.map
+    cat mgv-taxdump/taxid.map \
+        | taxonkit lineage --data-dir mgv-taxdump/ -i 2 \
+        | cut -f 1,3 \
+        > name.map
+        
+    head -n 5 name.map 
+    MGV-GENOME-0364295      Caudovirales;crAss-phage;OTU-61123
+    MGV-GENOME-0364296      Caudovirales;crAss-phage;OTU-61123
+    MGV-GENOME-0364303      Caudovirales;crAss-phage;OTU-05782
+    MGV-GENOME-0364311      Caudovirales;crAss-phage;OTU-01114
+    MGV-GENOME-0364312      Caudovirales;crAss-phage;OTU-23935
+    
+Building database:
+    
+    # compute k-mers
+    #   reference genomes are split into 5 chunks
+    #   k = 21
+    kmcp compute -I mgv/ -k 21 -n 5 -O mgv-k21-n5 --force
+
+    # viral genomes are small:
+    #   using small false positive rate: 0.05
+    #   still using one hash function: 1
+    kmcp index -j 32 -I mgv-k21-n5 -O mgv.kmcp \
+        -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+        --log mgv.kmcp.log
+    
+    cp taxid.map name.map mgv.kmcp/
+
 ## Building custom databases
 
 Files:
