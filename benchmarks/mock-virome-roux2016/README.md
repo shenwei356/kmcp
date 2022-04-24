@@ -211,6 +211,65 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             > $profile
     done
 
+## KMCP using MGV
+
+We search against MGV.
+
+
+    # ------------------------------------------------------------------------
+    # prepare folder and files
+    
+    reads=kmcp-pese-mgv
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+   
+    # ------------------------------------------------------------------------
+    # search
+      
+    reads=kmcp-pese-mgv
+    j=4
+    J=40
+    
+    # -------------------------------------
+    # mgv
+
+    db=mgv.kmcp/
+    X=mgv-taxdump/
+    T=mgv.kmcp/taxid.map    
+    dbname=mgv
+    
+    fd R1_001_t_paired.fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@^(.+)_R1_}' \
+            'kmcp search -d {db} {p}_R1_001_t_paired.fastq.gz {p}_R2_001_t_paired.fastq.gz \
+                {p}_R1_001_t_unpaired.fastq.gz {p}_R2_001_t_unpaired.fastq.gz \
+                -o {p}.kmcp@{dbname}.tsv.gz \
+                --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
+            -c -C $reads@$dbname.rush
+ 
+    # ------------------------------------------------------------------------
+    # [for merged search results] multiple profiling modes
+    
+     for m in $(seq 1 5); do
+        fd kmcp.tsv.gz$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -v X=$X -v T=$T -v m=$m \
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%@(^......)} \
+                    --show-rank superkingdom,phylum,class,order,family,genus,species \
+                    --log {}.k-m{m}.profile.log' 
+        
+        profile=$reads.c-m$m.profile
+        fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
+            | csvtk sort -H -k 1:N \
+            | rush -j 1 'cat {}' \
+            > $profile
+    done
+
     
 ## MetaPhlAn
     

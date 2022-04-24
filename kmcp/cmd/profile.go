@@ -1123,6 +1123,10 @@ Examples:
 
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(profile))
+			if len(profile) >= 1000 && !noAmbCorr {
+				log.Warningf("  too many candidates detected, the next stage would be very slow")
+				log.Warningf("  the flag --no-amb-corr is recommended to disable ambiguous reads correction which has very little effect on the results")
+			}
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
 		}
