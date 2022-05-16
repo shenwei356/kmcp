@@ -455,6 +455,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#can-i-create-a-database-with-custom-genome-collections-for-profiling" class="md-nav__link">
+    Can I create a database with custom genome collections for profiling?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-k-mer-size-should-i-use-to-build-the-database" class="md-nav__link">
     What k-mer size should I use to build the database?
   </a>
@@ -619,6 +626,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#can-i-create-a-database-with-custom-genome-collections-for-profiling" class="md-nav__link">
+    Can I create a database with custom genome collections for profiling?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-k-mer-size-should-i-use-to-build-the-database" class="md-nav__link">
     What k-mer size should I use to build the database?
   </a>
@@ -736,6 +750,9 @@ for downstream analysis.</p>
 <p>Buiding small databases can also accelerate searching on a <em>computer cluster</em>,
 where every node searches a part of the database.</p>
 <h2 id="database-building">Database building</h2>
+<h3 id="can-i-create-a-database-with-custom-genome-collections-for-profiling">Can I create a database with custom genome collections for profiling?</h3>
+<p>Yes, you can use <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>
+to create NCBI-style taxdump files for profiling, which also generates a <code>taxid.map</code> file.</p>
 <h3 id="what-k-mer-size-should-i-use-to-build-the-database">What k-mer size should I use to build the database?</h3>
 <p>Multiple k-mer sizes are supported, but one value is good enough.</p>
 <p>Bigger k-mer sizes bring high specificity at the cost of decrease
@@ -744,7 +761,7 @@ of sensitivity. <code>k = 21</code> is recommended for metagenomic profiling.</p
 <p>KMCP builds database very fast,
 you can either rebuilt the database after adding new genomes,
 or create a separate database with the new genomes,
-search against these databases, and <a href="/usage/#merge">merge</a> the results.</p>
+search against these databases, and <a href="/kmcp/usage/#merge">merge</a> the results.</p>
 <h3 id="unexpected-eof-error">Unexpected EOF error</h3>
 <p>Some files could corrupt during downloading, we recommend checking
 sequence file integrity using seqkit (<code>gzip -t</code> failed for some files in
@@ -819,7 +836,11 @@ GCA_003971385.1 10243
 <p>Or set the options <code>-T/--taxid-map</code> multiple times:</p>
 <pre><code>kmcp profile -T gtdb.kmcp/taxid.map -T refseq-viral.kmcp/taxid.map -T refseq-fungi.kmcp/taxid.map ...
 </code></pre>
-<p>For other custom databases, you may need to create one.</p>
+<p>For other custom genome collections, you can use
+<a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>
+to create NCBI-style taxdump files for custom taxonomy, e.g.,
+<a href="https://github.com/shenwei356/gtdb-taxdump">GTDB</a> and
+<a href="https://github.com/shenwei356/ictv-taxdump">ICTV</a>, which also generates a <code>taxid.map</code> file.</p>
 <h3 id="unknown-taxid">Unknown taxid?</h3>
 <blockquote>
 <p>19:54:54.632 [ERRO] unknown taxid for NZ_CP028116.1, please check taxid mapping file(s)</p>

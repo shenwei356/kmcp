@@ -1322,6 +1322,9 @@ increase precision at the cost of sensitivity.</li>
 <li>Mapping references IDs to TaxIds: <code>-T/--taxid-map</code></li>
 <li>NCBI taxonomy dump files: <code>-X/--taxdump</code></li>
 </ol>
+<p>For databases built with a custom genome collection, you can use
+<a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>
+to create NCBI-style taxdump files, which also generates a TaxId mapping file.</p>
 <p><strong>Performance notes</strong>:</p>
 <ol>
 <li>Searching results are parsed in parallel, and the number of
