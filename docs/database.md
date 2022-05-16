@@ -1271,7 +1271,9 @@ Files:
     - One genome per file **with the reference identifier in the file name**.
 2. TaxId mapping file (for metagenomic profiling)
     - Two-column (reference identifier and TaxId) tab-delimited.
-3. [NCBI taxonomy dump files](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz) (for metagenomic profiling)
+3. [NCBI taxonomy dump files](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz) (for metagenomic profiling).
+  You can use [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump)
+  to create NCBI-style taxdump files for custom genome collections, which also generates a TaxId mapping file.
     - `names.dmp`
     - `nodes.dmp`
     - `merged.dmp` (optional)

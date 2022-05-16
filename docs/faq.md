@@ -19,6 +19,11 @@ where every node searches a part of the database.
 
 ## Database building
 
+### Can I create a database with custom genome collections for profiling?
+
+Yes, you can use [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump)
+to create NCBI-style taxdump files for profiling, which also generates a `taxid.map` file.
+
 ### What k-mer size should I use to build the database?
 
 Multiple k-mer sizes are supported, but one value is good enough.
@@ -31,7 +36,7 @@ of sensitivity. `k = 21` is recommended for metagenomic profiling.
 KMCP builds database very fast,
 you can either rebuilt the database after adding new genomes,
 or create a separate database with the new genomes,
-search against these databases, and [merge](/usage/#merge) the results.
+search against these databases, and [merge](/kmcp/usage/#merge) the results.
 
 ### Unexpected EOF error
 
@@ -107,7 +112,11 @@ Or set the options `-T/--taxid-map` multiple times:
 
     kmcp profile -T gtdb.kmcp/taxid.map -T refseq-viral.kmcp/taxid.map -T refseq-fungi.kmcp/taxid.map ...
 
-For other custom databases, you may need to create one.
+For other custom genome collections, you can use
+[taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump)
+to create NCBI-style taxdump files for custom taxonomy, e.g.,
+[GTDB](https://github.com/shenwei356/gtdb-taxdump) and
+[ICTV](https://github.com/shenwei356/ictv-taxdump), which also generates a `taxid.map` file.
 
 ### Unknown taxid?
 
