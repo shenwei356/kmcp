@@ -482,6 +482,9 @@ Profiling modes:
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
   2. NCBI taxonomy dump files: -X/--taxdump
+     For databases built with a custom genome collection, you can use
+     "taxonkit create-taxdump" (https://github.com/shenwei356/taxonkit)
+     to create NCBI-style taxdump files, which also generates a TaxId mapping file.
 
 Performance notes:
   1. Searching results are parsed in parallel, and the number of
