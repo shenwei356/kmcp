@@ -23,6 +23,11 @@ from metagenomic shotgun sequence data, but also provides confident pathogen det
 in infectious clinical samples of low depth
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
+Genome collections with custom taxonomy,
+e.g., [GTDB](https://gtdb.ecogenomic.org/) uses its own taxonomy and
+[MGV](https://doi.org/10.1038/s41564-021-00928-6) uses [ICTV taxonomy](https://talk.ictvonline.org/),
+are also supported by generating NCBI-style taxdump files with [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump).
+
 ### 2. Fast sequence search against large scales of genomic datasets
 
 KMCP can be used for fast sequence search against large scales of genomic datasets

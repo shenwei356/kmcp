@@ -426,9 +426,9 @@ Methods:
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
      to reduce the false positive of ambiguous matches.
      You can also disable this step by the flag --no-amb-corr.
-     If the stage 1/4 produces thousands of candidates, you can also use
+     If stage 1/4 produces thousands of candidates, you can use
      the flag --no-amb-corr to reduce analysis time, which has very little
-     effect on the results
+     effect on the results.
   4. Multi-aligned queries are proportionally assigned to references
      with a similar strategy in Metalign.
   5. Input files are parsed four times, therefore STDIN is not supported.
@@ -477,7 +477,7 @@ Profiling modes:
     -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
-    --max-qcov-gap                0.4                       
+    --max-qcov-gap                0.4                          
 
 Taxonomy data:
   1. Mapping references IDs to TaxIds: -T/--taxid-map
@@ -491,7 +491,7 @@ Performance notes:
      lines proceeded by a thread can be set by the flag --line-chunk-size.
   2. However using a lot of threads does not always accelerate
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
- *3. If the stage 1/4 produces thousands of candidates, then the stage 2/4
+ *3. If stage 1/4 produces thousands of candidates, then stage 2/4
      would be very slow. You can use the flag --no-amb-corr to disable
      ambiguous reads correction which has very little effect on the results.
 
