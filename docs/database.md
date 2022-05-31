@@ -1220,16 +1220,15 @@ Prepare genomes:
     find mgv/ -name "*.fasta.gz" \
         | rush -j 20 'mv {} {/}/$(seqkit seq -ni {}).fa.gz'
         
-Create taxdump files and `taxid.map` with taxonkit (version >= v0.11.0):
+Create taxdump files and `taxid.map` with taxonkit (version >= v0.12.0):
 
     cat mgv_contig_info.tsv \
-        | csvtk cut -t -f contig_id,votu_id,ictv_order,ictv_family,ictv_genus \
+            | csvtk cut -t -f ictv_order,ictv_family,ictv_genus,votu_id,contig_id \
         | csvtk del-header \
-        > mgv.taxonmy.tsv
+        > mgv.taxonomy.tsv
 
-    taxonkit create-taxdump mgv.taxonmy.tsv --out-dir mgv-taxdump --force \
-        --field-accession 1 --field-species 2 \
-        --field-order 3 --field-family 4 --field-genus 5
+    taxonkit create-taxdump mgv.taxonomy.tsv --out-dir mgv-taxdump \
+        --force -A 5 -R order,family,genus,species
     
     cp mgv-taxdump/taxid.map .
     
