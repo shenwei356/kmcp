@@ -60,7 +60,7 @@ Taken GTDB for example:
     #   bloom filter parameter:
     #     number of hash function: 1
     #     false positive rate: 0.3
-    kmcp index -j 32 -I gtdb-r202-k21 -O gtdb-r202-k21-n 1 -f 0.3
+    kmcp index -j 32 -I gtdb-r202-k21 -O gtdb-r202-k21 -n 1 -f 0.3
     
     # cp name mapping file to database directory
     cp name.map gtdb-r202-k21.kmcp/
