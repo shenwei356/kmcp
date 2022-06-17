@@ -9,6 +9,18 @@
 > Wei Shen, Hongyan Xiang, Tianquan Huang, Hui Tang, Mingli Peng, Dachuan Cai, Peng Hu, Hong Ren.<br>
 > bioRxiv 2022.03.07.482835; doi: [https://doi.org/10.1101/2022.03.07.482835](https://doi.org/10.1101/2022.03.07.482835)
 
+## Documents
+
+- [Installation](https://bioinf.shenwei.me/kmcp/download)
+- [Databases](https://bioinf.shenwei.me/kmcp/database)
+- Tutorials
+    - [Taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+    - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
+- [Usage](https://bioinf.shenwei.me/kmcp/usage)
+- [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
+- [FAQs](https://bioinf.shenwei.me/kmcp/faq)
+
+
 ## What can we do?
 
 ### 1. Accurate metagenomic profiling
@@ -87,17 +99,6 @@ KMCP utilizes multiple k-mer sketches
 <img src="kmcp.jpg" alt="" width="800"/>
 
 <hr/>
-
-## Documents
-
-- [Installation](https://bioinf.shenwei.me/kmcp/download)
-- [Databases](https://bioinf.shenwei.me/kmcp/database)
-- Tutorials
-    - [Taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
-    - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
-- [Usage](https://bioinf.shenwei.me/kmcp/usage)
-- [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
-- [FAQs](https://bioinf.shenwei.me/kmcp/faq)
 
 
 ## Installation
