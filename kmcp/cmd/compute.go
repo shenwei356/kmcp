@@ -76,7 +76,7 @@ Attentions:
      where sequence IDs in all input files are better to be distinct.
   3. It also supports splitting sequences into chunks, this
      could increase the specificity in search results at the cost
-     of slower searching speed.
+     of a slower searching speed.
   4. Multiple sizes of k-mers are supported.
 
 Supported k-mer (sketches) types:

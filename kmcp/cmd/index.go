@@ -68,7 +68,7 @@ Database size and searching accuracy:
      query with tens of k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     at the cost of slower searching speed. Values <=4 are recommended.
+     at the cost of a slower searching speed. Values <=4 are recommended.
   3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
