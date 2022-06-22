@@ -313,6 +313,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#method-3-compile-from-source" class="md-nav__link">
+    Method 3: Compile from source
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -696,6 +703,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#method-3-compile-from-source" class="md-nav__link">
+    Method 3: Compile from source
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -869,7 +883,7 @@ in two packages for better searching performance.</p>
 </table>
 <p><em>Notes:</em></p>
 <ul>
-<li>please open an issue to request binaries for other platforms.</li>
+<li>please open an issue to request binaries for other platforms or <a href="#method-3-compile-from-source">compile from the source</a>.</li>
 <li>run <code>kmcp version</code> to check update !!!</li>
 <li>run <code>kmcp autocompletion</code> to update shell autocompletion script !!!</li>
 </ul>
@@ -902,6 +916,46 @@ And then:</p>
 <p><strong>For Windows</strong>, just copy <code>kmcp.exe</code> to <code>C:\WINDOWS\system32</code>.</p>
 </li>
 </ul>
+<h4 id="method-3-compile-from-source">Method 3: Compile from source</h4>
+<ol>
+<li>
+<p><a href="https://go.dev/doc/install">Install go</a></p>
+<pre><code>wget https://go.dev/dl/go1.17.11.linux-amd64.tar.gz
+
+tar -zxf go1.17.11.linux-amd64.tar.gz -C $HOME/
+
+# or 
+#   echo "export PATH=$PATH:$HOME/go/bin" &gt;&gt; ~/.bashrc
+#   source ~/.bashrc
+export PATH=$PATH:$HOME/go/bin
+</code></pre>
+</li>
+<li>
+<p>Compile KMCP</p>
+<pre><code># ------------- the latest stable version -------------
+
+go get -v -u github.com/shenwei356/kmcp/kmcp
+
+# The executable binary file is located in:
+#   ~/go/bin/kmcp
+# You can also move it to anywhere in the $PATH
+mkdir -p $HOME/bin
+cp ~/go/bin/kmcp $HOME/bin/
+
+# --------------- the devlopment version --------------
+
+git clone https://github.com/shenwei356/kmcp
+cd kmcp/kmcp/
+go build
+
+# The executable binary file is located in:
+#   ./kmcp
+# You can also move it to anywhere in the $PATH
+mkdir -p $HOME/bin
+cp ./kmcp $HOME/bin/
+</code></pre>
+</li>
+</ol>
 <h2 id="shell-completion">Shell-completion</h2>
 <p>Supported shell: bash|zsh|fish|powershell</p>
 <p>Bash:</p>
