@@ -5,6 +5,7 @@
 - `search`:
     - fix panic for paired-end reads with read2 shorter than the value of `--min-query-len`. [#10](https://github.com/shenwei356/kmcp/issues/10)
     - fix log. [#8](https://github.com/shenwei356/kmcp/issues/8)
+    - new flag `-f/--max-fpr`: maximal false positive rate of a query (default 0.05). It reduces outputting unnecessary when searching with a low minimal query coverage (-t/--min-query-cov).
 - `profile`:
     - recommend to use the flag `--no-amb-corr` to disable ambiguous reads correction when >= 1000 candidates are detected.
 

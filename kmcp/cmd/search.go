@@ -157,6 +157,7 @@ Examples:
 		queryCov := getFlagFloat64(cmd, "min-query-cov")
 		targetCov := getFlagFloat64(cmd, "min-target-cov")
 		minCount := getFlagPositiveInt(cmd, "min-kmers")
+		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		useMmap := !getFlagBool(cmd, "low-mem")
 		loadWholeFile := getFlagBool(cmd, "load-whole-db")
 		nameMappingFiles := getFlagStringSlice(cmd, "name-map")
@@ -370,6 +371,7 @@ Examples:
 			MinMatched:   minCount,
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
+			MaxFPR:       maxFPR,
 
 			LoadDefaultNameMap: loadDefaultNameMap,
 			NameMap:            namesMap,
@@ -1035,6 +1037,9 @@ func init() {
 
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0,
 		formatFlagUsage(`Minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target.`))
+
+	searchCmd.Flags().Float64P("max-fpr", "f", 0.05,
+		formatFlagUsage(`Maximal false positive rate of a query.`))
 
 	// output
 	searchCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))

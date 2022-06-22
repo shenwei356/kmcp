@@ -177,6 +177,7 @@ type SearchOptions struct {
 	MinMatched   int
 	MinQueryCov  float64
 	MinTargetCov float64
+	MaxFPR       float64
 
 	LoadDefaultNameMap bool
 	NameMap            map[string]string
@@ -1298,6 +1299,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		queryCov := opt.MinQueryCov
 		targetCov := opt.MinTargetCov
 		minMatched := opt.MinMatched
+		maxFPR := opt.MaxFPR
 		// compactSize := idx.Header.Compact
 
 		// bit matrix
@@ -7370,6 +7372,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 
 			// results := make([]Match, 0, 8)
 			results := poolMatches.Get().(*[]*Match)
+			var _fpr float64 // FPR for a query
 
 			for i, _counts = range counts {
 				ix8 = i << 3
@@ -7400,12 +7403,17 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				// 		continue
 				// 	}
 
+				// _fpr = maxFPRf(fpr, t, nHashes)
+				// if _fpr > maxFPR {
+				// 	continue
+				// }
+
 				// 	results = append(results, &Match{
 				// 		Target:     names[k],
 				// 		GenomeSize: gsizes[k],
 				// 		TargetIdx:  indices[k],
 				// 		NumKmers:   count,
-				//      FPR:        maxFPRf(fpr, t, nHashes),
+				//      FPR:        _fpr,
 				// 		QCov:       t,
 				// 		TCov:       T,
 
@@ -7425,17 +7433,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7453,17 +7464,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7481,17 +7495,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7509,17 +7526,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7537,17 +7557,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7565,17 +7588,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7593,17 +7619,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}
@@ -7621,17 +7650,20 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
-							*results = append(*results, &Match{
-								Target:     names[k],
-								GenomeSize: gsizes[k],
-								TargetIdx:  indices[k],
-								NumKmers:   count,
-								FPR:        maxFPRf(fpr, t, nHashes),
-								QCov:       t,
-								TCov:       T,
+							_fpr = maxFPRf(fpr, t, nHashes)
+							if _fpr <= maxFPR {
+								*results = append(*results, &Match{
+									Target:     names[k],
+									GenomeSize: gsizes[k],
+									TargetIdx:  indices[k],
+									NumKmers:   count,
+									FPR:        _fpr,
+									QCov:       t,
+									TCov:       T,
 
-								JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
-							})
+									JaccardIndex: c / (nHashes + nHashesTarget - c), // Jaccard Index
+								})
+							}
 						}
 					}
 				}

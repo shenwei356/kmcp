@@ -355,6 +355,7 @@ Flags:
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read "Index files loading modes" in "kmcp search -h".
+  -f, --max-fpr float              ► Maximal false positive rate of a query. (default 0.05)
   -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 10)
   -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a query. (default 0.55)
