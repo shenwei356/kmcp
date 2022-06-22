@@ -147,8 +147,8 @@ github.com/shenwei356/kmers v0.1.0 h1:zPmWftXQWDugG99Wxd3rFmCIF2QZEUpEba3jOSEn7n
 github.com/shenwei356/kmers v0.1.0/go.mod h1:23Ltr95n98LYy9OtJMFSzkmU/1nmdYwgzqB3walAQ6g=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d h1:eeXLHcXyGEr72V1SOSEI7vSzUOTJvHutwF7Ykm+hscQ=
 github.com/shenwei356/natsort v0.0.0-20190418160752-600d539c017d/go.mod h1:SiiGiRFyRtV7S9RamOrmQR5gpGIRhWJM1w0EtmuQ1io=
-github.com/shenwei356/pand v0.0.5 h1:TvafWrPusBkshVuL1DETJzCsVoAI7e3S3Y645W0bgcc=
-github.com/shenwei356/pand v0.0.5/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
+github.com/shenwei356/pand v0.0.6 h1:8E+MQgtFdnP1CdhYZFFl13MjVt4m8eq+FkdPh4uq6fU=
+github.com/shenwei356/pand v0.0.6/go.mod h1:vdhF70a1Pl2Ov54+5Y/2JQIGbJZtG++jt8cT/PGO5cw=
 github.com/shenwei356/unik/v5 v5.0.1 h1:IzQRepKUgPeu8HaFIK0Rg1oikaVXnKhHJOtg/pNYPOc=
 github.com/shenwei356/unik/v5 v5.0.1/go.mod h1:XNQTXvHsRsHA5ImUX1HhhhHccDs2Bf0gQRA1Q4kH0Vo=
 github.com/shenwei356/util v0.5.0 h1:gbPuGYVggNLOSORuZLnpaB2DrIpyDFolHiZQkyja+XU=

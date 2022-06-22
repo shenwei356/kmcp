@@ -27,7 +27,7 @@ Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwe
 
 *Notes:*
 
-- please open an issue to request binaries for other platforms.
+- please open an issue to request binaries for other platforms or [compile from the source](#method-3-compile-from-source).
 - run `kmcp version` to check update !!!
 - run `kmcp autocompletion` to update shell autocompletion script !!!
 
@@ -55,6 +55,44 @@ And then:
             mkdir -p $HOME/bin/; cp kmcp $HOME/bin/
 
 - **For Windows**, just copy `kmcp.exe` to `C:\WINDOWS\system32`.
+
+#### Method 3: Compile from source
+
+1. [Install go](https://go.dev/doc/install)
+
+        wget https://go.dev/dl/go1.17.11.linux-amd64.tar.gz
+
+        tar -zxf go1.17.11.linux-amd64.tar.gz -C $HOME/
+
+        # or 
+        #   echo "export PATH=$PATH:$HOME/go/bin" >> ~/.bashrc
+        #   source ~/.bashrc
+        export PATH=$PATH:$HOME/go/bin
+
+2. Compile KMCP
+
+        # ------------- the latest stable version -------------
+
+        go get -v -u github.com/shenwei356/kmcp/kmcp
+
+        # The executable binary file is located in:
+        #   ~/go/bin/kmcp
+        # You can also move it to anywhere in the $PATH
+        mkdir -p $HOME/bin
+        cp ~/go/bin/kmcp $HOME/bin/
+
+
+        # --------------- the devlopment version --------------
+
+        git clone https://github.com/shenwei356/kmcp
+        cd kmcp/kmcp/
+        go build
+
+        # The executable binary file is located in:
+        #   ./kmcp
+        # You can also move it to anywhere in the $PATH
+        mkdir -p $HOME/bin
+        cp ./kmcp $HOME/bin/
 
 
 ## Shell-completion
