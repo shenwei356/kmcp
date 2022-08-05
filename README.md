@@ -35,7 +35,7 @@ from metagenomic shotgun sequence data, but also provides confident pathogen det
 in infectious clinical samples of low depth
 (check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
 
-Genome collections with custom taxonomy,
+***Genome collections with custom taxonomy***,
 e.g., [GTDB](https://gtdb.ecogenomic.org/) uses its own taxonomy and
 [MGV](https://doi.org/10.1038/s41564-021-00928-6) uses [ICTV taxonomy](https://talk.ictvonline.org/),
 are also supported by generating NCBI-style taxdump files with [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump).
@@ -56,12 +56,12 @@ Genome sketching is a method of utilizing small and approximate summaries of
 genomic data for fast searching and comparison.
 [Mash](https://github.com/marbl/Mash) and [Sourmash](https://github.com/sourmash-bio/sourmash)
 provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sourmash).
-KMCP utilizes multiple k-mer sketches 
+KMCP supports multiple k-mer sketches 
 ([Minimizer](https://academic.oup.com/bioinformatics/article/20/18/3363/202143), 
 [FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
 (previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)), and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
-[KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
+And [KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
