@@ -743,7 +743,7 @@ Attentions:
      where sequence IDs in all input files are better to be distinct.
   3. It also supports splitting sequences into chunks, this
      could increase the specificity in search results at the cost
-     of slower searching speed.
+     of a slower searching speed.
   4. Multiple sizes of k-mers are supported.
 
 Supported k-mer (sketches) types:
@@ -851,7 +851,7 @@ Database size and searching accuracy:
      query with tens of k-mers (see BIGSI/COBS paper).
      Small values could largely increase the size of the database.
   2. -n/--num-hash: large values could reduce the database size,
-     at the cost of slower searching speed. Values &lt;=4 are recommended.
+     at the cost of a slower searching speed. Values &lt;=4 are recommended.
   3. The value of block size -b/--block-size better to be multiple of 64.
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
@@ -1016,6 +1016,7 @@ Flags:
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read &quot;Index files loading modes&quot; in &quot;kmcp search -h&quot;.
+  -f, --max-fpr float              ► Maximal false positive rate of a query. (default 0.05)
   -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 10)
   -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a query. (default 0.55)

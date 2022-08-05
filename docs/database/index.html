@@ -2224,8 +2224,8 @@ By default, <code>kmcp</code> computes k-mers (sketches) of every file,
 you can also use <code>--by-seq</code> to compute for every sequence,
 where sequence IDs in all input files are better to be distinct.
 It also <strong>supports splitting sequences into chunks, this
-could increase the specificity in profiling result at the cost
-of slower searching speed</strong>. </p>
+could increase the specificity in profiling results at the cost
+of a slower searching speed</strong>. </p>
 <p><strong>Splitting sequences</strong>:</p>
 <ol>
 <li>Sequences can be split into chunks by a chunk size 
@@ -2410,7 +2410,7 @@ and have improved the indexing and searching speed
     query with tens of k-mers (see BIGSI/COBS paper).
     Small values could largely increase the size of the database.</li>
 <li><code>-n/--num-hash</code>: large values could reduce the database size,
-    at the cost of slower searching speed. Values &lt;=4 are recommended.</li>
+    at the cost of a slower searching speed. Values &lt;=4 are recommended.</li>
 <li>
 <p>The value of block size <code>-b/--block-size</code> is better to be multiple of 64.
     The default value is: </p>

@@ -717,7 +717,7 @@ allows for accurate taxonomic profiling of archaea, bacteria, and viral populati
 from metagenomic shotgun sequence data, but also provides confident pathogen detection
 in infectious clinical samples of low depth
 (check the <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>).</p>
-<p>Genome collections with custom taxonomy,
+<p><strong><em>Genome collections with custom taxonomy</em></strong>,
 e.g., <a href="https://gtdb.ecogenomic.org/">GTDB</a> uses its own taxonomy and
 <a href="https://doi.org/10.1038/s41564-021-00928-6">MGV</a> uses <a href="https://talk.ictvonline.org/">ICTV taxonomy</a>,
 are also supported by generating NCBI-style taxdump files with <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>.</p>
@@ -733,12 +733,12 @@ bringing a smaller index size and much faster searching speed (<a href="https://
 genomic data for fast searching and comparison.
 <a href="https://github.com/marbl/Mash">Mash</a> and <a href="https://github.com/sourmash-bio/sourmash">Sourmash</a>
 provide fast genome distance estimation using MinHash (Mash) or FracMinHash (Sourmash).
-KMCP utilizes multiple k-mer sketches 
+KMCP supports multiple k-mer sketches 
 (<a href="https://academic.oup.com/bioinformatics/article/20/18/3363/202143">Minimizer</a>, 
 <a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
 (previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>), and
 <a href="https://peerj.com/articles/10805/">Closed Syncmers</a>) for genome similarity estimation.
-<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-7x faster than Mash/Sourmash</a>
+And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-7x faster than Mash/Sourmash</a>
  (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
 <h2 id="features">Features</h2>
 <ul>
