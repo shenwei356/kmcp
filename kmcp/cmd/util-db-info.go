@@ -59,6 +59,10 @@ type UnikIndexDBInfo struct {
 	Syncmer    bool   `yaml:"syncmer"`
 	SyncmerS   uint32 `yaml:"syncmer-s"`
 
+	SimHash      bool `yaml:"simhash"`
+	SimHashMmer  int  `yaml:"simhash-m"`
+	SimHashScale int  `yaml:"simhash-s"`
+
 	SplitSeq     bool `yaml:"split-seq"`
 	SplitSize    int  `yaml:"split-size"`
 	SplitNum     int  `yaml:"split-num"`

@@ -306,6 +306,16 @@ Examples:
 			checkError(fmt.Errorf("flag --minimizer-w and --syncmer-s can not be given simultaneously"))
 		}
 
+		simhashM := getFlagNonNegativeInt(cmd, "simhash-m")
+		simhashScale := getFlagNonNegativeInt(cmd, "simhash-scale")
+		if simhashM > kMax {
+			checkError(fmt.Errorf("value of flag --simhash-m is too big"))
+		}
+		if simhashScale > kMax {
+			checkError(fmt.Errorf("value of flag --simhash-scale too big"))
+		}
+		simhash := simhashM > 0
+
 		// ---------------------------------------------------------------
 		// out dir
 
@@ -387,6 +397,9 @@ Examples:
 			}
 			if syncmer {
 				log.Infof("  closed syncmer size: %d", syncmerS)
+			}
+			if simhash {
+				log.Infof("  simhash: m-mer size: %d, scale: %d", simhashM, simhashScale)
 			}
 			if scaled {
 				log.Infof("  down-sampling scale: %d", scale)
@@ -677,6 +690,8 @@ Examples:
 								sketch, err = sketches.NewSyncmerSketch(_seq, k, syncmerS, circular)
 							} else if minimizer {
 								sketch, err = sketches.NewMinimizerSketch(_seq, k, minimizerW, circular)
+							} else if simhash {
+								iter, err = sketches.NewSimHashIterator(_seq, k, simhashM, simhashScale, true, circular)
 							} else {
 								iter, err = sketches.NewHashIterator(_seq, k, true, circular)
 							}
@@ -704,6 +719,19 @@ Examples:
 							} else if minimizer {
 								for {
 									code, ok = sketch.NextMinimizer()
+									if !ok {
+										break
+									}
+									if scaled && code > maxHash {
+										continue
+									}
+									if code > 0 {
+										codes = append(codes, code)
+									}
+								}
+							} else if simhash {
+								for {
+									code, ok = iter.NextSimHash()
 									if !ok {
 										break
 									}
@@ -790,6 +818,9 @@ Examples:
 							SplitNum:     splitNumber,
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
+							SimHash:      simhash,
+							SimHashMmer:  simhashM,
+							SimHashScale: simhashScale,
 						}
 						writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 							scaled, scale, meta)
@@ -863,6 +894,9 @@ Examples:
 					SplitNum:     splitNumber,
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
+					SimHash:      simhash,
+					SimHashMmer:  simhashM,
+					SimHashScale: simhashScale,
 				}
 				writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
 					scaled, scale, meta)
@@ -981,6 +1015,12 @@ func init() {
 
 	computeCmd.Flags().IntP("split-overlap", "l", 0,
 		formatFlagUsage(`Chunk overlap for splitting sequences.`))
+
+	computeCmd.Flags().IntP("simhash-m", "", 0,
+		formatFlagUsage(`M-mer size of a k-mer for SimHash.`))
+
+	computeCmd.Flags().IntP("simhash-scale", "", 0,
+		formatFlagUsage(`Scale of FracMinhash of a m-mer in computing SimHash.`))
 
 	computeCmd.Flags().IntP("split-min-ref", "m", 1000,
 		formatFlagUsage(`Only splitting sequences >= X bp.`))

@@ -179,6 +179,10 @@ type Meta struct {
 	SplitSize    int  `json:"sp-s"`
 	SplitNum     int  `json:"sp-n"`
 	SplitOverlap int  `json:"sp-o"`
+
+	SimHash      bool `json:"sh"` // simhash
+	SimHashMmer  int  `json:"sh-m"`
+	SimHashScale int  `json:"sh-s"`
 }
 
 func (m Meta) String() string {

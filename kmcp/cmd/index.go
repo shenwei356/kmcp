@@ -576,6 +576,9 @@ Examples:
 			if meta0.Syncmer {
 				log.Infof("  closed syncmer size: %d", meta0.SyncmerS)
 			}
+			if meta0.SimHash {
+				log.Infof("  simhash: : m-mer size: %d, scale: %d", meta0.SimHashMmer, meta0.SimHashScale)
+			}
 			if meta0.SplitSeq {
 				log.Infof("  split seqequence size: %d, overlap: %d", meta0.SplitSize, meta0.SplitOverlap)
 			}
@@ -1330,6 +1333,10 @@ Examples:
 			dbInfo.MinimizerW = uint32(meta0.MinimizerW)
 			dbInfo.Syncmer = meta0.Syncmer
 			dbInfo.SyncmerS = uint32(meta0.SyncmerS)
+			dbInfo.SimHash = meta0.SimHash
+			dbInfo.SimHashMmer = meta0.SimHashMmer
+			dbInfo.SimHashScale = meta0.SimHashScale
+
 			dbInfo.SplitSeq = meta0.SplitSeq
 			dbInfo.SplitSize = meta0.SplitSize
 			dbInfo.SplitNum = meta0.SplitNum

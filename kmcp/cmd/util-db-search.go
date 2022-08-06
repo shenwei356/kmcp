@@ -1047,6 +1047,8 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 		sketch, err = sketches.NewSyncmerSketch(sequence, k, int(db.Info.SyncmerS), false)
 	} else if db.Info.Minimizer {
 		sketch, err = sketches.NewMinimizerSketch(sequence, k, int(db.Info.MinimizerW), false)
+	} else if db.Info.SimHash {
+		iter, err = sketches.NewSimHashIterator(sequence, k, int(db.Info.SimHashMmer), int(db.Info.SimHashScale), db.Header.Canonical, false)
 	} else {
 		iter, err = sketches.NewHashIterator(sequence, k, db.Header.Canonical, false)
 	}
@@ -1073,6 +1075,19 @@ func (db *UnikIndexDB) generateKmers(sequence *seq.Seq, k int, kmers *[]uint64) 
 	} else if db.Info.Minimizer {
 		for {
 			code, ok = sketch.NextMinimizer()
+			if !ok {
+				break
+			}
+			if scaled && code > maxHash {
+				continue
+			}
+			if code > 0 {
+				*kmers = append(*kmers, code)
+			}
+		}
+	} else if db.Info.SimHash {
+		for {
+			code, ok = iter.NextSimHash()
 			if !ok {
 				break
 			}
