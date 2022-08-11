@@ -399,7 +399,7 @@ Examples:
 				log.Infof("  closed syncmer size: %d", syncmerS)
 			}
 			if simhash {
-				log.Infof("  simhash: m-mer size: %d, scale: %d", simhashM, simhashScale)
+				log.Infof("  simhash: m-mer size: %d, FracMinHash scale: %d", simhashM, simhashScale)
 			}
 			if scaled {
 				log.Infof("  down-sampling scale: %d", scale)
