@@ -8,6 +8,7 @@
     - new flag `-f/--max-fpr`: maximal false positive rate of a query (default 0.05). It reduces outputting unnecessary when searching with a low minimal query coverage (-t/--min-query-cov).
 - `profile`:
     - recommend to use the flag `--no-amb-corr` to disable ambiguous reads correction when >= 1000 candidates are detected.
+    - fix loging when using `--level strain` and no taxonomy given.
 
 ### v0.8.2 - 2022-03-26
 

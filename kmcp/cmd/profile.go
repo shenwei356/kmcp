@@ -1070,10 +1070,17 @@ Examples:
 			if t.SumUniqMatch < 1 { // no enough unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough unique match", t.SumUniqMatch)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					} else {
+						fmt.Fprintf(outfhD, "failed1: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					}
 				}
 				continue
 			}
@@ -1084,10 +1091,18 @@ Examples:
 			if t.SumUniqMatchHic < 1 { // no enough high-confidence unique match
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough high-confidence unique match", t.SumUniqMatchHic)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+					} else {
+						fmt.Fprintf(outfhD, "failed1: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+
+					}
 				}
 				continue
 			}
@@ -1111,10 +1126,17 @@ Examples:
 			if t.FragsProp < minFragsProp { // low coverage
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"low chunks fraction", t.FragsProp, t.Match)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed1: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					} else {
+						fmt.Fprintf(outfhD, "failed1: %s, 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					}
 				}
 				continue
 			}
@@ -1757,10 +1779,17 @@ Examples:
 			if t.SumUniqMatch < minUReads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough unique match", t.SumUniqMatch)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					} else {
+						fmt.Fprintf(outfhD, "failed2: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					}
 				}
 				continue
 			}
@@ -1771,10 +1800,17 @@ Examples:
 			if t.SumUniqMatchHic < minHicUreads {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough high-confidence unique match", t.SumUniqMatchHic)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+					} else {
+						fmt.Fprintf(outfhD, "failed2: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+					}
 				}
 				continue
 			}
@@ -1782,10 +1818,17 @@ Examples:
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					} else {
+						fmt.Fprintf(outfhD, "failed2: %s, 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					}
 				}
 				continue
 			}
@@ -1802,10 +1845,17 @@ Examples:
 			if t.FragsProp < minFragsProp {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"low chunks fraction", t.FragsProp, t.Match)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					} else {
+						fmt.Fprintf(outfhD, "failed2: %s, 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					}
 				}
 				continue
 			}
@@ -1822,10 +1872,17 @@ Examples:
 			if t.RelDepthStd > maxFragsDepthStdev {
 				hs = append(hs, h)
 				if debug {
-					fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"high FragsDepthStdev", t.RelDepthStd)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed2: %s (%s), 90th percentile: %.2f, %s: %f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"high FragsDepthStdev", t.RelDepthStd)
+					} else {
+						fmt.Fprintf(outfhD, "failed2: %s, 90th percentile: %.2f, %s: %f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"high FragsDepthStdev", t.RelDepthStd)
+					}
 				}
 				continue
 			}
@@ -2310,10 +2367,17 @@ Examples:
 			}
 			if t.SumUniqMatch < minUReads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough unique match", t.SumUniqMatch)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					} else {
+						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough unique match", t.SumUniqMatch)
+					}
 				}
 				continue
 			}
@@ -2323,20 +2387,34 @@ Examples:
 			}
 			if t.SumUniqMatchHic < minHicUreads {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough high-confidence unique match", t.SumUniqMatchHic)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+					} else {
+						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match", t.SumUniqMatchHic)
+					}
 				}
 				continue
 			}
 
 			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					} else {
+						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+					}
 				}
 				continue
 			}
@@ -2352,10 +2430,17 @@ Examples:
 			t.FragsProp = t.FragsProp / float64(len(t.Match))
 			if t.FragsProp < minFragsProp {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"low chunks fraction", t.FragsProp, t.Match)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					} else {
+						fmt.Fprintf(outfhD, "failed3: %s 90th percentile: %.2f, %s: %.1f %v\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"low chunks fraction", t.FragsProp, t.Match)
+					}
 				}
 				continue
 			}
@@ -2371,10 +2456,17 @@ Examples:
 			_, t.RelDepthStd = MeanStdev(t.RelDepth)
 			if t.RelDepthStd > maxFragsDepthStdev {
 				if debug {
-					fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
-						t.Name, taxdb.Name(taxidMap[t.Name]),
-						t.StatsA.Percentile(90),
-						"high FragsDepthStdev", t.RelDepthStd)
+					if taxdb != nil {
+						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
+							t.Name, taxdb.Name(taxidMap[t.Name]),
+							t.StatsA.Percentile(90),
+							"high FragsDepthStdev", t.RelDepthStd)
+					} else {
+						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %f\n",
+							t.Name,
+							t.StatsA.Percentile(90),
+							"high FragsDepthStdev", t.RelDepthStd)
+					}
 				}
 				continue
 			}
