@@ -273,8 +273,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v082-2022-03-26" class="md-nav__link">
-    v0.8.2 - 2022-03-26
+  <a href="#v083-2022-08-15" class="md-nav__link">
+    v0.8.3 - 2022-08-15
   </a>
   
 </li>
@@ -341,7 +341,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v082-2022-03-26_1" class="md-nav__link">
+  <a href="#v082-2022-03-26" class="md-nav__link">
     v0.8.2 - 2022-03-26
   </a>
   
@@ -663,8 +663,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v082-2022-03-26" class="md-nav__link">
-    v0.8.2 - 2022-03-26
+  <a href="#v083-2022-08-15" class="md-nav__link">
+    v0.8.3 - 2022-08-15
   </a>
   
 </li>
@@ -731,7 +731,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v082-2022-03-26_1" class="md-nav__link">
+  <a href="#v082-2022-03-26" class="md-nav__link">
     v0.8.2 - 2022-03-26
   </a>
   
@@ -849,7 +849,21 @@ in two packages for better searching performance.</p>
   for batch counting matched k-mers in bloom filters.</li>
 </ul>
 <h2 id="current-version">Current Version</h2>
-<h3 id="v082-2022-03-26"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2">v0.8.2</a> - 2022-03-26 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg" /></a></h3>
+<h3 id="v083-2022-08-15">v0.8.3 - 2022-08-15</h3>
+<ul>
+<li><code>kmcp</code>: fix compling from source for ARM architectures.<a href="https://github.com/shenwei356/kmcp/issues/17">#17</a></li>
+<li><code>search</code>:<ul>
+<li>fix panic for paired-end reads with read2 shorter than the value of <code>--min-query-len</code>. <a href="https://github.com/shenwei356/kmcp/issues/10">#10</a></li>
+<li>fix log. <a href="https://github.com/shenwei356/kmcp/issues/8">#8</a></li>
+<li>new flag <code>-f/--max-fpr</code>: maximal false positive rate of a query (default 0.05). It reduces outputting unnecessary when searching with a low minimal query coverage (<code>-t/--min-query-cov</code>).</li>
+</ul>
+</li>
+<li><code>profile</code>:<ul>
+<li>recommend to use the flag <code>--no-amb-corr</code> to disable ambiguous reads correction when &gt;= 1000 candidates are detected.</li>
+<li>fix loging when using <code>--level strain</code> and no taxonomy given.</li>
+</ul>
+</li>
+</ul>
 <h3 id="links">Links</h3>
 <table>
 <thead>
@@ -864,20 +878,32 @@ in two packages for better searching performance.</p>
 <tr>
 <td align="left">Linux</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+</tr>
+<tr>
+<td align="left">Linux</td>
+<td align="left">arm64</td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_arm64.tar.gz"><strong>kmcp_linux_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">macOS</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+</tr>
+<tr>
+<td align="left">macOS</td>
+<td align="left">arm64</td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_arm64.tar.gz"><strong>kmcp_darwin_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">Windows</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 </tbody>
 </table>
@@ -920,9 +946,9 @@ And then:</p>
 <ol>
 <li>
 <p><a href="https://go.dev/doc/install">Install go</a></p>
-<pre><code>wget https://go.dev/dl/go1.17.11.linux-amd64.tar.gz
+<pre><code>wget https://go.dev/dl/go1.17.13.linux-amd64.tar.gz
 
-tar -zxf go1.17.11.linux-amd64.tar.gz -C $HOME/
+tar -zxf go1.17.13.linux-amd64.tar.gz -C $HOME/
 
 # or 
 #   echo "export PATH=$PATH:$HOME/go/bin" &gt;&gt; ~/.bashrc
@@ -979,7 +1005,7 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 <pre><code>kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 </code></pre>
 <h2 id="release-history">Release History</h2>
-<h3 id="v082-2022-03-26_1"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2">v0.8.2</a> - 2022-03-26 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg" /></a></h3>
+<h3 id="v082-2022-03-26"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2">v0.8.2</a> - 2022-03-26 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg" /></a></h3>
 <ul>
 <li><code>search</code>: <ul>
 <li>flag <code>-g/--query-whole-file</code>:<ul>
