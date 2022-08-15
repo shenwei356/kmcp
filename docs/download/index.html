@@ -851,16 +851,16 @@ in two packages for better searching performance.</p>
 <h2 id="current-version">Current Version</h2>
 <h3 id="v083-2022-08-15">v0.8.3 - 2022-08-15</h3>
 <ul>
-<li><code>kmcp</code>: fix compling from source for ARM architectures.<a href="https://github.com/shenwei356/kmcp/issues/17">#17</a></li>
+<li><code>kmcp</code>: fix compiling from source for ARM architectures.<a href="https://github.com/shenwei356/kmcp/issues/17">#17</a></li>
 <li><code>search</code>:<ul>
-<li>fix panic for paired-end reads with read2 shorter than the value of <code>--min-query-len</code>. <a href="https://github.com/shenwei356/kmcp/issues/10">#10</a></li>
-<li>fix log. <a href="https://github.com/shenwei356/kmcp/issues/8">#8</a></li>
-<li>new flag <code>-f/--max-fpr</code>: maximal false positive rate of a query (default 0.05). It reduces outputting unnecessary when searching with a low minimal query coverage (<code>-t/--min-query-cov</code>).</li>
+<li>fix searching with paired-end reads where the read2 is shorter than the value of <code>--min-query-len</code>. <a href="https://github.com/shenwei356/kmcp/issues/10">#10</a></li>
+<li>fix the log. <a href="https://github.com/shenwei356/kmcp/issues/8">#8</a></li>
+<li>a new flag <code>-f/--max-fpr</code>: maximal false positive rate of a query (default 0.05). It reduces the unnecessary output when searching with a low minimal query coverage (<code>-t/--min-query-cov</code>).</li>
 </ul>
 </li>
 <li><code>profile</code>:<ul>
-<li>recommend to use the flag <code>--no-amb-corr</code> to disable ambiguous reads correction when &gt;= 1000 candidates are detected.</li>
-<li>fix loging when using <code>--level strain</code> and no taxonomy given.</li>
+<li>recommend using the flag <code>--no-amb-corr</code> to disable ambiguous reads correction when &gt;= 1000 candidates are detected.</li>
+<li>fix logging when using <code>--level strain</code> and no taxonomy given.</li>
 </ul>
 </li>
 </ul>
