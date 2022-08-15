@@ -15,15 +15,25 @@ in two packages for better searching performance.
 
 ## Current Version
 
-### [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2) - 2022-03-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
+### v0.8.3 - 2022-08-15
+
+- `kmcp`: fix compling from source for ARM architectures.[#17](https://github.com/shenwei356/kmcp/issues/17)
+- `search`:
+    - fix panic for paired-end reads with read2 shorter than the value of `--min-query-len`. [#10](https://github.com/shenwei356/kmcp/issues/10)
+    - fix log. [#8](https://github.com/shenwei356/kmcp/issues/8)
+    - new flag `-f/--max-fpr`: maximal false positive rate of a query (default 0.05). It reduces outputting unnecessary when searching with a low minimal query coverage (`-t/--min-query-cov`).
+- `profile`:
+    - recommend to use the flag `--no-amb-corr` to disable ambiguous reads correction when >= 1000 candidates are detected.
+    - fix loging when using `--level strain` and no taxonomy given.
+
 
 ### Links
 
 OS     |Arch      |File, 中国镜像                                                                                                                                                                                  |Download Count
 :------|:---------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_linux_amd64.tar.gz)
-macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_darwin_amd64.tar.gz)
-Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.2/kmcp_windows_amd64.exe.tar.gz)
+Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz)
+macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz)
+Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz)
 
 *Notes:*
 
@@ -60,9 +70,9 @@ And then:
 
 1. [Install go](https://go.dev/doc/install)
 
-        wget https://go.dev/dl/go1.17.11.linux-amd64.tar.gz
+        wget https://go.dev/dl/go1.17.13.linux-amd64.tar.gz
 
-        tar -zxf go1.17.11.linux-amd64.tar.gz -C $HOME/
+        tar -zxf go1.17.13.linux-amd64.tar.gz -C $HOME/
 
         # or 
         #   echo "export PATH=$PATH:$HOME/go/bin" >> ~/.bashrc

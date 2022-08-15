@@ -7,7 +7,7 @@ KMCP is a command-line tool consisting of several subcommands.
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.8.2
+    Version: v0.8.3
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
