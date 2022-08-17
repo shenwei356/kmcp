@@ -82,6 +82,8 @@ var mergeGenomeCmd = &cobra.Command{
 		outDir := getFlagString(cmd, "out-dir")
 		outFile := getFlagString(cmd, "out-file")
 		force := getFlagBool(cmd, "force")
+		fileInfo := getFlagString(cmd, "info-file")
+		outputInfo := fileInfo != ""
 
 		if outDir == "" && outFile == "" {
 			checkError(fmt.Errorf("flag -O/--out-dir or -o/--out-file is needed"))
@@ -214,6 +216,10 @@ var mergeGenomeCmd = &cobra.Command{
 			} else {
 				log.Infof("       output file: %s", outFile)
 			}
+			if outputInfo {
+				log.Infof("   extra info file: %s", fileInfo)
+			}
+
 			log.Info()
 
 			log.Infof("sequences splitting: %v", true)
@@ -222,7 +228,7 @@ var mergeGenomeCmd = &cobra.Command{
 
 			log.Info("k-mer (sketches) computing:")
 
-			log.Infof("  k-mer size: %s", k)
+			log.Infof("  k-mer size: %d", k)
 
 			log.Infof("  circular genome: %v", circular0)
 			log.Info()
@@ -254,15 +260,30 @@ var mergeGenomeCmd = &cobra.Command{
 			splitNumber0, splitOverlap, splitMinRef)
 
 		outfhs := make([]*xopen.Writer, len(hashes))
+		chunkFiles := make([]string, len(hashes))
+		var chunkfile string
 		for i := range hashes {
-			outfhs[i], err = xopen.Wopen(filepath.Join(outdir, fmt.Sprintf("chunk%03d.fa.gz", i+1)))
+			chunkfile = filepath.Join(outdir, fmt.Sprintf("chunk%03d.fa.gz", i+1))
+			outfhs[i], err = xopen.Wopen(chunkfile)
 			if err != nil {
 				checkError(err)
 			}
+			chunkFiles[i] = chunkfile
+		}
+		var infofh *xopen.Writer
+		if outputInfo {
+			infofh, err = xopen.Wopen(fileInfo)
+			if err != nil {
+				checkError(err)
+			}
+			fmt.Fprintf(infofh, "file\tseqId\tmKmers\tchunkId\tfragLoc\n")
 		}
 		defer func() {
 			for _, outfh := range outfhs {
 				outfh.Close()
+			}
+			if outputInfo {
+				infofh.Close()
 			}
 		}()
 
@@ -323,6 +344,8 @@ var mergeGenomeCmd = &cobra.Command{
 			var max int
 			perfectN := fragSize - k + 1
 
+			var loc int
+
 			for {
 				record, err = fastxReader.Read()
 				if err != nil {
@@ -347,6 +370,7 @@ var mergeGenomeCmd = &cobra.Command{
 				}
 
 				slider = record.Seq.Slider(fragSize, step, false, true)
+				loc = 0
 				for {
 					_seq, _ok = slider()
 					if !_ok {
@@ -354,6 +378,7 @@ var mergeGenomeCmd = &cobra.Command{
 					}
 
 					if len(_seq.Seq)-1 < k {
+						loc += step
 						continue
 					}
 
@@ -395,6 +420,7 @@ var mergeGenomeCmd = &cobra.Command{
 						}
 					}
 					if max == perfectN { // a fragment perfectly match one of the chunks
+						loc += step
 						continue
 					}
 					// the max may be 0, which means this fragment is new, so we just add it to all chunks
@@ -408,9 +434,15 @@ var mergeGenomeCmd = &cobra.Command{
 							for _, code = range codes {
 								hashes[i][code] = struct{}{}
 							}
+
+							if outputInfo {
+								fmt.Fprintf(infofh, "%s\t%s\t%d\t%d\t%d\n",
+									file, record.ID, hit, i+1, loc+1)
+							}
 						}
 					}
 
+					loc += step
 				}
 
 			}
@@ -422,6 +454,47 @@ var mergeGenomeCmd = &cobra.Command{
 				nHashes[i] = strconv.Itoa(len(hashes[i]))
 			}
 			log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
+		}
+
+		// ---------------------------------------------------
+		// concatenate sequences in all chunks
+		if !outputDir {
+			for _, outfh := range outfhs {
+				outfh.Close()
+			}
+
+			var outfh *xopen.Writer
+			outfh, err = xopen.Wopen(outFile)
+			if err != nil {
+				checkError(err)
+			}
+
+			markSeq, _ := fastx.NewRecord(seq.Unlimit, []byte("marker-seq"), []byte("marker-seq"), nil, markerSeq)
+			for _, file := range chunkFiles {
+				fastxReader, err := fastx.NewDefaultReader(file)
+				checkError(errors.Wrap(err, file))
+				var record *fastx.Record
+				for {
+					record, err = fastxReader.Read()
+					if err != nil {
+						if err == io.EOF {
+							break
+						}
+						checkError(errors.Wrap(err, file))
+						break
+					}
+
+					record.FormatToWriter(outfh, 70)
+				}
+
+				markSeq.FormatToWriter(outfh, 70)
+			}
+
+			outfh.Close()
+
+			if opt.Verbose || opt.Log2File {
+				log.Infof("sequences saved to file: %s", outFile)
+			}
 		}
 	},
 }
@@ -728,6 +801,9 @@ func init() {
 	mergeGenomeCmd.Flags().StringP("out-dir", "O", "",
 		formatFlagUsage(`Output directory.`))
 
+	mergeGenomeCmd.Flags().StringP("info-file", "", "",
+		formatFlagUsage(`An extra output file to show which chunk(s) are assigned to for each genome fragment.`))
+
 	mergeGenomeCmd.Flags().BoolP("force", "", false,
 		formatFlagUsage(`Overwrite existed output directory.`))
 
@@ -759,3 +835,5 @@ var _mark_fasta = []byte{'>'}
 var _mark_fastq = []byte{'@'}
 var _mark_plus_newline = []byte{'+', '\n'}
 var _mark_newline = []byte{'\n'}
+
+var markerSeq = []byte("--kmcp--marker-seq--")
