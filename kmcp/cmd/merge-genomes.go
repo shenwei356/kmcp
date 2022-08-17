@@ -38,13 +38,13 @@ import (
 	"github.com/shenwei356/bio/seqio/fastx"
 	"github.com/shenwei356/bio/sketches"
 	"github.com/shenwei356/util/pathutil"
+	"github.com/shenwei356/xopen"
 	"github.com/spf13/cobra"
-	"github.com/twotwotwo/sorts/sortutil"
 )
 
 var mergeGenomeCmd = &cobra.Command{
 	Use:   "merge-genomes",
-	Short: "merge genomes of the same species/strain and split them into chunks before computing k-mers",
+	Short: "merge genomes of the same species/strain and split them into chunks",
 	Long: `merge genomes of the same species/strain and split them into chunks
 
 `,
@@ -71,26 +71,20 @@ var mergeGenomeCmd = &cobra.Command{
 		// ---------------------------------------------------------------
 		// basic flags
 
-		ks := getFlagIntSlice(cmd, "kmer")
-		if len(ks) == 0 {
-			checkError(fmt.Errorf("flag -k/--kmer needed"))
+		k := getFlagPositiveInt(cmd, "kmer")
+		fragSize := getFlagPositiveInt(cmd, "frag-size")
+		if fragSize < k {
+			checkError(fmt.Errorf("value of flag -f/--frag-size should be >= that of -k/--kmer"))
 		}
-		for _, k := range ks {
-			if k < 1 {
-				checkError(fmt.Errorf("invalid k: %d", k))
-			}
-		}
-		sortutil.Ints(ks)
-		kMax := ks[len(ks)-1]
 
 		circular0 := getFlagBool(cmd, "circular")
 
 		outDir := getFlagString(cmd, "out-dir")
-		outPrefix := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 		force := getFlagBool(cmd, "force")
 
-		if outDir == "" && outPrefix == "" {
-			checkError(fmt.Errorf("flag -O/--out-dir or -o/--out-prefix is needed"))
+		if outDir == "" && outFile == "" {
+			checkError(fmt.Errorf("flag -O/--out-dir or -o/--out-file is needed"))
 		}
 
 		var err error
@@ -153,10 +147,21 @@ var mergeGenomeCmd = &cobra.Command{
 
 		// ---------------------------------------------------------------
 		// out dir
-
+		var outdir string
 		outputDir := outDir != ""
+
 		if outputDir {
 			makeOutDir(outDir, force)
+			outdir = outDir
+		} else {
+			outdir = filepath.Join(os.TempDir(), fmt.Sprintf("kmcp.%d", os.Getpid()))
+			makeOutDir(outdir, force)
+			defer func() {
+				checkError(os.RemoveAll(outdir))
+				if opt.Verbose || opt.Log2File {
+					log.Infof("remove tmp dir: %s", outdir)
+				}
+			}()
 		}
 
 		// ---------------------------------------------------------------
@@ -207,7 +212,7 @@ var mergeGenomeCmd = &cobra.Command{
 			if outDir != "" {
 				log.Infof("  output directory: %s", outDir)
 			} else {
-				log.Infof("     output prefix: %s", outPrefix)
+				log.Infof("       output file: %s", outFile)
 			}
 			log.Info()
 
@@ -217,7 +222,7 @@ var mergeGenomeCmd = &cobra.Command{
 
 			log.Info("k-mer (sketches) computing:")
 
-			log.Infof("  k-mer size(s): %s", strings.Join(IntSlice2StringSlice(ks), ", "))
+			log.Infof("  k-mer size: %s", k)
 
 			log.Infof("  circular genome: %v", circular0)
 			log.Info()
@@ -245,26 +250,179 @@ var mergeGenomeCmd = &cobra.Command{
 			log.Infof("splitting the reference genome ...")
 		}
 
-		seqs, hashes := splitGenome(opt, refGenome, reSeqNames, kMax, circular0,
+		seqs, hashes := splitGenome(opt, refGenome, reSeqNames, k, circular0,
 			splitNumber0, splitOverlap, splitMinRef)
 
-		nSizes := make([]string, len(hashes))
-		nHashes := make([]string, len(hashes))
-		for i := 0; i < len(hashes); i++ {
-			nHashes[i] = strconv.Itoa(len(hashes[i]))
-			nSizes[i] = strconv.Itoa(len(seqs[i].Seq))
+		outfhs := make([]*xopen.Writer, len(hashes))
+		for i := range hashes {
+			outfhs[i], err = xopen.Wopen(filepath.Join(outdir, fmt.Sprintf("chunk%03d.fa.gz", i+1)))
+			if err != nil {
+				checkError(err)
+			}
 		}
+		defer func() {
+			for _, outfh := range outfhs {
+				outfh.Close()
+			}
+		}()
+
+		var buffer *bytes.Buffer
+		var text []byte
+		header := []byte(">seq\n")
+		for i, _seq := range seqs {
+			outfhs[i].Write(header)
+			text, buffer = wrapByteSlice(_seq.Seq, 70, buffer)
+			outfhs[i].Write(text)
+			outfhs[i].Write(_mark_newline)
+		}
+
+		var nSizes []string
+		var nHashes []string
 
 		// ---------------------------------------------------------------
 		// splitting other genomes
 
 		if opt.Verbose || opt.Log2File {
+			nSizes = make([]string, len(hashes))
+			nHashes = make([]string, len(hashes))
+			for i := 0; i < len(hashes); i++ {
+				nHashes[i] = strconv.Itoa(len(hashes[i]))
+				nSizes[i] = strconv.Itoa(len(seqs[i].Seq))
+			}
+
 			log.Infof("  seq length   of the %d chunks: %s", len(hashes), strings.Join(nSizes, ", "))
 			log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
 			log.Info()
 			log.Infof("splitting other genomes and add subsequences to ref chunks ...")
 		}
 
+		step := fragSize - k + 1
+		filterNames := len(reSeqNames) > 0
+		for _, file := range files {
+			if file == refGenome.File {
+				continue
+			}
+
+			fastxReader, err := fastx.NewDefaultReader(file)
+			checkError(errors.Wrap(err, file))
+
+			var record *fastx.Record
+			var ignoreSeq bool
+			var re *regexp.Regexp
+
+			var slider func() (*seq.Seq, bool)
+			var _seq *seq.Seq
+			var ok, _ok bool
+			var code uint64
+			var iter *sketches.Iterator
+
+			codes := make([]uint64, 0, fragSize)
+			hits := make([]int, len(hashes))
+			var m map[uint64]interface{}
+			var i, hit int
+			var max int
+			perfectN := fragSize - k + 1
+
+			for {
+				record, err = fastxReader.Read()
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+					checkError(errors.Wrap(err, file))
+					break
+				}
+
+				if filterNames {
+					ignoreSeq = false
+					for _, re = range reSeqNames {
+						if re.Match(record.Name) {
+							ignoreSeq = true
+							break
+						}
+					}
+					if ignoreSeq {
+						continue
+					}
+				}
+
+				slider = record.Seq.Slider(fragSize, step, false, true)
+				for {
+					_seq, _ok = slider()
+					if !_ok {
+						break
+					}
+
+					if len(_seq.Seq)-1 < k {
+						continue
+					}
+
+					seqs = append(seqs, _seq)
+
+					iter, err = sketches.NewHashIterator(_seq, k, true, false)
+					if err != nil {
+						if err == sketches.ErrShortSeq {
+							continue
+						} else {
+							checkError(errors.Wrapf(err, "seq: %s", record.Name))
+						}
+					}
+
+					for i = range hits {
+						hits[i] = 0
+					}
+					codes = codes[:0]
+
+					for {
+						code, ok = iter.NextHash()
+						if !ok {
+							break
+						}
+						if code > 0 {
+							for i, m = range hashes {
+								if _, ok = m[code]; ok {
+									hits[i]++
+								}
+							}
+							codes = append(codes, code)
+						}
+					}
+
+					max = 0
+					for i, hit = range hits {
+						if hit > max {
+							max = hit
+						}
+					}
+					if max == perfectN { // a fragment perfectly match one of the chunks
+						continue
+					}
+					// the max may be 0, which means this fragment is new, so we just add it to all chunks
+					for i, hit = range hits {
+						if hit == max {
+							outfhs[i].Write(header)
+							text, buffer = wrapByteSlice(_seq.Seq, 70, buffer)
+							outfhs[i].Write(text)
+							outfhs[i].Write(_mark_newline)
+
+							for _, code = range codes {
+								hashes[i][code] = struct{}{}
+							}
+						}
+					}
+
+				}
+
+			}
+
+		}
+
+		if opt.Verbose || opt.Log2File {
+			for i := 0; i < len(hashes); i++ {
+				nHashes[i] = strconv.Itoa(len(hashes[i]))
+			}
+			log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
+		}
 	},
 }
 
@@ -564,8 +722,8 @@ func init() {
 	mergeGenomeCmd.Flags().StringP("file-regexp", "r", `\.(f[aq](st[aq])?|fna)(.gz)?$`,
 		formatFlagUsage(`Regular expression for matching sequence files in -I/--in-dir, case ignored.`))
 
-	mergeGenomeCmd.Flags().StringP("out-prefix", "o", "",
-		formatFlagUsage(`Out file prefix.`))
+	mergeGenomeCmd.Flags().StringP("out-file", "o", "",
+		formatFlagUsage(`Out file.`))
 
 	mergeGenomeCmd.Flags().StringP("out-dir", "O", "",
 		formatFlagUsage(`Output directory.`))
@@ -573,7 +731,7 @@ func init() {
 	mergeGenomeCmd.Flags().BoolP("force", "", false,
 		formatFlagUsage(`Overwrite existed output directory.`))
 
-	mergeGenomeCmd.Flags().IntSliceP("kmer", "k", []int{21}, formatFlagUsage(`K-mer size(s).`))
+	mergeGenomeCmd.Flags().IntP("kmer", "k", 21, formatFlagUsage(`K-mer size.`))
 
 	mergeGenomeCmd.Flags().BoolP("circular", "", false,
 		formatFlagUsage(`Input sequences are circular.`))
@@ -590,6 +748,14 @@ func init() {
 	mergeGenomeCmd.Flags().StringSliceP("seq-name-filter", "B", []string{},
 		formatFlagUsage(`List of regular expressions for filtering out sequences by header/name, case ignored.`))
 
-	mergeGenomeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>"))
+	mergeGenomeCmd.Flags().IntP("frag-size", "f", 100,
+		formatFlagUsage(`size of sequence fragments to be re-assigned to the reference genome chunks.`))
+
+	mergeGenomeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} {-O <out dir> | -o <out file>"))
 
 }
+
+var _mark_fasta = []byte{'>'}
+var _mark_fastq = []byte{'@'}
+var _mark_plus_newline = []byte{'+', '\n'}
+var _mark_newline = []byte{'\n'}
