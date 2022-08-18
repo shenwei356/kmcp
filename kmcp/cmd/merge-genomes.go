@@ -305,7 +305,7 @@ var mergeGenomeCmd = &cobra.Command{
 		// write sequences of the ref genomes
 		headers := make([][]byte, len(hashes))
 		for i := range hashes {
-			headers[i] = []byte(fmt.Sprintf(">chunk%03d\n", i+1))
+			headers[i] = []byte(fmt.Sprintf(">chunk%03d split-number=%d split-overlap=%d\n", i+1, splitNumber0, splitOverlap))
 		}
 		var buffer *bytes.Buffer
 		var text []byte
@@ -942,3 +942,6 @@ func init() {
 }
 
 var markerSeq = []byte("--kmcp--marker-seq--")
+
+var reSplitNumber = regexp.MustCompile(`split-number=(\d+)`)
+var reSplitOverlap = regexp.MustCompile(`split-overlap=(\d+)`)
