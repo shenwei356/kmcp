@@ -147,6 +147,10 @@ var mergeGenomeCmd = &cobra.Command{
 			checkError(fmt.Errorf(("value of flag -s/--split-number should not be greater than 65535")))
 		}
 
+		// if opt.NumCPUs < splitNumber0 {
+		// 	runtime.GOMAXPROCS(splitNumber0)
+		// }
+
 		// ---------------------------------------------------------------
 		// out dir
 		var outdir string
@@ -340,9 +344,12 @@ var mergeGenomeCmd = &cobra.Command{
 			codes := make([]uint64, 0, fragSize)
 			hits := make([]int, len(hashes))
 			var m map[uint64]interface{}
+			var c *int
 			var i, hit int
 			var max int
 			perfectN := fragSize - k + 1
+
+			// var wg sync.WaitGroup
 
 			var loc int
 
@@ -404,14 +411,38 @@ var mergeGenomeCmd = &cobra.Command{
 							break
 						}
 						if code > 0 {
-							for i, m = range hashes {
-								if _, ok = m[code]; ok {
-									hits[i]++
-								}
-							}
+							// for i, m = range hashes {
+							// 	if _, ok = m[code]; ok {
+							// 		hits[i]++
+							// 	}
+							// }
 							codes = append(codes, code)
 						}
 					}
+
+					for i, m = range hashes {
+						c = &hits[i]
+						for _, code = range codes {
+							if _, ok = m[code]; ok {
+								*c++
+							}
+						}
+					}
+
+					// using goroutine did not speedup
+					// for i = range hashes {
+					// 	wg.Add(1)
+					// 	go func(m map[uint64]interface{}, c *int) {
+					// 		var ok bool
+					// 		for _, code := range codes {
+					// 			if _, ok = m[code]; ok {
+					// 				*c++
+					// 			}
+					// 		}
+					// 		wg.Done()
+					// 	}(hashes[i], &hits[i])
+					// }
+					// wg.Wait()
 
 					max = 0
 					for i, hit = range hits {
@@ -423,6 +454,7 @@ var mergeGenomeCmd = &cobra.Command{
 						loc += step
 						continue
 					}
+
 					// the max may be 0, which means this fragment is new, so we just add it to all chunks
 					for i, hit = range hits {
 						if hit == max {
@@ -431,9 +463,10 @@ var mergeGenomeCmd = &cobra.Command{
 							outfhs[i].Write(text)
 							outfhs[i].Write(_mark_newline)
 
-							for _, code = range codes {
-								hashes[i][code] = struct{}{}
-							}
+							// do not update the original hashes
+							// for _, code = range codes {
+							// 	hashes[i][code] = struct{}{}
+							// }
 
 							if outputInfo {
 								fmt.Fprintf(infofh, "%s\t%s\t%d\t%d\t%d\n",
@@ -449,12 +482,12 @@ var mergeGenomeCmd = &cobra.Command{
 
 		}
 
-		if opt.Verbose || opt.Log2File {
-			for i := 0; i < len(hashes); i++ {
-				nHashes[i] = strconv.Itoa(len(hashes[i]))
-			}
-			log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
-		}
+		// if opt.Verbose || opt.Log2File {
+		// 	for i := 0; i < len(hashes); i++ {
+		// 		nHashes[i] = strconv.Itoa(len(hashes[i]))
+		// 	}
+		// 	log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
+		// }
 
 		// ---------------------------------------------------
 		// concatenate sequences in all chunks
