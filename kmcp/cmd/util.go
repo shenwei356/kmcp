@@ -439,3 +439,8 @@ func wrapByteSlice(s []byte, width int, buffer *bytes.Buffer) ([]byte, *bytes.Bu
 	}
 	return buffer.Bytes(), buffer
 }
+
+var _mark_fasta = []byte{'>'}
+var _mark_fastq = []byte{'@'}
+var _mark_plus_newline = []byte{'+', '\n'}
+var _mark_newline = []byte{'\n'}

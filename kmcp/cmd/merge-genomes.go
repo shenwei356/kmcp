@@ -132,8 +132,6 @@ var mergeGenomeCmd = &cobra.Command{
 			reSeqNames = append(reSeqNames, re)
 		}
 
-		// filterNames := len(reSeqNames) > 0
-
 		// ---------------------------------------------------------------
 		// flags for splitting sequence
 
@@ -146,10 +144,6 @@ var mergeGenomeCmd = &cobra.Command{
 		if splitNumber0 > 65535 {
 			checkError(fmt.Errorf(("value of flag -s/--split-number should not be greater than 65535")))
 		}
-
-		// if opt.NumCPUs < splitNumber0 {
-		// 	runtime.GOMAXPROCS(splitNumber0)
-		// }
 
 		// ---------------------------------------------------------------
 		// out dir
@@ -263,6 +257,7 @@ var mergeGenomeCmd = &cobra.Command{
 		seqs, hashes := splitGenome(opt, refGenome, reSeqNames, k, circular0,
 			splitNumber0, splitOverlap, splitMinRef)
 
+		// sequence writers
 		outfhs := make([]*xopen.Writer, len(hashes))
 		chunkFiles := make([]string, len(hashes))
 		var chunkfile string
@@ -274,28 +269,48 @@ var mergeGenomeCmd = &cobra.Command{
 			}
 			chunkFiles[i] = chunkfile
 		}
+
+		// info writer (optional)
 		var infofh *xopen.Writer
+		var chInfo chan string
+		var doneInfo chan int
 		if outputInfo {
 			infofh, err = xopen.Wopen(fileInfo)
 			if err != nil {
 				checkError(err)
 			}
 			fmt.Fprintf(infofh, "file\tseqId\tmKmers\tchunkId\tfragLoc\n")
+
+			chInfo = make(chan string, len(hashes))
+			doneInfo = make(chan int)
+			go func() {
+				for r := range chInfo {
+					fmt.Fprint(infofh, r)
+				}
+				doneInfo <- 1
+			}()
 		}
 		defer func() {
 			for _, outfh := range outfhs {
 				outfh.Close()
 			}
+
 			if outputInfo {
+				close(chInfo)
+				<-doneInfo
 				infofh.Close()
 			}
 		}()
 
+		// write sequences of the ref genomes
+		headers := make([][]byte, len(hashes))
+		for i := range hashes {
+			headers[i] = []byte(fmt.Sprintf(">chunk%03d\n", i+1))
+		}
 		var buffer *bytes.Buffer
 		var text []byte
-		header := []byte(">seq\n")
 		for i, _seq := range seqs {
-			outfhs[i].Write(header)
+			outfhs[i].Write(headers[i])
 			text, buffer = wrapByteSlice(_seq.Seq, 70, buffer)
 			outfhs[i].Write(text)
 			outfhs[i].Write(_mark_newline)
@@ -323,6 +338,43 @@ var mergeGenomeCmd = &cobra.Command{
 
 		step := fragSize - k + 1
 		filterNames := len(reSeqNames) > 0
+
+		var record *fastx.Record
+		var ignoreSeq bool
+		var re *regexp.Regexp
+
+		var loc int
+		var slider func() (*seq.Seq, bool)
+		var _seq *seq.Seq
+		var _ok bool
+
+		perfectN := fragSize - k + 1
+
+		var poolCodes = &sync.Pool{New: func() interface{} {
+			tmp := make([]uint64, 0, len(hashes))
+			return &tmp
+		}}
+		var poolHits = &sync.Pool{New: func() interface{} {
+			tmp := make([]int, len(hashes))
+			return &tmp
+		}}
+		var wg sync.WaitGroup
+		type ISeq struct {
+			Chunk int
+			Seq   *seq.Seq
+		}
+		type IInfo struct {
+			Loc   int
+			Chunk int
+			Info  string
+		}
+		doneSeq := make(chan int)
+		doneIInfo := make(chan int)
+		var iinfos []IInfo
+		if outputInfo {
+			iinfos = make([]IInfo, 0, 1024)
+		}
+
 		for _, file := range files {
 			if file == refGenome.File {
 				continue
@@ -330,28 +382,6 @@ var mergeGenomeCmd = &cobra.Command{
 
 			fastxReader, err := fastx.NewDefaultReader(file)
 			checkError(errors.Wrap(err, file))
-
-			var record *fastx.Record
-			var ignoreSeq bool
-			var re *regexp.Regexp
-
-			var slider func() (*seq.Seq, bool)
-			var _seq *seq.Seq
-			var ok, _ok bool
-			var code uint64
-			var iter *sketches.Iterator
-
-			codes := make([]uint64, 0, fragSize)
-			hits := make([]int, len(hashes))
-			var m map[uint64]interface{}
-			var c *int
-			var i, hit int
-			var max int
-			perfectN := fragSize - k + 1
-
-			// var wg sync.WaitGroup
-
-			var loc int
 
 			for {
 				record, err = fastxReader.Read()
@@ -376,8 +406,57 @@ var mergeGenomeCmd = &cobra.Command{
 					}
 				}
 
+				chSeq := make(chan ISeq, len(hashes))
+				var chIInfo chan IInfo
+				if outputInfo {
+					chIInfo = make(chan IInfo, len(hashes))
+				}
+
+				go func() {
+					var buffer *bytes.Buffer
+					var text []byte
+					for is := range chSeq {
+						outfhs[is.Chunk].Write(headers[is.Chunk])
+						text, buffer = wrapByteSlice(is.Seq.Seq, 70, buffer)
+						outfhs[is.Chunk].Write(text)
+						outfhs[is.Chunk].Write(_mark_newline)
+					}
+
+					for _, outfh := range outfhs {
+						outfh.Flush()
+					}
+
+					doneSeq <- 1
+				}()
+				if outputInfo {
+					go func() {
+						// collect info of one sequence
+						iinfos = iinfos[:0]
+						for iinfo := range chIInfo {
+							iinfos = append(iinfos, iinfo)
+						}
+
+						// sort
+						sort.Slice(iinfos, func(i, j int) bool {
+							a := iinfos[i].Loc - iinfos[j].Loc
+							if a == 0 {
+								return iinfos[i].Chunk < iinfos[j].Chunk
+							}
+							return a < 0
+						})
+
+						// output
+						for _, iinfo := range iinfos {
+							chInfo <- iinfo.Info
+						}
+
+						doneIInfo <- 1
+					}()
+				}
+
 				slider = record.Seq.Slider(fragSize, step, false, true)
 				loc = 0
+
 				for {
 					_seq, _ok = slider()
 					if !_ok {
@@ -389,105 +468,99 @@ var mergeGenomeCmd = &cobra.Command{
 						continue
 					}
 
-					seqs = append(seqs, _seq)
+					wg.Add(1)
+					go func(_seq *seq.Seq, loc int) { // every genome fragment
+						defer wg.Done()
 
-					iter, err = sketches.NewHashIterator(_seq, k, true, false)
-					if err != nil {
-						if err == sketches.ErrShortSeq {
-							continue
-						} else {
-							checkError(errors.Wrapf(err, "seq: %s", record.Name))
-						}
-					}
-
-					for i = range hits {
-						hits[i] = 0
-					}
-					codes = codes[:0]
-
-					for {
-						code, ok = iter.NextHash()
-						if !ok {
-							break
-						}
-						if code > 0 {
-							// for i, m = range hashes {
-							// 	if _, ok = m[code]; ok {
-							// 		hits[i]++
-							// 	}
-							// }
-							codes = append(codes, code)
-						}
-					}
-
-					for i, m = range hashes {
-						c = &hits[i]
-						for _, code = range codes {
-							if _, ok = m[code]; ok {
-								*c++
+						iter, err := sketches.NewHashIterator(_seq, k, true, false)
+						if err != nil {
+							if err == sketches.ErrShortSeq {
+								return
+							} else {
+								checkError(errors.Wrapf(err, "seq: %s", record.Name))
 							}
 						}
-					}
 
-					// using goroutine did not speedup
-					// for i = range hashes {
-					// 	wg.Add(1)
-					// 	go func(m map[uint64]interface{}, c *int) {
-					// 		var ok bool
-					// 		for _, code := range codes {
-					// 			if _, ok = m[code]; ok {
-					// 				*c++
-					// 			}
-					// 		}
-					// 		wg.Done()
-					// 	}(hashes[i], &hits[i])
-					// }
-					// wg.Wait()
-
-					max = 0
-					for i, hit = range hits {
-						if hit > max {
-							max = hit
+						hits := poolHits.Get().(*[]int)
+						for i := range *hits {
+							(*hits)[i] = 0
 						}
-					}
-					if max == perfectN { // a fragment perfectly match one of the chunks
-						loc += step
-						continue
-					}
+						defer poolHits.Put(hits)
 
-					// the max may be 0, which means this fragment is new, so we just add it to all chunks
-					for i, hit = range hits {
-						if hit == max {
-							outfhs[i].Write(header)
-							text, buffer = wrapByteSlice(_seq.Seq, 70, buffer)
-							outfhs[i].Write(text)
-							outfhs[i].Write(_mark_newline)
+						codes := poolCodes.Get().(*[]uint64)
+						*codes = (*codes)[:0]
+						defer poolCodes.Put(codes)
 
-							// do not update the original hashes
-							// for _, code = range codes {
-							// 	hashes[i][code] = struct{}{}
-							// }
-
-							if outputInfo {
-								fmt.Fprintf(infofh, "%s\t%s\t%d\t%d\t%d\n",
-									file, record.ID, hit, i+1, loc+1)
+						var code uint64
+						var ok bool
+						for {
+							code, ok = iter.NextHash()
+							if !ok {
+								break
+							}
+							if code > 0 {
+								*codes = append(*codes, code)
 							}
 						}
-					}
+
+						var c *int
+						for i, m := range hashes {
+							c = &(*hits)[i]
+							for _, code = range *codes {
+								if _, ok = m[code]; ok {
+									*c++
+								}
+							}
+						}
+
+						max := 0
+						for _, hit := range *hits {
+							if hit > max {
+								max = hit
+							}
+						}
+						if max == perfectN { // a fragment perfectly match one of the chunks
+							return
+						}
+
+						// the max may be 0, which means this fragment is new, so we just add it to all chunks
+						for i, hit := range *hits {
+							if hit == max {
+								chSeq <- ISeq{Chunk: i, Seq: _seq}
+
+								// do not update the original hashes
+								// for _, code = range codes {
+								// 	hashes[i][code] = struct{}{}
+								// }
+
+								if outputInfo {
+									// do not directly output, they would be out of order
+									// chInfo <- fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n",
+									// 	file, record.ID, hit, i+1, loc+1)
+									chIInfo <- IInfo{
+										Loc:   loc,
+										Chunk: i,
+										Info: fmt.Sprintf("%s\t%s\t%d\t%d\t%d\n",
+											file, record.ID, hit, i+1, loc+1),
+									}
+								}
+							}
+						}
+					}(_seq, loc)
 
 					loc += step
 				}
 
+				wg.Wait()
+				close(chSeq)
+				<-doneSeq
+				if outputInfo {
+					close(chIInfo)
+					<-doneIInfo
+				}
 			}
 
 		}
-
-		// if opt.Verbose || opt.Log2File {
-		// 	for i := 0; i < len(hashes); i++ {
-		// 		nHashes[i] = strconv.Itoa(len(hashes[i]))
-		// 	}
-		// 	log.Infof("  k-mer number of the %d chunks: %s", len(hashes), strings.Join(nHashes, ", "))
-		// }
 
 		// ---------------------------------------------------
 		// concatenate sequences in all chunks
@@ -526,8 +599,12 @@ var mergeGenomeCmd = &cobra.Command{
 			outfh.Close()
 
 			if opt.Verbose || opt.Log2File {
+				log.Info()
 				log.Infof("sequences saved to file: %s", outFile)
 			}
+		} else if opt.Verbose || opt.Log2File {
+			log.Info()
+			log.Infof("sequences saved to directory: %s", outDir)
 		}
 	},
 }
@@ -863,10 +940,5 @@ func init() {
 	mergeGenomeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} {-O <out dir> | -o <out file>"))
 
 }
-
-var _mark_fasta = []byte{'>'}
-var _mark_fastq = []byte{'@'}
-var _mark_plus_newline = []byte{'+', '\n'}
-var _mark_newline = []byte{'\n'}
 
 var markerSeq = []byte("--kmcp--marker-seq--")
