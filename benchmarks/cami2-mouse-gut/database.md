@@ -160,6 +160,52 @@ Building database:
 
     cp taxid.map name.map $prefix-k$k-n10.db
     
+### building database with pre-splitted genomes
+
+Collect accession of each species
+
+    cat taxid.map.lineage.tsv \
+        | csvtk fold -t -s ',' -f species -v accession \
+        | csvtk mutate -t -f accession -n acc -p '^([^,]+);?' \
+        | sed 1d \
+        > acc.species.tsv
+        
+Merge genomes of the same species and split into chunks
+
+    genomes=refseq-cami2-slim
+    
+    genomes=${genomes%/}
+    prefix=refseq-cami2-species
+    
+    k=21
+    splitn=10
+    splito=100
+    
+    # file list
+    list=files.txt
+    find $genomes -name "*" > $list
+    
+    j=20
+    J=8
+    time cat acc.species.tsv \
+        | rush -j $j -d "\t" -v j=$J -v list=$list -v k=$k -v n=$splitn -v l=$splito -v out=$prefix \
+            'kmcp utils merge-genomes --quiet --force -j {j} -n {n} -l {l} -B plasmid \
+                $(csvtk grep -Ht -r -p {2} {list} | paste -s -d " ") -o {out}/{3}.fa.gz ' \
+            --verbose -c -C merge.rush
+    
+Create db
+
+    j=40
+    
+    kmcp compute -j $j -p -I $prefix/ -O $prefix-k$k-n10 -k $k  \
+        --log $prefix-k$k-n10.log
+        
+    n=1
+    f=0.3
+    kmcp index -I $prefix-k$k-n10/ -O $prefix-k$k-n10.db -j $j -n $n -f $f \
+        --log $prefix-k$k-n10.db.log
+
+    cp taxid.map name.map $prefix-k$k-n10.db
 
 ## Viruses
 
