@@ -15,7 +15,7 @@ in two packages for better searching performance.
 
 ## Current Version
 
-### v0.8.3 - 2022-08-15
+### v0.8.3 - 2022-08-15 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.3/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.3)
 
 - `kmcp`: fix compiling from source for ARM architectures.[#17](https://github.com/shenwei356/kmcp/issues/17)
 - `search`:

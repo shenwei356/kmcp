@@ -504,7 +504,7 @@ Examples:
 
 				var genomeSize uint64
 
-				var codes []uint64
+				var codes, codes2 []uint64
 
 				// multiple level file tree for saving files
 				var dir1, dir2 string
@@ -667,6 +667,7 @@ Examples:
 
 						if bySeq {
 							codes = codes[:0] // reset
+							codes2 = codes2[:0]
 						}
 
 						if len(_seq.Seq)-1 <= splitOverlap {
@@ -738,18 +739,15 @@ Examples:
 						n = len(codes)
 
 						if exactNumber {
-							// compute exact number of unique k-mers
-							codes2 := make([]uint64, n)
-							copy(codes2, codes)
-							sortutil.Uint64s(codes2)
+							sortutil.Uint64s(codes)
 							var pre uint64 = 0
-							n = 0
-							for _, code = range codes2 {
+							for _, code = range codes {
 								if code != pre {
-									n++
+									codes2 = append(codes2, code)
 									pre = code
 								}
 							}
+							n = len(codes2)
 						}
 
 						if splitSeq {
@@ -792,8 +790,13 @@ Examples:
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
-						writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
-							scaled, scale, meta)
+						if exactNumber {
+							writeKmers(kMax, codes2, uint64(n), outFile, compress, opt.CompressionLevel,
+								scaled, scale, meta)
+						} else {
+							writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+								scaled, scale, meta)
+						}
 
 						ch <- UnikFileInfo{
 							Path:       outFile,
@@ -822,18 +825,15 @@ Examples:
 				}
 
 				if exactNumber {
-					// compute exact number of unique k-mers
-					codes2 := make([]uint64, n)
-					copy(codes2, codes)
-					sortutil.Uint64s(codes2)
+					sortutil.Uint64s(codes)
 					var pre uint64 = 0
-					n = 0
-					for _, code = range codes2 {
+					for _, code = range codes {
 						if code != pre {
-							n++
+							codes2 = append(codes2, code)
 							pre = code
 						}
 					}
+					n = len(codes2)
 				}
 
 				// write to file
@@ -865,8 +865,13 @@ Examples:
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
-				writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
-					scaled, scale, meta)
+				if exactNumber {
+					writeKmers(kMax, codes2, uint64(n), outFile, compress, opt.CompressionLevel,
+						scaled, scale, meta)
+				} else {
+					writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+						scaled, scale, meta)
+				}
 
 				ch <- UnikFileInfo{
 					Path:       outFile,

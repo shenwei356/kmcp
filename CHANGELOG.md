@@ -1,5 +1,16 @@
 # Changelog
 
+### v0.8.5 - 2022-00-00
+
+- `compute`:
+    - smaller output files and faster speed.
+- `index`:
+    - faster speed due to smaller input files.
+
+### v0.8.4 - 2022-08-16
+
+- fix compilation for 386 architectures
+
 ### v0.8.3 - 2022-08-15
 
 - `kmcp`: fix compiling from source for ARM architectures.[#17](https://github.com/shenwei356/kmcp/issues/17)
