@@ -330,6 +330,7 @@ Examples:
 
 		// ---------------- preset modes ----------------
 
+		maxIters := getFlagPositiveInt(cmd, "abund-max-iters")
 		noAmbCorr := getFlagBool(cmd, "no-amb-corr")
 
 		outFile := getFlagString(cmd, "out-prefix")
@@ -814,9 +815,11 @@ Examples:
 			log.Infof("stage 1/4: counting matches and unique matches for filtering out low-confidence references")
 		}
 		timeStart1 := time.Now()
+		var timeStart2 time.Time
 
 		for _, file := range files {
 			if opt.Verbose || opt.Log2File {
+				timeStart2 = time.Now()
 				log.Infof("  parsing file: %s", file)
 			}
 
@@ -1937,579 +1940,616 @@ Examples:
 		profile3 := make(map[uint64]*Target, len(profile2))
 
 		var nAssignedReads float64
+		targets := make([]*Target, 0, 256)
+		targetsMap := make(map[uint64]*Target, 256)
+		whiteList := make(map[uint64]interface{}, len(profile2))
+		for h := range profile2 {
+			whiteList[h] = struct{}{}
+		}
 
-		for _, file := range files {
+		for iter := 0; iter < maxIters; iter++ {
 			if opt.Verbose || opt.Log2File {
-				log.Infof("  parsing file: %s", file)
+				log.Infof("  iter #%d", iter+1)
 			}
 
-			var matches map[uint64]*[]*MatchResult // target -> match result
-			var m *MatchResult
-			var ms *[]*MatchResult
-			var t, t1 *Target
-			var ok bool
-			var hTarget, h uint64
-			var prevQuery string
-			var floatMsSize float64
-			var uniqMatch bool
-			var first bool
-			var sumUReads, prop float64
-			var uregionProp float64
-			var match *MatchResult
+			nAssignedReads = 0
+			for _, file := range files {
+				if opt.Verbose || opt.Log2File {
+					log.Infof("    parsing file: %s", file)
+				}
 
-			onlyTopNScore := topNScore > 0
-			var nScore int
-			var pScore float64
-			var processThisMatch bool
+				var matches map[uint64]*[]*MatchResult // target -> match result
+				var m *MatchResult
+				var ms *[]*MatchResult
+				var t, t1 *Target
+				var ok bool
+				var hTarget, h uint64
+				var prevQuery string
+				var floatMsSize float64
+				var uniqMatch bool
+				var first bool
+				var sumUReads, prop float64
+				var uregionProp float64
+				var match *MatchResult
 
-			taxids := make([]uint32, 0, 128)
-			var taxid1, taxid2 uint32
-			var theSameSpecies bool
+				onlyTopNScore := topNScore > 0
+				var nScore int
+				var pScore float64
+				var processThisMatch bool
 
-			reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
-			checkError(err)
-			var data interface{}
+				taxids := make([]uint32, 0, 128)
+				var taxid1, taxid2 uint32
+				var theSameSpecies bool
 
-			matches = make(map[uint64]*[]*MatchResult)
-			pScore = 1024
-			nScore = 0
-			processThisMatch = true
-			for chunk := range reader.Ch {
-				checkError(chunk.Err)
+				reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
+				checkError(err)
+				var data interface{}
 
-				for _, data = range chunk.Data {
-					match = data.(*MatchResult)
+				matches = make(map[uint64]*[]*MatchResult)
+				pScore = 1024
+				nScore = 0
+				processThisMatch = true
+				for chunk := range reader.Ch {
+					checkError(chunk.Err)
 
-					hTarget = wyhash.HashString(match.Target, 1)
-					if _, ok = profile2[hTarget]; !ok { // skip matches of unwanted targets
-						continue
-					}
+					for _, data = range chunk.Data {
+						match = data.(*MatchResult)
 
-					if prevQuery != match.Query {
-						nAssignedReads++
-						uniqMatch = false
-						if len(matches) > 1 { // redistribute matches
-							sumUReads = 0
+						hTarget = wyhash.HashString(match.Target, 1)
 
-							taxids = taxids[:0]
-							for h, ms = range matches {
-								// consider unique sequence proportion of references.
-								if considerUregionProp {
-									if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
-										sumUReads += profile2[h].SumUniqMatch / uregionProp
+						if _, ok = whiteList[hTarget]; !ok { // skip matches of unwanted targets
+							continue
+						}
+
+						if prevQuery != match.Query {
+							nAssignedReads++
+							uniqMatch = false
+							if len(matches) > 1 { // redistribute matches
+								sumUReads = 0
+
+								taxids = taxids[:0]
+								for h, ms = range matches {
+									if iter == 0 {
+										// consider unique sequence proportion of references.
+										if considerUregionProp {
+											if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
+												sumUReads += profile2[h].SumUniqMatch / uregionProp
+											} else {
+												sumUReads += profile2[h].SumUniqMatch
+											}
+										} else {
+											sumUReads += profile2[h].SumUniqMatch
+										}
 									} else {
-										sumUReads += profile2[h].SumUniqMatch
+										sumUReads += targetsMap[h].SumUniqMatch
 									}
-								} else {
-									sumUReads += profile2[h].SumUniqMatch
+
+									if mappingTaxids {
+										taxid1, ok = taxidMap[(*ms)[0].Target]
+										if !ok {
+											checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+										}
+										taxids = append(taxids, taxid1)
+									}
 								}
 
 								if mappingTaxids {
-									taxid1, ok = taxidMap[(*ms)[0].Target]
-									if !ok {
-										checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+									// LCA
+									theSameSpecies = false
+									taxid1 = taxids[0]
+									for _, taxid2 = range taxids[1:] {
+										taxid1 = taxdb.LCA(taxid1, taxid2)
 									}
-									taxids = append(taxids, taxid1)
-								}
-							}
 
-							if mappingTaxids {
-								// LCA
-								theSameSpecies = false
-								taxid1 = taxids[0]
-								for _, taxid2 = range taxids[1:] {
-									taxid1 = taxdb.LCA(taxid1, taxid2)
-								}
+									if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+										theSameSpecies = true
+									}
 
-								if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
-									theSameSpecies = true
+									if outputBinningResult {
+										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+										nB++
+									}
 								}
 
-								if outputBinningResult {
-									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-									nB++
-								}
-							}
+								for h, ms = range matches {
+									floatMsSize = float64(len(*ms))
+									first = true
+									t1 = profile2[h]
 
-							for h, ms = range matches {
-								floatMsSize = float64(len(*ms))
-								first = true
-								t1 = profile2[h]
-
-								// consider unique sequence proportion of references.
-								if considerUregionProp {
-									if uregionProp, ok = uregionPropMap[t1.Name]; ok {
-										prop = t1.SumUniqMatch / uregionProp / sumUReads
+									if iter == 0 {
+										// consider unique sequence proportion of references.
+										if considerUregionProp {
+											if uregionProp, ok = uregionPropMap[t1.Name]; ok {
+												prop = t1.SumUniqMatch / uregionProp / sumUReads
+											} else {
+												prop = t1.SumUniqMatch / sumUReads
+											}
+										} else {
+											prop = t1.SumUniqMatch / sumUReads
+										}
 									} else {
 										prop = t1.SumUniqMatch / sumUReads
 									}
-								} else {
-									prop = t1.SumUniqMatch / sumUReads
-								}
 
-								for _, m = range *ms {
-									if t, ok = profile3[h]; !ok {
-										t0 := Target{
-											Name:         m.Target,
-											GenomeSize:   m.GSize,
-											Match:        make([]float64, m.IdxNum),
-											UniqMatch:    make([]float64, m.IdxNum),
-											UniqMatchHic: make([]float64, m.IdxNum),
-											QLen:         make([]float64, m.IdxNum),
-											RelDepth:     make([]float64, m.IdxNum),
-											Stats:        stats.NewQuantiler(),
-											StatsA:       stats.NewQuantiler(),
-										}
-										profile3[h] = &t0
-										t = &t0
-									}
-
-									if first { // count once
-										if levelSpecies && theSameSpecies {
-											t.Stats.Add(m.QCov) // the best match on a subject
-										}
-										first = false
-
-										t.StatsA.Add(m.QCov)
-									}
-
-									t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
-									t.Match[m.FragIdx] += prop / floatMsSize
-
-									if levelSpecies && theSameSpecies {
-										t.UniqMatch[m.FragIdx] += prop / floatMsSize
-										if m.QCov >= hicUreadsMinQcov {
-											t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-										}
-									}
-								}
-								poolMatchResults.Put(ms)
-							}
-
-							uniqMatch = false
-						} else if len(matches) == 1 {
-							uniqMatch = true
-						} else {
-							// should not happen here, but it may happen out the main loop
-						}
-
-						if uniqMatch {
-							for h, ms = range matches {
-								floatMsSize = float64(len(*ms))
-								first = true
-								for _, m = range *ms {
-									if t, ok = profile3[h]; !ok {
-										t0 := Target{
-											Name:         m.Target,
-											GenomeSize:   m.GSize,
-											Match:        make([]float64, m.IdxNum),
-											UniqMatch:    make([]float64, m.IdxNum),
-											UniqMatchHic: make([]float64, m.IdxNum),
-											QLen:         make([]float64, m.IdxNum),
-											RelDepth:     make([]float64, m.IdxNum),
-											Stats:        stats.NewQuantiler(),
-											StatsA:       stats.NewQuantiler(),
-										}
-										profile3[h] = &t0
-										t = &t0
-									}
-
-									if first { // count once
-										if len(matches) == 1 {
-											t.UniqMatch[m.FragIdx]++
-											if m.QCov >= hicUreadsMinQcov {
-												t.UniqMatchHic[m.FragIdx]++
+									for _, m = range *ms {
+										if t, ok = profile3[h]; !ok {
+											t0 := Target{
+												Name:         m.Target,
+												GenomeSize:   m.GSize,
+												Match:        make([]float64, m.IdxNum),
+												UniqMatch:    make([]float64, m.IdxNum),
+												UniqMatchHic: make([]float64, m.IdxNum),
+												QLen:         make([]float64, m.IdxNum),
+												RelDepth:     make([]float64, m.IdxNum),
+												Stats:        stats.NewQuantiler(),
+												StatsA:       stats.NewQuantiler(),
 											}
-											t.Stats.Add(m.QCov) // the best match on a subject
+											profile3[h] = &t0
+											t = &t0
 										}
 
-										t.StatsA.Add(m.QCov)
-										first = false
+										if first { // count once
+											if levelSpecies && theSameSpecies {
+												t.Stats.Add(m.QCov) // the best match on a subject
+											}
+											first = false
 
-										if outputBinningResult {
-											outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
-											nB++
+											t.StatsA.Add(m.QCov)
+										}
+
+										t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
+										t.Match[m.FragIdx] += prop / floatMsSize
+
+										if levelSpecies && theSameSpecies {
+											t.UniqMatch[m.FragIdx] += prop / floatMsSize
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+											}
 										}
 									}
-
-									t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
-
-									t.Match[m.FragIdx] += floatOne / floatMsSize
+									poolMatchResults.Put(ms)
 								}
-								poolMatchResults.Put(ms)
+
+								uniqMatch = false
+							} else if len(matches) == 1 {
+								uniqMatch = true
+							} else {
+								// should not happen here, but it may happen out the main loop
 							}
-						}
 
-						matches = make(map[uint64]*[]*MatchResult)
-						pScore = 1024
-						nScore = 0
-						processThisMatch = true
-					} else if keepFullMatch {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
+							if uniqMatch {
+								for h, ms = range matches {
+									floatMsSize = float64(len(*ms))
+									first = true
+									for _, m = range *ms {
+										if t, ok = profile3[h]; !ok {
+											t0 := Target{
+												Name:         m.Target,
+												GenomeSize:   m.GSize,
+												Match:        make([]float64, m.IdxNum),
+												UniqMatch:    make([]float64, m.IdxNum),
+												UniqMatchHic: make([]float64, m.IdxNum),
+												QLen:         make([]float64, m.IdxNum),
+												RelDepth:     make([]float64, m.IdxNum),
+												Stats:        stats.NewQuantiler(),
+												StatsA:       stats.NewQuantiler(),
+											}
+											profile3[h] = &t0
+											t = &t0
+										}
 
-						if pScore == 1 && match.QCov < 1 {
-							processThisMatch = false
+										if first { // count once
+											if len(matches) == 1 {
+												t.UniqMatch[m.FragIdx]++
+												if m.QCov >= hicUreadsMinQcov {
+													t.UniqMatchHic[m.FragIdx]++
+												}
+												t.Stats.Add(m.QCov) // the best match on a subject
+											}
 
-							prevQuery = match.Query
-							continue
-						}
-					} else if keepMainMatch && pScore <= 1 {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
+											t.StatsA.Add(m.QCov)
+											first = false
 
-						if pScore-match.QCov > maxScoreGap {
-							processThisMatch = false
+											if outputBinningResult {
+												outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
+												nB++
+											}
+										}
 
-							prevQuery = match.Query
-							continue
-						}
-					}
+										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
-					if onlyTopNScore {
-						if !processThisMatch {
-							prevQuery = match.Query
-							continue
-						}
+										t.Match[m.FragIdx] += floatOne / floatMsSize
+									}
+									poolMatchResults.Put(ms)
+								}
+							}
 
-						if match.QCov < pScore { // match with a smaller score
-							nScore++
-							if nScore > topNScore {
+							matches = make(map[uint64]*[]*MatchResult)
+							pScore = 1024
+							nScore = 0
+							processThisMatch = true
+						} else if keepFullMatch {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if pScore == 1 && match.QCov < 1 {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+						} else if keepMainMatch && pScore <= 1 {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if pScore-match.QCov > maxScoreGap {
 								processThisMatch = false
 
 								prevQuery = match.Query
 								continue
 							}
 						}
-					}
 
-					if ms, ok = matches[hTarget]; !ok {
-						// tmp := []*MatchResult{match}
-						tmp := poolMatchResults.Get().(*[]*MatchResult)
-						*tmp = (*tmp)[:0]
-						*tmp = append(*tmp, match)
-						matches[hTarget] = tmp
-					} else {
-						*ms = append(*ms, match)
-					}
+						if onlyTopNScore {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
 
-					prevQuery = match.Query
-					pScore = match.QCov
-				}
-			}
+							if match.QCov < pScore { // match with a smaller score
+								nScore++
+								if nScore > topNScore {
+									processThisMatch = false
 
-			nAssignedReads++
-			uniqMatch = false
-			if len(matches) > 1 { // redistribute matches
-				sumUReads = 0
-
-				taxids = taxids[:0]
-				for h, ms = range matches {
-					// consider unique sequence proportion of references.
-					if considerUregionProp {
-						if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
-							sumUReads += profile2[h].SumUniqMatch / uregionProp
-						} else {
-							sumUReads += profile2[h].SumUniqMatch
+									prevQuery = match.Query
+									continue
+								}
+							}
 						}
-					} else {
-						sumUReads += profile2[h].SumUniqMatch
+
+						if ms, ok = matches[hTarget]; !ok {
+							// tmp := []*MatchResult{match}
+							tmp := poolMatchResults.Get().(*[]*MatchResult)
+							*tmp = (*tmp)[:0]
+							*tmp = append(*tmp, match)
+							matches[hTarget] = tmp
+						} else {
+							*ms = append(*ms, match)
+						}
+
+						prevQuery = match.Query
+						pScore = match.QCov
+					}
+				}
+
+				nAssignedReads++
+				uniqMatch = false
+				if len(matches) > 1 { // redistribute matches
+					sumUReads = 0
+
+					taxids = taxids[:0]
+					for h, ms = range matches {
+						if iter == 0 {
+							// consider unique sequence proportion of references.
+							if considerUregionProp {
+								if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
+									sumUReads += profile2[h].SumUniqMatch / uregionProp
+								} else {
+									sumUReads += profile2[h].SumUniqMatch
+								}
+							} else {
+								sumUReads += profile2[h].SumUniqMatch
+							}
+						} else {
+							sumUReads += targetsMap[h].SumUniqMatch
+						}
+
+						if mappingTaxids {
+							taxid1, ok = taxidMap[(*ms)[0].Target]
+							if !ok {
+								checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+							}
+							taxids = append(taxids, taxid1)
+						}
 					}
 
 					if mappingTaxids {
-						taxid1, ok = taxidMap[(*ms)[0].Target]
-						if !ok {
-							checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+						// LCA
+						theSameSpecies = false
+						taxid1 = taxids[0]
+						for _, taxid2 = range taxids[1:] {
+							taxid1 = taxdb.LCA(taxid1, taxid2)
 						}
-						taxids = append(taxids, taxid1)
-					}
-				}
 
-				if mappingTaxids {
-					// LCA
-					theSameSpecies = false
-					taxid1 = taxids[0]
-					for _, taxid2 = range taxids[1:] {
-						taxid1 = taxdb.LCA(taxid1, taxid2)
-					}
+						if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
+							theSameSpecies = true
+						}
 
-					if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
-						theSameSpecies = true
+						if outputBinningResult {
+							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+							nB++
+						}
 					}
 
-					if outputBinningResult {
-						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-						nB++
-					}
-				}
+					for h, ms = range matches {
+						floatMsSize = float64(len(*ms))
+						first = true
+						t1 = profile2[h]
 
-				for h, ms = range matches {
-					floatMsSize = float64(len(*ms))
-					first = true
-					t1 = profile2[h]
-
-					// consider unique sequence proportion of references.
-					if considerUregionProp {
-						if uregionProp, ok = uregionPropMap[t1.Name]; ok {
-							prop = t1.SumUniqMatch / uregionProp / sumUReads
+						// consider unique sequence proportion of references.
+						if considerUregionProp {
+							if uregionProp, ok = uregionPropMap[t1.Name]; ok {
+								prop = t1.SumUniqMatch / uregionProp / sumUReads
+							} else {
+								prop = t1.SumUniqMatch / sumUReads
+							}
 						} else {
 							prop = t1.SumUniqMatch / sumUReads
 						}
-					} else {
-						prop = t1.SumUniqMatch / sumUReads
-					}
 
-					for _, m = range *ms {
-						if t, ok = profile3[h]; !ok {
-							t0 := Target{
-								Name:         m.Target,
-								GenomeSize:   m.GSize,
-								Match:        make([]float64, m.IdxNum),
-								UniqMatch:    make([]float64, m.IdxNum),
-								UniqMatchHic: make([]float64, m.IdxNum),
-								QLen:         make([]float64, m.IdxNum),
-								RelDepth:     make([]float64, m.IdxNum),
-								Stats:        stats.NewQuantiler(),
-								StatsA:       stats.NewQuantiler(),
-							}
-							profile3[h] = &t0
-							t = &t0
-						}
-
-						if first { // count once
-							if levelSpecies && theSameSpecies {
-								t.Stats.Add(m.QCov) // the best match on a subject
-							}
-							first = false
-							t.StatsA.Add(m.QCov)
-						}
-
-						t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
-						t.Match[m.FragIdx] += prop / floatMsSize
-
-						if levelSpecies && theSameSpecies {
-							t.UniqMatch[m.FragIdx] += prop / floatMsSize
-							if m.QCov >= hicUreadsMinQcov {
-								t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-							}
-						}
-					}
-					poolMatchResults.Put(ms)
-				}
-
-				uniqMatch = false
-			} else if len(matches) == 1 {
-				uniqMatch = true
-			} else {
-				// should not happen here, but it may happen out the main loop
-			}
-
-			if uniqMatch {
-				for h, ms = range matches {
-					floatMsSize = float64(len(*ms))
-					first = true
-					for _, m = range *ms {
-						if t, ok = profile3[h]; !ok {
-							t0 := Target{
-								Name:         m.Target,
-								GenomeSize:   m.GSize,
-								Match:        make([]float64, m.IdxNum),
-								UniqMatch:    make([]float64, m.IdxNum),
-								UniqMatchHic: make([]float64, m.IdxNum),
-								QLen:         make([]float64, m.IdxNum),
-								RelDepth:     make([]float64, m.IdxNum),
-								Stats:        stats.NewQuantiler(),
-								StatsA:       stats.NewQuantiler(),
-							}
-							profile3[h] = &t0
-							t = &t0
-						}
-
-						if first { // count once
-							if len(matches) == 1 {
-								t.UniqMatch[m.FragIdx]++
-								if m.QCov >= hicUreadsMinQcov {
-									t.UniqMatchHic[m.FragIdx]++
+						for _, m = range *ms {
+							if t, ok = profile3[h]; !ok {
+								t0 := Target{
+									Name:         m.Target,
+									GenomeSize:   m.GSize,
+									Match:        make([]float64, m.IdxNum),
+									UniqMatch:    make([]float64, m.IdxNum),
+									UniqMatchHic: make([]float64, m.IdxNum),
+									QLen:         make([]float64, m.IdxNum),
+									RelDepth:     make([]float64, m.IdxNum),
+									Stats:        stats.NewQuantiler(),
+									StatsA:       stats.NewQuantiler(),
 								}
-								t.Stats.Add(m.QCov) // the best match on a subject
+								profile3[h] = &t0
+								t = &t0
 							}
 
-							t.StatsA.Add(m.QCov)
-							first = false
+							if first { // count once
+								if levelSpecies && theSameSpecies {
+									t.Stats.Add(m.QCov) // the best match on a subject
+								}
+								first = false
+								t.StatsA.Add(m.QCov)
+							}
 
-							if outputBinningResult {
-								outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
-								nB++
+							t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
+							t.Match[m.FragIdx] += prop / floatMsSize
+
+							if levelSpecies && theSameSpecies {
+								t.UniqMatch[m.FragIdx] += prop / floatMsSize
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+								}
 							}
 						}
-
-						t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
-
-						t.Match[m.FragIdx] += floatOne / floatMsSize
+						poolMatchResults.Put(ms)
 					}
-					poolMatchResults.Put(ms)
+
+					uniqMatch = false
+				} else if len(matches) == 1 {
+					uniqMatch = true
+				} else {
+					// should not happen here, but it may happen out the main loop
 				}
-			}
 
-		}
+				if uniqMatch {
+					for h, ms = range matches {
+						floatMsSize = float64(len(*ms))
+						first = true
+						for _, m = range *ms {
+							if t, ok = profile3[h]; !ok {
+								t0 := Target{
+									Name:         m.Target,
+									GenomeSize:   m.GSize,
+									Match:        make([]float64, m.IdxNum),
+									UniqMatch:    make([]float64, m.IdxNum),
+									UniqMatchHic: make([]float64, m.IdxNum),
+									QLen:         make([]float64, m.IdxNum),
+									RelDepth:     make([]float64, m.IdxNum),
+									Stats:        stats.NewQuantiler(),
+									StatsA:       stats.NewQuantiler(),
+								}
+								profile3[h] = &t0
+								t = &t0
+							}
 
-		// --------------------
-		// sum up #4
+							if first { // count once
+								if len(matches) == 1 {
+									t.UniqMatch[m.FragIdx]++
+									if m.QCov >= hicUreadsMinQcov {
+										t.UniqMatchHic[m.FragIdx]++
+									}
+									t.Stats.Add(m.QCov) // the best match on a subject
+								}
 
-		if debug {
-			outfhD.WriteString("\n\n")
-			outfhD.WriteString("#------------------ round 3 ------------------\n")
-		}
+								t.StatsA.Add(m.QCov)
+								first = false
 
-		targets := make([]*Target, 0, 256)
+								if outputBinningResult {
+									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
+									nB++
+								}
+							}
 
-		for _, t := range profile3 {
-			for _, c1 = range t.UniqMatch {
-				t.SumUniqMatch += c1
-			}
-			if t.SumUniqMatch < minUReads {
-				if debug {
-					if taxdb != nil {
-						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-							t.Name, taxdb.Name(taxidMap[t.Name]),
-							t.StatsA.Percentile(90),
-							"no enough unique match", t.SumUniqMatch)
-					} else {
-						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
-							t.Name,
-							t.StatsA.Percentile(90),
-							"no enough unique match", t.SumUniqMatch)
-					}
-				}
-				continue
-			}
+							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
-			for _, c1 = range t.UniqMatchHic {
-				t.SumUniqMatchHic += c1
-			}
-			if t.SumUniqMatchHic < minHicUreads {
-				if debug {
-					if taxdb != nil {
-						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
-							t.Name, taxdb.Name(taxidMap[t.Name]),
-							t.StatsA.Percentile(90),
-							"no enough high-confidence unique match", t.SumUniqMatchHic)
-					} else {
-						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
-							t.Name,
-							t.StatsA.Percentile(90),
-							"no enough high-confidence unique match", t.SumUniqMatchHic)
+							t.Match[m.FragIdx] += floatOne / floatMsSize
+						}
+						poolMatchResults.Put(ms)
 					}
 				}
-				continue
+
 			}
 
-			if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
-				if debug {
-					if taxdb != nil {
-						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
-							t.Name, taxdb.Name(taxidMap[t.Name]),
-							t.StatsA.Percentile(90),
-							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
-					} else {
-						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
-							t.Name,
-							t.StatsA.Percentile(90),
-							"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+			// --------------------
+			// sum up #4
+
+			if debug {
+				outfhD.WriteString("\n\n")
+				outfhD.WriteString(fmt.Sprintf("#------------------ round 3: iter #%d ------------------\n", iter+1))
+			}
+
+			targets = targets[:0]
+			whiteList = make(map[uint64]interface{}, len(profile3))
+
+			for h, t := range profile3 {
+				for _, c1 = range t.UniqMatch {
+					t.SumUniqMatch += c1
+				}
+				if t.SumUniqMatch < minUReads {
+					if debug {
+						if taxdb != nil {
+							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+								t.Name, taxdb.Name(taxidMap[t.Name]),
+								t.StatsA.Percentile(90),
+								"no enough unique match", t.SumUniqMatch)
+						} else {
+							fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
+								t.Name,
+								t.StatsA.Percentile(90),
+								"no enough unique match", t.SumUniqMatch)
+						}
 					}
+					continue
 				}
-				continue
-			}
 
-			// ----------------------
-
-			for _, c = range t.Match {
-				if c >= minReads {
-					t.FragsProp++
+				for _, c1 = range t.UniqMatchHic {
+					t.SumUniqMatchHic += c1
 				}
-				t.SumMatch += c
-			}
-			t.FragsProp = t.FragsProp / float64(len(t.Match))
-			if t.FragsProp < minFragsProp {
-				if debug {
-					if taxdb != nil {
-						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
-							t.Name, taxdb.Name(taxidMap[t.Name]),
-							t.StatsA.Percentile(90),
-							"low chunks fraction", t.FragsProp, t.Match)
-					} else {
-						fmt.Fprintf(outfhD, "failed3: %s 90th percentile: %.2f, %s: %.1f %v\n",
-							t.Name,
-							t.StatsA.Percentile(90),
-							"low chunks fraction", t.FragsProp, t.Match)
+				if t.SumUniqMatchHic < minHicUreads {
+					if debug {
+						if taxdb != nil {
+							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
+								t.Name, taxdb.Name(taxidMap[t.Name]),
+								t.StatsA.Percentile(90),
+								"no enough high-confidence unique match", t.SumUniqMatchHic)
+						} else {
+							fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.0f\n",
+								t.Name,
+								t.StatsA.Percentile(90),
+								"no enough high-confidence unique match", t.SumUniqMatchHic)
+						}
 					}
+					continue
 				}
-				continue
-			}
 
-			t.Qlens = 0
-			for _, c2 = range t.QLen {
-				t.Qlens += c2
-			}
-			for i, c2 := range t.QLen {
-				t.RelDepth[i] = c2 / t.Qlens * float64(len(t.QLen))
-			}
-
-			_, t.RelDepthStd = MeanStdev(t.RelDepth)
-			if t.RelDepthStd > maxFragsDepthStdev {
-				if debug {
-					if taxdb != nil {
-						fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
-							t.Name, taxdb.Name(taxidMap[t.Name]),
-							t.StatsA.Percentile(90),
-							"high FragsDepthStdev", t.RelDepthStd)
-					} else {
-						fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %f\n",
-							t.Name,
-							t.StatsA.Percentile(90),
-							"high FragsDepthStdev", t.RelDepthStd)
+				if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
+					if debug {
+						if taxdb != nil {
+							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+								t.Name, taxdb.Name(taxidMap[t.Name]),
+								t.StatsA.Percentile(90),
+								"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+						} else {
+							fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
+								t.Name,
+								t.StatsA.Percentile(90),
+								"no enough high-confidence unique match proportion", t.SumUniqMatchHic/t.SumUniqMatch, t.SumUniqMatchHic, t.SumUniqMatch)
+						}
 					}
+					continue
 				}
-				continue
-			}
 
-			// ----------------------
+				// ----------------------
 
-			switch normAbund {
-			case "mean":
-				t.Coverage = t.Qlens / float64(t.GenomeSize)
-			case "min":
-				tmp := math.MaxFloat64
+				for _, c = range t.Match {
+					if c >= minReads {
+						t.FragsProp++
+					}
+					t.SumMatch += c
+				}
+				t.FragsProp = t.FragsProp / float64(len(t.Match))
+				if t.FragsProp < minFragsProp {
+					if debug {
+						if taxdb != nil {
+							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
+								t.Name, taxdb.Name(taxidMap[t.Name]),
+								t.StatsA.Percentile(90),
+								"low chunks fraction", t.FragsProp, t.Match)
+						} else {
+							fmt.Fprintf(outfhD, "failed3: %s 90th percentile: %.2f, %s: %.1f %v\n",
+								t.Name,
+								t.StatsA.Percentile(90),
+								"low chunks fraction", t.FragsProp, t.Match)
+						}
+					}
+					continue
+				}
+
+				t.Qlens = 0
 				for _, c2 = range t.QLen {
-					if c2 == 0 {
-						continue
-					}
-					if c2 < tmp {
-						tmp = c2
-					}
+					t.Qlens += c2
 				}
-				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
-			case "max":
-				var tmp float64
-				for _, c2 = range t.QLen {
-					if c2 == 0 {
-						continue
-					}
-					if c2 > tmp {
-						tmp = c2
-					}
+				for i, c2 := range t.QLen {
+					t.RelDepth[i] = c2 / t.Qlens * float64(len(t.QLen))
 				}
-				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
+
+				_, t.RelDepthStd = MeanStdev(t.RelDepth)
+				if t.RelDepthStd > maxFragsDepthStdev {
+					if debug {
+						if taxdb != nil {
+							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
+								t.Name, taxdb.Name(taxidMap[t.Name]),
+								t.StatsA.Percentile(90),
+								"high FragsDepthStdev", t.RelDepthStd)
+						} else {
+							fmt.Fprintf(outfhD, "failed3: %s, 90th percentile: %.2f, %s: %f\n",
+								t.Name,
+								t.StatsA.Percentile(90),
+								"high FragsDepthStdev", t.RelDepthStd)
+						}
+					}
+					continue
+				}
+
+				// ----------------------
+
+				switch normAbund {
+				case "mean":
+					t.Coverage = t.Qlens / float64(t.GenomeSize)
+				case "min":
+					tmp := math.MaxFloat64
+					for _, c2 = range t.QLen {
+						if c2 == 0 {
+							continue
+						}
+						if c2 < tmp {
+							tmp = c2
+						}
+					}
+					t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
+				case "max":
+					var tmp float64
+					for _, c2 = range t.QLen {
+						if c2 == 0 {
+							continue
+						}
+						if c2 > tmp {
+							tmp = c2
+						}
+					}
+					t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
+				}
+
+				// t.Score = similarity(t.Stats.Percentile(90))
+				t.Score = t.Stats.Percentile(90) * 100
+
+				targets = append(targets, t)
+				targetsMap[h] = t
+				whiteList[h] = struct{}{}
+				// fmt.Println(t.Name, t.Coverage)
 			}
 
-			// t.Score = similarity(t.Stats.Percentile(90))
-			t.Score = t.Stats.Percentile(90) * 100
+			if opt.Verbose || opt.Log2File {
+				log.Infof("    number of estimated references: %d", len(targets))
+				log.Infof("    elapsed time: %s", time.Since(timeStart2))
+			}
 
-			targets = append(targets, t)
+			profile3 = make(map[uint64]*Target, len(profile3))
 		}
 
 		if opt.Verbose || opt.Log2File {
@@ -2885,6 +2925,9 @@ func init() {
 
 	profileCmd.Flags().StringP("level", "", "species",
 		formatFlagUsage(`Level to estimate abundance at. Available values: species, strain/assembly.`))
+
+	profileCmd.Flags().IntP("abund-max-iters", "", 5,
+		formatFlagUsage(`Miximal iteration of abundance estimation.`))
 
 	// not used
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)
