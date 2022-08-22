@@ -1339,7 +1339,8 @@ Examples:
 			var ms *[]*MatchResult
 			var t *Target
 			var ok bool
-			var hTarget, h, h1, h2 uint64
+			var hTarget, h, hi, hj, h1, h2 uint64
+			var nShared float64
 			var prevQuery string
 			var floatMsSize float64
 			var uniqMatch bool
@@ -1348,6 +1349,7 @@ Examples:
 			hsm := make([]bool, 0, 256)   // marking hash values to delete
 			var n, np1, i, j int
 			var match *MatchResult
+			OneMinusminDReadsProp := 1 - minDReadsProp
 
 			onlyTopNScore := topNScore > 0
 			var nScore int
@@ -1402,15 +1404,17 @@ Examples:
 											continue
 										}
 
+										hi, hj = hss[i], hss[j]
 										h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+										nShared = ambMatch[h1][h2]
 
-										if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-											profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+										if profile[hi].SumMatch*OneMinusminDReadsProp >= nShared &&
+											profile[hj].SumUniqMatch < profile[hi].SumUniqMatch*maxMismatchErr {
 											// remove hss[j]
 											hsm[j] = true
 											// fmt.Println(matches[hss[i]], matches[hss[j]])
-										} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-											profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+										} else if profile[hj].SumMatch*OneMinusminDReadsProp >= nShared &&
+											profile[hi].SumUniqMatch < profile[hj].SumUniqMatch*maxMismatchErr {
 											// remove hss[i]
 											hsm[i] = true
 											// fmt.Println(matches[hss[j]], matches[hss[i]])
@@ -1625,15 +1629,17 @@ Examples:
 								continue
 							}
 
+							hi, hj = hss[i], hss[j]
 							h1, h2 = sortTwoUint64s(hss[i], hss[j]) // sort to extract data from ambMatch
+							nShared = ambMatch[h1][h2]
 
-							if profile[hss[i]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-								profile[hss[j]].SumUniqMatch < profile[hss[i]].SumUniqMatch*maxMismatchErr {
+							if profile[hi].SumMatch*OneMinusminDReadsProp >= nShared &&
+								profile[hj].SumUniqMatch < profile[hi].SumUniqMatch*maxMismatchErr {
 								// remove hss[j]
 								hsm[j] = true
 								// fmt.Println(matches[hss[i]], matches[hss[j]])
-							} else if profile[hss[j]].SumMatch*(1-minDReadsProp) >= ambMatch[h1][h2] &&
-								profile[hss[i]].SumUniqMatch < profile[hss[j]].SumUniqMatch*maxMismatchErr {
+							} else if profile[hj].SumMatch*OneMinusminDReadsProp >= nShared &&
+								profile[hi].SumUniqMatch < profile[hj].SumUniqMatch*maxMismatchErr {
 								// remove hss[i]
 								hsm[i] = true
 								// fmt.Println(matches[hss[j]], matches[hss[i]])
