@@ -2021,7 +2021,7 @@ Examples:
 											sumUReads += profile2[h].SumUniqMatch
 										}
 									} else {
-										sumUReads += targetsMap[h].SumUniqMatch
+										sumUReads += targetsMap[h].Coverage
 									}
 
 									if mappingTaxids {
@@ -2066,9 +2066,10 @@ Examples:
 											}
 										} else {
 											prop = t1.SumUniqMatch / sumUReads
+											// prop = floatOne / float64(len(matches))
 										}
 									} else {
-										prop = t1.SumUniqMatch / sumUReads
+										prop = t1.Coverage / sumUReads
 									}
 
 									for _, m = range *ms {
@@ -2245,7 +2246,7 @@ Examples:
 								sumUReads += profile2[h].SumUniqMatch
 							}
 						} else {
-							sumUReads += targetsMap[h].SumUniqMatch
+							sumUReads += targetsMap[h].Coverage
 						}
 
 						if mappingTaxids {
@@ -2280,15 +2281,20 @@ Examples:
 						first = true
 						t1 = profile2[h]
 
-						// consider unique sequence proportion of references.
-						if considerUregionProp {
-							if uregionProp, ok = uregionPropMap[t1.Name]; ok {
-								prop = t1.SumUniqMatch / uregionProp / sumUReads
+						if iter == 0 {
+							// consider unique sequence proportion of references.
+							if considerUregionProp {
+								if uregionProp, ok = uregionPropMap[t1.Name]; ok {
+									prop = t1.SumUniqMatch / uregionProp / sumUReads
+								} else {
+									prop = t1.SumUniqMatch / sumUReads
+								}
 							} else {
 								prop = t1.SumUniqMatch / sumUReads
+								// prop = floatOne / float64(len(matches))
 							}
 						} else {
-							prop = t1.SumUniqMatch / sumUReads
+							prop = t1.Coverage / sumUReads
 						}
 
 						for _, m = range *ms {
@@ -2541,7 +2547,8 @@ Examples:
 				targets = append(targets, t)
 				targetsMap[h] = t
 				whiteList[h] = struct{}{}
-				// fmt.Println(t.Name, t.Coverage)
+
+				// fmt.Printf("%d\t%s\t%v\n", iter+1, t.Name, t.Coverage)
 			}
 
 			if opt.Verbose || opt.Log2File {
