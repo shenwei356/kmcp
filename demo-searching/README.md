@@ -1,4 +1,4 @@
-# Demo
+# Demo of sequence/genome searching
 
 ## Dataset
 
@@ -22,84 +22,6 @@ NC_013654.1.fasta.gz  |FASTA |DNA |1       |4717338|Escherichia coli SE15
 NC_018658.1.fasta.gz  |FASTA |DNA |1       |5273097|Escherichia coli O104:H4 str. 2011C-3493
 NZ_CP007592.1.fasta.gz|FASTA |DNA |1       |5104557|Escherichia coli O157:H16 strain Santai
 NZ_CP028116.1.fasta.gz|FASTA |DNA |1       |5648177|Escherichia coli O26 str. RM8426
-
-### Taxonomy data
-
-Please download and uncompress [taxdump.tar.gz](ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz),
-and then copy `names.dmp`, `nodes.dmp`, `delnodes.dmp` and `merged.dmp` to directory `taxdump`.
-## Metagenomic Profiling
-
-Buiding database:
-
-    # computing k-mers
-    kmcp compute \
-        --in-dir refs/ \
-        --ref-name-regexp "^([\w\.\_]+\.\d+)" \
-        --seq-name-filter "plasmid" \
-        --kmer 31 \
-        --split-number 10 \
-        --split-overlap 150 \
-        --out-dir refs-k31-n10 \
-        --force
-
-    # indexing k-mers
-    kmcp index \
-        --in-dir refs-k31-n10/\
-        --num-hash 3 \
-        --false-positive-rate 0.01 \
-        --out-dir refs-k31-n10.kmcp \
-        --force
-
-Generating mock dataset of three references with abundance 100:10:1.
-
-    # generating mock dataset
-    (seqkit sliding -s 10 -W 150 refs/NC_000913.3.fasta.gz | seqkit sample -p 0.6 ; \
-            seqkit sliding -s 10 -W 150 refs/NC_013654.1.fasta.gz | seqkit sample -p 0.6; \
-            seqkit sliding -s 10 -W 150 refs/NC_002695.2.fasta.gz | seqkit sample -p 0.06 ;  \
-            seqkit sliding -s 10 -W 150 refs/NC_010655.1.fasta.gz | seqkit sample -p 0.006 ) \
-        | seqkit shuffle -o mock.fastq.gz
-
-Searching
-
-    # searching
-    for f in *.fastq.gz; do
-        kmcp search \
-            --db-dir refs-k31-n10.kmcp/ \
-            --min-query-cov 0.55 \
-            $f \
-            --out-file $f.kmcp.gz
-    done
-
-Profiling
-
-    # profiling
-    # use a high --min-query-cov for strain level profiling
-    for f in *.kmcp.gz; do
-        kmcp profile \
-            --taxid-map taxid.map \
-            --taxdump taxdump \
-            $f \
-            --level strain \
-            --min-query-cov 0.8 \
-            --min-hic-ureads-qcov 0.8 \
-            --min-chunks-reads 20 \
-            --min-uniq-reads 5 \
-            --out-prefix $f.kmcp.profile \
-            --metaphlan-report $f.metaphlan.profile \
-            --cami-report $f.cami.profile \
-            --binning-result $f.binning.gz
-    done
-
-    cat mock.fastq.gz.kmcp.gz.kmcp.profile \
-        | csvtk cut -t -f ref,percentage,taxname \
-        | csvtk csv2md -t
-    
-|ref        |percentage|taxname                                  |
-|:----------|:---------|:----------------------------------------|
-|NC_013654.1|48.321535 |Escherichia coli SE15                    |
-|NC_000913.3|46.194629 |Escherichia coli str. K-12 substr. MG1655|
-|NC_002695.2|5.014025  |Escherichia coli O157:H7 str. Sakai      |
-|NC_010655.1|0.469811  |Akkermansia muciniphila ATCC BAA-835     |
 
 ## Genome similarity estimation
 
