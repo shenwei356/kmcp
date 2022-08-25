@@ -95,19 +95,19 @@ Searching
 Profiling
 
     # profiling using mode 1 for low coverage data
-    for f in *.kmcp.gz; do
-        kmcp profile \
-            --taxid-map taxdump-custom/taxid.map \
-            --taxdump taxdump-custom/ \
-            $f \
-            --mode 1 \
-            --out-prefix $f.kmcp.profile \
-            --metaphlan-report $f.metaphlan.profile \
-            --cami-report $f.cami.profile \
-            --binning-result $f.binning.gz
-    done
+    f=mock.fastq.gz.kmcp.gz
+    
+    kmcp profile \
+        --taxid-map taxdump-custom/taxid.map \
+        --taxdump taxdump-custom/ \
+        $f \
+        --mode 1 \
+        --out-prefix $f.kmcp.profile \
+        --metaphlan-report $f.metaphlan.profile \
+        --cami-report $f.cami.profile \
+        --binning-result $f.binning.gz
 
-    cat mock.fastq.gz.kmcp.gz.kmcp.profile \
+    cat $f.kmcp.profile \
         | csvtk cut -t -f ref,percentage,taxname \
         | csvtk csv2md -t
     
@@ -126,3 +126,4 @@ Profiling
 |GCF_000148585.2|0.186310  |Streptococcus mitis       |
 |GCF_000017205.1|0.091788  |Pseudomonas aeruginosa    |
 |GCF_009759685.1|0.089414  |Acinetobacter baumannii   |
+
