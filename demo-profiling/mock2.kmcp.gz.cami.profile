@@ -1,0 +1,43 @@
+@SampleID:
+@Version:0.10.0
+@Ranks:superkingdom|phylum|class|order|family|genus|species|strain
+@TaxonomyID:
+@@TAXID	RANK	TAXPATH	TAXPATHSN	PERCENTAGE
+609216830	superkingdom	609216830	Bacteria	100.000000
+3788559933	phylum	609216830|3788559933	Bacteria|Proteobacteria	94.096202
+3642462009	phylum	609216830|3642462009	Bacteria|Firmicutes	5.903798
+329474883	class	609216830|3788559933|329474883	Bacteria|Proteobacteria|Gammaproteobacteria	94.096202
+1845768359	class	609216830|3642462009|1845768359	Bacteria|Firmicutes|Bacilli	5.903798
+3160438580	order	609216830|3788559933|329474883|3160438580	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales	93.902670
+185544332	order	609216830|3642462009|1845768359|185544332	Bacteria|Firmicutes|Bacilli|Lactobacillales	4.067374
+813944714	order	609216830|3642462009|1845768359|813944714	Bacteria|Firmicutes|Bacilli|Bacillales	1.836424
+2185117029	order	609216830|3788559933|329474883|2185117029	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales	0.100630
+86398254	order	609216830|3788559933|329474883|86398254	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales	0.092902
+2234733759	family	609216830|3788559933|329474883|3160438580|2234733759	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae	93.902670
+3209851916	family	609216830|3642462009|1845768359|185544332|3209851916	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae	3.688450
+1997712377	family	609216830|3642462009|1845768359|813944714|1997712377	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae	1.836424
+1255484345	family	609216830|3642462009|1845768359|185544332|1255484345	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae	0.378924
+943158193	family	609216830|3788559933|329474883|2185117029|943158193	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae	0.100630
+1478401337	family	609216830|3788559933|329474883|86398254|1478401337	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae	0.092902
+2258433137	genus	609216830|3788559933|329474883|3160438580|2234733759|2258433137	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella	34.874363
+3334977531	genus	609216830|3788559933|329474883|3160438580|2234733759|3334977531	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia	20.665537
+2440106587	genus	609216830|3788559933|329474883|3160438580|2234733759|2440106587	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Klebsiella	19.423473
+794943543	genus	609216830|3788559933|329474883|3160438580|2234733759|794943543	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Salmonella	18.939297
+602175708	genus	609216830|3642462009|1845768359|185544332|3209851916|602175708	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus	3.688450
+1824050977	genus	609216830|3642462009|1845768359|813944714|1997712377|1824050977	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus	1.836424
+2394826844	genus	609216830|3642462009|1845768359|185544332|1255484345|2394826844	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus	0.378924
+568178587	genus	609216830|3788559933|329474883|2185117029|943158193|568178587	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae|Acinetobacter	0.100630
+1616653803	genus	609216830|3788559933|329474883|86398254|1478401337|1616653803	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae|Pseudomonas	0.092902
+4093283224	species	609216830|3788559933|329474883|3160438580|2234733759|3334977531|4093283224	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli	20.665537
+3958205156	species	609216830|3788559933|329474883|3160438580|2234733759|2440106587|3958205156	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Klebsiella|Klebsiella pneumoniae	19.423473
+1678121664	species	609216830|3788559933|329474883|3160438580|2234733759|794943543|1678121664	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Salmonella|Salmonella enterica	18.939297
+2695851945	species	609216830|3788559933|329474883|3160438580|2234733759|2258433137|2695851945	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella|Shigella flexneri	17.728628
+524994882	species	609216830|3788559933|329474883|3160438580|2234733759|2258433137|524994882	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella|Shigella dysenteriae	17.145735
+4145431389	species	609216830|3642462009|1845768359|185544332|3209851916|602175708|4145431389	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus|Enterococcus faecium	1.889502
+3809813362	species	609216830|3642462009|1845768359|185544332|3209851916|602175708|3809813362	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus|Enterococcus faecalis	1.798948
+1920251658	species	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1920251658	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus|Staphylococcus epidermidis	0.920654
+1569132721	species	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1569132721	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus|Staphylococcus aureus	0.915770
+1527235303	species	609216830|3642462009|1845768359|185544332|1255484345|2394826844|1527235303	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus|Streptococcus mitis	0.190503
+2983929374	species	609216830|3642462009|1845768359|185544332|1255484345|2394826844|2983929374	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus|Streptococcus pneumoniae	0.188421
+72054943	species	609216830|3788559933|329474883|2185117029|943158193|568178587|72054943	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae|Acinetobacter|Acinetobacter baumannii	0.100630
+3843752343	species	609216830|3788559933|329474883|86398254|1478401337|1616653803|3843752343	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae|Pseudomonas|Pseudomonas aeruginosa	0.092902
