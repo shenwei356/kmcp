@@ -23,10 +23,8 @@
 *trace.out
 
 # taxonomy
-delnodes.dmp
-merged.dmp
-names.dmp
-nodes.dmp
+!demo-profiling/*.dmp
+kmcp/*.dmp
 
 # binary and html
 kmcp/kmcp*
