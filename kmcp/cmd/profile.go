@@ -803,9 +803,9 @@ Examples:
 					match = data.(*MatchResult)
 
 					if prevQuery != match.Query { // new query
-						nReads++
-
 						if len(matches) > 0 { // not the first query
+							nReads++
+
 							if levelSpecies {
 								taxids = taxids[:0]
 								for h, ms = range matches {
@@ -1894,31 +1894,8 @@ Examples:
 		}
 		timeStart1 = time.Now()
 
-		var outfhB *bufio.Writer
-		var gwB io.WriteCloser
-		var wB *os.File
-		var nB uint64
-		if outputBinningResult {
-			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(binningFile), ".gz"), opt.CompressionLevel)
-			checkError(err)
-			defer func() {
-				outfhB.Flush()
-				if gwB != nil {
-					gwB.Close()
-				}
-				wB.Close()
-			}()
-
-			outfhB.WriteString("# This is the bioboxes.org binning output format at\n")
-			outfhB.WriteString("# https://github.com/bioboxes/rfc/tree/master/data-format\n")
-			outfhB.WriteString("@Version:0.10.0\n")
-			outfhB.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
-			outfhB.WriteString("@@SEQUENCEID	TAXID\n")
-		}
-
 		profile3 := make(map[uint64]*Target, len(profile2))
 
-		var nAssignedReads float64
 		targets := make([]*Target, 0, 256)
 		targetsMap := make(map[uint64]*Target, 256)
 		whiteList := make(map[uint64]interface{}, len(profile2))
@@ -1927,6 +1904,7 @@ Examples:
 			targetsMap[h] = t
 		}
 		var domPctPre, domPctChange float64
+		var nAssignedReads float64
 		for iter := 0; iter < maxIters; iter++ {
 			if opt.Verbose || opt.Log2File {
 				log.Infof("  iter #%d", iter+1)
@@ -1982,9 +1960,9 @@ Examples:
 						}
 
 						if prevQuery != match.Query {
-							nAssignedReads++
 							uniqMatch = false
 							if len(matches) > 1 { // redistribute matches
+								nAssignedReads++
 								sumCoverages = 0
 
 								taxids = taxids[:0]
@@ -2010,11 +1988,6 @@ Examples:
 
 									if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
 										theSameSpecies = true
-									}
-
-									if outputBinningResult {
-										outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-										nB++
 									}
 								}
 
@@ -2064,9 +2037,10 @@ Examples:
 
 								uniqMatch = false
 							} else if len(matches) == 1 {
+								nAssignedReads++
 								uniqMatch = true
 							} else {
-								// should not happen here, but it may happen out the main loop
+								// the first query
 							}
 
 							if uniqMatch {
@@ -2099,11 +2073,6 @@ Examples:
 
 											t.StatsA.Add(m.QCov)
 											first = false
-
-											if outputBinningResult {
-												outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
-												nB++
-											}
 										}
 
 										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
@@ -2205,11 +2174,6 @@ Examples:
 						if levelSpecies && taxdb.AtOrBelowRank(taxid1, "species") {
 							theSameSpecies = true
 						}
-
-						if outputBinningResult {
-							outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
-							nB++
-						}
 					}
 
 					for h, ms = range matches {
@@ -2260,7 +2224,7 @@ Examples:
 				} else if len(matches) == 1 {
 					uniqMatch = true
 				} else {
-					// should not happen here, but it may happen out the main loop
+					// the first query
 				}
 
 				if uniqMatch {
@@ -2293,11 +2257,6 @@ Examples:
 
 								t.StatsA.Add(m.QCov)
 								first = false
-
-								if outputBinningResult {
-									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[m.Target]))
-									nB++
-								}
 							}
 
 							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
@@ -2519,26 +2478,207 @@ Examples:
 			log.Infof("  number of estimated references: %d", len(targets))
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
-			if outputBinningResult {
-				log.Infof("%d binning results are save to %s", nB, binningFile)
-			}
-			log.Info()
 			log.Infof("#input matched reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
 				nReads, nAssignedReads, nAssignedReads/nReads*100)
 		}
 
 		// ---------------------------------------------------------------
-		// output
+		// binning result
 
-		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
-		checkError(err)
-		defer func() {
-			outfh.Flush()
-			if gw != nil {
-				gw.Close()
+		var outfhB *bufio.Writer
+		var gwB io.WriteCloser
+		var wB *os.File
+		var nB uint64
+		if outputBinningResult {
+			outfhB, gwB, wB, err = outStream(binningFile, strings.HasSuffix(strings.ToLower(binningFile), ".gz"), opt.CompressionLevel)
+			checkError(err)
+			defer func() {
+				outfhB.Flush()
+				if gwB != nil {
+					gwB.Close()
+				}
+				wB.Close()
+			}()
+
+			outfhB.WriteString("# This is the bioboxes.org binning output format at\n")
+			outfhB.WriteString("# https://github.com/bioboxes/rfc/tree/master/data-format\n")
+			outfhB.WriteString("@Version:0.10.0\n")
+			outfhB.WriteString(fmt.Sprintf("@SampleID:%s\n", sampleID))
+			outfhB.WriteString("@@SEQUENCEID	TAXID\n")
+
+			if opt.Verbose || opt.Log2File {
+				log.Info()
+				log.Infof("writting binning result...")
 			}
-			w.Close()
-		}()
+
+			for _, file := range files {
+				if opt.Verbose || opt.Log2File {
+					log.Infof("  parsing file: %s", file)
+				}
+
+				var matches map[uint64]*[]*MatchResult // target -> match result
+				var ms *[]*MatchResult
+				var ok bool
+				var hTarget uint64
+				var prevQuery string
+				var match *MatchResult
+
+				onlyTopNScore := topNScore > 0
+				var nScore int
+				var pScore float64
+				var processThisMatch bool
+
+				taxids := make([]uint32, 0, 128)
+				var taxid1, taxid2 uint32
+				reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
+				checkError(err)
+				var data interface{}
+
+				matches = make(map[uint64]*[]*MatchResult)
+				pScore = 1024
+				nScore = 0
+				processThisMatch = true
+				for chunk := range reader.Ch {
+					checkError(chunk.Err)
+
+					for _, data = range chunk.Data {
+						match = data.(*MatchResult)
+
+						hTarget = wyhash.HashString(match.Target, 1)
+
+						if _, ok = whiteList[hTarget]; !ok { // skip matches of unwanted targets
+							continue
+						}
+
+						if prevQuery != match.Query {
+							if len(matches) > 1 { // redistribute matches
+								taxids = taxids[:0]
+								for _, ms = range matches {
+									taxid1, ok = taxidMap[(*ms)[0].Target]
+									if !ok {
+										checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+									}
+									taxids = append(taxids, taxid1)
+
+									poolMatchResults.Put(ms)
+								}
+
+								// LCA
+								taxid1 = taxids[0]
+								for _, taxid2 = range taxids[1:] {
+									taxid1 = taxdb.LCA(taxid1, taxid2)
+								}
+
+								outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+								nB++
+							} else {
+								for _, ms = range matches {
+									outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[(*ms)[0].Target]))
+									nB++
+
+									poolMatchResults.Put(ms)
+								}
+							}
+
+							matches = make(map[uint64]*[]*MatchResult)
+							pScore = 1024
+							nScore = 0
+							processThisMatch = true
+						} else if keepFullMatch {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if pScore == 1 && match.QCov < 1 {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+						} else if keepMainMatch && pScore <= 1 {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if pScore-match.QCov > maxScoreGap {
+								processThisMatch = false
+
+								prevQuery = match.Query
+								continue
+							}
+						}
+
+						if onlyTopNScore {
+							if !processThisMatch {
+								prevQuery = match.Query
+								continue
+							}
+
+							if match.QCov < pScore { // match with a smaller score
+								nScore++
+								if nScore > topNScore {
+									processThisMatch = false
+
+									prevQuery = match.Query
+									continue
+								}
+							}
+						}
+
+						if ms, ok = matches[hTarget]; !ok {
+							// tmp := []*MatchResult{match}
+							tmp := poolMatchResults.Get().(*[]*MatchResult)
+							*tmp = (*tmp)[:0]
+							*tmp = append(*tmp, match)
+							matches[hTarget] = tmp
+						} else {
+							*ms = append(*ms, match)
+						}
+
+						prevQuery = match.Query
+						pScore = match.QCov
+					}
+				}
+
+				if len(matches) > 1 { // redistribute matches
+					taxids = taxids[:0]
+					for _, ms = range matches {
+						taxid1, ok = taxidMap[(*ms)[0].Target]
+						if !ok {
+							checkError(fmt.Errorf("unknown taxid for %s, please check taxid mapping file(s)", (*ms)[0].Target))
+						}
+						taxids = append(taxids, taxid1)
+
+						poolMatchResults.Put(ms)
+					}
+
+					// LCA
+					taxid1 = taxids[0]
+					for _, taxid2 = range taxids[1:] {
+						taxid1 = taxdb.LCA(taxid1, taxid2)
+					}
+
+					outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxid1))
+					nB++
+				} else {
+					for _, ms = range matches {
+						outfhB.WriteString(fmt.Sprintf("%s\t%d\n", prevQuery, taxidMap[(*ms)[0].Target]))
+						nB++
+
+						poolMatchResults.Put(ms)
+					}
+				}
+			}
+
+			if opt.Verbose || opt.Log2File {
+				log.Info()
+				log.Infof("  %d binning results are save to %s", nB, binningFile)
+			}
+		}
+		// ---------------------------------------------------------------
+		// sort and filter
 
 		if mode0 {
 			sort.Slice(targets, func(i, j int) bool {
@@ -2620,6 +2760,19 @@ Examples:
 		for _i, _r := range showRanks {
 			rankPrefixesMap[_r] = rankPrefixes[_i]
 		}
+
+		// ---------------------------------------------------------------
+		// output
+
+		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
+		checkError(err)
+		defer func() {
+			outfh.Flush()
+			if gw != nil {
+				gw.Close()
+			}
+			w.Close()
+		}()
 
 		outfh.WriteString("ref\tpercentage\tcoverage\tscore\tchunksFrac\tchunksRelDepth\tchunksRelDepthStd\treads\tureads\thicureads\trefsize\trefname\ttaxid\trank\ttaxname\ttaxpath\ttaxpathsn\n")
 
