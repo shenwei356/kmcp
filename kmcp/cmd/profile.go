@@ -713,7 +713,7 @@ Examples:
 				log.Infof("    Taxonomy ID   : %s", taxonomyID)
 			}
 			if outputBinningResult {
-				log.Infof("  Binning result  : %s", binningFile)
+				log.Infof(" Binning result   : %s", binningFile)
 			}
 
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -861,6 +861,7 @@ Examples:
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
 									// the sum is still one.
+									// Besides, we add one for ambiguous reads too.
 									t.Match[m.FragIdx] += floatOne / floatMsSize
 								}
 								poolMatchResults.Put(ms)
@@ -1890,7 +1891,7 @@ Examples:
 		// ---------------------------------------------------------------
 		// stage 4/4
 		if opt.Verbose || opt.Log2File {
-			log.Infof("stage 4/4: computing profile")
+			log.Infof("stage 4/4: estimating abundance using EM algorithm")
 		}
 		timeStart1 = time.Now()
 
