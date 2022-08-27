@@ -430,13 +430,11 @@ Methods:
      If stage 1/4 produces thousands of candidates, you can use
      the flag --no-amb-corr to reduce analysis time, which has very little
      effect on the results.
-  4. Multi-aligned queries are proportionally assigned to references
-     with a similar strategy in Metalign.
-  5. Input files are parsed four times, therefore STDIN is not supported.
+  4. Abundance are estimated using an Expectation-Maximization (EM) algorithm.
+  5. Input files are parsed for multiple times, therefore STDIN is not supported.
 
 Reference:
   1. MegaPath: https://doi.org/10.1186/s12864-020-06875-6
-  2. Metalign: https://doi.org/10.1186/s13059-020-02159-0
 
 Accuracy notes:
   *. Smaller -t/--min-qcov increase sensitivity at the cost of higher false
@@ -547,6 +545,9 @@ Usage:
   kmcp profile [flags] [-X <taxdump dir>] [-T <taxid.map>] [-m <mode>] [-o <kmcp profile>] <search results>
 
 Flags:
+  -I, --abund-max-iters int               ► Miximal iteration of abundance estimation. (default 5)
+      --abund-pct-threshold float         ► If the percentage change of the predominant target is
+                                          smaller than this threshold, stop the iteration. (default 0.01)
   -B, --binning-result string             ► Save extra binning result in CAMI report.
   -C, --cami-report string                ► Save extra CAMI-like report.
       --debug string                      ► Debug output file.
