@@ -331,6 +331,8 @@ Examples:
 		// ---------------- preset modes ----------------
 
 		maxIters := getFlagPositiveInt(cmd, "abund-max-iters")
+		abundPctThreshold := getFlagPositiveFloat64(cmd, "abund-pct-threshold")
+
 		noAmbCorr := getFlagBool(cmd, "no-amb-corr")
 
 		outFile := getFlagString(cmd, "out-prefix")
@@ -456,10 +458,6 @@ Examples:
 		}
 
 		// -----
-
-		// UregionPropFiles := getFlagStringSlice(cmd, "uregion-prop-map")
-		UregionPropFiles := []string{}
-		considerUregionProp := len(UregionPropFiles) > 0
 
 		// -----
 
@@ -665,59 +663,6 @@ Examples:
 			}
 		}
 
-		// ---------------------------------------------------------------
-		// unique region proportion (experimental, not used)
-
-		var uregionPropMap map[string]float64
-
-		if considerUregionProp {
-			if opt.Verbose || opt.Log2File {
-				log.Infof("loading reference unique regions proportion mapping file ...")
-			}
-			uregionPropFile := UregionPropFiles[0]
-			uregionPropStr, err := cliutil.ReadKVs(uregionPropFile, false)
-			if err != nil {
-				checkError(errors.Wrap(err, uregionPropFile))
-			}
-			uregionPropMap = make(map[string]float64, len(uregionPropStr))
-			var p float64
-			for k, s := range uregionPropStr {
-				p, err = strconv.ParseFloat(s, 64)
-				if err != nil {
-					checkError(fmt.Errorf("invalid proportion: %s", s))
-				}
-				uregionPropMap[k] = p
-			}
-
-			if len(UregionPropFiles) > 1 {
-				for _, uregionPropFile := range taxidMappingFiles[1:] {
-					uregionPropStr, err := cliutil.ReadKVs(uregionPropFile, false)
-					if err != nil {
-						checkError(errors.Wrap(err, uregionPropFile))
-					}
-					uregionPropMap = make(map[string]float64, len(uregionPropStr))
-					var p float64
-					for k, s := range uregionPropStr {
-						p, err = strconv.ParseFloat(s, 64)
-						if err != nil {
-							checkError(fmt.Errorf("invalid proportion: %s", s))
-						}
-						uregionPropMap[k] = p
-					}
-				}
-			}
-
-			if opt.Verbose || opt.Log2File {
-				log.Infof("  %d pairs of reference unique regions proportion mapping values from %d file(s) loaded", len(uregionPropMap), len(UregionPropFiles))
-			}
-
-			considerUregionProp = len(uregionPropMap) > 0
-
-			if !considerUregionProp {
-				checkError(fmt.Errorf("no valid reference unique regions proportions found in mapping file: %s", strings.Join(UregionPropFiles, ", ")))
-			}
-		}
-
 		if opt.Verbose || opt.Log2File {
 			log.Info()
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -912,7 +857,7 @@ Examples:
 										first = false
 									}
 
-									// t.QLen[m.FragIdx] += float64(m.QLen)
+									// t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
 
 									// for a read matching multiple regions of a reference, distribute count to multiple regions,
 									// the sum is still one.
@@ -1348,6 +1293,7 @@ Examples:
 			var floatMsSize float64
 			var uniqMatch bool
 			var first bool
+			var prop float64
 			hss := make([]uint64, 0, 256) // for sorting hash value of reference
 			hsm := make([]bool, 0, 256)   // marking hash values to delete
 			var n, np1, i, j int
@@ -1452,6 +1398,8 @@ Examples:
 									}
 								}
 
+								// targets are assigned equaly
+								prop = floatOne / float64(len(matches))
 								for h, ms = range matches {
 									floatMsSize = float64(len(*ms))
 									first = true
@@ -1486,7 +1434,8 @@ Examples:
 											first = false
 										}
 
-										t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
+										// targets are assigned equaly
+										t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
 
 										// for a read matching multiple regions of a reference, distribute count to multiple regions,
 										// the sum is still one.
@@ -1523,14 +1472,13 @@ Examples:
 									}
 
 									if first { // count once
-										if len(matches) == 1 {
-											t.UniqMatch[m.FragIdx]++
-											if m.QCov >= hicUreadsMinQcov {
-												t.UniqMatchHic[m.FragIdx]++
-											}
-
-											// t.Stats.Add(m.QCov) // the best match on a subject
+										t.UniqMatch[m.FragIdx]++
+										if m.QCov >= hicUreadsMinQcov {
+											t.UniqMatchHic[m.FragIdx]++
 										}
+
+										// t.Stats.Add(m.QCov) // the best match on a subject
+
 										t.StatsA.Add(m.QCov) // the best match on a subject
 
 										first = false
@@ -1677,6 +1625,8 @@ Examples:
 						}
 					}
 
+					// targets are assigned equaly
+					prop = floatOne / float64(len(matches))
 					for h, ms = range matches {
 						floatMsSize = float64(len(*ms))
 						first = true
@@ -1711,7 +1661,8 @@ Examples:
 								first = false
 							}
 
-							t.QLen[m.FragIdx] += float64(m.QLen) / floatMsSize
+							// targets are assigned equaly
+							t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
 
 							// for a read matching multiple regions of a reference, distribute count to multiple regions,
 							// the sum is still one.
@@ -1748,14 +1699,13 @@ Examples:
 						}
 
 						if first { // count once
-							if len(matches) == 1 {
-								t.UniqMatch[m.FragIdx]++
-								if m.QCov >= hicUreadsMinQcov {
-									t.UniqMatchHic[m.FragIdx]++
-								}
-
-								// t.Stats.Add(m.QCov) // the best match on a subject
+							t.UniqMatch[m.FragIdx]++
+							if m.QCov >= hicUreadsMinQcov {
+								t.UniqMatchHic[m.FragIdx]++
 							}
+
+							// t.Stats.Add(m.QCov) // the best match on a subject
+
 							t.StatsA.Add(m.QCov) // the best match on a subject
 
 							first = false
@@ -1896,6 +1846,35 @@ Examples:
 				continue
 			}
 
+			// ----------------------
+			// compute coverage.
+			// The first M-step in EM algorithm.
+			switch normAbund {
+			case "mean":
+				t.Coverage = t.Qlens / float64(t.GenomeSize)
+			case "min":
+				tmp := math.MaxFloat64
+				for _, c2 = range t.QLen {
+					if c2 == 0 {
+						continue
+					}
+					if c2 < tmp {
+						tmp = c2
+					}
+				}
+				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
+			case "max":
+				var tmp float64
+				for _, c2 = range t.QLen {
+					if c2 == 0 {
+						continue
+					}
+					if c2 > tmp {
+						tmp = c2
+					}
+				}
+				t.Coverage = tmp * float64(len(t.QLen)) / float64(t.GenomeSize)
+			}
 		}
 
 		for _, h := range hs {
@@ -1943,13 +1922,15 @@ Examples:
 		targets := make([]*Target, 0, 256)
 		targetsMap := make(map[uint64]*Target, 256)
 		whiteList := make(map[uint64]interface{}, len(profile2))
-		for h := range profile2 {
+		for h, t := range profile2 {
 			whiteList[h] = struct{}{}
+			targetsMap[h] = t
 		}
-
+		var domPctPre, domPctChange float64
 		for iter := 0; iter < maxIters; iter++ {
 			if opt.Verbose || opt.Log2File {
 				log.Infof("  iter #%d", iter+1)
+				timeStart2 = time.Now()
 			}
 
 			nAssignedReads = 0
@@ -1961,15 +1942,14 @@ Examples:
 				var matches map[uint64]*[]*MatchResult // target -> match result
 				var m *MatchResult
 				var ms *[]*MatchResult
-				var t, t1 *Target
+				var t *Target
 				var ok bool
 				var hTarget, h uint64
 				var prevQuery string
 				var floatMsSize float64
 				var uniqMatch bool
 				var first bool
-				var sumUReads, prop float64
-				var uregionProp float64
+				var sumCoverages, prop float64
 				var match *MatchResult
 
 				onlyTopNScore := topNScore > 0
@@ -2005,24 +1985,11 @@ Examples:
 							nAssignedReads++
 							uniqMatch = false
 							if len(matches) > 1 { // redistribute matches
-								sumUReads = 0
+								sumCoverages = 0
 
 								taxids = taxids[:0]
 								for h, ms = range matches {
-									if iter == 0 {
-										// consider unique sequence proportion of references.
-										if considerUregionProp {
-											if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
-												sumUReads += profile2[h].SumUniqMatch / uregionProp
-											} else {
-												sumUReads += profile2[h].SumUniqMatch
-											}
-										} else {
-											sumUReads += profile2[h].SumUniqMatch
-										}
-									} else {
-										sumUReads += targetsMap[h].Coverage
-									}
+									sumCoverages += targetsMap[h].Coverage
 
 									if mappingTaxids {
 										taxid1, ok = taxidMap[(*ms)[0].Target]
@@ -2054,23 +2021,8 @@ Examples:
 								for h, ms = range matches {
 									floatMsSize = float64(len(*ms))
 									first = true
-									t1 = profile2[h]
 
-									if iter == 0 {
-										// consider unique sequence proportion of references.
-										if considerUregionProp {
-											if uregionProp, ok = uregionPropMap[t1.Name]; ok {
-												prop = t1.SumUniqMatch / uregionProp / sumUReads
-											} else {
-												prop = t1.SumUniqMatch / sumUReads
-											}
-										} else {
-											prop = t1.SumUniqMatch / sumUReads
-											// prop = floatOne / float64(len(matches))
-										}
-									} else {
-										prop = t1.Coverage / sumUReads
-									}
+									prop = targetsMap[h].Coverage / sumCoverages
 
 									for _, m = range *ms {
 										if t, ok = profile3[h]; !ok {
@@ -2091,22 +2043,21 @@ Examples:
 
 										if first { // count once
 											if levelSpecies && theSameSpecies {
+												t.UniqMatch[m.FragIdx] += prop / floatMsSize
+												if m.QCov >= hicUreadsMinQcov {
+													t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+												}
+
 												t.Stats.Add(m.QCov) // the best match on a subject
 											}
-											first = false
-
 											t.StatsA.Add(m.QCov)
+
+											first = false
 										}
 
 										t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
-										t.Match[m.FragIdx] += prop / floatMsSize
 
-										if levelSpecies && theSameSpecies {
-											t.UniqMatch[m.FragIdx] += prop / floatMsSize
-											if m.QCov >= hicUreadsMinQcov {
-												t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-											}
-										}
+										t.Match[m.FragIdx] += prop / floatMsSize
 									}
 									poolMatchResults.Put(ms)
 								}
@@ -2140,13 +2091,11 @@ Examples:
 										}
 
 										if first { // count once
-											if len(matches) == 1 {
-												t.UniqMatch[m.FragIdx]++
-												if m.QCov >= hicUreadsMinQcov {
-													t.UniqMatchHic[m.FragIdx]++
-												}
-												t.Stats.Add(m.QCov) // the best match on a subject
+											t.UniqMatch[m.FragIdx]++
+											if m.QCov >= hicUreadsMinQcov {
+												t.UniqMatchHic[m.FragIdx]++
 											}
+											t.Stats.Add(m.QCov) // the best match on a subject
 
 											t.StatsA.Add(m.QCov)
 											first = false
@@ -2230,24 +2179,11 @@ Examples:
 				nAssignedReads++
 				uniqMatch = false
 				if len(matches) > 1 { // redistribute matches
-					sumUReads = 0
+					sumCoverages = 0
 
 					taxids = taxids[:0]
 					for h, ms = range matches {
-						if iter == 0 {
-							// consider unique sequence proportion of references.
-							if considerUregionProp {
-								if uregionProp, ok = uregionPropMap[profile2[h].Name]; ok {
-									sumUReads += profile2[h].SumUniqMatch / uregionProp
-								} else {
-									sumUReads += profile2[h].SumUniqMatch
-								}
-							} else {
-								sumUReads += profile2[h].SumUniqMatch
-							}
-						} else {
-							sumUReads += targetsMap[h].Coverage
-						}
+						sumCoverages += targetsMap[h].Coverage
 
 						if mappingTaxids {
 							taxid1, ok = taxidMap[(*ms)[0].Target]
@@ -2279,23 +2215,8 @@ Examples:
 					for h, ms = range matches {
 						floatMsSize = float64(len(*ms))
 						first = true
-						t1 = profile2[h]
 
-						if iter == 0 {
-							// consider unique sequence proportion of references.
-							if considerUregionProp {
-								if uregionProp, ok = uregionPropMap[t1.Name]; ok {
-									prop = t1.SumUniqMatch / uregionProp / sumUReads
-								} else {
-									prop = t1.SumUniqMatch / sumUReads
-								}
-							} else {
-								prop = t1.SumUniqMatch / sumUReads
-								// prop = floatOne / float64(len(matches))
-							}
-						} else {
-							prop = t1.Coverage / sumUReads
-						}
+						prop = targetsMap[h].Coverage / sumCoverages
 
 						for _, m = range *ms {
 							if t, ok = profile3[h]; !ok {
@@ -2316,21 +2237,21 @@ Examples:
 
 							if first { // count once
 								if levelSpecies && theSameSpecies {
+									t.UniqMatch[m.FragIdx] += prop / floatMsSize
+									if m.QCov >= hicUreadsMinQcov {
+										t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
+									}
+
 									t.Stats.Add(m.QCov) // the best match on a subject
 								}
-								first = false
 								t.StatsA.Add(m.QCov)
+
+								first = false
 							}
 
 							t.QLen[m.FragIdx] += float64(m.QLen) * prop / floatMsSize
-							t.Match[m.FragIdx] += prop / floatMsSize
 
-							if levelSpecies && theSameSpecies {
-								t.UniqMatch[m.FragIdx] += prop / floatMsSize
-								if m.QCov >= hicUreadsMinQcov {
-									t.UniqMatchHic[m.FragIdx] += prop / floatMsSize
-								}
-							}
+							t.Match[m.FragIdx] += prop / floatMsSize
 						}
 						poolMatchResults.Put(ms)
 					}
@@ -2364,13 +2285,11 @@ Examples:
 							}
 
 							if first { // count once
-								if len(matches) == 1 {
-									t.UniqMatch[m.FragIdx]++
-									if m.QCov >= hicUreadsMinQcov {
-										t.UniqMatchHic[m.FragIdx]++
-									}
-									t.Stats.Add(m.QCov) // the best match on a subject
+								t.UniqMatch[m.FragIdx]++
+								if m.QCov >= hicUreadsMinQcov {
+									t.UniqMatchHic[m.FragIdx]++
 								}
+								t.Stats.Add(m.QCov) // the best match on a subject
 
 								t.StatsA.Add(m.QCov)
 								first = false
@@ -2548,13 +2467,50 @@ Examples:
 				targetsMap[h] = t
 				whiteList[h] = struct{}{}
 
-				// fmt.Printf("%d\t%s\t%v\n", iter+1, t.Name, t.Coverage)
+			}
+
+			var sumCoverages float64
+			for _, t := range targets {
+				sumCoverages += t.Coverage
+			}
+			for _, t := range targets {
+				t.Percentage = t.Coverage / sumCoverages * 100
+			}
+
+			sort.Slice(targets, func(i, j int) bool {
+				return targets[i].Coverage > targets[j].Coverage
+			})
+			if debug {
+				fmt.Fprintf(outfhD, "Abundance:\n")
+				if taxdb != nil {
+					for _, t := range targets {
+						fmt.Fprintf(outfhD, "%50s\t%v\n", taxdb.Names[taxidMap[t.Name]], t.Percentage)
+					}
+				} else {
+					for _, t := range targets {
+						fmt.Fprintf(outfhD, "%s\t%v\n", t.Name, t.Percentage)
+					}
+				}
 			}
 
 			if opt.Verbose || opt.Log2File {
 				log.Infof("    number of estimated references: %d", len(targets))
 				log.Infof("    elapsed time: %s", time.Since(timeStart2))
 			}
+
+			if iter > 0 {
+				domPctChange = math.Abs(targets[0].Percentage - domPctPre)
+				if domPctChange < abundPctThreshold {
+					if opt.Verbose || opt.Log2File {
+						log.Infof("    stop iterating after abundances are converged")
+					}
+					if debug {
+						fmt.Fprintln(outfhD, "stop iterating after abundances are converged")
+					}
+					break
+				}
+			}
+			domPctPre = targets[0].Percentage
 
 			profile3 = make(map[uint64]*Target, len(profile3))
 		}
@@ -2612,15 +2568,6 @@ Examples:
 			sorts.Quicksort(Targets(targets))
 		}
 
-		var totalCoverage float64
-		for _, t := range targets {
-			totalCoverage += t.Coverage
-		}
-
-		for _, t := range targets {
-			t.Percentage = t.Coverage / totalCoverage * 100
-		}
-
 		if fileterLowAbc && len(targets) > 1 {
 			if opt.Verbose || opt.Log2File {
 				log.Infof("filtering out predictions with the smallest relative abundances summing up %v%%", lowAbcPct)
@@ -2628,6 +2575,7 @@ Examples:
 			var accPct float64
 			var t *Target
 			var i, n int
+			var totalCoverage float64
 
 			for i = len(targets) - 1; i >= 0; i-- { // reverse order
 				t = targets[i]
@@ -2933,8 +2881,10 @@ func init() {
 	profileCmd.Flags().StringP("level", "", "species",
 		formatFlagUsage(`Level to estimate abundance at. Available values: species, strain/assembly.`))
 
-	profileCmd.Flags().IntP("abund-max-iters", "", 5,
+	profileCmd.Flags().IntP("abund-max-iters", "I", 5,
 		formatFlagUsage(`Miximal iteration of abundance estimation.`))
+	profileCmd.Flags().Float64P("abund-pct-threshold", "", 0.01,
+		formatFlagUsage(`If the percentage change of the predominant target is smaller than this threshold, stop the iteration.`))
 
 	// not used
 	// profileCmd.Flags().StringSliceP("uregion-prop-map", "Y", []string{}, `tabular two-column file(s) mapping reference IDs to unique region proportion (experimental)`)

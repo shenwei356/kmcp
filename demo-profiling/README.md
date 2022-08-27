@@ -180,19 +180,19 @@ Results (mock 1):
     
 |ref            |percentage|taxname                   |
 |:--------------|:---------|:-------------------------|
-|GCF_003697165.2|23.974382 |Escherichia coli          |
-|GCF_000742135.1|20.155870 |Klebsiella pneumoniae     |
-|GCF_000006945.2|19.407535 |Salmonella enterica       |
-|GCF_002950215.1|15.583846 |Shigella flexneri         |
-|GCF_002949675.1|14.767599 |Shigella dysenteriae      |
-|GCF_001544255.1|1.852659  |Enterococcus faecium      |
-|GCF_000392875.1|1.844333  |Enterococcus faecalis     |
-|GCF_001027105.1|0.929976  |Staphylococcus aureus     |
-|GCF_006742205.1|0.923797  |Staphylococcus epidermidis|
-|GCF_001096185.1|0.192491  |Streptococcus pneumoniae  |
-|GCF_000148585.2|0.186310  |Streptococcus mitis       |
-|GCF_000017205.1|0.091788  |Pseudomonas aeruginosa    |
-|GCF_009759685.1|0.089414  |Acinetobacter baumannii   |
+|GCF_000742135.1|19.123795 |Klebsiella pneumoniae     |
+|GCF_003697165.2|18.887595 |Escherichia coli          |
+|GCF_002949675.1|18.778146 |Shigella dysenteriae      |
+|GCF_000006945.2|18.680933 |Salmonella enterica       |
+|GCF_002950215.1|18.461495 |Shigella flexneri         |
+|GCF_001544255.1|1.840951  |Enterococcus faecium      |
+|GCF_000392875.1|1.829837  |Enterococcus faecalis     |
+|GCF_001027105.1|0.922711  |Staphylococcus aureus     |
+|GCF_006742205.1|0.918477  |Staphylococcus epidermidis|
+|GCF_000148585.2|0.190200  |Streptococcus mitis       |
+|GCF_001096185.1|0.187513  |Streptococcus pneumoniae  |
+|GCF_000017205.1|0.090965  |Pseudomonas aeruginosa    |
+|GCF_009759685.1|0.087383  |Acinetobacter baumannii   |
 
 Results (mock 2):
 
@@ -205,17 +205,17 @@ Results (mock 2):
 
 |ref            |percentage|taxname                   |
 |:--------------|:---------|:-------------------------|
-|GCF_003697165.2|20.665537 |Escherichia coli          |
-|GCF_000742135.1|19.423473 |Klebsiella pneumoniae     |
-|GCF_000006945.2|18.939297 |Salmonella enterica       |
-|GCF_002950215.1|17.728628 |Shigella flexneri         |
-|GCF_002949675.1|17.145735 |Shigella dysenteriae      |
-|GCF_001544255.1|1.889502  |Enterococcus faecium      |
-|GCF_000392875.1|1.798948  |Enterococcus faecalis     |
-|GCF_006742205.1|0.920654  |Staphylococcus epidermidis|
-|GCF_001027105.1|0.915770  |Staphylococcus aureus     |
-|GCF_000148585.2|0.190503  |Streptococcus mitis       |
-|GCF_001096185.1|0.188421  |Streptococcus pneumoniae  |
-|GCF_009759685.1|0.100630  |Acinetobacter baumannii   |
-|GCF_000017205.1|0.092902  |Pseudomonas aeruginosa    |
+|GCF_002949675.1|19.307308 |Shigella dysenteriae      |
+|GCF_002950215.1|18.960647 |Shigella flexneri         |
+|GCF_000742135.1|18.924976 |Klebsiella pneumoniae     |
+|GCF_000006945.2|18.612709 |Salmonella enterica       |
+|GCF_003697165.2|18.118441 |Escherichia coli          |
+|GCF_001544255.1|1.883821  |Enterococcus faecium      |
+|GCF_000392875.1|1.791524  |Enterococcus faecalis     |
+|GCF_006742205.1|0.918205  |Staphylococcus epidermidis|
+|GCF_001027105.1|0.911963  |Staphylococcus aureus     |
+|GCF_000148585.2|0.192247  |Streptococcus mitis       |
+|GCF_001096185.1|0.186028  |Streptococcus pneumoniae  |
+|GCF_009759685.1|0.099627  |Acinetobacter baumannii   |
+|GCF_000017205.1|0.092503  |Pseudomonas aeruginosa    |
 

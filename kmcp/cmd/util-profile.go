@@ -278,15 +278,11 @@ type Targets []*Target
 
 func (t Targets) Len() int { return len(t) }
 func (t Targets) Less(i, j int) bool {
-	if t[i].Coverage > t[j].Coverage {
-		return true
+	d := t[i].Coverage - t[j].Coverage
+	if d == 0 {
+		return t[i].FragsProp > t[j].FragsProp
 	}
-
-	if t[i].Coverage < t[j].Coverage {
-		return false
-	}
-
-	return t[i].FragsProp > t[j].FragsProp
+	return t[i].Coverage > t[j].Coverage
 }
 func (t Targets) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
