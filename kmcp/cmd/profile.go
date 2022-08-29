@@ -2468,6 +2468,10 @@ Examples:
 					break
 				}
 			}
+
+			if len(targets) == 0 {
+				break
+			}
 			domPctPre = targets[0].Percentage
 
 			profile3 = make(map[uint64]*Target, len(profile3))
