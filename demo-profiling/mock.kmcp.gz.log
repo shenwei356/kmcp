@@ -1,0 +1,25 @@
+11:25:31.184 [INFO] kmcp v0.8.5
+11:25:31.184 [INFO]   https://github.com/shenwei356/kmcp
+11:25:31.184 [INFO] 
+11:25:31.184 [INFO] checking input files ...
+11:25:31.184 [INFO]   2 input file(s) given
+11:25:31.184 [INFO] loading database with mmap enabled ...
+11:25:31.187 [INFO] database loaded: refs-k21-n10.kmcp/
+11:25:31.187 [INFO] 
+11:25:31.187 [INFO] -------------------- [main parameters] --------------------
+11:25:31.187 [INFO]   minimum    query length: 30
+11:25:31.187 [INFO]   minimum  matched k-mers: 10
+11:25:31.187 [INFO]   minimum  query coverage: 0.550000
+11:25:31.187 [INFO]   minimum target coverage: 0.000000
+11:25:31.187 [INFO] -------------------- [main parameters] --------------------
+11:25:31.187 [INFO] 
+11:25:31.187 [INFO] searching ...
+11:25:31.187 [INFO] reading sequence file: mock_1.fastq.gz
+11:25:32.266 [INFO] reading sequence file: mock_2.fastq.gz
+11:25:33.320 [INFO] 
+11:25:33.320 [INFO] processed queries: 343870, speed: 9.673 million queries per minute
+11:25:33.320 [INFO] 89.4297% (307522/343870) queries matched
+11:25:33.320 [INFO] done searching
+11:25:33.324 [INFO] 
+11:25:33.324 [INFO] elapsed time: 2.14033698s
+11:25:33.324 [INFO] 

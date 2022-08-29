@@ -32,11 +32,11 @@ The number of unambiguous reads:
 
     csvtk grep -t -f query -P t.gz.uniq.reads t.gz.pair \
         | csvtk freq -t -f target -nr \
-        | csvtk join -t -k - <(csvtk add-header -t -n target,name name2.map) genome-size.tsv \
-        | csvtk mutate2 -t -n fraction -e '$frequency / ${genome-size}' -w 6 \
+        | csvtk join -t -k - name2.map genome_size.tsv \
+        | csvtk mutate2 -t -n fraction -e '$frequency / ${genome_size}' -w 6 \
         | csvtk csv2md -t
         
-|target         |frequency|name                      |genome-size|fraction|
+|target         |frequency|species                   |genome-size|fraction|
 |:--------------|:--------|:-------------------------|:----------|:-------|
 |GCF_000742135.1|65908    |Klebsiella pneumoniae     |5545784    |0.011884|
 |GCF_000006945.2|57244    |Salmonella enterica       |4951383    |0.011561|

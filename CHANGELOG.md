@@ -1,11 +1,13 @@
 # Changelog
 
-### v0.8.5 - 2022-00-00
+### v0.9.0 - 2022-00-00
 
 - `compute`:
     - smaller output files and faster speed.
 - `index`:
     - faster speed due to smaller input files.
+- `profile`:
+    - ***using EM algorithm for abundance estimation***.
 
 ### v0.8.4 - 2022-08-16
 

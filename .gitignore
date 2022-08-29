@@ -24,6 +24,7 @@
 
 # taxonomy
 !demo-profiling/*.dmp
+demo-profiling/refs.plain/*
 kmcp/*.dmp
 
 # binary and html
