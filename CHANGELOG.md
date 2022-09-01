@@ -6,6 +6,8 @@
     - smaller output files and faster speed.
 - `index`:
     - faster speed due to smaller input files.
+- `search`:
+    - smaller query FPR values by computing the actual FPR values for all bloom filters in a genome chunk.
 - `profile`:
     - ***using EM algorithm for abundance estimation***.
 

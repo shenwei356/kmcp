@@ -43,6 +43,7 @@ mix*.kmcp.gz*
 refs-*
 *.unik
 _info.txt
+t0.gz
 t.gz
 *.binning.gz
 

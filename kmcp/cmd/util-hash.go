@@ -47,6 +47,13 @@ func CalcSignatureSize(numElements uint64, numHashes int, falsePositiveRate floa
 	return uint64(math.Ceil(float64(numElements) * ratio))
 }
 
+// CalcFPR is for computing the actual FPR for a bloom filter of which the orginal k-mers are less than the most one.
+// Because in COBS, the size of bloom filters of a block is decided by the k-mers number of the genome with the most k-mers.
+// Boom filters with less k-mers would have smaller FPR.
+func CalcFPR(numElements uint64, numHashes int, signatureSize uint64) float64 {
+	return math.Pow(1-math.Pow(math.E, float64(-numHashes)*float64(numElements)/float64(signatureSize)), float64(numHashes))
+}
+
 /*
 p, fpr of single bloom filter.
 k, theshold of query coverage.
