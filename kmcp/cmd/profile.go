@@ -2460,10 +2460,10 @@ Examples:
 				domPctChange = math.Abs(targets[0].Percentage - domPctPre)
 				if domPctChange < abundPctThreshold {
 					if opt.Verbose || opt.Log2File {
-						log.Infof("    stop iterating after abundances are converged")
+						log.Infof("    stop iterating after abundances being converged")
 					}
 					if debug {
-						fmt.Fprintln(outfhD, "stop iterating after abundances are converged")
+						fmt.Fprintln(outfhD, "stop iterating after abundances being converged")
 					}
 					break
 				}

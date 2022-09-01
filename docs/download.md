@@ -94,7 +94,7 @@ And then:
         cp ~/go/bin/kmcp $HOME/bin/
 
 
-        # --------------- the devlopment version --------------
+        # --------------- the development version --------------
 
         git clone https://github.com/shenwei356/kmcp
         cd kmcp/kmcp/
