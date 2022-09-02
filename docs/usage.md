@@ -160,7 +160,8 @@ Flags:
   -m, --split-min-ref int         ► Only splitting sequences >= X bp. (default 1000)
   -n, --split-number int          ► Chunk number for splitting sequences, incompatible with
                                   -s/--split-size.
-  -l, --split-overlap int         ► Chunk overlap for splitting sequences.
+  -l, --split-overlap int         ► Chunk overlap for splitting sequences. The default value will be
+                                  set to k-1 unless you change it.
   -s, --split-size int            ► Chunk size for splitting sequences, incompatible with
                                   -n/--split-number.
   -S, --syncmer-s int             ► Length of the s-mer in Closed Syncmers.

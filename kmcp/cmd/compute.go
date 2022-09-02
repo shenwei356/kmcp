@@ -171,6 +171,7 @@ Examples:
 		}
 		sortutil.Ints(ks)
 		kMax := ks[len(ks)-1]
+		kMin := ks[0]
 
 		circular0 := getFlagBool(cmd, "circular")
 
@@ -253,6 +254,9 @@ Examples:
 		splitNumber0 := getFlagNonNegativeInt(cmd, "split-number")
 		splitSize0 := getFlagNonNegativeInt(cmd, "split-size")
 		splitOverlap := getFlagNonNegativeInt(cmd, "split-overlap")
+		if !cmd.Flags().Lookup("split-overlap").Changed {
+			splitOverlap = kMax - 1
+		}
 		splitMinRef := getFlagNonNegativeInt(cmd, "split-min-ref")
 		if splitNumber0 == 0 {
 			splitNumber0 = 1
@@ -649,9 +653,29 @@ Examples:
 							step = seqLen
 							greedy = false
 						} else {
-							splitSize = (seqLen + (splitNumber-1)*(splitOverlap+kMax-1) + splitNumber - 1) / splitNumber
+							splitSize = (seqLen + (splitNumber-1)*(splitOverlap) + splitNumber - 1) / splitNumber
 							step = splitSize - splitOverlap
 						}
+					}
+
+					// get the actual split number
+					_splitNumber := 0
+					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
+					for {
+						_seq, _ok = slider()
+						if !_ok {
+							break
+						}
+						if len(_seq.Seq)-1 <= splitOverlap || len(_seq.Seq) < kMin {
+							continue
+						}
+
+						_splitNumber++
+					}
+
+					if _splitNumber == 0 {
+						log.Warningf("sequence is too short to split into %d chunks with overlap of %d: %s", splitSize, splitOverlap, file)
+						return
 					}
 
 					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
@@ -670,7 +694,7 @@ Examples:
 							codes2 = codes2[:0]
 						}
 
-						if len(_seq.Seq)-1 <= splitOverlap {
+						if len(_seq.Seq)-1 <= splitOverlap || len(_seq.Seq) < kMin {
 							continue
 						}
 
@@ -786,7 +810,7 @@ Examples:
 							Minimizer:    minimizer,
 							MinimizerW:   minimizerW,
 							SplitSeq:     splitSeq,
-							SplitNum:     splitNumber,
+							SplitNum:     _splitNumber,
 							SplitSize:    splitSize0,
 							SplitOverlap: splitOverlap,
 						}
@@ -803,7 +827,7 @@ Examples:
 							Name:       seqID,
 							GenomeSize: uint64(len(record.Seq.Seq)),
 							Index:      slidIdx,
-							Indexes:    uint32(splitNumber),
+							Indexes:    uint32(_splitNumber),
 							Kmers:      uint64(n),
 						}
 
@@ -815,6 +839,8 @@ Examples:
 				if bySeq {
 					return
 				}
+
+				// no splitting
 
 				n = len(codes)
 
@@ -986,7 +1012,7 @@ func init() {
 		formatFlagUsage(`Chunk size for splitting sequences, incompatible with -n/--split-number.`))
 
 	computeCmd.Flags().IntP("split-overlap", "l", 0,
-		formatFlagUsage(`Chunk overlap for splitting sequences.`))
+		formatFlagUsage(`Chunk overlap for splitting sequences. The default value will be set to k-1 unless you change it.`))
 
 	computeCmd.Flags().IntP("split-min-ref", "m", 1000,
 		formatFlagUsage(`Only splitting sequences >= X bp.`))

@@ -4,6 +4,7 @@
 
 - `compute`:
     - smaller output files and faster speed.
+    - more uniform genome splitting
 - `index`:
     - faster speed due to smaller input files.
 - `search`:
