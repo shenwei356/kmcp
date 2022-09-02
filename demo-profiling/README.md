@@ -150,7 +150,7 @@ Steps:
       
     # stats
     seqkit stats -a  mock*.fastq.gz
-    file              format  type  num_seqs     sum_len  min_len  avg_len  max_len  Q1   Q2  Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+    file             format  type  num_seqs     sum_len  min_len  avg_len  max_len  Q1   Q2  Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
     mock_1.fastq.gz  FASTQ   DNA    171,935  25,790,250      150      150      150  75  150  75        0  150      98   91.66  51.87
     mock_2.fastq.gz  FASTQ   DNA    171,935  25,790,250      150      150      150  75  150  75        0  150   97.31   89.65  51.86
 
