@@ -44,10 +44,10 @@ import (
 
 var splitGenomeCmd = &cobra.Command{
 	Use:   "split-genomes",
-	Short: "split genomes into chunks",
-	Long: `split genomes into chunks
+	Short: "Split genomes into chunks",
+	Long: `Split genomes into chunks
 
-This command acts like 'kmcp compute' with many options/flags shared,
+This command acts like 'kmcp compute' with many same options/flags shared,
 but it only performs genome splitting and does not compute k-mers. Genome
 chunks will be saved into the output directory with one file for a chunk.
 
@@ -55,7 +55,7 @@ One single input file or a directory with one single genome file is preferred.
 
 Warning (experimental feature):
   If more than one genome files are given, the "reference genome" with the least
-but longest sequence(s) will be chosen and split into chunks. Then other genomes
+and longest sequence(s) will be chosen and split into chunks. Then other genomes
 are fragmented and each genome fragment is assigned to the most similar genome
 chunk of the reference genome.
 `,

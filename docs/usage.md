@@ -619,7 +619,7 @@ Flags:
 Some utilities
 
 Usage:
-  kmcp utils [command]
+  kmcp utils [command] 
 
 Available Commands:
   cov2simi      Convert k-mer coverage to sequence similarity
@@ -627,6 +627,7 @@ Available Commands:
   index-info    Print information of index file
   merge-regions Merge species/assembly-specific regions
   query-fpr     Compute the maximal false positive rate of a query
+  split-genomes Split genomes into chunks
   unik-info     Print information of .unik file
 
 ```
@@ -735,6 +736,49 @@ Flags:
   -o, --out-prefix string      ► Out file prefix ("-" for stdout). (default "-")
   -r, --regexp string          ► Regular expression for extract reference name and query locations.
                                (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
+
+```
+
+## split-genomes
+
+```
+Split genomes into chunks
+
+This command acts like 'kmcp compute' with many same options/flags shared,
+but it only performs genome splitting and does not compute k-mers. Genome
+chunks will be saved into the output directory with one file for a chunk.
+
+One single input file or a directory with one single genome file is preferred.
+
+Warning (experimental feature):
+  If more than one genome files are given, the "reference genome" with the least
+and longest sequence(s) will be chosen and split into chunks. Then other genomes
+are fragmented and each genome fragment is assigned to the most similar genome
+chunk of the reference genome.
+
+Usage:
+  kmcp utils split-genomes [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} {-O <out dir> | -o <out file>
+
+Flags:
+      --circular                  ► Input sequences are circular.
+  -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
+                                  case ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
+      --force                     ► Overwrite existed output directory.
+  -f, --frag-size int             ► size of sequence fragments to be assigned to the reference genome
+                                  chunks. (default 100)
+  -h, --help                      help for split-genomes
+  -I, --in-dir string             ► Directory containing FASTA files. Directory symlinks are followed.
+      --info-file string          ► An extra output file to show which chunk(s) are assigned to for
+                                  each genome fragment.
+  -k, --kmer int                  ► K-mer size. (default 21)
+  -O, --out-dir string            ► Output directory.
+  -B, --seq-name-filter strings   ► List of regular expressions for filtering out sequences by
+                                  header/name, case ignored.
+  -m, --split-min-ref int         ► Only splitting sequences >= X bp. (default 1000)
+  -n, --split-number int          ► Chunk number for splitting sequences, incompatible with
+                                  -s/--split-size.
+  -l, --split-overlap int         ► Chunk overlap for splitting sequences. The default value will be
+                                  set to k-1 unless you change it.
 
 ```
 

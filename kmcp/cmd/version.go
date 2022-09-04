@@ -30,7 +30,7 @@ import (
 )
 
 // VERSION is the version
-var VERSION = "0.8.5"
+var VERSION = "0.9.0"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
