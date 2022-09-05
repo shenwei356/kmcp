@@ -24,7 +24,8 @@
 
 # taxonomy
 !demo-profiling/*.dmp
-demo-profiling/refs.plain/*
+demo-profiling/mock/*
+demo-profiling/opal/
 kmcp/*.dmp
 
 # binary and html
@@ -37,7 +38,8 @@ site
 t_*
 *.kmcp
 # data
-*.fastq.gz
+!demo-profiling/*.fastq.gz
+kmcp/*.fastq.gz
 *.kmcp.gz
 mix*.kmcp.gz*
 refs-*
