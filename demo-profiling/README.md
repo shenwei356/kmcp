@@ -287,23 +287,23 @@ Profiling results:
         | csvtk cut -t -f ref,taxname,ground_truth,percentage \
         | csvtk csv2md -t
 
-    |ref            |taxname                   |ground_truth|percentage|
-    |:--------------|:-------------------------|:-----------|:---------|
-    |GCF_003697165.2|Escherichia coli          |18.093707   |18.663804 |
-    |GCF_002949675.1|Shigella dysenteriae      |18.094390   |18.201855 |
-    |GCF_000006945.2|Salmonella enterica       |18.093898   |18.143627 |
-    |GCF_000742135.1|Klebsiella pneumoniae     |18.075498   |17.738253 |
-    |GCF_002950215.1|Shigella flexneri         |18.093780   |17.728060 |
-    |GCF_900638025.1|Haemophilus parainfluenzae|1.815273    |1.809292  |
-    |GCF_000392875.1|Enterococcus faecalis     |1.798382    |1.800250  |
-    |GCF_001544255.1|Enterococcus faecium      |1.808651    |1.795723  |
-    |GCF_001457655.1|Haemophilus influenzae    |1.798328    |1.787560  |
-    |GCF_006742205.1|Staphylococcus epidermidis|0.896071    |0.906778  |
-    |GCF_001027105.1|Staphylococcus aureus     |0.889459    |0.881014  |
-    |GCF_000148585.2|Streptococcus mitis       |0.176667    |0.178996  |
-    |GCF_001096185.1|Streptococcus pneumoniae  |0.183016    |0.177453  |
-    |GCF_009759685.1|Acinetobacter baumannii   |0.093004    |0.098158  |
-    |GCF_000017205.1|Pseudomonas aeruginosa    |0.089875    |0.089177  |
+|ref            |taxname                   |ground_truth|percentage|
+|:--------------|:-------------------------|:-----------|:---------|
+|GCF_003697165.2|Escherichia coli          |18.093707   |18.663804 |
+|GCF_002949675.1|Shigella dysenteriae      |18.094390   |18.201855 |
+|GCF_000006945.2|Salmonella enterica       |18.093898   |18.143627 |
+|GCF_000742135.1|Klebsiella pneumoniae     |18.075498   |17.738253 |
+|GCF_002950215.1|Shigella flexneri         |18.093780   |17.728060 |
+|GCF_900638025.1|Haemophilus parainfluenzae|1.815273    |1.809292  |
+|GCF_000392875.1|Enterococcus faecalis     |1.798382    |1.800250  |
+|GCF_001544255.1|Enterococcus faecium      |1.808651    |1.795723  |
+|GCF_001457655.1|Haemophilus influenzae    |1.798328    |1.787560  |
+|GCF_006742205.1|Staphylococcus epidermidis|0.896071    |0.906778  |
+|GCF_001027105.1|Staphylococcus aureus     |0.889459    |0.881014  |
+|GCF_000148585.2|Streptococcus mitis       |0.176667    |0.178996  |
+|GCF_001096185.1|Streptococcus pneumoniae  |0.183016    |0.177453  |
+|GCF_009759685.1|Acinetobacter baumannii   |0.093004    |0.098158  |
+|GCF_000017205.1|Pseudomonas aeruginosa    |0.089875    |0.089177  |
     
 Assessing with [OPAL](https://github.com/CAMI-challenge/OPAL):
 
