@@ -141,6 +141,9 @@ Example:
 			if _, ok := fileMap[file]; ok {
 				checkError(fmt.Errorf("duplicated file: %s", file))
 			}
+			if file == outFile {
+				checkError(fmt.Errorf("input and output file should not be the same: %s", file))
+			}
 			fileMap[file] = struct{}{}
 		}
 

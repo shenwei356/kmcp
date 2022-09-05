@@ -83,6 +83,9 @@ chunk of the reference genome.
 		// basic flags
 
 		k := getFlagPositiveInt(cmd, "kmer")
+		if k > 64 {
+			checkError(fmt.Errorf("k-mer size (%d) should be <=64", k))
+		}
 		fragSize := getFlagPositiveInt(cmd, "frag-size")
 		if fragSize < k {
 			checkError(fmt.Errorf("value of flag -f/--frag-size should be >= that of -k/--kmer"))

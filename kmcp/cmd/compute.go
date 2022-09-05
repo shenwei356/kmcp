@@ -168,6 +168,9 @@ Examples:
 			if k < 1 {
 				checkError(fmt.Errorf("invalid k: %d", k))
 			}
+			if k > 64 {
+				checkError(fmt.Errorf("k-mer size (%d) should be <=64", k))
+			}
 		}
 		sortutil.Ints(ks)
 		kMax := ks[len(ks)-1]
