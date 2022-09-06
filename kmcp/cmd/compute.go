@@ -662,23 +662,26 @@ Examples:
 					}
 
 					// get the actual split number
-					_splitNumber := 0
-					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
-					for {
-						_seq, _ok = slider()
-						if !_ok {
-							break
-						}
-						if len(_seq.Seq)-1 <= splitOverlap || len(_seq.Seq) < kMin {
-							continue
+					_splitNumber := 1
+					if splitNumber > 1 {
+						slider = record.Seq.Slider(splitSize, step, circular0, greedy)
+						_splitNumber = 0
+						for {
+							_seq, _ok = slider()
+							if !_ok {
+								break
+							}
+							if len(_seq.Seq)-1 <= splitOverlap || len(_seq.Seq) < kMin {
+								continue
+							}
+
+							_splitNumber++
 						}
 
-						_splitNumber++
-					}
-
-					if _splitNumber == 0 {
-						log.Warningf("sequence is too short to split into %d chunks with overlap of %d: %s", splitSize, splitOverlap, file)
-						return
+						if _splitNumber == 0 {
+							log.Warningf("sequence is too short to split into %d chunks with overlap of %d: %s", splitNumber, splitOverlap, file)
+							return
+						}
 					}
 
 					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
