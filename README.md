@@ -130,7 +130,7 @@ in two packages for better searching performance.
 |[**search**](https://bioinf.shenwei.me/kmcp/usage/#search)                |Search sequences against a database                             |
 |[**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)                  |Merge search results from multiple databases                    |
 |[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate taxonomic profile from search results                  |
-|[split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)      |Split genomes into chunks                                       |
+|[utils split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)|Split genomes into chunks                                       |
 |[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
 |[utils merge-regions](https://bioinf.shenwei.me/kmcp/usage/#merge-regions)|Merge species/assembly-specific regions                         |
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |

@@ -4,13 +4,13 @@
 
 - `compute`:
     - smaller output files and faster speed.
-    - more uniform genome splitting
+    - more even genome splitting.
 - `index`:
     - faster speed due to smaller input files.
 - `search`:
-    - smaller query FPR values by computing the actual FPR values for all bloom filters in a genome chunk.
+    - smaller query FPR values by computing the actual FPR values for each bloom filter in a genome chunk.
 - `profile`:
-    - ***using EM algorithm for abundance estimation***.
+    -***more accurate abundance estimation using EM algorithm***.
 
 ### v0.8.4 - 2022-08-16
 
