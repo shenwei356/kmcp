@@ -702,16 +702,16 @@ Examples:
 			}
 			log.Infof("  default format  : %s", outFile)
 			if outputCamiReport {
-				log.Infof("  CAMI format     : %s", camiReportFile)
-				log.Infof("    Sample ID     : %s", sampleID)
+				log.Infof("  CAMI format      : %s", camiReportFile)
+				log.Infof("    Sample ID      : %s", sampleID)
 			}
 			if outputMetaphlanReport {
-				log.Infof(" MetaPhlAn%s format: %s", metaphlanReportVersion, metaphlanReportFile)
-				log.Infof("    Sample ID     : %s", sampleID)
-				log.Infof("    Taxonomy ID   : %s", taxonomyID)
+				log.Infof("  MetaPhlAn%s format: %s", metaphlanReportVersion, metaphlanReportFile)
+				log.Infof("    Sample ID      : %s", sampleID)
+				log.Infof("    Taxonomy ID    : %s", taxonomyID)
 			}
 			if outputBinningResult {
-				log.Infof(" Binning result   : %s", binningFile)
+				log.Infof("  Binning result   : %s", binningFile)
 			}
 
 			log.Infof("-------------------- [main parameters] --------------------")
@@ -3037,7 +3037,7 @@ func init() {
 	profileCmd.Flags().StringP("level", "", "species",
 		formatFlagUsage(`Level to estimate abundance at. Available values: species, strain/assembly.`))
 
-	profileCmd.Flags().IntP("abund-max-iters", "I", 5,
+	profileCmd.Flags().IntP("abund-max-iters", "I", 10,
 		formatFlagUsage(`Miximal iteration of abundance estimation.`))
 	profileCmd.Flags().Float64P("abund-pct-threshold", "", 0.01,
 		formatFlagUsage(`If the percentage change of the predominant target is smaller than this threshold, stop the iteration.`))

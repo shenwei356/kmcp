@@ -1,4 +1,4 @@
-### Analysis of ambiguous and unambiguous reads
+## Analysis of ambiguous and unambiguous reads
     
     # clean
     zcat mock.kmcp.gz  | csvtk rename -C$ -t -f 1 -n query | csvtk uniq -t -f query,target -o t.gz
@@ -61,19 +61,22 @@ The number of ambiguous reads:
         | csvtk sort -t -k query -k target \
         | csvtk fold -t -f query -v target \
         | csvtk freq -t -f target -nr \
-        | csvtk filter2 -t -f '$frequency >= 200' \
+        | csvtk filter2 -t -f '$frequency >= 150' \
         | csvtk csv2md -t
         
-|target                                                                                               |frequency|
-|:----------------------------------------------------------------------------------------------------|:--------|
-|Escherichia coli; Shigella dysenteriae; Shigella flexneri                                            |57173    |
-|Shigella dysenteriae; Shigella flexneri                                                              |20811    |
-|Escherichia coli; Shigella flexneri                                                                  |13160    |
-|Escherichia coli; Shigella dysenteriae                                                               |9473     |
-|Escherichia coli; Klebsiella pneumoniae; Salmonella enterica; Shigella dysenteriae; Shigella flexneri|2055     |
-|Escherichia coli; Salmonella enterica; Shigella dysenteriae; Shigella flexneri                       |1719     |
-|Escherichia coli; Klebsiella pneumoniae; Shigella dysenteriae; Shigella flexneri                     |1212     |
-|Escherichia coli; Klebsiella pneumoniae                                                              |638      |
-|Klebsiella pneumoniae; Shigella dysenteriae; Shigella flexneri                                       |587      |
-|Escherichia coli; Klebsiella pneumoniae; Shigella dysenteriae                                        |546      |
-|Klebsiella pneumoniae; Salmonella enterica                                                           |232      |
+|target                                                                                                                                                   |frequency|
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+|Escherichia coli; Shigella dysenteriae; Shigella flexneri                                                                                                |57173    |
+|Shigella dysenteriae; Shigella flexneri                                                                                                                  |20811    |
+|Escherichia coli; Shigella flexneri                                                                                                                      |13160    |
+|Escherichia coli; Shigella dysenteriae                                                                                                                   |9473     |
+|Escherichia coli; Klebsiella pneumoniae; Salmonella enterica; Shigella dysenteriae; Shigella flexneri                                                    |2055     |
+|Escherichia coli; Salmonella enterica; Shigella dysenteriae; Shigella flexneri                                                                           |1719     |
+|Escherichia coli; Klebsiella pneumoniae; Shigella dysenteriae; Shigella flexneri                                                                         |1212     |
+|Escherichia coli; Klebsiella pneumoniae                                                                                                                  |638      |
+|Klebsiella pneumoniae; Shigella dysenteriae; Shigella flexneri                                                                                           |587      |
+|Escherichia coli; Klebsiella pneumoniae; Shigella dysenteriae                                                                                            |546      |
+|Klebsiella pneumoniae; Salmonella enterica                                                                                                               |232      |
+|Acinetobacter baumannii; Shigella flexneri                                                                                                               |185      |
+|Escherichia coli; Haemophilus influenzae; Haemophilus parainfluenzae; Klebsiella pneumoniae; Salmonella enterica; Shigella dysenteriae; Shigella flexneri|183      |
+|Klebsiella pneumoniae; Shigella dysenteriae                                                                                                              |172      |

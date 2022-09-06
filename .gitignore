@@ -51,9 +51,11 @@ t.gz
 
 analysis/kmer-similarity/*/all.n*
 analysis/kmer-similarity/*/*.fasta
-
 analysis/kmer-similarity/*/*.gz
 analysis/*/tool-*
+
+analysis/genome-chunks/opal2
+analysis/genome-chunks/*.profile*
 
 kmer-similarity
 

@@ -1,0 +1,9 @@
+chunks	rank	metric	sample	value
+1	species	L1 norm error	0	0.053504460000000024
+5	species	L1 norm error	0	0.018994210000000008
+10	species	L1 norm error	0	0.014946969999999964
+20	species	L1 norm error	0	0.01926148
+1	na	Weighted UniFrac error	0	0.023275701493843635
+5	na	Weighted UniFrac error	0	0.006270342734690989
+10	na	Weighted UniFrac error	0	0.004712290601693156
+20	na	Weighted UniFrac error	0	0.007459834023109472

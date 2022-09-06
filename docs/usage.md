@@ -546,7 +546,7 @@ Usage:
   kmcp profile [flags] [-X <taxdump dir>] [-T <taxid.map>] [-m <mode>] [-o <kmcp profile>] <search results>
 
 Flags:
-  -I, --abund-max-iters int               ► Miximal iteration of abundance estimation. (default 5)
+  -I, --abund-max-iters int               ► Miximal iteration of abundance estimation. (default 10)
       --abund-pct-threshold float         ► If the percentage change of the predominant target is
                                           smaller than this threshold, stop the iteration. (default 0.01)
   -B, --binning-result string             ► Save extra binning result in CAMI report.

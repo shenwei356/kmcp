@@ -1,12 +1,20 @@
 # Demo of taxonomic profiling
 
+Some extra tools:
+
+- https://github.com/shenwei356/csvtk
+- https://github.com/shenwei356/rush
+- https://github.com/shenwei356/taxonkit
+
 ## Data
 
 ### Reference genomes
 
 We choose 15 bacterial genomes to make a mock metagenomic community.
+Note that some species belong to the same family or genus.
 
 Taxonomy information (NCBI Taxonomy):
+    
     
     cat taxid.map \
         | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' \
@@ -112,10 +120,6 @@ Designed relative depths:
 
 Steps:
     
-    # tools:
-    #   - https://github.com/shenwei356/rush
-    #   - https://github.com/shenwei356/taxonkit
-
     # unzip all references which are required by 'simutator'
     mkdir -p mock
     ls refs/*.gz | rush 'seqkit seq {} -o mock/{%.}'
@@ -260,8 +264,10 @@ Searching:
     # matched reads
     grep "queries matched" mock.kmcp.gz.log
     10:18:31.492 [INFO] 88.4713% (308839/349084) queries matched
+    
+[Analysis of ambiguous and unambiguous reads](ANALYSIS.md).
 
-Profiling using mode 1 for low coverage data:
+Profiling using mode 1 for low-depth data:
 
     for f in *.kmcp.gz; do
         kmcp profile \
