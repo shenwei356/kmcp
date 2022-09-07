@@ -96,7 +96,7 @@ Splitting sequences:
      individual file.
   2. When splitting by number of chunks, all sequences (except for
      these matching any regular expression given by -B/--seq-name-filter)
-     in a sequence file are concatenated with k-1 'N's before splitting.
+     in a sequence file are concatenated with k-1 N's before splitting.
   3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 
@@ -270,6 +270,9 @@ Examples:
 		if bySeq && splitNumber0 > 1 {
 			checkError(fmt.Errorf("flag --by-seq and -n/--split-number are incompatible"))
 		}
+		if bySeq && splitSize0 > 0 {
+			checkError(fmt.Errorf("flag --by-seq and -s/--split-size are incompatible"))
+		}
 		splitSeq := splitSize0 > 0 || splitNumber0 > 1
 		if splitSeq {
 			if splitSize0 > 0 { // split by size
@@ -286,7 +289,6 @@ Examples:
 			}
 			bySeq = true
 		}
-		step := splitSize0 - splitOverlap
 
 		// ---------------------------------------------------------------
 		// flags of sketch
@@ -371,10 +373,14 @@ Examples:
 			log.Infof("  output directory: %s", outDir)
 			log.Info()
 
+			if !splitSeq && bySeq {
+				log.Infof("compute k-mers (sketches) for each sequence: %v", bySeq)
+			}
+
 			log.Infof("sequences splitting: %v", splitSeq)
 			if splitSeq {
 				if splitNumber0 > 1 {
-					log.Infof("  split parts: %d, overlap: %d bp", splitNumber0, splitOverlap)
+					log.Infof("  split number: %d, overlap: %d bp", splitNumber0, splitOverlap)
 				} else {
 					log.Infof("  split sequence size: %d bp, overlap: %d bp", splitSize0, splitOverlap)
 				}
@@ -507,11 +513,22 @@ Examples:
 				var seqLen int
 				var splitSize int
 				var splitNumber int
+				var step int
 				splitByNumber := splitNumber0 > 1
 
 				var genomeSize uint64
 
-				var codes, codes2 []uint64
+				// var codes, codes2 []uint64
+				codes := poolCodes.Get().(*[]uint64)
+				codes2 := poolCodes.Get().(*[]uint64)
+				*codes = (*codes)[:0]
+				*codes2 = (*codes2)[:0]
+				defer func() {
+					*codes = (*codes)[:0]
+					*codes2 = (*codes2)[:0]
+					poolCodes.Put(codes)
+					poolCodes.Put(codes2)
+				}()
 
 				// multiple level file tree for saving files
 				var dir1, dir2 string
@@ -524,10 +541,8 @@ Examples:
 				var outFileBase, dir3 string
 
 				if !splitSeq {
-					codes = make([]uint64, 0, mapInitSize)
 					circular = circular0
 				} else {
-					codes = make([]uint64, 0, splitSize0)
 					circular = false // split seq is linear, isn't it?
 				}
 
@@ -536,15 +551,13 @@ Examples:
 
 				var allSeqs [][]byte
 				var bigSeq []byte
-				var record1 *fastx.Record
 				nnn := bytes.Repeat([]byte{'N'}, kMax-1)
 
 				var ignoreSeq bool
 				var re *regexp.Regexp
-				if splitByNumber { // concatenate all seqs
+				if splitSeq { // concatenate all seqs. given split number of by split size
 					allSeqs = make([][]byte, 0, 8)
 					lenSum := 0
-					first := true
 					for {
 						record, err = fastxReader.Read()
 						if err != nil {
@@ -568,10 +581,6 @@ Examples:
 							}
 						}
 
-						if first {
-							record1 = record
-							first = false
-						}
 						aseq := make([]byte, len(record.Seq.Seq))
 						copy(aseq, record.Seq.Seq)
 						allSeqs = append(allSeqs, aseq)
@@ -598,18 +607,17 @@ Examples:
 						}
 					}
 
-					record1.Seq.Seq = bigSeq
-					record1.Seq.Qual = nil
-					record = record1
+					record, _ = fastx.NewRecordWithoutValidation(seq.Unlimit, nil, []byte{}, nil, bigSeq)
 
 					genomeSize = uint64(len(record.Seq.Seq))
 				}
 
 				slidIdx = 0
+				var _splitNumber int
 
 				once := true
 				for {
-					if splitByNumber {
+					if splitSeq {
 						if !once {
 							break
 						}
@@ -650,21 +658,23 @@ Examples:
 						step = seqLen
 						greedy = false
 						splitNumber = 1
-					} else if splitByNumber {
-						if splitNumber == 1 {
+					} else if splitSeq {
+						if splitNumber > 1 {
+							splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
+							step = splitSize - splitOverlap
+						} else if splitSize > 0 { // --split-size
+							step = splitSize - splitOverlap
+						} else { // splitNumber == 1 , no split
 							splitSize = seqLen
 							step = seqLen
 							greedy = false
-						} else {
-							splitSize = (seqLen + (splitNumber-1)*(splitOverlap) + splitNumber - 1) / splitNumber
-							step = splitSize - splitOverlap
 						}
 					}
 
 					// get the actual split number
-					_splitNumber := 1
-					if splitNumber > 1 {
-						slider = record.Seq.Slider(splitSize, step, circular0, greedy)
+					_splitNumber = 1
+					if splitSeq {
+						slider = record.Seq.Slider(splitSize, step, false, true)
 						_splitNumber = 0
 						for {
 							_seq, _ok = slider()
@@ -696,8 +706,7 @@ Examples:
 						}
 
 						if bySeq {
-							codes = codes[:0] // reset
-							codes2 = codes2[:0]
+							*codes = (*codes)[:0] // reset
 						}
 
 						if len(_seq.Seq)-1 <= splitOverlap || len(_seq.Seq) < kMin {
@@ -730,7 +739,7 @@ Examples:
 										continue
 									}
 									if code > 0 {
-										codes = append(codes, code)
+										*codes = append(*codes, code)
 									}
 								}
 							} else if minimizer {
@@ -743,7 +752,7 @@ Examples:
 										continue
 									}
 									if code > 0 {
-										codes = append(codes, code)
+										*codes = append(*codes, code)
 									}
 								}
 							} else {
@@ -756,28 +765,29 @@ Examples:
 										continue
 									}
 									if code > 0 {
-										codes = append(codes, code)
+										*codes = append(*codes, code)
 									}
 								}
 							}
 						}
 
-						if !bySeq {
+						if !bySeq { // whole file
 							break
 						}
 
-						n = len(codes)
+						n = len(*codes)
 
+						*codes2 = (*codes2)[:0]
 						if exactNumber {
-							sortutil.Uint64s(codes)
+							sortutil.Uint64s(*codes)
 							var pre uint64 = 0
-							for _, code = range codes {
+							for _, code = range *codes {
 								if code != pre {
-									codes2 = append(codes2, code)
+									*codes2 = append(*codes2, code)
 									pre = code
 								}
 							}
-							n = len(codes2)
+							n = len(*codes2)
 						}
 
 						if splitSeq {
@@ -821,10 +831,10 @@ Examples:
 							SplitOverlap: splitOverlap,
 						}
 						if exactNumber {
-							writeKmers(kMax, codes2, uint64(n), outFile, compress, opt.CompressionLevel,
+							writeKmers(kMax, *codes2, uint64(n), outFile, compress, opt.CompressionLevel,
 								scaled, scale, meta)
 						} else {
-							writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+							writeKmers(kMax, *codes, uint64(n), outFile, compress, opt.CompressionLevel,
 								scaled, scale, meta)
 						}
 
@@ -846,9 +856,9 @@ Examples:
 					return
 				}
 
-				// no splitting
+				// whole file, no splitting
 
-				n = len(codes)
+				n = len(*codes)
 
 				if n == 0 {
 					log.Warningf("skipping %s: no valid sequences", file)
@@ -856,16 +866,17 @@ Examples:
 					return
 				}
 
+				*codes2 = (*codes2)[:0]
 				if exactNumber {
-					sortutil.Uint64s(codes)
+					sortutil.Uint64s(*codes)
 					var pre uint64 = 0
-					for _, code = range codes {
+					for _, code = range *codes {
 						if code != pre {
-							codes2 = append(codes2, code)
+							*codes2 = append(*codes2, code)
 							pre = code
 						}
 					}
-					n = len(codes2)
+					n = len(*codes2)
 				}
 
 				// write to file
@@ -881,6 +892,7 @@ Examples:
 				} else {
 					fileprefix, _ = filepathTrimExtension(baseFile)
 				}
+				slidIdx = 0
 				meta := Meta{
 					SeqID:      fileprefix,
 					FragIdx:    slidIdx,
@@ -893,15 +905,15 @@ Examples:
 					Minimizer:    minimizer,
 					MinimizerW:   minimizerW,
 					SplitSeq:     splitSeq,
-					SplitNum:     splitNumber,
+					SplitNum:     splitNumber, // 1
 					SplitSize:    splitSize0,
 					SplitOverlap: splitOverlap,
 				}
 				if exactNumber {
-					writeKmers(kMax, codes2, uint64(n), outFile, compress, opt.CompressionLevel,
+					writeKmers(kMax, *codes2, uint64(n), outFile, compress, opt.CompressionLevel,
 						scaled, scale, meta)
 				} else {
-					writeKmers(kMax, codes, uint64(n), outFile, compress, opt.CompressionLevel,
+					writeKmers(kMax, *codes, uint64(n), outFile, compress, opt.CompressionLevel,
 						scaled, scale, meta)
 				}
 
@@ -913,9 +925,6 @@ Examples:
 					Indexes:    uint32(splitNumber),
 					Kmers:      uint64(n),
 				}
-
-				slidIdx++
-
 			}(file, multiLevelFileTree)
 		}
 
@@ -952,6 +961,7 @@ func writeKmers(k int, codes []uint64, n uint64,
 
 	mode |= unik.UnikCanonical
 	mode |= unik.UnikHashed
+	mode |= unik.UnikSorted
 
 	writer, err = unik.NewWriter(outfh, k, mode)
 	if err != nil {
@@ -1040,3 +1050,8 @@ var reIgnoreCaseStr = "(?i)"
 var reIgnoreCase = regexp.MustCompile(`\(\?i\)`)
 
 var fileUnikInfos = "_info.txt"
+
+var poolCodes = &sync.Pool{New: func() interface{} {
+	tmp := make([]uint64, 0, mapInitSize)
+	return &tmp
+}}

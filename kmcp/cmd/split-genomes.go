@@ -771,7 +771,7 @@ func splitGenome(opt *Options, info *GenomeInfo, reSeqNames []*regexp.Regexp,
 			step = seqLen
 			greedy = false
 		} else {
-			splitSize = (seqLen + (splitNumber-1)*(splitOverlap) + splitNumber - 1) / splitNumber
+			splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
 			step = splitSize - splitOverlap
 		}
 	}

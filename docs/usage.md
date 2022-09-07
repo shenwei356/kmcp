@@ -94,7 +94,7 @@ Splitting sequences:
      individual file.
   2. When splitting by number of chunks, all sequences (except for
      these matching any regular expression given by -B/--seq-name-filter)
-     in a sequence file are concatenated with k-1 'N's before splitting.
+     in a sequence file are concatenated with k-1 N's before splitting.
   3. Both sequence IDs and chunks indices are saved for later use,
      in form of meta/description data in .unik files.
 

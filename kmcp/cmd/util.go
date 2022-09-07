@@ -98,6 +98,7 @@ func makeOutDir(outDir string, force bool) {
 			checkError(errors.Wrap(err, outDir))
 			if !empty {
 				if force {
+					log.Infof("removing old output directory: %s", outDir)
 					checkError(os.RemoveAll(outDir))
 				} else {
 					checkError(fmt.Errorf("out-dir not empty: %s, use --force to overwrite", outDir))
