@@ -964,7 +964,7 @@ func init() {
 	splitGenomeCmd.Flags().IntP("frag-size", "f", 100,
 		formatFlagUsage(`size of sequence fragments to be assigned to the reference genome chunks.`))
 
-	splitGenomeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} {-O <out dir> | -o <out file>"))
+	splitGenomeCmd.SetUsageTemplate(usageTemplate("[-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>"))
 
 }
 

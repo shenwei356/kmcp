@@ -757,7 +757,7 @@ are fragmented and each genome fragment is assigned to the most similar genome
 chunk of the reference genome.
 
 Usage:
-  kmcp utils split-genomes [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} {-O <out dir> | -o <out file>
+  kmcp utils split-genomes [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>
 
 Flags:
       --circular                  ► Input sequences are circular.

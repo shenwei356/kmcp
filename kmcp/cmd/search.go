@@ -989,6 +989,10 @@ Examples:
 			log.Infof("processed queries: %d, speed: %.3f million queries per minute\n", total, speed)
 			log.Infof("%.4f%% (%d/%d) queries matched", float64(matched)/float64(total)*100, matched, total)
 			log.Infof("done searching")
+			if outFile != "-" {
+				log.Infof("search results saved to: %s", outFile)
+			}
+
 		}
 
 		checkError(sg.Close()) // cleanup
