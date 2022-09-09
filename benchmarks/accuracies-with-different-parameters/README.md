@@ -258,6 +258,7 @@ fails, try read2)
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={@(.+)_1.fq.gz}' \
             'memusg -H -t -s "kmcp search -j {j} -w -d {db} -1 {} -2 {p}_2.fq.gz -o {p}.kmcp@{dbname}.tsv.gz \
+                --try-se \
                 --log {p}.kmcp@{dbname}.tsv.gz.log0" > {p}.kmcp@{dbname}.tsv.gz.log 2>&1' \
             -c -C $reads@$dbname.rush
     
