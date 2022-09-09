@@ -7,7 +7,7 @@ Sequence datasets were download from: https://data.cami-challenge.org/participat
 
 ## Softwares
 
-- kmcp [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
+- kmcp [v0.9.0](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0)
 
 ## Databases
 

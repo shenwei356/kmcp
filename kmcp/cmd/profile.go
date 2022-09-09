@@ -59,7 +59,7 @@ Methods:
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
-     to reduce the false positive of ambiguous matches.
+     to reduce the false positives of ambiguous matches.
      You can also disable this step by the flag --no-amb-corr.
      If stage 1/4 produces thousands of candidates, you can use
      the flag --no-amb-corr to reduce analysis time, which has very little
@@ -131,14 +131,14 @@ Performance notes:
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
      Note that: abundances are only computed for target references rather than
-     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format.
+     each taxon at all taxonomic ranks, so please also output CAMI or MetaPhlAn format.
   2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
                 -s/--sample-id, --taxonomy-id)
      Related tools (https://github.com/shenwei356/taxonkit):
        - taxonkit profile2cami: convert any metagenomic profile table with
          TaxIds to CAMI format. Use this if you forget to output CAMI format.
        - taxonkit cami-filter: remove taxa of given TaxIds and their
-         descendants in CAMI metagenomic profile.
+         descendants in a CAMI metagenomic profile.
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
@@ -166,14 +166,18 @@ Taxonomic binning formats:
 
 Examples:
   1. Default mode:
+
        kmcp profile -X taxdump/ -T taxid.map -m 3 \
            sample.kmcp.tsv.gz -o sample.k.profile \
            -C sample.c.profile -s sample
-  2. For pathogen detection (you may create databases with lower FPR,
+
+  2. For pathogen detection (you may create databases with lower FPRs,
      e.g., kmcp index -f 0.1 -n 2 for bacteria and fungi genomes,
-     and search with low k-mer coverage threshold -t 0.4):
+     and search with a low k-mer coverage threshold -t 0.4):
+
        kmcp profile -X taxdump/ -T taxid.map -m 3 -t 0.4 \
            sample.kmcp.tsv.gz -o sample.k.profile
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)

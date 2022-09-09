@@ -61,7 +61,8 @@ Attentions:
          seqkit sliding -s 100 -W 300
 
 Shared flags between "search" and "profile":
-  1. -t/--min-query-cov.
+  1. -t/--min-query-cov
+  2. -f/--max-fpr
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default):
@@ -72,9 +73,9 @@ Index files loading modes:
         And multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
-      - Please switch on this flag when searching on computer clusters,
+      - **Please switch on this flag when searching on computer clusters,
         where the default mmap mode would be very slow for network-attached
-        storage (NAS).
+        storage (NAS)**.
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -111,14 +112,20 @@ Performance tips:
 
 Examples:
   1. Single-end mode (recommended)
+
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz sample_1_unpaired.fq.gz sample_2_unpaired.fq.gz
+
   2. Paired-end mode
+
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            -1 sample_1.fq.gz -2 sample_2.fq.gz
-  3. In computer cluster, where databases are saved in NAS storages.
+
+  3. In computer clusters, where databases are saved in NAS storages.
+
        kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt := getOptions(cmd)

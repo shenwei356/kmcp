@@ -7,7 +7,7 @@ Benchmark results of other tools are downloaded from: https://zenodo.org/search?
 
 ## Softwares
 
-- kmcp [v0.8.2](https://github.com/shenwei356/kmcp/releases/tag/v0.8.2)
+- kmcp [v0.9.0](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0)
 - motus 2.5.1
 - metaphlan 2.9.21
 - bracken 2.5

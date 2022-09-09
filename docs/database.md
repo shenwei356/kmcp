@@ -20,7 +20,8 @@ All prebuilt databases and the used reference genomes are available at:
 - Prebuilt databases were built for computers with >= 32 CPU cores
 in consideration of better parallelization,
 and computers should have at least 64 GB. 
-- By default, `kmcp search` loads the whole database into main memory (via [mmap](https://en.wikipedia.org/wiki/Mmap)) for fast searching.
+- By default, `kmcp search` loads the whole database into main memory
+(via [mmap](https://en.wikipedia.org/wiki/Mmap) by default) for fast searching.
 Optionally, the flag `--low-mem` can be set to avoid loading the whole database,
 while it's much slower, >10X slower on SSD and should be much slower on HDD disks.
 - **To reduce memory requirements on computers without enough memory,
@@ -29,7 +30,7 @@ and build a smaller database for each partition, so that the biggest
 database can be loaded into RAM**. 
 This can also **accelerate searching on a computer cluster, where every node searches against a small database.
 After performing database searching,
-search results on all small databases can be merged with `kmcp merge`
+search results from all small databases can be merged with `kmcp merge`
 for downstream analysis**.
 
 

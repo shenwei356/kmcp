@@ -73,7 +73,7 @@ Database size and searching accuracy:
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
      and -1/--block-size1-kmers-t to separately create indexes for
-     inputs with huge number of k-mers, for precise control of
+     inputs with a huge number of k-mers, for precise control of
      database size.
 
 References:
@@ -84,12 +84,12 @@ Taxonomy data:
   2. Taxonomy information are only needed in "profile" command.
   
 Performance tips:
-  1. The number of blocks (.uniki files) better to be smaller than
+  1. The number of blocks (.uniki files) is better be smaller than
      or equal to the number of CPU cores for faster searching speed. 
-     We can set -j/--threads to control blocks number.
+     We can set the flag -j/--threads to control the blocks number.
      When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
-  2. #threads files are simultaneously opened, and max number
+  2. #threads files are simultaneously opened, and the max number
      of opened files is limited by the flag -F/--max-open-files.
      You may use a small value of -F/--max-open-files for 
      hard disk drive storages.
@@ -98,9 +98,12 @@ Performance tips:
      as possible.
 
 Examples:
-  1. For bacteria genomes:
+  1. For bacterial genomes:
+
        kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l100/ -O gtdb.kmcp
+
   2. For viruses, use -x and -8 to control index size of the largest chunks:
+
        kmcp index -f 0.05 -n 1 -j 32 -x 100K -8 1M \
            -I genbank-viral-k21-n5-l100/ -O genbank-viral.kmcp
 
