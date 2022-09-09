@@ -173,7 +173,7 @@ Building database (all k-mers, for profiling on short-reads):
     #   sequence containing "plasmid" in name are ignored,
     #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
-    kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+    kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
         --log gtdb-r202-k21-n10.log -j 32 --force
 
     # build database
@@ -182,7 +182,7 @@ Building database (all k-mers, for profiling on short-reads):
     #     number of hash function: 1
     #     false positive rate: 0.3
     kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
-        --log gtdb.kmcp.log
+        --log gtdb.kmcp.log --force
     
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map gtdb.kmcp/
@@ -217,7 +217,7 @@ Building small databases (all k-mers, for profiling with a computer cluster or c
         #   sequence containing "plasmid" in name are ignored,
         #   reference genomes are split into 10 chunks with 100bp overlap
         #   k = 21
-        kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 100 -B plasmid \
+        kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
             --log $f-k21-n10.log -j 24 --force
 
         # build database
@@ -244,7 +244,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   s = 16 # Closed Syncmers
-    kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 100 -B plasmid \
+    kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 150 -B plasmid \
         --log gtdb-r202-k21-n10-S16.log -j 32 --force
 
     # build database
@@ -269,7 +269,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   D = 5 # FracMinhash
-    kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 100 -B plasmid \
+    kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 150 -B plasmid \
         --log gtdb-r202-k21-n10-D5.log -j 32 --force
 
     # build database
@@ -294,7 +294,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     #   W = 5 # Minimizer
-    kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 100 -B plasmid \
+    kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 150 -B plasmid \
         --log gtdb-r202-k21-n10-W5.log -j 32 --force
 
     # build database
@@ -381,15 +381,15 @@ Building database (all k-mers, for profiling on short-reads):
     # -------------
     # all kmers
     
-    kmcp compute -I $input -O refseq-$name-k21-n5 \
+    kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log refseq-$name-k21-n10.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n5/ -O refseq-viral.kmcp \
+    kmcp index -I refseq-$name-k21-n10/ -O refseq-viral.kmcp \
         -j 32 -f 0.001 -n 3 -x 100K \
         --log refseq-viral.kmcp.log --force
     
@@ -409,7 +409,7 @@ Building database (all k-mers, for profiling on short-reads):
     
     kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 \
+        --split-number 10 --split-overlap 150 \
         --log refseq-$name-k21-n10.log -j 32 --force
       
     kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
@@ -434,15 +434,15 @@ Building database (k-mer sketches, for profiling on long-reads):
     # ---------------------------------------------
     # here we compute Closed Syncmers with s=16
     
-    kmcp compute -I $input -O refseq-$name-k21-n5-S16 \
+    kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
         -k 21 -S 16 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5-S16.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log refseq-$name-k21-n10-S16.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n5-S16/ -O refseq-viral.sync16.kmcp \
+    kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-viral.sync16.kmcp \
         -j 32 -f 0.001 -n 3 -x 100K \
         --log refseq-viral.sync16.kmcp.log --force
     
@@ -453,15 +453,15 @@ Building database (k-mer sketches, for profiling on long-reads):
     # ---------------------------------------------
     # here we compute FracMinHash with D=5
     
-    kmcp compute -I $input -O refseq-$name-k21-n5-D5 \
+    kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
         -k 21 -D 5 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5-D5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log refseq-$name-k21-n10-D5.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n5-D5/ -O refseq-viral.minh5.kmcp \
+    kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-viral.minh5.kmcp \
         -j 32 -f 0.001 -n 3 -x 100K \
         --log refseq-viral.minh5.kmcp.log --force
     
@@ -480,7 +480,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
         -k 21 -S 16 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 \
+        --split-number 10 --split-overlap 150 \
         --log refseq-$name-k21-n10-S16.log -j 32 --force
       
     kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-fungi.sync16.kmcp \
@@ -496,7 +496,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
         -k 21 -D 5 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 \
+        --split-number 10 --split-overlap 150 \
         --log refseq-$name-k21-n10-D5.log -j 32 --force
       
     kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-fungi.minh5.kmcp \
@@ -512,7 +512,7 @@ Building database (k-mer sketches, for profiling on long-reads):
     
     kmcp compute -I $input -O refseq-$name-k21-n10-W5 \
         -k 21 -W 5 --seq-name-filter plasmid \
-        --split-number 10 --split-overlap 100 \
+        --split-number 10 --split-overlap 150 \
         --log refseq-$name-k21-n10-W5.log -j 32 --force
       
     kmcp index -I refseq-$name-k21-n10-W5/ -O refseq-fungi.mini5.kmcp \
@@ -626,7 +626,6 @@ Keep at most 5 genomes for a taxid (optional)
 Building database (all k-mers, for profiling on short-reads):
 
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 chunks
     name=viral
     
     input=files.renamed.slim
@@ -635,15 +634,15 @@ Building database (all k-mers, for profiling on short-reads):
     # ----------------
     # all kmers
     
-    kmcp compute -I $input -O genbank-$name-k21-n5 \
+    kmcp compute -I $input -O genbank-$name-k21-n10 \
         -k 21 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log genbank-$name-k21-n5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log genbank-$name-k21-n10.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.05
     #   still using one hash function: 1
-    kmcp index -I genbank-$name-k21-n5/ -O genbank-viral.kmcp \
+    kmcp index -I genbank-$name-k21-n10/ -O genbank-viral.kmcp \
         -j 32 -f 0.05 -n 1 -x 100K -8 1M \
         --log genbank-viral.kmcp.log --force
     
@@ -678,15 +677,15 @@ Building small databases (all k-mers, for profiling with a computer cluster or c
     for f in $name.n$n-*; do 
         echo $f
   
-        kmcp compute -i $f -O $f-k21-n5 \
+        kmcp compute -i $f -O $f-k21-n10 \
             -k 21 --seq-name-filter plasmid \
-            --split-number 5 --split-overlap 100 \
-            --log $f-k21-n5.log -j 24 --force
+            --split-number 10 --split-overlap 150 \
+            --log $f-k21-n10.log -j 24 --force
         
         # viral genomes are small:
         #   using small false positive rate: 0.001
         #   using more hash functions: 3
-        kmcp index -I $f-k21-n5/ -O $f.kmcp \
+        kmcp index -I $f-k21-n10/ -O $f.kmcp \
             -j 24 -f 0.05 -n 1 -x 100K -8 1M \
             --log $f.kmcp.log --force
         
@@ -704,15 +703,15 @@ Building database (k-mer sketches, for profiling on long-reads):
     # ----------------------------------------------
     # here we compute Closed Syncmers with s=16
     
-    kmcp compute -I $input -O genbank-$name-k21-n5-S16 \
+    kmcp compute -I $input -O genbank-$name-k21-n10-S16 \
         -k 21 -S 16 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log genbank-$name-k21-n5-S16.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log genbank-$name-k21-n10-S16.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I genbank-$name-k21-n5-S16/ -O genbank-viral.sync16.kmcp \
+    kmcp index -I genbank-$name-k21-n10-S16/ -O genbank-viral.sync16.kmcp \
         -j 32 -f 0.001 -n 3 -x 50K -8 1M \
         --log genbank-viral.sync16.kmcp.log --force
     
@@ -723,15 +722,15 @@ Building database (k-mer sketches, for profiling on long-reads):
     # ----------------------------------------------
     # here we compute FracMinHash with D=5
     
-    kmcp compute -I $input -O genbank-$name-k21-n5-D5 \
+    kmcp compute -I $input -O genbank-$name-k21-n10-D5 \
         -k 21 -D 5 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log genbank-$name-k21-n5-D5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log genbank-$name-k21-n10-D5.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I genbank-$name-k21-n5-D5/ -O genbank-viral.minh5.kmcp \
+    kmcp index -I genbank-$name-k21-n10-D5/ -O genbank-viral.minh5.kmcp \
         -j 32 -f 0.001 -n 3 -x 50K -8 1M \
         --log genbank-viral.minh5.kmcp.log --force
     
@@ -742,15 +741,15 @@ Building database (k-mer sketches, for profiling on long-reads):
     # ----------------------------------------------
     # here we compute Minimizer with W=5
     
-    kmcp compute -I $input -O genbank-$name-k21-n5-W5 \
+    kmcp compute -I $input -O genbank-$name-k21-n10-W5 \
         -k 21 -W 5 --seq-name-filter plasmid \
-        --split-number 5 --split-overlap 100 \
-        --log genbank-$name-k21-n5-W5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log genbank-$name-k21-n10-W5.log -j 32 --force
     
     # viral genomes are small:
     #   using small false positive rate: 0.001
     #   using more hash functions: 3
-    kmcp index -I genbank-$name-k21-n5-W5/ -O genbank-viral.mini5.kmcp \
+    kmcp index -I genbank-$name-k21-n10-W5/ -O genbank-viral.mini5.kmcp \
         -j 32 -f 0.001 -n 3 -x 50K -8 1M \
         --log genbank-viral.mini5.kmcp.log --force
     
@@ -780,7 +779,7 @@ Building database (all k-mers, < 6min):
     kmcp compute $input -O human-chm13-k21-n1024 \
         --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
         -k 21 \
-        --split-number 1024 --split-overlap 100 \
+        --split-number 1024 --split-overlap 150 \
         --log human-chm13-k21-n1024.log -j 32 --force
     
     #   using small false positive rate: 0.3
@@ -836,14 +835,14 @@ Building database (all k-mers):
     
     input=refseq-plasmid
     
-    kmcp compute -I $input -O refseq-$name-k21-n5 \
+    kmcp compute -I $input -O refseq-$name-k21-n10 \
         -k 21 --circular \
-        --split-number 5 --split-overlap 100 \
-        --log refseq-$name-k21-n5.log -j 32 --force
+        --split-number 10 --split-overlap 150 \
+        --log refseq-$name-k21-n10.log -j 32 --force
     
     #   using small false positive rate: 0.01
     #   using more hash functions: 3
-    kmcp index -I refseq-$name-k21-n5/ -O refseq-$name.kmcp \
+    kmcp index -I refseq-$name-k21-n10/ -O refseq-$name.kmcp \
         -j 32 -f 0.01 -n 3 -x 200K -X 1024 \
         --log refseq-$name.kmcp.log --force
     
@@ -1249,14 +1248,14 @@ Create taxdump files and `taxid.map` with taxonkit (version >= v0.12.0):
 Building database:
     
     # compute k-mers
-    #   reference genomes are split into 5 chunks
+    #   reference genomes are split into 10 chunks
     #   k = 21
-    kmcp compute -I mgv/ -k 21 -n 5 -O mgv-k21-n5 --force
+    kmcp compute -I mgv/ -k 21 -n 10 -O mgv-k21-n10 --force
 
     # viral genomes are small:
     #   using small false positive rate: 0.05
     #   still using one hash function: 1
-    kmcp index -j 32 -I mgv-k21-n5 -O mgv.kmcp \
+    kmcp index -j 32 -I mgv-k21-n10 -O mgv.kmcp \
         -j 32 -f 0.05 -n 1 -x 100K -8 1M \
         --log mgv.kmcp.log
     
@@ -1409,7 +1408,7 @@ is good enough.
     kmcp compute --in-dir refs/ \
         --kmer 21 \
         --split-number 10 \
-        --split-overlap 100 \
+        --split-overlap 150 \
         --seq-name-filter plasmid \
         --ref-name-regexp '(.+).fasta.gz' \
         --out-dir refs-k21-n10

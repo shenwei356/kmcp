@@ -150,7 +150,7 @@ Building database:
     
     # for short reads
     k=21
-    kmcp compute -j $j -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 100 -B plasmid \
+    kmcp compute -j $j -I $genomes/ -O $prefix-k$k-n10 -k $k -n 10 -l 150 -B plasmid \
         --log $prefix-k$k-n10.log
         
     n=1
@@ -255,10 +255,10 @@ prokaryotic data.
     # -------------------------------------------------------------
     # create kmcp database
 
-    kmcp compute -j 40 -k 21 -n 5 -l 100 -I refseq-cami2-viral/ -O refseq-cami2-viral-k21-n5 \
-        --log refseq-cami2-viral-k21-n5.log
+    kmcp compute -j 40 -k 21 -n 10 -l 150 -I refseq-cami2-viral/ -O refseq-cami2-viral-k21-n10 \
+        --log refseq-cami2-viral-k21-n10.log
     
-    kmcp index -I refseq-cami2-viral-k21-n5/ -O refseq-cami2-viral-k21-n5.db \
+    kmcp index -I refseq-cami2-viral-k21-n10/ -O refseq-cami2-viral-k21-n10.db \
         -j 40 -n 1 -f 0.05 -x 100k \
-        --log refseq-cami2-viral-k21-n5.db.log
+        --log refseq-cami2-viral-k21-n10.db.log
     
