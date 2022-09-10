@@ -1,5 +1,16 @@
 # Demo of taxonomic profiling
 
+Table of contents
+
+* [Data](#data)
+    + [Reference genomes](#reference-genomes)
+    + [Taxonomy data](#taxonomy-data)
+    + [Mock community](#mock-community)
+* [Metagenomic profiling](#metagenomic-profiling)
+    + [Building database](#building-database)
+    + [Searching and profiling](#searching-and-profiling)
+    + [Compared to KMCP v0.8.2](#compared-to-kmcp-v082)
+
 Some extra tools:
 
 - https://github.com/shenwei356/csvtk
@@ -284,7 +295,7 @@ Profiling using mode 1 for low-depth data:
     done
     
 
-Profiling results:
+Profiling results (KMCP v0.9.0):
 
     cat mock.kmcp.gz.kmcp.profile \
         | csvtk cut -t -f ref,reads,percentage,taxname \
@@ -310,7 +321,58 @@ Profiling results:
 |GCF_001096185.1|Streptococcus pneumoniae  |0.183016    |0.177453  |
 |GCF_009759685.1|Acinetobacter baumannii   |0.093004    |0.098158  |
 |GCF_000017205.1|Pseudomonas aeruginosa    |0.089875    |0.089177  |
+
+### Compared to KMCP v0.8.2
+
+    cat mock.kmcp.gz.kmcp.profile \
+        | csvtk cut -t -f ref,reads,percentage,taxname \
+        | csvtk rename -t -f percentage -n v0.9.0 \
+        | csvtk join -t - <(csvtk cut -t -f ref,reads,percentage,taxname mock.kmcp.gz.kmcp.profile.v0.8.2 \
+                            | csvtk rename -t -f percentage -n v0.8.2) \
+        | csvtk join -t - <(csvtk cut -t -f id,abundance mock.gs.tsv) \
+        | csvtk rename -t -f abundance -n ground_truth \
+        | csvtk cut -t -f ref,taxname,ground_truth,v0.8.2,v0.9.0 \
+        | csvtk csv2md -t
+
+|ref            |taxname                   |ground_truth|v0.8.2   |v0.9.0   |
+|:--------------|:-------------------------|:-----------|:--------|:--------|
+|GCF_003697165.2|Escherichia coli          |18.093707   |21.030266|18.663804|
+|GCF_002949675.1|Shigella dysenteriae      |18.094390   |16.238689|18.201855|
+|GCF_000006945.2|Salmonella enterica       |18.093898   |18.461336|18.143627|
+|GCF_000742135.1|Klebsiella pneumoniae     |18.075498   |18.151451|17.738253|
+|GCF_002950215.1|Shigella flexneri         |18.093780   |16.568953|17.728060|
+|GCF_900638025.1|Haemophilus parainfluenzae|1.815273    |1.814883 |1.809292 |
+|GCF_000392875.1|Enterococcus faecalis     |1.798382    |1.806859 |1.800250 |
+|GCF_001544255.1|Enterococcus faecium      |1.808651    |1.800647 |1.795723 |
+|GCF_001457655.1|Haemophilus influenzae    |1.798328    |1.787957 |1.787560 |
+|GCF_006742205.1|Staphylococcus epidermidis|0.896071    |0.908937 |0.906778 |
+|GCF_001027105.1|Staphylococcus aureus     |0.889459    |0.884391 |0.881014 |
+|GCF_000148585.2|Streptococcus mitis       |0.176667    |0.176785 |0.178996 |
+|GCF_001096185.1|Streptococcus pneumoniae  |0.183016    |0.180202 |0.177453 |
+|GCF_009759685.1|Acinetobacter baumannii   |0.093004    |0.099102 |0.098158 |
+|GCF_000017205.1|Pseudomonas aeruginosa    |0.089875    |0.089544 |0.089177 |
     
 Assessing with [OPAL](https://github.com/CAMI-challenge/OPAL):
 
-    opal.py -g mock.gs.profile mock.kmcp.gz.cami.profile -l KMCP -o opal/
+    opal.py -g mock.gs.profile \
+        mock.kmcp.gz.cami.profile.v0.8.2 \
+        mock.kmcp.gz.cami.profile \
+        -l KMCP-v0.8.2,KMCP-v0.9.0\
+        -o opal
+
+    cat opal/results.tsv \
+        | csvtk grep -t -f tool -p 'Gold standard' -v \
+        | csvtk grep -t -f rank -p na -p species -p genus \
+        | csvtk grep -t -f metric -p 'L1 norm error' -p 'Weighted UniFrac error' \
+        | csvtk cut -t -f metric,rank,tool,value \
+        | csvtk sort -t -k metric -k rank -k tool:N \
+        | csvtk csv2md -t
+
+|metric                |rank   |tool       |value               |
+|:---------------------|:------|:----------|:-------------------|
+|L1 norm error         |genus  |KMCP-v0.8.2|0.06788634000000003 |
+|L1 norm error         |genus  |KMCP-v0.9.0|0.012544829999999974|
+|L1 norm error         |species|KMCP-v0.8.2|0.06815015000000002 |
+|L1 norm error         |species|KMCP-v0.9.0|0.014946969999999962|
+|Weighted UniFrac error|na     |KMCP-v0.8.2|0.021269975910780666|
+|Weighted UniFrac error|na     |KMCP-v0.9.0|0.004712290601693156|

@@ -7,7 +7,7 @@ KMCP is a command-line tool consisting of several subcommands.
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.8.3
+    Version: v0.9.0
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -20,7 +20,7 @@ KMCP can also be used for:
      by utilizing Minimizer, FracMinHash (Scaled MinHash), or Closed Syncmers.
 
 Usage:
-  kmcp [command]
+  kmcp [command] 
 
 Available Commands:
   autocompletion Generate shell autocompletion script
@@ -40,6 +40,8 @@ Flags:
   -q, --quiet                ► Do not print any verbose information. But you can write them to file
                              with --log.
   -j, --threads int          ► Number of CPUs cores to use. (default 16)
+
+Use "kmcp [command] --help" for more information about a command.
 
 ```
 
@@ -128,10 +130,15 @@ Next step:
 
 Examples:
   1. From few sequence files:
+
         kmcp compute -k 21 -n 5 -l 100 -O tmp-k21-n5-l100 NC_045512.2.fna.gz
+
   2. From a list file:
+
         kmcp compute -k 21 -n 10 -l 100 -O tmp-k21-10-l100 -i list.txt
+
   3. From a directory containing many sequence files:
+
         kmcp compute -k 21 -n 10 -l 100 -B plasmid \
             -O gtdb-k21-n10-l100 -I gtdb-genomes/
 
@@ -193,7 +200,7 @@ Database size and searching accuracy:
      The default value is:  (#unikFiles/#threads + 7) / 8 * 8
   4. Use flag -x/--block-sizeX-kmers-t, -8/--block-size8-kmers-t,
      and -1/--block-size1-kmers-t to separately create indexes for
-     inputs with huge number of k-mers, for precise control of
+     inputs with a huge number of k-mers, for precise control of
      database size.
 
 References:
@@ -204,12 +211,12 @@ Taxonomy data:
   2. Taxonomy information are only needed in "profile" command.
   
 Performance tips:
-  1. The number of blocks (.uniki files) better to be smaller than
+  1. The number of blocks (.uniki files) is better be smaller than
      or equal to the number of CPU cores for faster searching speed. 
-     We can set -j/--threads to control blocks number.
+     We can set the flag -j/--threads to control the blocks number.
      When more threads (>= 1.3 * #blocks) are given, extra workers are
      automatically created.
-  2. #threads files are simultaneously opened, and max number
+  2. #threads files are simultaneously opened, and the max number
      of opened files is limited by the flag -F/--max-open-files.
      You may use a small value of -F/--max-open-files for 
      hard disk drive storages.
@@ -218,9 +225,12 @@ Performance tips:
      as possible.
 
 Examples:
-  1. For bacteria genomes:
+  1. For bacterial genomes:
+
        kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l100/ -O gtdb.kmcp
+
   2. For viruses, use -x and -8 to control index size of the largest chunks:
+
        kmcp index -f 0.05 -n 1 -j 32 -x 100K -8 1M \
            -I genbank-viral-k21-n5-l100/ -O genbank-viral.kmcp
 
@@ -277,7 +287,8 @@ Attentions:
          seqkit sliding -s 100 -W 300
 
 Shared flags between "search" and "profile":
-  1. -t/--min-query-cov.
+  1. -t/--min-query-cov
+  2. -f/--max-fpr
 
 Index files loading modes:
   1. Using memory-mapped index files with mmap (default):
@@ -288,9 +299,9 @@ Index files loading modes:
         And multiple KMCP processes can not share the database in memory.
       - It's slightly faster due to the use of physically contiguous memory.
         The speedup is more significant for smaller databases.
-      - Please switch on this flag when searching on computer clusters,
+      - **Please switch on this flag when searching on computer clusters,
         where the default mmap mode would be very slow for network-attached
-        storages (NAS).
+        storage (NAS)**.
   3. Low memory mode (--low-mem):
       - Do not load all index files into memory nor use mmap, using file seeking.
       - It's much slower, >4X slower on SSD and would be much slower on HDD disks.
@@ -327,12 +338,17 @@ Performance tips:
 
 Examples:
   1. Single-end mode (recommended)
+
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz sample_1_unpaired.fq.gz sample_2_unpaired.fq.gz
+
   2. Paired-end mode
+
        kmcp search -d gtdb.kmcp -o sample.kmcp@gtdb.kmcp.tsv.gz \
            -1 sample_1.fq.gz -2 sample_2.fq.gz
-  3. In computer cluster, where databases are saved in NAS storages.
+
+  3. In computer clusters, where databases are saved in NAS storages.
+
        kmcp search -w -d gtdb.n16-00.kmcp -o sample.kmcp@gtdb.n16-00.kmcp.tsv.gz \
            sample_1.fq.gz sample_2.fq.gz
 
@@ -426,7 +442,7 @@ Methods:
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
   3. We also use the two-stage taxonomy assignment algorithm in MegaPath
-     to reduce the false positive of ambiguous matches.
+     to reduce the false positives of ambiguous matches.
      You can also disable this step by the flag --no-amb-corr.
      If stage 1/4 produces thousands of candidates, you can use
      the flag --no-amb-corr to reduce analysis time, which has very little
@@ -498,14 +514,14 @@ Performance notes:
 Profiling output formats:
   1. KMCP      (-o/--out-prefix)
      Note that: abundances are only computed for target references rather than
-     each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format.
+     each taxon at all taxonomic ranks, so please also output CAMI or MetaPhlAn format.
   2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
                 -s/--sample-id, --taxonomy-id)
      Related tools (https://github.com/shenwei356/taxonkit):
        - taxonkit profile2cami: convert any metagenomic profile table with
          TaxIds to CAMI format. Use this if you forget to output CAMI format.
        - taxonkit cami-filter: remove taxa of given TaxIds and their
-         descendants in CAMI metagenomic profile.
+         descendants in a CAMI metagenomic profile.
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
@@ -533,12 +549,15 @@ Taxonomic binning formats:
 
 Examples:
   1. Default mode:
+
        kmcp profile -X taxdump/ -T taxid.map -m 3 \
            sample.kmcp.tsv.gz -o sample.k.profile \
            -C sample.c.profile -s sample
-  2. For pathogen detection (you may create databases with lower FPR,
+
+  2. For pathogen detection (you may create databases with lower FPRs,
      e.g., kmcp index -f 0.1 -n 2 for bacteria and fungi genomes,
-     and search with low k-mer coverage threshold -t 0.4):
+     and search with a low k-mer coverage threshold -t 0.4):
+
        kmcp profile -X taxdump/ -T taxid.map -m 3 -t 0.4 \
            sample.kmcp.tsv.gz -o sample.k.profile
 
@@ -648,14 +667,14 @@ Performance notes:
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 Usage:
-  kmcp utils filter [flags]
+  kmcp utils filter [flags] 
 
 Flags:
   -h, --help                  help for filter
       --level string          ► Level to filter. available values: species, strain/assembly. (default
                               "species")
       --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
-                              enough. Type "kmcp utils filter -h" for details. (default 5000)
+                              enough. Type "kmcp utils filter" for details. (default 5000)
   -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
   -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
@@ -672,7 +691,7 @@ Flags:
 Print information of index file
 
 Usage:
-  kmcp utils index-info [flags]
+  kmcp utils index-info [flags] 
 
 Flags:
   -a, --all                 ► Show all information.
@@ -792,7 +811,7 @@ Tips:
      parallelize counting.
 
 Usage:
-  kmcp utils unik-info [flags]
+  kmcp utils unik-info [flags] 
 
 Flags:
   -a, --all                   ► All information, including the number of k-mers.

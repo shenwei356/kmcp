@@ -1910,7 +1910,7 @@ Examples:
 		var nAssignedReads float64
 		for iter := 0; iter < maxIters; iter++ {
 			if opt.Verbose || opt.Log2File {
-				log.Infof("  iter #%d", iter+1)
+				log.Infof("  iteration #%d", iter+1)
 				timeStart2 = time.Now()
 			}
 
