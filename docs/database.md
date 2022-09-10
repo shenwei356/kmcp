@@ -1414,7 +1414,7 @@ is good enough.
         --out-dir refs-k21-n10
 
     # demo output
-    13:11:13.397 [INFO] kmcp v0.8.0
+    13:11:13.397 [INFO] kmcp v0.9.0
     13:11:13.397 [INFO]   https://github.com/shenwei356/kmcp
     13:11:13.397 [INFO] 
     13:11:13.397 [INFO] checking input files ...
@@ -1525,7 +1525,7 @@ and have improved the indexing and searching speed
         --out-dir refs.kmcp 
 
     # demo output
-    22:44:17.710 [INFO] kmcp v0.8.0
+    22:44:17.710 [INFO] kmcp v0.9.0
     22:44:17.710 [INFO]   https://github.com/shenwei356/kmcp
     22:44:17.710 [INFO] 
     22:44:17.710 [INFO] loading .unik file infos from file: refs-k21-n10/_info.txt
@@ -1596,5 +1596,7 @@ Output:
 |file                          |k  |canonical|num-hashes|num-sigs|num-names|
 |:-----------------------------|:--|:--------|:---------|:-------|:--------|
 |refs.kmcp/R001/_block001.uniki|21 |true     |1         |746442  |8        |
+
+Where `num-sigs` is the size of the bloom filters, and `num-names` is the number of genome (chunks).
 
 What's next? Check the [tutorials](/kmcp/tutorial).

@@ -26,14 +26,13 @@
 ### 1. Accurate metagenomic profiling
 
 KMCP adopts a novel metagenomic profiling strategy
-by splitting reference genomes into 10 or 5 chunks and mappings reads to these
+by splitting reference genomes into 10 chunks and mappings reads to these
 chunks via fast k-mer matching, denoted as ***pseudo-mapping***.
 
 Benchmarking results on both simulated and real data indicate that KMCP not only
 allows for accurate taxonomic profiling of archaea, bacteria, and viral populations
 from metagenomic shotgun sequence data, but also provides confident pathogen detection
-in infectious clinical samples of low depth
-(check the [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling)).
+in infectious clinical samples of low depth.
 
 ***Genome collections with custom taxonomy***,
 e.g., [GTDB](https://gtdb.ecogenomic.org/) uses its own taxonomy and
@@ -45,7 +44,7 @@ are also supported by generating NCBI-style taxdump files with [taxonkit create-
 KMCP can be used for fast sequence search against large scales of genomic datasets
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
-bringing a smaller index size and much faster searching speed ([4x-10x faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result))
+bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
  
 ### 3. Fast genome similarity estimation
@@ -61,14 +60,14 @@ KMCP supports multiple k-mer sketches
 [FracMinHash](https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2)
 (previously named [Scaled MinHash](https://f1000research.com/articles/8-1006)), and
 [Closed Syncmers](https://peerj.com/articles/10805/)) for genome similarity estimation.
-And [KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
+And [KMCP is 5x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
  (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
 
 
 ## Features
 
 - **Easy to install**
-    - [Statically linked executable binaries for multiple platforms](https://bioinf.shenwei.me/kmcp/download) (Linux/Windows/macOS, amd64).
+    - [Statically linked executable binaries for multiple platforms](https://bioinf.shenwei.me/kmcp/download) (Linux/Windows/macOS, AMD64/ARM64).
     - No dependencies, no configurations.
     - `conda install -c bioconda kmcp`
 - **Easy to use**
@@ -77,9 +76,9 @@ And [KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/ben
 - **Building database is easy and fast**
     - [~25 min for 47894 genomes from GTDB-r202](https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs) on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**
-    - The index structure is modified from COBS, while [KMCP is 4x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
+    - The index structure is modified from COBS, while [KMCP is 2x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
     - Automatically scales to exploit all available CPU cores.
-    - Searching time is linearly related to the number of reference genomes.
+    - Searching time is linearly related to the number of reference genomes (chunks).
 - **Scalable searching**. *Searching results against multiple databases can be fast merged*.
     This brings many benefits:
     - *There's no need to re-built the database with newly added reference genomes*. 
@@ -88,9 +87,9 @@ And [KMCP is 4x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/ben
 - **Accurate taxonomic profiling**
     - Some k-mer based taxonomic profilers suffer from high false positive rates,
       while [KMCP adopts multiple strategies](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods)
-      to [improve specificity and keeps high sensitivity at the same time](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
-    - In addition to archaea and bacteria, [KMCP performed well on **viruses/phages**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages).
-    - [KMCP also provides **confident infectious pathogen detection**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#87-metagenomic-samples-of-infected-body-fluids-bacteria-pathogens-low-coverage).
+      to **improve specificity and keeps high sensitivity at the same time**.
+    - In addition to archaea and bacteria, KMCP performed well on **viruses/phages**.
+    - KMCP also provides **confident infectious pathogen detection**.
     - [Preset six modes for multiple scenarios](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes).
     - [Supports CAMI and MetaPhlAn profiling format](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats).
     
@@ -143,7 +142,7 @@ in two packages for better searching performance.
 ![](kmcp-workflow.jpg)
 
     # compute k-mers
-    kmcp compute -k 21 --split-number 10 --split-overlap 100 \
+    kmcp compute -k 21 --split-number 10 --split-overlap 150 \
         --in-dir genomes/ --out-dir genomes-k21-n10
 
     # index k-mers
@@ -168,10 +167,15 @@ in two packages for better searching performance.
         --cami-report      search.tsv.gz.c.profile \
         --binning-result   search.tsv.gz.binning.gz
 
+Next:
+
+- [Demo of taxonomic profiling](https://github.com/shenwei356/kmcp/tree/main/demo-profiling)
+- [Tutorial of taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+
 ## Support
 
 Please [open an issue](https://github.com/shenwei356/kmcp/issues) to report bugs,
-propose new functions or ask for help.
+propose new functions, or ask for help.
 
 ## License
 

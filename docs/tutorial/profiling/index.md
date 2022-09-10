@@ -66,7 +66,6 @@ and the results can be fastly merged for downstream analysis.
         kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
 
     **Single-end mode is recommended for paired-end reads, for higher sensitivity**.
-    See [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/profiling).
 
 2. A long query sequence may contain duplicated k-mers, which are
     not removed for short sequences by default. You may modify the
@@ -74,7 +73,7 @@ and the results can be fastly merged for downstream analysis.
 3. For long reads or contigs, you should split them into short reads
     using `seqkit sliding`, e.g.,
 
-        seqkit sliding -s 100 -W 300
+        seqkit sliding -s 100 -W 300-f/--max-fpr
 
 4. The values of `tCov` and `jacc` in results only apply to databases built with a single size of k-mer.
 
@@ -83,6 +82,7 @@ can use stricter criteria in `kmcp profile`.
 
 1. `-t/--min-query-cov`, minimal query coverage, i.e., 
    proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity)
+1. `-f/--max-fpr`, maximal false positive rate of a query. (default `0.05`)
 
 #### **Index files loading modes**
 
@@ -345,11 +345,7 @@ is used for batch submitting Slurm jobs via script templates.
     the flag `--no-amb-corr` to reduce analysis time, which has very little
      effect on the results.
 4. Abundance are estimated using an Expectation-Maximization (EM) algorithm..
-5. Input files are parsed 4 times, therefore STDIN is not supported.
-
-Three-rounds profiling:
-
-<img src="profiling-steps.jpg" alt="" width="500"/>
+5. Input files are parsed for multiple times, therefore STDIN is not supported.
 
 **Accuracy notes**:
 
@@ -399,9 +395,9 @@ You can still change the values of some options below as usual.
 1. Mapping references IDs to TaxIds: `-T/--taxid-map`
 2. NCBI taxonomy dump files: `-X/--taxdump`
 
-For databases built with a custom genome collection, you can use
+**For databases built with a custom genome collection, you can use
 [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump)
-to create NCBI-style taxdump files, which also generates a TaxId mapping file.
+to create NCBI-style taxdump files, which also generates a TaxId mapping file**.
 
 **Performance notes**:
 
@@ -449,7 +445,7 @@ to create NCBI-style taxdump files, which also generates a TaxId mapping file.
 
 #### Profiling result formats
 
-**Supported profiling output formats**:
+Taxonomic profiling output formats:
 
 - KMCP      (`-o/--out-prefix`). 
   **Note that: abundances are only computed for target references rather than
@@ -457,14 +453,12 @@ to create NCBI-style taxdump files, which also generates a TaxId mapping file.
 - CAMI      (`-M/--metaphlan-report`, `--metaphlan-report-version`, sample name: `-s/--sample-id`, taxonomy data: `--taxonomy-id`)
 - MetaPhlAn (`-C/--cami-report`, sample name: `-s/--sample-id`))
 
-**Supported taxonomic binning formats**:
+Taxonomic binning formats:
 
 - CAMI      (`-B/--binning-result`)
 
 
-**KMCP format**:
-
-Tab-delimited format with 16 columns:
+KMCP format (Tab-delimited format with 16 columns):
 
 ```
  1. ref,                Identifier of the reference genome

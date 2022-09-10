@@ -22,7 +22,7 @@ Some extra tools:
 ### Reference genomes
 
 We choose 15 bacterial genomes to make a mock metagenomic community.
-Note that some species belong to the same family or genus.
+Note that **some species belong to the same family or genus**.
 
 Taxonomy information (NCBI Taxonomy):
     

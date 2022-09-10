@@ -73,8 +73,8 @@ Database size and building time.
 |               |cobs      |kmcp     |
 |:--------------|:---------|:--------|
 |database size  | 86.96GB  | 55.15GB |
-|building time  | 29m:55s  | 21min04s|
-|temporary files| 160.76GB | 935.11G  |
+|building time  | 29m55s   | 21min04s|
+|temporary files| 160.76GB | 935.11G |
     
 ### Searching with bacterial genomes
 

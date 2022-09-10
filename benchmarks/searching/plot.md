@@ -21,6 +21,19 @@ KMCP vs COBS
     csvtk concat bench.kmcp-cobs.long.tsv.time.csv bench.kmcp-cobs.short.tsv.time.csv \
         > bench.kmcp-cobs.csv
         
+    cat bench.kmcp-cobs.csv \
+        | csvtk summary -g group,app -f time:mean \
+        | csvtk sort -k group \
+        | csvtk cut -f group,app,time:mean \
+        | csvtk csv2md 
+
+|group          |app |time:mean|
+|:--------------|:---|:--------|
+|1M 150-bp reads|KMCP|74.28    |
+|1M 150-bp reads|COBS|749.32   |
+|One genome     |KMCP|12.83    |
+|One genome     |COBS|25.70    |
+
 KMCP vs Mash and Sourmash
 
     cat bench.kmcp-mash-sourmash.thread1.tsv \
@@ -41,6 +54,21 @@ KMCP vs Mash and Sourmash
         
     csvtk concat bench.kmcp-mash-sourmash.thread1.tsv.csv bench.kmcp-mash-sourmash.thread8.tsv.csv\
         > bench.kmcp-mash-sourmash.csv
+
+    cat bench.kmcp-mash-sourmash.csv \
+        | csvtk summary -g group,app -f time:mean \
+        | csvtk sort -k group \
+        | csvtk cut -f group,app,time:mean \
+        | csvtk csv2md 
+
+|group    |app     |time:mean|
+|:--------|:-------|:--------|
+|Threads=1|Sourmash|3.48     |
+|Threads=1|Mash    |6.46     |
+|Threads=1|KMCP    |1.11     |
+|Threads=8|Sourmash|3.48     |
+|Threads=8|Mash    |4.20     |
+|Threads=8|KMCP    |0.60     |
     
 ## Plotting
 

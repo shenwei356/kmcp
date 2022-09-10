@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.9.0 - 2022-00-00
+### v0.9.0 - 2022-09-00
 
 - `compute`:
     - smaller output files and faster speed.
@@ -11,6 +11,7 @@
     - smaller query FPR values by computing the actual FPR values for each bloom filter in a genome chunk.
 - `profile`:
     -***more accurate abundance estimation using EM algorithm***.
+- new command `utils split-genomes` for splitting genomes into chunks.
 
 ### v0.8.4 - 2022-08-16
 
