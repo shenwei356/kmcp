@@ -106,38 +106,38 @@ Metrics of profiling accuracy
 |tool          |rank   |metric                |value   |
 |:-------------|:------|:---------------------|:-------|
 |Bracken       |na     |Weighted UniFrac error|0.727547|
-|KMCP-chunks-1 |na     |Weighted UniFrac error|0.335229|
-|KMCP-chunks-5 |na     |Weighted UniFrac error|0.335518|
-|KMCP-chunks-10|na     |Weighted UniFrac error|0.336558|
-|KMCP-chunks-20|na     |Weighted UniFrac error|0.338124|
+|KMCP-chunks-1 |na     |Weighted UniFrac error|0.335137|
+|KMCP-chunks-5 |na     |Weighted UniFrac error|0.335588|
+|KMCP-chunks-10|na     |Weighted UniFrac error|0.336705|
+|KMCP-chunks-20|na     |Weighted UniFrac error|0.338017|
 |MetaPhlAn2    |na     |Weighted UniFrac error|0.517009|
 |mOTUs2        |na     |Weighted UniFrac error|0.407855|
 |Bracken       |species|Completeness          |0.338235|
 |KMCP-chunks-1 |species|Completeness          |0.724179|
 |KMCP-chunks-5 |species|Completeness          |0.713924|
 |KMCP-chunks-10|species|Completeness          |0.698402|
-|KMCP-chunks-20|species|Completeness          |0.670707|
+|KMCP-chunks-20|species|Completeness          |0.671314|
 |MetaPhlAn2    |species|Completeness          |0.674236|
 |mOTUs2        |species|Completeness          |0.678851|
 |Bracken       |species|F1 score              |0.039738|
-|KMCP-chunks-1 |species|F1 score              |0.630705|
-|KMCP-chunks-5 |species|F1 score              |0.745917|
+|KMCP-chunks-1 |species|F1 score              |0.630500|
+|KMCP-chunks-5 |species|F1 score              |0.746178|
 |KMCP-chunks-10|species|F1 score              |0.772194|
-|KMCP-chunks-20|species|F1 score              |0.773150|
+|KMCP-chunks-20|species|F1 score              |0.773359|
 |MetaPhlAn2    |species|F1 score              |0.738563|
 |mOTUs2        |species|F1 score              |0.770092|
 |Bracken       |species|L1 norm error         |1.250587|
-|KMCP-chunks-1 |species|L1 norm error         |0.521398|
-|KMCP-chunks-5 |species|L1 norm error         |0.528133|
-|KMCP-chunks-10|species|L1 norm error         |0.526533|
-|KMCP-chunks-20|species|L1 norm error         |0.527752|
+|KMCP-chunks-1 |species|L1 norm error         |0.522035|
+|KMCP-chunks-5 |species|L1 norm error         |0.527917|
+|KMCP-chunks-10|species|L1 norm error         |0.526972|
+|KMCP-chunks-20|species|L1 norm error         |0.527961|
 |MetaPhlAn2    |species|L1 norm error         |0.497277|
 |mOTUs2        |species|L1 norm error         |0.851210|
 |Bracken       |species|Purity                |0.021615|
-|KMCP-chunks-1 |species|Purity                |0.572472|
-|KMCP-chunks-5 |species|Purity                |0.795017|
+|KMCP-chunks-1 |species|Purity                |0.572196|
+|KMCP-chunks-5 |species|Purity                |0.795713|
 |KMCP-chunks-10|species|Purity                |0.871994|
-|KMCP-chunks-20|species|Purity                |0.921084|
+|KMCP-chunks-20|species|Purity                |0.920273|
 |MetaPhlAn2    |species|Purity                |0.819617|
 |mOTUs2        |species|Purity                |0.892699|
 
