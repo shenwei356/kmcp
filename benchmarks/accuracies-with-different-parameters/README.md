@@ -58,7 +58,9 @@ Searching and profiling
     for chunks in 1 5 10 20; do
         db=refseq-cami2-k21-n$chunks.db
         dbname=refseq-cami2-k21-n$chunks
-                
+        
+        reads=single
+        
         X=taxdump
         T=taxid.map
     
@@ -226,6 +228,8 @@ Paired-end reads
     
     # Profiling --------------------
     
+    reads=paired
+    
     X=taxdump
     T=taxid.map
 
@@ -264,6 +268,8 @@ fails, try read2)
     
     
     # Profiling --------------------
+    
+    reads=paired-se
     
     X=taxdump
     T=taxid.map

@@ -2456,7 +2456,9 @@ Examples:
 			}
 
 			if opt.Verbose || opt.Log2File {
-				log.Infof("    number of estimated references: %d", len(targets))
+				if iter == 0 {
+					log.Infof("    number of estimated references: %d", len(targets))
+				}
 				log.Infof("    elapsed time: %s", time.Since(timeStart2))
 			}
 
