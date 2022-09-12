@@ -2287,7 +2287,7 @@ Examples:
 				for _, c1 = range t.UniqMatch {
 					t.SumUniqMatch += c1
 				}
-				if t.SumUniqMatch < minUReads {
+				if iter > 0 && t.SumUniqMatch < minUReads {
 					if debug {
 						if taxdb != nil {
 							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
@@ -2307,7 +2307,7 @@ Examples:
 				for _, c1 = range t.UniqMatchHic {
 					t.SumUniqMatchHic += c1
 				}
-				if t.SumUniqMatchHic < minHicUreads {
+				if iter > 0 && t.SumUniqMatchHic < minHicUreads {
 					if debug {
 						if taxdb != nil {
 							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.0f\n",
@@ -2324,7 +2324,7 @@ Examples:
 					continue
 				}
 
-				if t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
+				if iter > 0 && t.SumUniqMatchHic < HicUreadsMinProp*t.SumUniqMatch {
 					if debug {
 						if taxdb != nil {
 							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.4f (%.0f/%.0f)\n",
@@ -2350,7 +2350,7 @@ Examples:
 					t.SumMatch += c
 				}
 				t.FragsProp = t.FragsProp / float64(len(t.Match))
-				if t.FragsProp < minFragsProp {
+				if iter > 0 && t.FragsProp < minFragsProp {
 					if debug {
 						if taxdb != nil {
 							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %.1f %v\n",
@@ -2376,7 +2376,7 @@ Examples:
 				}
 
 				_, t.RelDepthStd = MeanStdev(t.RelDepth)
-				if t.RelDepthStd > maxFragsDepthStdev {
+				if iter > 0 && t.RelDepthStd > maxFragsDepthStdev {
 					if debug {
 						if taxdb != nil {
 							fmt.Fprintf(outfhD, "failed3: %s (%s), 90th percentile: %.2f, %s: %f\n",
