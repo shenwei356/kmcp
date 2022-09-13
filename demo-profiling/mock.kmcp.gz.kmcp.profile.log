@@ -1,96 +1,92 @@
-09:37:08.177 [INFO] using a lot of threads does not always accelerate processing, 4-threads is fast enough
-09:37:08.177 [INFO] kmcp v0.9.0
-09:37:08.177 [INFO]   https://github.com/shenwei356/kmcp
-09:37:08.177 [INFO] 
-09:37:08.177 [INFO] checking input files ...
-09:37:08.177 [INFO]   1 input file(s) given
-09:37:08.177 [INFO] loading TaxId mapping file ...
-09:37:08.177 [INFO]   15 pairs of TaxId mapping values from 1 file(s) loaded
-09:37:08.178 [INFO] loading Taxonomy from: taxdump-custom/
-09:37:08.178 [INFO]   44 nodes in 8 ranks loaded
-09:37:08.178 [INFO]   0 merged nodes loaded
-09:37:08.178 [INFO]   44 names loaded
-09:37:08.178 [INFO]   0 deleted nodes loaded
-09:37:08.178 [INFO] 
-09:37:08.178 [INFO] -------------------- [main parameters] --------------------
-09:37:08.178 [INFO] match filtration: 
-09:37:08.178 [INFO]   maximal false positive rate: 0.050000
-09:37:08.178 [INFO]   minimal query coverage: 0.550000
-09:37:08.178 [INFO]   keep matches with the top N scores: N=0
-09:37:08.178 [INFO]   only keep the full matches: false
-09:37:08.178 [INFO]   only keep main matches: false, maximal score gap: 0.400000
-09:37:08.178 [INFO] 
-09:37:08.178 [INFO] deciding the existence of a reference:
-09:37:08.178 [INFO]   preset profiling mode: 1
-09:37:08.178 [INFO]   minimal number of reads per reference chunk: 5
-09:37:08.178 [INFO]   minimal number of uniquely matched reads: 2
-09:37:08.178 [INFO]   minimal proportion of matched reference chunks: 0.600000
-09:37:08.178 [INFO]   maximal standard deviation of relative depths of all chunks: 2.000000
-09:37:08.178 [INFO] 
-09:37:08.178 [INFO]   minimal number of high-confidence uniquely matched reads: 1
-09:37:08.178 [INFO]   minimal query coverage of high-confidence uniquely matched reads: 0.700000
-09:37:08.178 [INFO]   minimal proportion of high-confidence uniquely matched reads: 0.100000
-09:37:08.178 [INFO] 
-09:37:08.178 [INFO] taxonomy data:
-09:37:08.178 [INFO]   taxdump directory: taxdump-custom/
-09:37:08.178 [INFO]   mapping reference IDs to TaxIds: [taxdump-custom/taxid.map]
-09:37:08.179 [INFO] 
-09:37:08.179 [INFO] reporting:
-09:37:08.179 [INFO]   default format  : mock.kmcp.gz.kmcp.profile
-09:37:08.179 [INFO]   CAMI format      : mock.kmcp.gz.cami.profile
-09:37:08.179 [INFO]     Sample ID      : 0
-09:37:08.179 [INFO]   MetaPhlAn3 format: mock.kmcp.gz.metaphlan.profile
-09:37:08.179 [INFO]     Sample ID      : 0
-09:37:08.179 [INFO]     Taxonomy ID    : 
-09:37:08.179 [INFO]   Binning result   : mock.kmcp.gz.binning.gz
-09:37:08.179 [INFO] -------------------- [main parameters] --------------------
-09:37:08.179 [INFO] 
-09:37:08.179 [INFO] stage 1/4: counting matches and unique matches for filtering out low-confidence references
-09:37:08.179 [INFO]   parsing file: mock.kmcp.gz
-09:37:08.439 [INFO]   number of references in search result: 15
-09:37:08.439 [INFO]   number of estimated references: 15
-09:37:08.439 [INFO]   elapsed time: 260.004124ms
-09:37:08.439 [INFO] 
-09:37:08.439 [INFO] stage 2/4: counting ambiguous matches for correcting matches
-09:37:08.439 [INFO]   parsing file: mock.kmcp.gz
-09:37:08.617 [INFO]   elapsed time: 178.540179ms
-09:37:08.617 [INFO] 
-09:37:08.617 [INFO] stage 3/4: recounting matches and unique matches
-09:37:08.617 [INFO]   parsing file: mock.kmcp.gz
-09:37:08.882 [INFO]   number of estimated references: 15
-09:37:08.882 [INFO]   elapsed time: 264.412878ms
-09:37:08.882 [INFO] 
-09:37:08.882 [INFO] stage 4/4: estimating abundance using EM algorithm
-09:37:08.882 [INFO]   iter #1
-09:37:08.882 [INFO]     parsing file: mock.kmcp.gz
-09:37:09.123 [INFO]     number of estimated references: 15
-09:37:09.123 [INFO]     elapsed time: 240.707309ms
-09:37:09.123 [INFO]   iter #2
-09:37:09.123 [INFO]     parsing file: mock.kmcp.gz
-09:37:09.368 [INFO]     number of estimated references: 15
-09:37:09.368 [INFO]     elapsed time: 245.586106ms
-09:37:09.368 [INFO]   iter #3
-09:37:09.368 [INFO]     parsing file: mock.kmcp.gz
-09:37:09.618 [INFO]     number of estimated references: 15
-09:37:09.618 [INFO]     elapsed time: 249.770861ms
-09:37:09.618 [INFO]   iter #4
-09:37:09.618 [INFO]     parsing file: mock.kmcp.gz
-09:37:09.850 [INFO]     number of estimated references: 15
-09:37:09.850 [INFO]     elapsed time: 231.485888ms
-09:37:09.850 [INFO]   iter #5
-09:37:09.850 [INFO]     parsing file: mock.kmcp.gz
-09:37:10.086 [INFO]     number of estimated references: 15
-09:37:10.086 [INFO]     elapsed time: 236.395734ms
-09:37:10.086 [INFO]     stop iterating after abundances being converged
-09:37:10.086 [INFO]   number of estimated references: 15
-09:37:10.086 [INFO]   elapsed time: 1.204109918s
-09:37:10.086 [INFO] 
-09:37:10.086 [INFO] #input matched reads: 308839, #reads belonging to references in profile: 308839, proportion: 100.000000%
-09:37:10.086 [INFO] 
-09:37:10.086 [INFO] writting binning result...
-09:37:10.086 [INFO]   parsing file: mock.kmcp.gz
-09:37:10.350 [INFO] 
-09:37:10.351 [INFO]   308839 binning results are save to mock.kmcp.gz.binning.gz
-09:37:10.353 [INFO] 
-09:37:10.353 [INFO] elapsed time: 2.176102166s
-09:37:10.353 [INFO] 
+16:56:21.500 [INFO] using a lot of threads does not always accelerate processing, 4-threads is fast enough
+16:56:21.500 [INFO] kmcp v0.9.0
+16:56:21.500 [INFO]   https://github.com/shenwei356/kmcp
+16:56:21.500 [INFO] 
+16:56:21.500 [INFO] checking input files ...
+16:56:21.500 [INFO]   1 input file(s) given
+16:56:21.500 [INFO] loading TaxId mapping file ...
+16:56:21.506 [INFO]   15 pairs of TaxId mapping values from 1 file(s) loaded
+16:56:21.506 [INFO] loading Taxonomy from: taxdump-custom/
+16:56:21.506 [INFO]   44 nodes in 8 ranks loaded
+16:56:21.506 [INFO]   0 merged nodes loaded
+16:56:21.506 [INFO]   0 deleted nodes loaded
+16:56:21.506 [INFO]   44 names loaded
+16:56:21.506 [INFO] 
+16:56:21.506 [INFO] -------------------- [main parameters] --------------------
+16:56:21.506 [INFO] match filtration: 
+16:56:21.506 [INFO]   maximal false positive rate: 0.050000
+16:56:21.506 [INFO]   minimal query coverage: 0.550000
+16:56:21.506 [INFO]   keep matches with the top N scores: N=0
+16:56:21.506 [INFO]   only keep the full matches: false
+16:56:21.506 [INFO]   only keep main matches: false, maximal score gap: 0.400000
+16:56:21.506 [INFO] 
+16:56:21.506 [INFO] deciding the existence of a reference:
+16:56:21.506 [INFO]   preset profiling mode: 1
+16:56:21.506 [INFO]   minimal number of reads per reference chunk: 5
+16:56:21.506 [INFO]   minimal number of uniquely matched reads: 2
+16:56:21.507 [INFO]   minimal proportion of matched reference chunks: 0.600000
+16:56:21.507 [INFO]   maximal standard deviation of relative depths of all chunks: 2.000000
+16:56:21.507 [INFO] 
+16:56:21.507 [INFO]   minimal number of high-confidence uniquely matched reads: 1
+16:56:21.507 [INFO]   minimal query coverage of high-confidence uniquely matched reads: 0.700000
+16:56:21.507 [INFO]   minimal proportion of high-confidence uniquely matched reads: 0.100000
+16:56:21.507 [INFO] 
+16:56:21.507 [INFO] taxonomy data:
+16:56:21.507 [INFO]   taxdump directory: taxdump-custom/
+16:56:21.507 [INFO]   mapping reference IDs to TaxIds: [taxdump-custom/taxid.map]
+16:56:21.507 [INFO] 
+16:56:21.507 [INFO] reporting:
+16:56:21.507 [INFO]   default format   : mock.kmcp.gz.kmcp.profile
+16:56:21.507 [INFO]   CAMI format      : mock.kmcp.gz.cami.profile
+16:56:21.507 [INFO]     Sample ID      : 0
+16:56:21.507 [INFO]   MetaPhlAn3 format: mock.kmcp.gz.metaphlan.profile
+16:56:21.507 [INFO]     Sample ID      : 0
+16:56:21.507 [INFO]     Taxonomy ID    : 
+16:56:21.507 [INFO]   Binning result   : mock.kmcp.gz.binning.gz
+16:56:21.507 [INFO] -------------------- [main parameters] --------------------
+16:56:21.507 [INFO] 
+16:56:21.507 [INFO] stage 1/4: counting matches and unique matches for filtering out low-confidence references
+16:56:21.507 [INFO]   parsing file: mock.kmcp.gz
+16:56:21.755 [INFO]   number of references in search result: 15
+16:56:21.755 [INFO]   number of estimated references: 15
+16:56:21.755 [INFO]   elapsed time: 248.437037ms
+16:56:21.755 [INFO] 
+16:56:21.755 [INFO] stage 2/4: counting ambiguous matches for correcting matches
+16:56:21.755 [INFO]   parsing file: mock.kmcp.gz
+16:56:21.953 [INFO]   elapsed time: 197.246986ms
+16:56:21.953 [INFO] 
+16:56:21.953 [INFO] stage 3/4: recounting matches and unique matches
+16:56:21.953 [INFO]   parsing file: mock.kmcp.gz
+16:56:22.210 [INFO]   number of estimated references: 15
+16:56:22.210 [INFO]   elapsed time: 256.914102ms
+16:56:22.210 [INFO] 
+16:56:22.210 [INFO] stage 4/4: estimating abundance using EM algorithm
+16:56:22.210 [INFO]   initialization step
+16:56:22.210 [INFO]     parsing file: mock.kmcp.gz
+16:56:22.440 [INFO]     number of estimated references: 15
+16:56:22.440 [INFO]     elapsed time: 230.74824ms
+16:56:22.440 [INFO]   iteration #1
+16:56:22.440 [INFO]     parsing file: mock.kmcp.gz
+16:56:22.676 [INFO]     elapsed time: 235.058252ms
+16:56:22.676 [INFO]   iteration #2
+16:56:22.676 [INFO]     parsing file: mock.kmcp.gz
+16:56:22.912 [INFO]     elapsed time: 236.592076ms
+16:56:22.912 [INFO]   iteration #3
+16:56:22.912 [INFO]     parsing file: mock.kmcp.gz
+16:56:23.147 [INFO]     elapsed time: 234.33021ms
+16:56:23.147 [INFO]   iteration #4
+16:56:23.147 [INFO]     parsing file: mock.kmcp.gz
+16:56:23.376 [INFO]     elapsed time: 229.061957ms
+16:56:23.376 [INFO]     stop iterating after abundances being converged
+16:56:23.376 [INFO]   number of estimated references: 15
+16:56:23.376 [INFO]   elapsed time: 1.166149775s
+16:56:23.376 [INFO] 
+16:56:23.376 [INFO] #input matched reads: 308839, #reads belonging to references in profile: 308839, proportion: 100.000000%
+16:56:23.376 [INFO] 
+16:56:23.376 [INFO] writting binning result...
+16:56:23.376 [INFO]   parsing file: mock.kmcp.gz
+16:56:23.632 [INFO] 
+16:56:23.632 [INFO]   308839 binning results are save to mock.kmcp.gz.binning.gz
+16:56:23.635 [INFO] 
+16:56:23.635 [INFO] elapsed time: 2.134640379s
+16:56:23.635 [INFO] 
