@@ -9,6 +9,21 @@
 > Wei Shen, Hongyan Xiang, Tianquan Huang, Hui Tang, Mingli Peng, Dachuan Cai, Peng Hu, Hong Ren.<br>
 > bioRxiv 2022.03.07.482835; doi: [https://doi.org/10.1101/2022.03.07.482835](https://doi.org/10.1101/2022.03.07.482835)
 
+## Table of contents
+
+* [Documents](#documents)
+* [What can we do?](#what-can-we-do-)
+    + [1. Accurate metagenomic profiling](#1-accurate-metagenomic-profiling)
+    + [2. Fast sequence search against large scales of genomic datasets](#2-fast-sequence-search-against-large-scales-of-genomic-datasets)
+    + [3. Fast genome similarity estimation](#3-fast-genome-similarity-estimation)
+* [Features](#features)
+* [Installation](#installation)
+* [Commands](#commands)
+* [Quickstart](#quickstart)
+* [Support](#support)
+* [License](#license)
+* [Acknowledgments](#acknowledgments)
+
 ## Documents
 
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
