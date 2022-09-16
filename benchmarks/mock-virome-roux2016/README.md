@@ -210,7 +210,33 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             | rush -j 1 'cat {}' \
             > $profile
     done
+    
+Export prediction at rank of family
 
+    reads=kmcp-pese
+    X=taxdump/
+    
+    # filter viruses
+    for m in $(seq 1 5); do
+        fd c-m$m.profile$ $reads \
+            | grep filter -v \
+            | rush 'taxonkit cami-filter -t 2,2157,2759 {} -o {.}.filter.profile'
+    done
+    
+    for m in $(seq 1 5); do
+        fd c-m$m.filter.profile$ $reads \
+            | rush -k -v X=$X \
+                'grep ^@ -v {} \
+                    | csvtk grep -Ht -f 2 -p family \
+                    | csvtk cut -Ht -f 1 \
+                    | taxonkit reformat -I 1 -f "{f}" --data-dir {X} \
+                    | csvtk uniq -Ht -f 2 \
+                    | csvtk mutate2 -Ht -e "\"{%@(.+?)_}\"" \
+                    | csvtk cut -Ht -f 3,2 ' \
+            | csvtk add-header -t -n sample,family \
+            > family.kmcp-m$m.tsv
+    done
+    
 ## KMCP using MGV
 
 We search against MGV.
@@ -514,3 +540,222 @@ Steps
         | rush -j 1 'cat {}' \
         > $newprofile
  
+## Assembly-based Tools
+
+Assembly
+
+    # ------------------------------------------------------------------------
+    # prepare folder and files
+    
+    reads=assembly
+    
+    # prepare folder and files.
+    mkdir -p $reads
+    cd $reads
+    fd fastq.gz$ ../reads | rush 'ln -s {}'
+    cd ..
+
+   
+    # ------------------------------------------------------------------------
+    # assembly
+      
+    reads=assembly
+    j=4
+    J=40
+    mem=100
+    
+    fd R1_001_t_paired.fastq.gz$ $reads/ \
+        | csvtk sort -H -k 1:N \
+        | rush -j $j -v j=$J -v 'p={@^(.+)_R1_}' -v m=$mem \
+            'spades.py --meta -k 55 -t {j} -m {m}  \
+                -1 {p}_R1_001_t_paired.fastq.gz   -2 {p}_R2_001_t_paired.fastq.gz \
+                -s {p}_R1_001_t_unpaired.fastq.gz -s {p}_R2_001_t_unpaired.fastq.gz \
+                -o {@^(.+?)_} \
+            ' \
+            -c -C $reads.spades.rush
+            
+    # copy result
+    result=assembly.contigs
+    mkdir -p $result
+    time fd ^contigs.fasta$ $reads/ \
+        | grep -v work \
+        | rush -v dir=$result \
+            'seqkit seq -m 2000 {} | seqkit seq -o {dir}/{/%}.fasta'
+
+### Annotation with VIRify
+
+[VIRify](https://github.com/EBI-Metagenomics/emg-viral-pipeline)
+
+    # create taxdump database for ete3
+    #
+    # cd taxdump; tar -zcvf ../taxdump.tar.gz delnodes.dmp names.dmp nodes.dmp merged.dmp
+    #
+    # in Python:
+    #     from ete3 import NCBITaxa
+    #     ncbi = NCBITaxa(dbfile='ete3_ncbi_tax.sqlite', taxdump_file='taxdump.tar.gz')
+
+    j=4
+    J=40
+    mem=100
+    
+    db=~/ws/db/virify
+    sg=~/app/singularity
+    reads=assembly
+    ete3tax=ete3_ncbi_tax.sqlite
+    
+    # about 8 hours
+    time fd ^contigs.fasta$ $reads/ \
+        | grep -v work \
+        | rush -j $j -v j=$J -v mem=$mem -v db=$db -v sg=$sg -v ete3tax=$ete3tax \
+            'nextflow run EBI-Metagenomics/emg-viral-pipeline -r v0.4.0 \
+                --databases {db} --cachedir {sg} --ncbi {ete3tax} \
+                --fasta {} --workdir {/}/work --output {/}/virify --length 2 \
+                -profile local,singularity --memory {mem} --cores {j} ' \
+            -c -C virify.rush --verbose
+    
+    # copy result
+    result=assembly.virify
+    mkdir -p $result
+    time fd ^contigs.fasta$ $reads/ \
+        | grep -v work \
+        | rush -v dir=$result \
+            'cp -r {/}/virify/contigs/08-final/ {dir}/{/%}'
+            
+Export prediction at rank of family
+
+    ls assembly.virify/*/taxonomy/high_confidence_viral_contigs_prodigal_annotation_taxonomy.tsv \
+        | rush -k 'csvtk cut -t -f family {} \
+            | csvtk uniq -Ht \
+            | csvtk del-header \
+            | csvtk mutate2 -Ht -e "\"{//%}\"" \
+            | csvtk cut -Ht -f 2,1 ' \
+        > family.virify.tsv
+    
+
+### Annotation with PhaGCN
+
+Identify Viruses with DeepVirFinder
+    
+    dvf=~/app/DeepVirFinder/dvf.py
+    minlen=2000
+    
+    j=1
+    J=40
+    reads=assembly
+    time fd ^contigs.fasta$ $reads/ \
+        | rush -j $j -v j=$J -v dvf=$dvf -v minlen=$minlen \
+            'echo {}; time python {dvf} -i {} -l {minlen} -c {j} > {}.dvf'
+
+    # filter
+    time fd ^contigs.fasta$ $reads/ \
+        | grep -v work \
+        | rush -v minlen=$minlen \
+            'cat {}_gt{minlen}bp_dvfpred.txt | sed 1d  | awk "\$4 < 0.05 && \$3 >= 0.7" | cut -f 1 > {}.viral.id; \
+            seqkit grep -f {}.viral.id {} > {}.viral.fasta'
+
+[PhaGCN](https://github.com/KennthShang/PhaGCN)
+
+Some known issues:
+    
+    # 1) install
+    # conda env create -f environment.yaml -n phagcn
+    # 
+    # ISSUE: nothing provides __glibc >=2.17,<3.0.a0 needed by cudatoolkit-11.1.1-h6406543_10
+    # HOWTO: update mamba/conda first.
+    
+    # 2) error: python: relocation error: /lib64/libpthread.so.0: symbol __h_errno, version GLIBC_PRIVATE not defined in file libc.so.6 with link time referenc conda    
+    # HOWTO: run the two lines below, or append the two lines below to ~/.bashrc or miniconda3/envs/phagcn/etc/profile.d/conda.sh
+    export LD_PRELOAD=/lib64/libpthread.so.0
+    export LD_PRELOAD=/lib64/libc.so.6
+    
+    # 3) change the threads of DIAMOND
+    # 3.1) manually edit '8' to other values
+    # 3.2) add an option --threads (run_Speed_up.py)
+    #     parser.add_argument('--threads', type=int, default=os.cpu_count())
+    #     make_diamond_cmd = 'diamond makedb --threads {:d} --in database/Caudovirales_protein.fasta -d database/database.dmnd'.format(args.threads)
+    #     diamond_cmd = 'diamond blastp --threads {:d} --sensitive -d database/database.dmnd -q database/Caudovirales_protein.fasta -o database/database.self-diamond.tab'.format(args.threads)
+    # 3.3) run_KnowledgeGraph.py
+    #    _ = make_diamond_db(8)   => _ = make_diamond_db(os.cpu_count())
+    #    similarity_fp = run_diamond(proteins_aa_fp, db_fp, 8, diamond_out_fp)
+           => similarity_fp = similarity_fp = run_diamond(proteins_aa_fp, db_fp, os.cpu_count(), diamond_out_fp)
+        
+    # 4) avoid creating database every time
+    # if not os.path.exists(database_abc_fp):
+    #     try creating database...
+    
+    # 5) the tool must be executed in its code base, and only one instance is allowed.
+    #    1) chdir to the code base,
+    #    2) process one input file at a time
+    #    3) move the final_prediction.csv to your destination.
+    
+Steps
+
+    conda activate phagcn
+       
+    phagcn=~/app/PhaGCN
+    reads=assembly
+    pwd=$(pwd)
+    
+    # 100min
+    time fd ^contigs.fasta.viral.fasta$ $reads/ \
+        | grep -v work \
+        | rush -j 1 -v base=$phagcn -v pwd=$pwd \
+            'cd {base}; \
+            time python run_Speed_up.py --contigs {pwd}/{} --len 2000 > {pwd}/{/}/{/%}.csv.log 2>&1; \
+            cp final_prediction.csv {pwd}/{/}/{/%}.csv; \
+            cd {pwd}; ' \
+            -c -C phagcn.rush --verbose
+    
+    # copy result
+    result=assembly.phagcn
+    mkdir -p $result
+    time fd ^contigs.fasta.viral.fasta$ $reads/ \
+        | grep -v work \
+        | rush -v dir=$result \
+            'cp {/}/{/%}.csv {dir}'
+
+Export predition at rank of family
+
+    ls assembly.phagcn/*.csv \
+        | rush -k 'csvtk cut -f prediction {} \
+            | csvtk uniq -t \
+            | csvtk del-header -t \
+            | csvtk mutate2 -Ht -e "\"{%.}\"" \
+            | csvtk cut -Ht -f 2,1 ' \
+        | csvtk add-header -t -n sample,family \
+        > family.phagcn.tsv
+    
+### Recall and precision at family rank
+
+    gs=family.gs.tsv
+    ls family.*.tsv | grep -v family.gs.tsv \
+        | while read f; do
+            cat $f | csvtk uniq -t -f 1 | csvtk del-header | csvtk cut -Ht -f 1 \
+                | while read sample; do
+                    tp=$(csvtk join -Ht -f 2 <(csvtk grep -t -p $sample $gs | csvtk del-header) \
+                        <(csvtk grep -t -p $sample $f | csvtk del-header)  | wc -l)
+                    p=$(csvtk grep -t -p $sample $gs | csvtk del-header | wc -l)
+                    fp=$(csvtk grep -t -p $sample $f | csvtk del-header \
+                        | csvtk grep -Ht -v -f 2 -P <(csvtk grep -t -p $sample $gs | csvtk cut -t -f 2 | csvtk del-header) \
+                        | wc -l)
+                    recall=$(echo "scale=6; $tp/$p" | bc)
+                    precision=$(echo "scale=6; $tp/($tp+fp)" | bc)
+                    tool=$(echo $f | rush 'echo {@\.(.+)\.}')
+                    echo -e "$tool\t$sample\t$recall\t$precision"
+                done
+        done \
+    | csvtk add-header -t -n tool,sample,recall,precision \
+    > family.tsv
+        
+    cat family.tsv \
+        | csvtk summary -t -g tool -f recall:mean -f recall:stdev -f precision:mean -f precision:stdev \
+        | csvtk pretty -t
+    tool      recall:mean   recall:stdev   precision:mean   precision:stdev
+    -------   -----------   ------------   --------------   ---------------
+    kmcp-m1   0.99          0.05           1.00             0.00
+    kmcp-m2   0.97          0.07           1.00             0.00
+    kmcp-m3   0.97          0.07           1.00             0.00
+    kmcp-m4   0.97          0.07           1.00             0.00
+    kmcp-m5   0.97          0.07           1.00             0.00
+    phagcn    0.60          0.00           1.00             0.00
+    virify    0.54          0.12           1.00             0.00

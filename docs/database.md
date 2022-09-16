@@ -1249,7 +1249,7 @@ Building database:
     # compute k-mers
     #   reference genomes are split into 10 chunks
     #   k = 21
-    kmcp compute -I mgv/ -k 21 -n 10 -O mgv-k21-n10 --force
+    kmcp compute -I mgv/ -k 21 -n 10 -l 150 -O mgv-k21-n10 --force
 
     # viral genomes are small:
     #   using small false positive rate: 0.05

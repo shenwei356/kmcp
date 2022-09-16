@@ -249,3 +249,26 @@ Build it!
 ## kaiju
 
 https://kaiju.binf.ku.dk/database/kaiju_db_refseq_2021-02-26.tgz
+
+## Mmseqs2
+
+Prepare acc2taxid.tsv:
+
+    time for db in refseq-fungi genbank-viral gtdb; do    
+        find $db/ -name "*.fna.gz" \
+            | rush -k -v map=taxid.$db.map \
+                'taxid=$(grep {%..} {map} | cut -f 2); \
+                seqkit seq -n -i {} | awk "{print \$1\"\t\"$taxid}"'
+    done > acc2taxid.tsv
+
+Create a seqTaxDB:
+
+    # 17m49.463s
+    # 153 GB
+    time find $db/ -name "*.fna.gz" \
+        | rush -j 4 'seqkit seq {}' \
+        | mmseqs createdb stdin mmseqs
+
+Annotate our sequence database
+ 
+    time mmseqs createtaxdb mmseqs tmp --ncbi-tax-dump taxdump --tax-mapping-file acc2taxid.tsv
