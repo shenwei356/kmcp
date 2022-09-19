@@ -22,7 +22,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -103,7 +103,7 @@ func UnikIndexDBInfoFromFile(file string) (UnikIndexDBInfo, error) {
 		return info, fmt.Errorf("fail to open kmcp database info file: %s", file)
 	}
 
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return info, fmt.Errorf("fail to read kmcp database info file: %s", file)
 	}

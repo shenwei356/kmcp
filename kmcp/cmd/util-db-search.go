@@ -1414,6 +1414,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		var hashes *[][]uint64
 		var hashes1 *[]uint64
 		var nHashes float64
+		var nHashesThr float64 // nHashes * minCov
 		var nHashesInt int
 		var bufIdx int
 
@@ -6610,6 +6611,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				if moreThanOneHash {
 					hashes = query.Hashes
 					nHashes = float64(len(*hashes))
+					nHashesThr = nHashes * queryCov
 					nHashesInt = len(*hashes)
 
 					for _, hs = range *hashes {
@@ -6790,6 +6792,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				} else {
 					hashes1 = query.Hashes1
 					nHashes = float64(len(*hashes1))
+					nHashesThr = nHashes * queryCov
 					nHashesInt = len(*hashes1)
 
 					for _, _h = range *hashes1 {
@@ -6960,6 +6963,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				if moreThanOneHash {
 					hashes = query.Hashes
 					nHashes = float64(len(*hashes))
+					nHashesThr = nHashes * queryCov
 					nHashesInt = len(*hashes)
 
 					for _, hs = range *hashes {
@@ -7144,6 +7148,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				} else {
 					hashes1 = query.Hashes1
 					nHashes = float64(len(*hashes1))
+					nHashesThr = nHashes * queryCov
 					nHashesInt = len(*hashes1)
 
 					for _, _h = range *hashes1 {
@@ -7446,8 +7451,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[7]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7479,8 +7485,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[6]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7512,8 +7519,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[5]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7545,8 +7553,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[4]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7578,8 +7587,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[3]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7611,8 +7621,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[2]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7644,8 +7655,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[1]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {
@@ -7677,8 +7689,9 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 				count = _counts[0]
 				if count >= minMatched {
 					c = float64(count)
-					t = c / nHashes // Containment index
-					if t >= queryCov {
+					if c > nHashesThr {
+						t = c / nHashes // Containment index
+						// if t >= queryCov {
 						nHashesTarget = sizesFloat[k]
 						T = c / nHashesTarget
 						if T >= targetCov {

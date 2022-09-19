@@ -8,7 +8,7 @@
 - `index`:
     - faster speed due to smaller input files.
 - `search`:
-    - smaller query FPR values by computing the actual FPR values for each bloom filter in a genome chunk.
+    - more accurate query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
 - `profile`:
     - ***more accurate abundance estimation using EM algorithm***.
 - new commands:
