@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -249,6 +248,13 @@ Examples:
 			}
 		}
 
+		var fprBufSize int
+		if pairedEnd {
+			fprBufSize = 499
+		} else {
+			fprBufSize = 249
+		}
+
 		if trySE && !pairedEnd {
 			log.Warningf("flag --try-se ignored for single-end input(s)")
 			trySE = false
@@ -287,7 +293,7 @@ Examples:
 		// ---------------------------------------------------------------
 		// check Database
 
-		subFiles, err := ioutil.ReadDir(dbDir)
+		subFiles, err := os.ReadDir(dbDir)
 		if err != nil {
 			checkError(fmt.Errorf("read database error: %s", err))
 		}
@@ -379,6 +385,8 @@ Examples:
 			MinQueryCov:  queryCov,
 			MinTargetCov: targetCov,
 			MaxFPR:       maxFPR,
+
+			FPRBufSize: fprBufSize,
 
 			LoadDefaultNameMap: loadDefaultNameMap,
 			NameMap:            namesMap,

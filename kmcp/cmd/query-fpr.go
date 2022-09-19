@@ -30,23 +30,19 @@ import (
 
 var queryFPRCmd = &cobra.Command{
 	Use:   "query-fpr",
-	Short: "Compute the maximal false positive rate of a query",
-	Long: `Compute the maximal false positive rate of a query
+	Short: "Compute the false positive rate of a query",
+	Long: `Compute the false positive rate of a query
 
-Solomon and Kingsford apply a Chernoff bound and show that the 
-false positive probability for a query is:
+When the flag '-a/--all' is given, the Chernoff bound (column 'cbound')
+is also output along with input parameters.
 
-    fpr ≤ exp( -n(t-f)^2 / (2(1-f)) )
-
-Where:
-
-    f,  the false positive rate of the bloom filters
-    t,  the minimal proportion of matched k-mers and unique k-mers of a query
-    n,  the number of unique k-mers of the query 
+> Given K ≥ p, Solomon and Kingsford also apply a Chernoff bound and
+show that the false positive probability for a query to be detected
+in a document is ≤ exp(−l(K − p)^2 /(2(1 − p)))
 
 Reference:
-  1. SBT: https://doi.org/10.1038/nbt.3442
-  2. COBS: https://arxiv.org/abs/1905.09624v2
+  1. Theorem 2 in https://doi.org/10.1038/nbt.3442
+  2. Theorem 1 in https://arxiv.org/abs/1905.09624v2
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -59,12 +55,12 @@ Reference:
 			checkError(fmt.Errorf("value of -f/--false-positive-rate too big: %f", fpr))
 		}
 
-		queryCov := getFlagFloat64(cmd, "min-query-cov")
-		if queryCov < 0 || queryCov > 1 {
-			checkError(fmt.Errorf("value of -t/--min-query-cov should be in range [0, 1]"))
-		}
+		mKmers := getFlagPositiveInt(cmd, "matched-kmers")
 
 		nKmers := getFlagPositiveInt(cmd, "num-kmers")
+
+		all := getFlagBool(cmd, "all")
+		addHeader := getFlagBool(cmd, "add-header")
 
 		outFile := getFlagString(cmd, "out-prefix")
 
@@ -78,18 +74,20 @@ Reference:
 			w.Close()
 		}()
 
-		/*
-			p, fpr of single bloom filter.
-			k, theshold of query coverage.
-			l, number of k-mers.
+		_fpr := QueryFPR(nKmers, mKmers, fpr)
+		_fpr2 := maxFPR(fpr, float64(mKmers)/float64(nKmers), nKmers) // Chernoff bound
 
-			import math
-			fpr = lambda p,k,l: math.exp(-l * (k - p) * (k - p) / 2 / (1 - p))
-
-			fpr(0.3, 0.8, 60)
-		*/
-
-		fmt.Fprintf(outfh, "%s\n", strconv.FormatFloat(maxFPR(fpr, queryCov, nKmers), 'e', 4, 64))
+		if all {
+			if addHeader {
+				fmt.Fprintf(outfh, "fpr\tcbound\tfpr0\tnKmers\tmKmers\n")
+			}
+			fmt.Fprintf(outfh, "%s\t%f\t%f\t%d\t%d\n", strconv.FormatFloat(_fpr, 'e', 4, 64), _fpr2, fpr, nKmers, mKmers)
+		} else {
+			if addHeader {
+				fmt.Fprintf(outfh, "fpr\n")
+			}
+			fmt.Fprintf(outfh, "%s\n", strconv.FormatFloat(_fpr, 'e', 4, 64))
+		}
 
 	},
 }
@@ -97,11 +95,14 @@ Reference:
 func init() {
 	utilsCmd.AddCommand(queryFPRCmd)
 
+	queryFPRCmd.Flags().BoolP("add-header", "H", false, formatFlagUsage(`Add header line (column names`))
+	queryFPRCmd.Flags().BoolP("all", "a", false, formatFlagUsage(`Also show the value of -f, -n, and -t`))
+
 	queryFPRCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	queryFPRCmd.Flags().Float64P("false-positive-rate", "f", 0.3,
-		formatFlagUsage(`False positive rate of the bloom filters in the database. range: (0, 1)`))
-	queryFPRCmd.Flags().Float64P("min-query-cov", "t", 0.55,
-		formatFlagUsage(`Minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query. range: [0, 1]`))
-	queryFPRCmd.Flags().IntP("num-kmers", "n", 80, formatFlagUsage("Number of unique k-mers of the query."))
+		formatFlagUsage(`False positive rate of a single k-mer, i.e., FPR of the bloom filters in the database. range: (0, 1)`))
+	queryFPRCmd.Flags().IntP("matched-kmers", "m", 35,
+		formatFlagUsage(`The number of matched k-mers of a query.`))
+	queryFPRCmd.Flags().IntP("num-kmers", "n", 70, formatFlagUsage("Number of unique k-mers of the query."))
 }

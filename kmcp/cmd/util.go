@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math"
 	"math/bits"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -445,3 +446,15 @@ var _mark_fasta = []byte{'>'}
 var _mark_fastq = []byte{'@'}
 var _mark_plus_newline = []byte{'+', '\n'}
 var _mark_newline = []byte{'\n'}
+
+func randInts(start int, end int, n int) []int {
+	if start > end {
+		start, end = end, start
+	}
+	ns := make([]int, n)
+	w := end - start
+	for i := 0; i < n; i++ {
+		ns[i] = rand.Intn(w) + start
+	}
+	return ns
+}

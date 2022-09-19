@@ -11,7 +11,10 @@
     - smaller query FPR values by computing the actual FPR values for each bloom filter in a genome chunk.
 - `profile`:
     - ***more accurate abundance estimation using EM algorithm***.
-- new command `utils split-genomes` for splitting genomes into chunks.
+- new commands:
+    - `utils split-genomes` for splitting genomes into chunks.
+    - `utils ref-info` for printing information of reference (chunks), including the number of k-mers
+      and the actual false-positive rate.
 
 ### v0.8.4 - 2022-08-16
 

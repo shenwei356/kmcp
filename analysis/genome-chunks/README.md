@@ -59,20 +59,20 @@ FDR = FP / (FP + TP)
                 | csvtk uniq -Ht -f 1 \
                 | csvtk grep -Ht -f 1 -P mock/$id.fa.ids -v \
                 | csvtk nrow -Ht)
-            fpr=$(echo "scale=6; $fp/($fp+$tp)" | bc)
-            echo -e "$f\t$id\t$tp\t$fp\t$fpr"
+            fdr=$(echo "scale=6; $fp/($fp+$tp)" | bc)
+            echo -e "$f\t$id\t$tp\t$fp\t$fdr"
         done
     done \
         | csvtk replace -Ht -p '.+n(\d+).+' -r '$1' \
-        | csvtk add-header -t -n chunks,ref,tp,fp,fpr \
-        > fpr.tsv
+        | csvtk add-header -t -n chunks,ref,tp,fp,fdr \
+        > fdr.tsv
 
-    cat fpr.tsv \
+    cat fdr.tsv \
         | csvtk sort -t -k chunks:n -k ref \
-        | csvtk fold -t -f ref -v fpr \
-        | csvtk sep -t -R -f fpr -s '; ' -n '1,5,10,20' \
+        | csvtk fold -t -f ref -v fdr \
+        | csvtk sep -t -R -f fdr -s '; ' -n '1,5,10,20' \
         | csvtk join -t - <(csvtk cut -t -f id,species,reads mock.gs.tsv) \
-        | tee fpr2.tsv \
+        | tee fdr2.tsv \
         | csvtk sort -t -k 2:n \
         | csvtk rename2 -t -f 2-5 -p '^' -r 'chunks=' \
         | csvtk csv2md -t
