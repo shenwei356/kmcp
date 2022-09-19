@@ -645,45 +645,41 @@ Available Commands:
   filter        Filter search results and find species/assembly-specific queries
   index-info    Print information of index file
   merge-regions Merge species/assembly-specific regions
-  query-fpr     Compute the maximal false positive rate of a query
+  query-fpr     Compute the false positive rate of a query
+  ref-info      Print information of reference (chunks) in a database
   split-genomes Split genomes into chunks
   unik-info     Print information of .unik file
 
 ```
 
-## filter
+
+## ref-info
 
 ```text
-Filter search results and find species/assembly-specific queries
+Print information of reference chunks in a database
 
-Taxonomy data:
-  1. Mapping references IDs to TaxIds: -T/--taxid-map
-  2. NCBI taxonomy dump files: -X/--taxdump
+Columns:
 
-Performance notes:
-  1. Searching results are parsed in parallel, and the number of
-     lines proceeded by a thread can be set by the flag --line-chunk-size.
-  2. However using a lot of threads does not always accelerate
-     processing, 4 threads with a chunk size of 500-5000 is fast enough.
+    file,     the base name of index file
+    i,        the idx of a reference chunk in the index file, 1-based
+    target,   reference name
+    chunkIdx, the idx of the chunk, 0-based
+    chunks,   the number of chunks of the reference
+    kmers,    the number of k-mers of the chunk
+    fpr,      the actual false-positive reate of the chunk
 
 Usage:
-  kmcp utils filter [flags] 
+  kmcp utils ref-info [flags] 
 
 Flags:
-  -h, --help                  help for filter
-      --level string          ► Level to filter. available values: species, strain/assembly. (default
-                              "species")
-      --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
-                              enough. Type "kmcp utils filter" for details. (default 5000)
-  -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
-  -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
-  -H, --no-header-row         ► Do not print header row.
-  -o, --out-prefix string     ► Out file prefix ("-" for stdout). (default "-")
-  -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
-                              with merged.dmp and delnodes.dmp.
-  -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+  -d, --db-dir string     ► Database directory created by "kmcp index".
+  -h, --help              help for ref-info
+  -H, --no-header-row     ► Do not print header row.
+  -o, --out-file string   ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
+                          (default "-")
 
 ```
+
 
 ## index-info
 
@@ -698,6 +694,30 @@ Flags:
   -b, --basename            ► Only output basenames of files.
   -h, --help                help for index-info
   -o, --out-prefix string   ► Out file prefix ("-" for stdout). (default "-")
+
+```
+
+## unik-info
+
+```text
+Print information of .unik file
+
+Tips:
+  1. For lots of small files (especially on SDD), use big value of '-j' to
+     parallelize counting.
+
+Usage:
+  kmcp utils unik-info [flags] 
+
+Flags:
+  -a, --all                   ► All information, including the number of k-mers.
+  -b, --basename              ► Only output basename of files.
+  -h, --help                  help for unik-info
+  -o, --out-file string       ► Out file ("-" for stdout, suffix .gz for gzipped out.) (default "-")
+  -e, --skip-err              ► Skip error, only show warning message.
+      --symbol-false string   ► Smybol for false. (default "✕")
+      --symbol-true string    ► Smybol for true. (default "✓")
+  -T, --tabular               ► Output in machine-friendly tabular format.
 
 ```
 
@@ -758,6 +778,42 @@ Flags:
 
 ```
 
+
+## filter
+
+```text
+Filter search results and find species/assembly-specific queries
+
+Taxonomy data:
+  1. Mapping references IDs to TaxIds: -T/--taxid-map
+  2. NCBI taxonomy dump files: -X/--taxdump
+
+Performance notes:
+  1. Searching results are parsed in parallel, and the number of
+     lines proceeded by a thread can be set by the flag --line-chunk-size.
+  2. However using a lot of threads does not always accelerate
+     processing, 4 threads with a chunk size of 500-5000 is fast enough.
+
+Usage:
+  kmcp utils filter [flags] 
+
+Flags:
+  -h, --help                  help for filter
+      --level string          ► Level to filter. available values: species, strain/assembly. (default
+                              "species")
+      --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
+                              enough. Type "kmcp utils filter" for details. (default 5000)
+  -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
+  -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
+  -H, --no-header-row         ► Do not print header row.
+  -o, --out-prefix string     ► Out file prefix ("-" for stdout). (default "-")
+  -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
+                              with merged.dmp and delnodes.dmp.
+  -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
+
+```
+
+
 ## split-genomes
 
 ```
@@ -801,29 +857,7 @@ Flags:
 
 ```
 
-## unik-info
 
-```text
-Print information of .unik file
-
-Tips:
-  1. For lots of small files (especially on SDD), use big value of '-j' to
-     parallelize counting.
-
-Usage:
-  kmcp utils unik-info [flags] 
-
-Flags:
-  -a, --all                   ► All information, including the number of k-mers.
-  -b, --basename              ► Only output basename of files.
-  -h, --help                  help for unik-info
-  -o, --out-file string       ► Out file ("-" for stdout, suffix .gz for gzipped out.) (default "-")
-  -e, --skip-err              ► Skip error, only show warning message.
-      --symbol-false string   ► Smybol for false. (default "✕")
-      --symbol-true string    ► Smybol for true. (default "✓")
-  -T, --tabular               ► Output in machine-friendly tabular format.
-
-```
 
 ## cov2simi
 
@@ -846,36 +880,34 @@ Flags:
 ## query-fpr
 
 ```text
-Compute the the maximimal false positive rate of a query
+Compute the false positive rate of a query
 
-Solomon and Kingsford apply a Chernoff bound and show that the 
-false positive probability for a query is:
+When the flag '-a/--all' is given, the Chernoff bound (column 'cbound')
+is also output along with input parameters.
 
-    fpr ≤ exp( -n(t-f)^2 / (2(1-f)) )
-
-Where:
-
-    f,  the false positive rate of the bloom filters
-    t,  the minimal proportion of matched k-mers and unique k-mers of a query
-    n,  the number of unique k-mers of the query 
+> Given K ≥ p, Solomon and Kingsford also apply a Chernoff bound and
+show that the false positive probability for a query to be detected
+in a document is ≤ exp(−l(K − p)^2 /(2(1 − p)))
 
 Reference:
-  1. SBT: https://doi.org/10.1038/nbt.3442
-  2. COBS: https://arxiv.org/abs/1905.09624v2
+  1. Theorem 2 in https://doi.org/10.1038/nbt.3442
+  2. Theorem 1 in https://arxiv.org/abs/1905.09624v2
 
 Usage:
-  kmcp utils query-fpr [flags]
+  kmcp utils query-fpr [flags] 
 
 Flags:
-  -f, --false-positive-rate float   ► False positive rate of the bloom filters in the database. range:
-                                    (0, 1) (default 0.3)
+  -H, --add-header                  ► Add header line (column names
+  -a, --all                         ► Also show the value of -f, -n, and -t
+  -f, --false-positive-rate float   ► False positive rate of a single k-mer, i.e., FPR of the bloom
+                                    filters in the database. range: (0, 1) (default 0.3)
   -h, --help                        help for query-fpr
-  -t, --min-query-cov float         ► Minimal query coverage, i.e., proportion of matched k-mers and
-                                    unique k-mers of a query. range: [0, 1] (default 0.55)
-  -n, --num-kmers int               ► Number of unique k-mers of the query. (default 80)
+  -m, --matched-kmers int           ► The number of matched k-mers of a query. (default 35)
+  -n, --num-kmers int               ► Number of unique k-mers of the query. (default 70)
   -o, --out-prefix string           ► Out file prefix ("-" for stdout). (default "-")
 
 ```
+
 
 ## autocompletion
 

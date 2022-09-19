@@ -34,8 +34,8 @@ import (
 
 var refInfoCmd = &cobra.Command{
 	Use:   "ref-info",
-	Short: "Print information of reference (chunks) in a database",
-	Long: `Print information of reference (chunks) in a database
+	Short: "Print information of reference chunks in a database",
+	Long: `Print information of reference chunks in a database
 
 Columns:
 

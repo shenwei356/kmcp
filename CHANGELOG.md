@@ -9,6 +9,7 @@
     - faster speed due to smaller input files.
 - `search`:
     - more accurate query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
+    - 10% speedup.
 - `profile`:
     - ***more accurate abundance estimation using EM algorithm***.
 - new commands:
