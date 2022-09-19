@@ -1305,10 +1305,10 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		// compactSize := idx.Header.Compact
 
 		// compute actual FPR for each chunk.
-		fprs := make([]float64, len(sizes))
-		for i, nKmers := range sizes {
-			fprs[i] = CalcFPR(nKmers, int(h.NumHashes), h.NumSigs)
-		}
+		// fprs := make([]float64, len(sizes))
+		// for i, nKmers := range sizes {
+		// 	fprs[i] = CalcFPR(nKmers, int(h.NumHashes), h.NumSigs)
+		// }
 
 		// bit matrix
 		data := make([][]byte, numHashes)
@@ -1423,7 +1423,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		// var lastRound bool
 		// var tmp int
 
-		queryFPR := QueryFPRWithCache(opt.FPRBufSize, fpr, 20)
+		// queryFPR := QueryFPRWithCacheWithBins(opt.FPRBufSize, fpr, 20)
+		queryFPR := QueryFPRWithCacheWithConstantFPR(opt.FPRBufSize, fpr)
 
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
@@ -7449,7 +7450,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7481,7 +7483,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7513,7 +7516,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7545,7 +7549,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7577,7 +7582,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7609,7 +7615,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7641,7 +7648,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],
@@ -7673,7 +7681,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 						T = c / nHashesTarget
 						if T >= targetCov {
 							// _fpr = queryFPR(nHashesInt, count, fpr)
-							_fpr = queryFPR(nHashesInt, count, fprs[k])
+							// _fpr = queryFPR(nHashesInt, count, fprs[k])
+							_fpr = queryFPR(nHashesInt, count)
 							if _fpr <= maxFPR {
 								*results = append(*results, &Match{
 									Target:     names[k],

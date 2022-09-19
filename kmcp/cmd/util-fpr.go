@@ -35,7 +35,7 @@ func QueryFPR(n int, k int, fpr float64) float64 {
 
 	for i := 0; i <= k; i++ {
 		coeff = BinomialCoeff(n, i)
-		if math.IsInf(coeff, 1) {
+		if coeff > math.MaxFloat64 {
 			return 0
 		}
 
@@ -70,6 +70,8 @@ func BinomialCoeff(n int, k int) float64 {
 	return coeff
 }
 
+// -----------------------------------------------------------------------
+
 // BinomialCoeffWithCache returns a BinomialCoeff function with cache.
 // When n < bufSize, it returns cached values.
 func BinomialCoeffWithCache(bufSize int) func(n int, k int) float64 {
@@ -86,10 +88,8 @@ func BinomialCoeffWithCache(bufSize int) func(n int, k int) float64 {
 			return BinomialCoeff(n, k)
 		}
 
-		var idx int
-		if k > n-k {
-			idx = n*h + n - k
-		} else {
+		idx := n*h + n - k // most of the case
+		if k <= n-k {
 			idx = n*h + k
 		}
 
@@ -103,11 +103,98 @@ func BinomialCoeffWithCache(bufSize int) func(n int, k int) float64 {
 	}
 }
 
+// QueryFPRWithCache returns a QueryFPR function with the BinomialCoeff cached.
+func QueryFPRWithCache(bufSize int) func(n int, k int, fpr float64) float64 {
+	if bufSize < 1 {
+		panic("buffer size should be > 0")
+	}
+
+	bc := BinomialCoeffWithCache(bufSize)
+
+	return func(n int, k int, fpr float64) float64 {
+		if n > bufSize {
+			return QueryFPR(n, k, fpr)
+		}
+
+		var r float64 = 1
+		var coeff float64
+		for i := 0; i <= k; i++ {
+			coeff = bc(n, i)
+			if coeff > math.MaxFloat64 {
+				return 0
+			}
+
+			r -= coeff * math.Pow(fpr, float64(i)) * math.Pow(1-fpr, float64(n-i))
+
+			if r < 0 {
+				return 0
+			}
+		}
+
+		return r
+	}
+}
+
 // QueryFPRWithCache returns a QueryFPR function with cache.
+// Here the fpr is constant, so we can easily buffer the results
+func QueryFPRWithCacheWithConstantFPR(bufSize int, fpr float64) func(n int, k int) float64 {
+	if bufSize < 1 {
+		panic("buffer size should be > 0")
+	}
+
+	w := bufSize + 1
+	h := (bufSize+1)/2 + 1 // a half is enough, because C(n, k) = C(n, n-k)
+	buf := make([]float64, w*h)
+	for i := 0; i < len(buf); i++ {
+		buf[i] = -1 // fpr may be 0, so we initialize it to -1
+	}
+
+	bc := BinomialCoeffWithCache(bufSize)
+
+	return func(n int, k int) float64 {
+		if n > bufSize {
+			return QueryFPR(n, k, fpr)
+		}
+
+		// r := buf[n][k]
+		idx := n*h + n - k // most of the case
+		if k <= n-k {
+			idx = n*h + k
+		}
+
+		r := buf[idx]
+
+		if r >= 0 { // cached
+			return r
+		}
+
+		r = 1
+		var coeff float64
+		for i := 0; i <= k; i++ {
+			coeff = bc(n, i)
+			if coeff > math.MaxFloat64 {
+				r = 0
+				break
+			}
+
+			r -= coeff * math.Pow(fpr, float64(i)) * math.Pow(1-fpr, float64(n-i))
+
+			if r < 0 {
+				r = 0
+				break
+			}
+		}
+
+		buf[idx] = r
+		return r
+	}
+}
+
+// QueryFPRWithCacheWithFPRBins returns a QueryFPR function with cache.
 // Since fpr, being a float, is difficult to use a slice to cache the values.
 // But it could be achieved by splitting the maxFPR into bins.
 // When n < bufSize and fpr <= maxFPR, it returns cached values.
-func QueryFPRWithCache(bufSize int, maxFPR float64, bins int) func(n int, k int, fpr float64) float64 {
+func QueryFPRWithCacheWithFPRBins(bufSize int, maxFPR float64, bins int) func(n int, k int, fpr float64) float64 {
 	if bufSize < 1 {
 		panic("buffer size should be > 0")
 	}
@@ -139,20 +226,14 @@ func QueryFPRWithCache(bufSize int, maxFPR float64, bins int) func(n int, k int,
 		bin := int(fpr / maxFPR * binsFloat)
 
 		// r := buf[bin][n][k]
-		var idx int
-		if k > n-k {
-			idx = bin*wh + n*h + n - k
-		} else {
+		idx := bin*wh + n*h + n - k
+		if k <= n-k {
 			idx = bin*wh + n*h + k
 		}
 
 		r := buf[idx]
 
-		if r > -1 { // cached
-			// r0 := QueryFPR(n, k, fpr)
-			// if r0 != r {
-			//     fmt.Println(r0, r)
-			// }
+		if r >= 0 { // cached
 			return r
 		}
 
@@ -160,7 +241,7 @@ func QueryFPRWithCache(bufSize int, maxFPR float64, bins int) func(n int, k int,
 		var coeff float64
 		for i := 0; i <= k; i++ {
 			coeff = bc(n, i)
-			if math.IsInf(coeff, 1) {
+			if coeff > math.MaxFloat64 {
 				r = 0
 				break
 			}
