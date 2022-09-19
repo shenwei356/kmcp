@@ -678,8 +678,10 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		log.Infof("  number of extra workers for every index file: %d", nextraWorkers)
 	}
 
+	queryFPR := QueryFPRWithCacheWithConstantFPR(opt.FPRBufSize, info.FPR)
+
 	// the first idx
-	idx1, err := NewUnikIndex(filepath.Join(path, info.Files[0]), opt, info.FPR, nextraWorkers)
+	idx1, err := NewUnikIndex(filepath.Join(path, info.Files[0]), opt, info.FPR, nextraWorkers, queryFPR)
 	checkError(errors.Wrap(err, filepath.Join(path, info.Files[0])))
 
 	if info.IndexVersion == idx1.Header.Version &&
@@ -721,7 +723,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 			go func(f string) {
 				defer wg.Done()
 
-				idx, err := NewUnikIndex(f, opt, info.FPR, nextraWorkers)
+				idx, err := NewUnikIndex(f, opt, info.FPR, nextraWorkers, queryFPR)
 				checkError(errors.Wrap(err, f))
 
 				if !idx.Header.Compatible(idx1.Header) {
@@ -1189,7 +1191,7 @@ func (idx *UnikIndex) String() string {
 }
 
 // NewUnikIndex create a index from file.
-func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int) (*UnikIndex, error) {
+func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int, queryFPR func(n int, k int) float64) (*UnikIndex, error) {
 	fh, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -1424,7 +1426,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		// var tmp int
 
 		// queryFPR := QueryFPRWithCacheWithBins(opt.FPRBufSize, fpr, 20)
-		queryFPR := QueryFPRWithCacheWithConstantFPR(opt.FPRBufSize, fpr)
+		// queryFPR := QueryFPRWithCacheWithConstantFPR(opt.FPRBufSize, fpr)
 
 		counts0 := make([][8]int, numRowBytes)
 		counts := make([][8]int, numRowBytes)
