@@ -142,24 +142,25 @@ Profiling output formats:
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
-  Tab-delimited format with 16 columns:
+  Tab-delimited format with 17 columns:
 
      1. ref,                Identifier of the reference genome
      2. percentage,         Relative abundance of the reference
-     3. score,              The 90th percentile of qCov of uniquely matched reads
-     4. chunksFrac,         Genome chunks fraction
-     5. chunksRelDepth,     Relative depths of reference chunks
-     6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
-     7. reads,              Total number of matched reads of this reference
-     8. ureads,             Number of uniquely matched reads
-     9. hicureads,          Number of uniquely matched reads with high-confidence
-    10. refsize,            Reference size
-    11. refname,            Reference name, optional via name mapping file
-    12. taxid,              TaxId of the reference
-    13. rank,               Taxonomic rank
-    14. taxname,            Taxonomic name
-    15. taxpath,            Complete lineage
-    16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
+     3. coverage,           Average coverage of the reference
+     4. score,              The 90th percentile of qCov of uniquely matched reads
+     5. chunksFrac,         Genome chunks fraction
+     6. chunksRelDepth,     Relative depths of reference chunks
+     7. chunksRelDepthStd,  The standard deviation of chunksRelDepth
+     8. reads,              Total number of matched reads of this reference
+     9. ureads,             Number of uniquely matched reads
+    10. hicureads,          Number of uniquely matched reads with high-confidence
+    11. refsize,            Reference size
+    12. refname,            Reference name, optional via name mapping file
+    13. taxid,              TaxId of the reference
+    14. rank,               Taxonomic rank
+    15. taxname,            Taxonomic name
+    16. taxpath,            Complete lineage
+    17. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 
 Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)

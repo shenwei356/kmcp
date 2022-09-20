@@ -15,6 +15,7 @@
     - ***more accurate abundance estimation using EM algorithm***.
     - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
     - mode 0: change the default value of `-H/--min-hic-ureads-qcov` from 0.55 to 0.7.
+    - increase float width of coverage from 2 to 6.
 - `util query-fpr`:
     - compute query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
 - new commands:

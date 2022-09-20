@@ -372,7 +372,7 @@ Flags:
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read "Index files loading modes" in "kmcp search -h".
-  -f, --max-fpr float              ► Maximal false positive rate of a query. (default 0.05)
+  -f, --max-fpr float              ► Maximal false positive rate of a query. (default 0.01)
   -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 10)
   -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a query. (default 0.55)
@@ -490,7 +490,7 @@ Profiling modes:
     -d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
     -u/--min-uniq-reads           1      2     5     20     50    50
     -U/--min-hic-ureads           1      1     2     5      10    10
-    -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+    -H/--min-hic-ureads-qcov      0.7    0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
     --max-qcov-gap                0.4                          
@@ -525,24 +525,25 @@ Profiling output formats:
   3. MetaPhlAn (-C/--cami-report, -s/--sample-id)
 
 KMCP format:
-  Tab-delimited format with 16 columns:
+  Tab-delimited format with 17 columns:
 
      1. ref,                Identifier of the reference genome
      2. percentage,         Relative abundance of the reference
-     3. score,              The 90th percentile of qCov of uniquely matched reads
-     4. chunksFrac,         Genome chunks fraction
-     5. chunksRelDepth,     Relative depths of reference chunks
-     6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
-     7. reads,              Total number of matched reads of this reference
-     8. ureads,             Number of uniquely matched reads
-     9. hicureads,          Number of uniquely matched reads with high-confidence
-    10. refsize,            Reference size
-    11. refname,            Reference name, optional via name mapping file
-    12. taxid,              TaxId of the reference
-    13. rank,               Taxonomic rank
-    14. taxname,            Taxonomic name
-    15. taxpath,            Complete lineage
-    16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
+     3. coverage,           Average coverage of the reference
+     4. score,              The 90th percentile of qCov of uniquely matched reads
+     5. chunksFrac,         Genome chunks fraction
+     6. chunksRelDepth,     Relative depths of reference chunks
+     7. chunksRelDepthStd,  The standard deviation of chunksRelDepth
+     8. reads,              Total number of matched reads of this reference
+     9. ureads,             Number of uniquely matched reads
+    10. hicureads,          Number of uniquely matched reads with high-confidence
+    11. refsize,            Reference size
+    12. refname,            Reference name, optional via name mapping file
+    13. taxid,              TaxId of the reference
+    14. rank,               Taxonomic rank
+    15. taxname,            Taxonomic name
+    16. taxpath,            Complete lineage
+    17. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 
 Taxonomic binning formats:
   1. CAMI      (-B/--binning-result)
@@ -585,7 +586,7 @@ Flags:
   -d, --max-chunks-depth-stdev float      ► Maximal standard deviation of relative depths of all
                                           chunks. (default 2)
   -f, --max-fpr float                     ► Maximal false positive rate of a read in search result.
-                                          (default 0.05)
+                                          (default 0.01)
   -R, --max-mismatch-err float            ► Maximal error rate of a read being matched to a wrong
                                           reference, for determing the right reference for ambiguous
                                           reads. Range: (0, 1). (default 0.05)

@@ -190,21 +190,21 @@ Tab-delimited format with 15 columns:
 Note: The header line starts with `#`, you need to assign another comment charactor
 if using `csvtk` for analysis. e.g.,
 
-    csvtk filter2 -C '$' -t -f '$qCov > 0.7' mock.fastq.gz.kmcp.gz
+    csvtk filter2 -C '$' -t -f '$qCov > 0.55' mock.kmcp.gz
 
 Demo result:
 
-|#query                             |qLen|qKmers|FPR       |hits|target       |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
-|:----------------------------------|:---|:-----|:---------|:---|:------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_012971.2  |2       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_000913.3  |2       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|0       |
-|NC_000913.3_sliding:1244941-1245090|150 |120   |1.5955e-26|6   |NC_018658.1  |5       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|0       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_012971.2  |0       |10    |4558953|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_000913.3  |0       |10    |4641652|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_013654.1  |0       |10    |4717338|31   |120   |1.0000|0.0003|0.0003|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP007592.1|1       |10    |5104557|31   |120   |1.0000|0.0002|0.0002|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NC_018658.1  |7       |10    |5273097|31   |120   |1.0000|0.0002|0.0002|1       |
-|NC_013654.1_sliding:344871-345020  |150 |120   |1.5955e-26|8   |NZ_CP028116.1|0       |10    |5648177|31   |120   |1.0000|0.0002|0.0002|1       |
+|#query             |qLen|qKmers|FPR       |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
+|:------------------|:---|:-----|:---------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
+|NC_003197.2-64416/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|9       |10    |4857450|21   |90    |0.6923|0.0002|0.0002|1       |
+|NC_003197.2-64414/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|6       |10    |4857450|21   |130   |1.0000|0.0003|0.0003|2       |
+|NC_003197.2-64412/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|6       |10    |4857450|21   |121   |0.9308|0.0002|0.0002|3       |
+|NC_003197.2-64410/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|1       |10    |4857450|21   |101   |0.7769|0.0002|0.0002|4       |
+|NC_003197.2-64408/1|150 |130   |7.8754e-15|1   |GCF_000006945.2|9       |10    |4857450|21   |83    |0.6385|0.0002|0.0002|5       |
+|NC_003197.2-64406/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|2       |10    |4857450|21   |103   |0.7923|0.0002|0.0002|6       |
+|NC_003197.2-64404/1|150 |130   |7.4671e-15|1   |GCF_000006945.2|5       |10    |4857450|21   |86    |0.6615|0.0002|0.0002|7       |
+|NC_003197.2-64402/1|150 |130   |7.5574e-15|1   |GCF_000006945.2|3       |10    |4857450|21   |84    |0.6462|0.0002|0.0002|8       |
+|NC_003197.2-64400/1|150 |130   |7.4626e-15|1   |GCF_000006945.2|1       |10    |4857450|21   |89    |0.6846|0.0002|0.0002|9       |
 
 #### Searching on a computer cluster
 
@@ -385,7 +385,7 @@ You can still change the values of some options below as usual.
     -d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
     -u/--min-uniq-reads           1      2     5     20     50    50
     -U/--min-hic-ureads           1      1     2     5      10    10
-    -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+    -H/--min-hic-ureads-qcov      0.7    0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
     --max-qcov-gap                0.4                       
@@ -458,35 +458,36 @@ Taxonomic binning formats:
 - CAMI      (`-B/--binning-result`)
 
 
-KMCP format (Tab-delimited format with 16 columns):
+KMCP format (Tab-delimited format with 17 columns):
 
 ```
  1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of the reference
- 3. score,              The 90th percentile of qCov of uniquely matched reads
- 4. chunksFrac,         Genome chunks fraction
- 5. chunksRelDepth,     Relative depths of reference chunks
- 6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
- 7. reads,              Total number of matched reads of this reference
- 8. ureads,             Number of uniquely matched reads
- 9. hicureads,          Number of uniquely matched reads with high-confidence
-10. refsize,            Reference size
-11. refname,            Reference name, optional via name mapping file
-12. taxid,              TaxId of the reference
-13. rank,               Taxonomic rank
-14. taxname,            Taxonomic name
-15. taxpath,            Complete lineage
-16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
+ 3. coverage,           Average coverage of the reference
+ 4. score,              The 90th percentile of qCov of uniquely matched reads
+ 5. chunksFrac,         Genome chunks fraction
+ 6. chunksRelDepth,     Relative depths of reference chunks
+ 7. chunksRelDepthStd,  The standard deviation of chunksRelDepth
+ 8. reads,              Total number of matched reads of this reference
+ 9. ureads,             Number of uniquely matched reads
+10. hicureads,          Number of uniquely matched reads with high-confidence
+11. refsize,            Reference size
+12. refname,            Reference name, optional via name mapping file
+13. taxid,              TaxId of the reference
+14. rank,               Taxonomic rank
+15. taxname,            Taxonomic name
+16. taxpath,            Complete lineage
+17. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 ```
 
 Demo output:
 
-|ref        |percentage|score |chunksFrac|chunksRelDepth                                   |chunksRelDepthStd|reads |ureads|hicureads|refsize|refname|taxid |rank   |taxname                                  |taxpath                                                                                                                                              |taxpathsn                                        |
-|:----------|:---------|:-----|:---------|:------------------------------------------------|:----------------|:-----|:-----|:--------|:------|:------|:-----|:------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------|
-|NC_013654.1|48.321535 |100.00|1.00      |0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02|0.02             |287936|226225|226225   |4717338|       |431946|strain |Escherichia coli SE15                    |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15                   |2;1224;1236;91347;543;561;562;431946             |
-|NC_000913.3|46.194629 |100.00|1.00      |1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98|0.02             |270846|175686|175686   |4641652|       |511145|no rank|Escherichia coli str. K-12 substr. MG1655|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12                   |2;1224;1236;91347;543;561;562;83333              |
-|NC_002695.2|5.014025  |100.00|1.00      |0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00|0.05             |34825 |22945 |22945    |5498578|       |386585|strain |Escherichia coli O157:H7 str. Sakai      |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai     |2;1224;1236;91347;543;561;562;386585             |
-|NC_010655.1|0.469811  |100.00|1.00      |1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09|0.10             |1581  |1581  |1581     |2664102|       |349741|strain |Akkermansia muciniphila ATCC BAA-835     |Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835|2;74201;203494;48461;1647988;239934;239935;349741|
+|ref            |percentage|coverage|score |chunksFrac|chunksRelDepth                                   |chunksRelDepthStd|reads|ureads|hicureads|refsize|refname|taxid     |rank   |taxname              |taxpath                                                                                                         |taxpathsn                                                                 |
+|:--------------|:---------|:-------|:-----|:---------|:------------------------------------------------|:----------------|:----|:-----|:--------|:------|:------|:---------|:------|:--------------------|:---------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------|
+|GCF_003697165.2|18.663804 |1.864553|100.00|1.00      |1.04;0.90;1.03;1.00;0.90;1.00;1.00;1.02;1.11;0.99|0.06             |60952|27831 |15850    |4903501|       |4093283224|species|Escherichia coli     |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli    |609216830;3788559933;329474883;3160438580;2234733759;3334977531;4093283224|
+|GCF_002949675.1|18.201855 |1.818404|97.69 |1.00      |1.04;0.93;1.02;1.03;1.04;0.97;1.04;1.02;0.95;0.98|0.04             |53288|17152 |8866     |4395762|       |524994882 |species|Shigella dysenteriae |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Shigella;Shigella dysenteriae   |609216830;3788559933;329474883;3160438580;2234733759;2258433137;524994882 |
+|GCF_000006945.2|18.143627 |1.812587|100.00|1.00      |1.02;0.98;0.98;0.99;1.03;0.99;0.98;1.03;0.97;1.02|0.02             |58697|57300 |40690    |4857450|       |1678121664|species|Salmonella enterica  |Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Salmonella;Salmonella enterica  |609216830;3788559933;329474883;3160438580;2234733759;794943543;1678121664 |
+|GCF_000742135.1|17.738253 |1.772089|100.00|1.00      |1.01;1.01;1.02;0.99;1.01;1.01;1.00;0.97;0.96;1.03|0.02             |65518|63665 |44088    |5545864|       |3958205156|species|Klebsiella pneumoniae|Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Klebsiella;Klebsiella pneumoniae|609216830;3788559933;329474883;3160438580;2234733759;2440106587;3958205156|
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 
