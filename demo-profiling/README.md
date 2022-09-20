@@ -1,6 +1,6 @@
 # Demo of taxonomic profiling
 
-Table of contents
+## Table of contents
 
 * [Data](#data)
     + [Reference genomes](#reference-genomes)

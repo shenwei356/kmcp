@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 library(argparse)
 
+# kmcp >= 0.9.0 is needed
+
 parser <-
   ArgumentParser(description = "", formatter_class = "argparse.RawTextHelpFormatter")
 parser$add_argument("infile", type = "character", help = "usage: ./plot.R all.se150.fasta.blastn.filter.tsv.gz.stats.gz")
@@ -138,7 +140,7 @@ p4 <-
 # k, theshold of query coverage.
 # l, number of k-mers.
 FPR <- function(p, k, l) {
-  exp(-l * (k - p) * (k - p) / 2 / (1 - p))
+  as.double(system(paste("kmcp utils query-fpr -n", l, "-f", p, "-m", as.integer(k*l)), intern = TRUE))
 }
 
 model <- lm(pident ~ poly(qcov, 3, raw = TRUE), data = df2)
@@ -149,6 +151,7 @@ df3$pident <- predict(model, df3)
 tmp <- c()
 fpr150 <- c()
 fpr100 <- c()
+fpr50 <- c()
 for (i in seq(1, length(df3$qcov))) {
   t_qcov <- df3$qcov[i]
   t_pident <- df3$pident[i]
@@ -158,11 +161,12 @@ for (i in seq(1, length(df3$qcov))) {
              dim(df2 %>% filter(pident > t_pident))[1])
   fpr150 <- c(fpr150, FPR(0.3, t_qcov, 130))
   fpr100 <- c(fpr100, FPR(0.3, t_qcov, 80))
-  
+  fpr50 <- c(fpr50, FPR(0.3, t_qcov, 30))
 }
 df3$recall <- tmp
 df3$SE150 <- fpr150
 df3$SE100 <- fpr100
+df3$SE50 <- fpr50
 
 df3$recall <- df3$recall * 100
 df3$qcov <- df3$qcov * 100
@@ -174,39 +178,39 @@ custom_breaks_y <- seq(0, 100, 5)
 custom_breaks_y2 <- seq(0,-log10(min(df3$SE150)), 1)
 
 df3 <- df3 %>% gather(-qcov, -pident, -recall, key = "rlen", value = "fpr")
-df3$rlen <- recode(df3$rlen, SE150="150 bp", SE100="100 bp")
+df3$rlen <- recode(df3$rlen, SE150="150 bp", SE100="100 bp", SE50="50 bp")
 
 p5 <- ggplot(df3, aes(qcov, recall)) +
   xlab("k-mer similarity threshold(%)") +
   # geom_point(size = 1.2, color="grey30") +
   geom_smooth(color = "#0072B2", size = 0.9) +
   geom_line(aes(y = -log10(fpr) / s150, color = rlen), size = 0.9) +
-  scale_color_manual(values = c("#E69F00", "#D55e00")) +
+  scale_color_manual(values = c( "#E69F00", "#D55e00", "#FFDB3C")) +
   labs(color = "read length") +
   theme1 +
-  geom_hline(
-    yintercept = -log10(0.001) / s150,
-    colour = "grey30",
-    linetype = 2
-  ) +
-  geom_label(
-    x = 80,
-    y = -log10(0.001) / s150,
-    label = "FPR=0.001",
-    size = 4
-  ) +
+  #   geom_hline(
+  #     yintercept = -log10(0.001) / s150,
+  #     colour = "grey30",
+  #     linetype = 2
+  #   ) +
+  #   geom_label(
+  #     x = 80,
+  #     y = -log10(0.001) / s150,
+  #     label = "FPR=0.001",
+  #     size = 4
+  #   ) +
   # geom_hline(yintercept = 2 / s150,
   #            colour = "grey20",
   #            linetype = 2) +
   geom_hline(
-    yintercept = -log10(0.05) / s150,
+    yintercept = -log10(0.01) / s150,
     colour = "grey20",
     linetype = 2
   ) +
   geom_label(
     x = 80,
-    y = -log10(0.05) / s150,
-    label = "FPR=0.05",
+    y = -log10(0.01) / s150,
+    label = "FPR=0.01",
     size = 4
   ) +
   geom_vline(xintercept = 55,
@@ -221,7 +225,7 @@ p5 <- ggplot(df3, aes(qcov, recall)) +
     name = "Recall(%)",
     sec.axis = sec_axis(
       ~ . * s150,
-      name = "-log10(Query FPR)",
+      name = "-log10(Maximum query FPR)",
       breaks = custom_breaks_y2,
       labels = every_nth(custom_breaks_y2, 2)
     ),
@@ -287,7 +291,9 @@ p <- plot_grid(
   nrow = 2,
   rel_heights = c(1, 1),
   labels = c("", "")
-)
+) + theme ( # fill the gap in sub figures
+    panel.background = element_rect(fill = "white", colour = NA),
+) 
 
 ggsave(p,
        file = args$outfile,
