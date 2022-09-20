@@ -16,12 +16,6 @@
 - Kraken, built with the genomes same to KMCP.
 - Ganon, built with the genomes same to KMCP.
 
-**We create databases of GTDB and Refseq-fungi with a smaller false-positive rate `0.1` instead of `0.3`,
-and use `2` hash functions instead of `1`.
-The size of GTDB database increase fom 58 to 109GB, and that of Refseq-fungi from 4.2 to 7.9GB.
-We use a small query coverage threshhold `0.4` instead of `0.55` during searching and profiling,
-and use the re-built mode 0 (pathogen detection) in profiling.**
-
 In this benchmark, we generate metagenomic profiles with the same NCBI Taxonomy version 2021-12-06,
 including the gold-standard profiles.
 
@@ -116,7 +110,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -t 0.4 -d {db} {} \
+            'kmcp search -d {db} {} \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -133,7 +127,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -t 0.4 -d {db} {} \
+            'kmcp search -d {db} {} \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -150,7 +144,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
     fd fastq.gz$ $reads/ \
         | csvtk sort -H -k 1:N \
         | rush -v db=$db -v dbname=$dbname -j $j -v j=$J -v 'p={:}' \
-            'kmcp search -t 0.4 -d {db} {} \
+            'kmcp search -d {db} {} \
                 -o {p}.kmcp@{dbname}.tsv.gz \
                 --log {p}.kmcp@{dbname}.tsv.gz.log -j {j}' \
             -c -C $reads@$dbname.rush
@@ -179,7 +173,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         fd kmcp.tsv.gz$ $reads/ \
             | csvtk sort -H -k 1:N \
             | rush -v X=$X -v T=$T -v m=$m \
-                'kmcp profile -t 0.4 -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
+                'kmcp profile -m {m} -X {X} -T {T} {} -o {}.k-m{m}.profile -C {}.c-m{m}.profile -s {%:} --log {}.k-m{m}.profile.log' 
         
         profile=$reads.c-m$m.profile
         fd kmcp.tsv.gz.c-m$m.profile$ $reads/ \
@@ -196,7 +190,7 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
         fd kmcp.tsv.gz$ $reads/ \
             | csvtk sort -H -k 1:N \
             | rush -v X=$X -v T=$T -v m=$m \
-                'kmcp profile -t 0.4 -m {m} -X {X} -T {T} {} --no-amb-corr -o {}.k-m{m}.profile.no-amb-corr -s {%:}' 
+                'kmcp profile -m {m} -X {X} -T {T} {} --no-amb-corr -o {}.k-m{m}.profile.no-amb-corr -s {%:}' 
     done
 
 

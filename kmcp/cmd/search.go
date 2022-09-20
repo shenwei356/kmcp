@@ -1057,7 +1057,7 @@ func init() {
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0,
 		formatFlagUsage(`Minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target.`))
 
-	searchCmd.Flags().Float64P("max-fpr", "f", 0.05,
+	searchCmd.Flags().Float64P("max-fpr", "f", 0.01,
 		formatFlagUsage(`Maximal false positive rate of a query.`))
 
 	// output

@@ -107,7 +107,7 @@ Profiling modes:
     -d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
     -u/--min-uniq-reads           1      2     5     20     50    50
     -U/--min-hic-ureads           1      1     2     5      10    10
-    -H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+    -H/--min-hic-ureads-qcov      0.7    0.7   0.7   0.75   0.8   0.8
     -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
     --keep-main-matches           true                            
     --max-qcov-gap                0.4                          
@@ -245,7 +245,7 @@ Examples:
 			maxFragsDepthStdev: 10,
 			minUReads:          1,
 			minHicUreads:       1,
-			hicUreadsMinQcov:   0.55,
+			hicUreadsMinQcov:   0.7,
 			HicUreadsMinProp:   0.01,
 			keepMainMatch:      true,
 			maxScoreGap:        0.4,
@@ -2810,7 +2810,7 @@ Examples:
 				covs[i] = fmt.Sprintf("%.2f", v)
 			}
 
-			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.2f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+			outfh.WriteString(fmt.Sprintf("%s\t%.6f\t%.6f\t%.2f\t%.2f\t%s\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
 				t.Name, t.Percentage, t.Coverage, t.Score,
 				t.FragsProp, strings.Join(covs, ";"), t.RelDepthStd,
 				t.SumMatch, t.SumUniqMatch, t.SumUniqMatchHic, t.GenomeSize,
@@ -2962,7 +2962,7 @@ func init() {
 		formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	// for single read
-	profileCmd.Flags().Float64P("max-fpr", "f", 0.05,
+	profileCmd.Flags().Float64P("max-fpr", "f", 0.01,
 		formatFlagUsage(`Maximal false positive rate of a read in search result.`))
 
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55,
