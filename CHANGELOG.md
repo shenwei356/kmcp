@@ -8,14 +8,14 @@
 - `index`:
     - faster speed due to smaller input files.
 - `search`:
-    - more accurate and smaler query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
+    - ***more accurate and smaller query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound***.
     - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
-    - 10% speedup.
+    - ***10% speedup***.
 - `profile`:
     - ***more accurate abundance estimation using EM algorithm***.
     - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
     - mode 0: change the default value of `-H/--min-hic-ureads-qcov` from 0.55 to 0.7.
-    - increase float width of coverage from 2 to 6.
+    - increase float width of reference coverage in KMCP profile format from 2 to 6.
 - `util query-fpr`:
     - compute query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
 - new commands:

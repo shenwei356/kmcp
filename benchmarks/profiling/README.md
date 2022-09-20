@@ -24,6 +24,55 @@
 - SLIMM, built with the genomes same to KMCP.
 - Ganon, built with the genomes same to KMCP.
 
+## Database of KMCP (local machine)
+
+GTDB
+
+    input=gtdb
+    
+    memusg -t -s "kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
+        --log gtdb-r202-k21-n10.log0 -j 40 --force" > gtdb-r202-k21-n10.log 2>&1
+
+    memusg -t -s "kmcp index -j 40 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
+        --log gtdb.kmcp.log0 --force" > gtdb.kmcp.log 2>&1
+    
+    cp taxid.map name.map gtdb.kmcp/
+
+Genbank Viral
+
+    name=viral    
+    input=files.renamed.slim
+    
+    memusg -t -s "kmcp compute -I $input -O genbank-$name-k21-n10 \
+        -k 21 --seq-name-filter plasmid \
+        --split-number 10 --split-overlap 150 \
+        --log genbank-$name-k21-n10.log0 -j 40 --force " > genbank-$name-k21-n10.log 2>&1
+    memusg -t -s "kmcp index -I genbank-$name-k21-n10/ -O genbank-viral.kmcp \
+        -j 40 -f 0.05 -n 1 -x 100K -8 1M \
+        --log genbank-viral.kmcp.log0 --force" > genbank-viral.kmcp.log 2>&1
+    
+    cp taxid.map name.map genbank-viral.kmcp/
+    
+Refseq fungi
+
+    name=fungi    
+    input=files.renamed
+    
+    memusg -t -s "kmcp compute -I $input -O refseq-$name-k21-n10 \
+        -k 21 --seq-name-filter plasmid \
+        --split-number 10 --split-overlap 150 \
+        --log refseq-$name-k21-n10.log0 -j 40 --force" > refseq-$name-k21-n10.log 2>&1
+      
+    memusg -t -s "kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
+        -j 40 -f 0.3 -n 1 \
+        --log refseq-fungi.kmcp.log0 --force" > refseq-fungi.kmcp.log 2>&1
+    
+    cp taxid.map name.map refseq-fungi.kmcp/
+    
+## Database of KMCP (HPC)
+    
+https://bioinf.shenwei.me/kmcp/database/
+    
 ## Datasets
 
 Eight simulated short-read mouse gut metagenome datasets from the CAMI challenge, 
@@ -296,6 +345,11 @@ We search against GTDB, Genbank-viral, and Refseq-fungi respectively, and merge 
             'memusg -t -s "kmcp profile -X {X} -T {T} {} -o {}.k.profile -C {}.c.profile -s {%:} \
                 --quiet --log {}.k.profile.log0" > {}.k.profile.log 2>&1 ' 
 
+    # ----------------------------------
+    # wait all job being done
+
+    
+    
     # ----------------------------------
     # time and peak memory
     

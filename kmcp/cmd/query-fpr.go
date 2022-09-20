@@ -59,6 +59,10 @@ Reference:
 
 		nKmers := getFlagPositiveInt(cmd, "num-kmers")
 
+		if mKmers > nKmers {
+			checkError(fmt.Errorf("-m/--matched-kmers should be <= -n/--num-kmers"))
+		}
+
 		all := getFlagBool(cmd, "all")
 		addHeader := getFlagBool(cmd, "add-header")
 

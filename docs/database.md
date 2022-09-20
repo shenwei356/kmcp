@@ -7,9 +7,6 @@ All prebuilt databases and the used reference genomes are available at:
 - [OneDrive](https://1drv.ms/u/s!Ag89cZ8NYcqtjHwpe0ND3SUEhyrp?e=QDRbEC) for *global users*.
 - [CowTransfer](https://shenwei356.cowtransfer.com/s/c7220dd5901c42) for *Chinese users and global users*.<br>
   **Please click the "kmcp+105 more files" link to browse directories and files, and choose an indiviual file to download**.<br>
-  [A command-line tool](https://github.com/Mikubill/transfer) is also available for downloading a single file with the link listed in tables below. e.g.,
-
-        transfer https://shenwei356.cowtransfer.com/s/75737ae002fc45
 
 <p style="color:Tomato;">Please check file integrity with `md5sum` after download the files:</p>
 
