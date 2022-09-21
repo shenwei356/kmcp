@@ -386,7 +386,7 @@ Metrics of profiling accuracy
     cat opal/results.tsv \
         | csvtk grep -t -f tool -p 'Gold standard' -v \
         | csvtk grep -t -f rank -p na -p species -p genus \
-        | csvtk grep -t -f metric -p 'Completeness' -p 'Purity' -p 'F1 score ' \
+        | csvtk grep -t -f metric -p 'Completeness' -p 'Purity' -p 'F1 score' \
             -p 'L1 norm error' -p 'Weighted UniFrac error' \
         | csvtk summary -t -g tool,metric,rank -f value:mean -w 6 \
         | csvtk rename -t -f value:mean -n value \
