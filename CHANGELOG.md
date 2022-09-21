@@ -10,7 +10,7 @@
 - `search`:
     - ***more accurate and smaller query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound***.
     - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
-    - ***10% speedup***.
+    - ***10-20% speedup***.
 - `profile`:
     - ***more accurate abundance estimation using EM algorithm***.
     - change the default value of `-f/--max-fpr` from 0.05 to 0.01.

@@ -20,6 +20,7 @@
 * [Installation](#installation)
 * [Commands](#commands)
 * [Quickstart](#quickstart)
+* [KMCP vs COBS](#kmcp-vs-cobs)
 * [Support](#support)
 * [License](#license)
 * [Acknowledgments](#acknowledgments)
@@ -60,7 +61,7 @@ KMCP can be used for fast sequence search against large scales of genomic datase
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
- (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)).
+ (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)). Also check [the algorithm and data structure differences between KMCP and COBS](#kmcp-vs-cobs)
  
 ### 3. Fast genome similarity estimation
 
@@ -187,6 +188,26 @@ Next:
 
 - [Demo of taxonomic profiling](https://github.com/shenwei356/kmcp/tree/main/demo-profiling)
 - [Tutorial of taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+
+## KMCP vs COBS
+
+We reimplemented and modified the Compact Bit-Sliced Signature index ([COBS](https://github.com/bingmann/cobs)) algorithm,
+bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
+
+|Category       |Iterm                  |COBS                                 |KMCP                                                               |Comment                                                                                           |
+|:--------------|:----------------------|:------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
+|Algorithm      |K-mer hashing          |xxhash                               |ntHash1                                                            |xxHash is a general-purpose hashing function while ntHash is a recursive hash function for DNA/RNA|
+|               |Bloom filter hashing   |xxhash                               |Using k-mer hash values                                            |Reducing hashing computing                                                                        |
+|               |Multiple-hash functions|xxhash with different seeds          |Generating multiple values from a single one                       |Reducing hashing computing                                                                        |
+|               |Single-hash function   |Same to multiple-hash functions      |Separated method                                                   |Reducing loops                                                                                    |
+|               |AND step               |Serial bitwise AND                   |Vectorised bitwise AND                                             |Bitwise AND for >1 hash functions                                                                 |
+|               |PLUS step              |Serially bit-unpacking               |Vectorised positional popcount with pospop                         |Counting from bit-packed data                                                                     |
+|Index structure|Size of blocks         |/                                    |Using extra thresholds to split the last block with the most k-mers|Uneven genome size distribution would make bloom filters of the last block extremely huge         |
+|               |Index files            |Concatentated                        |Independent                                                        |                                                                                                  |
+|               |Index loading          |mmap, loading complete index into RAM|mmap, loading complete index into RAM, seek                        |Index loading modes                                                                               |
+|Input/output   |Input files            |FASTA/Q, McCortex, text              |FASTA/Q                                                            |                                                                                                  |
+|               |Output                 |Target and matched k-mers            |Query FPR and more                                                 |                                                                                                  |
+
 
 ## Support
 
