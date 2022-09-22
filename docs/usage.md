@@ -133,16 +133,16 @@ Next step:
 Examples:
   1. From few sequence files:
 
-        kmcp compute -k 21 -n 5 -l 100 -O tmp-k21-n5-l100 NC_045512.2.fna.gz
+        kmcp compute -k 21 -n 10 -l 150 -O tmp-k21-n10-l150 NC_045512.2.fna.gz
 
   2. From a list file:
 
-        kmcp compute -k 21 -n 10 -l 100 -O tmp-k21-10-l100 -i list.txt
+        kmcp compute -k 21 -n 10 -l 150 -O tmp-k21-210-l150 -i list.txt
 
   3. From a directory containing many sequence files:
 
-        kmcp compute -k 21 -n 10 -l 100 -B plasmid \
-            -O gtdb-k21-n10-l100 -I gtdb-genomes/
+        kmcp compute -k 21 -n 10 -l 150 -B plasmid \
+            -O gtdb-k21-n10-l150 -I gtdb-genomes/
 
 Usage:
   kmcp compute [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>
@@ -234,12 +234,12 @@ Next step:
 Examples:
   1. For bacterial genomes:
 
-       kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l100/ -O gtdb.kmcp
+       kmcp index -f 0.3 -n 1 -j 32 -I gtdb-k21-n10-l150/ -O gtdb.kmcp
 
   2. For viruses, use -x and -8 to control index size of the largest chunks:
 
        kmcp index -f 0.05 -n 1 -j 32 -x 100K -8 1M \
-           -I genbank-viral-k21-n5-l100/ -O genbank-viral.kmcp
+           -I genbank-viral-k21-n10-l150/ -O genbank-viral.kmcp
 
 Usage:
   kmcp index [flags] [-f <fpr>] [-n <hashes>] [-j <blocks>] -I <compute output> -O <kmcp db>

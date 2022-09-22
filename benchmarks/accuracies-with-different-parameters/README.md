@@ -81,14 +81,11 @@ Metrics of profiling accuracy
 
     # OPAL
     opal.py -g cami2_mouse_gut_gs.profile \
-        cami2_mouse_gut_bracken2.5.profile \
-        cami2_mouse_gut_metaphlan2.9.21.profile \
-        cami2_mouse_gut_motus2.5.1.profile \
         single@refseq-cami2-k21-n1.c.profile \
         single@refseq-cami2-k21-n5.c.profile \
         single@refseq-cami2-k21-n10.c.profile \
         single@refseq-cami2-k21-n20.c.profile \
-        -l Bracken,MetaPhlAn2,mOTUs2,KMCP-chunks-1,KMCP-chunks-5,KMCP-chunks-10,KMCP-chunks-20 \
+        -l chunks-1,chunks-5,chunks-10,chunks-20 \
         -o opal
 
     cat opal/results.tsv \
@@ -96,50 +93,35 @@ Metrics of profiling accuracy
         | csvtk grep -t -f rank -p na -p species -p genus \
         | csvtk grep -t -f metric -p 'Completeness' -p 'Purity' -p 'F1 score' \
             -p 'L1 norm error' -p 'Weighted UniFrac error' \
+        | tee accuracy.tsv \
         | csvtk summary -t -g tool,metric,rank -f value:mean -w 6 \
         | csvtk rename -t -f value:mean -n value \
         | csvtk sort -t -k rank -k metric -k tool:N \
-        | tee accuracy.tsv \
         | csvtk grep -t -f rank -p genus -v \
         | csvtk csv2md -t
 
-|tool          |rank   |metric                |value   |
-|:-------------|:------|:---------------------|:-------|
-|Bracken       |na     |Weighted UniFrac error|0.727547|
-|KMCP-chunks-1 |na     |Weighted UniFrac error|0.334769|
-|KMCP-chunks-5 |na     |Weighted UniFrac error|0.336242|
-|KMCP-chunks-10|na     |Weighted UniFrac error|0.337509|
-|KMCP-chunks-20|na     |Weighted UniFrac error|0.339137|
-|MetaPhlAn2    |na     |Weighted UniFrac error|0.517009|
-|mOTUs2        |na     |Weighted UniFrac error|0.407855|
-|Bracken       |species|Completeness          |0.338235|
-|KMCP-chunks-1 |species|Completeness          |0.725203|
-|KMCP-chunks-5 |species|Completeness          |0.713924|
-|KMCP-chunks-10|species|Completeness          |0.698402|
-|KMCP-chunks-20|species|Completeness          |0.671732|
-|MetaPhlAn2    |species|Completeness          |0.674236|
-|mOTUs2        |species|Completeness          |0.678851|
-|Bracken       |species|F1 score              |0.039738|
-|KMCP-chunks-1 |species|F1 score              |0.629712|
-|KMCP-chunks-5 |species|F1 score              |0.745917|
-|KMCP-chunks-10|species|F1 score              |0.771154|
-|KMCP-chunks-20|species|F1 score              |0.773635|
-|MetaPhlAn2    |species|F1 score              |0.738563|
-|mOTUs2        |species|F1 score              |0.770092|
-|Bracken       |species|L1 norm error         |1.250587|
-|KMCP-chunks-1 |species|L1 norm error         |0.520477|
-|KMCP-chunks-5 |species|L1 norm error         |0.525122|
-|KMCP-chunks-10|species|L1 norm error         |0.524143|
-|KMCP-chunks-20|species|L1 norm error         |0.527089|
-|MetaPhlAn2    |species|L1 norm error         |0.497277|
-|mOTUs2        |species|L1 norm error         |0.851210|
-|Bracken       |species|Purity                |0.021615|
-|KMCP-chunks-1 |species|Purity                |0.570523|
-|KMCP-chunks-5 |species|Purity                |0.795017|
-|KMCP-chunks-10|species|Purity                |0.869483|
-|KMCP-chunks-20|species|Purity                |0.920199|
-|MetaPhlAn2    |species|Purity                |0.819617|
-|mOTUs2        |species|Purity                |0.892699|
+|tool     |rank   |metric                |value   |
+|:--------|:------|:---------------------|:-------|
+|chunks-1 |na     |Weighted UniFrac error|0.334769|
+|chunks-5 |na     |Weighted UniFrac error|0.336242|
+|chunks-10|na     |Weighted UniFrac error|0.337509|
+|chunks-20|na     |Weighted UniFrac error|0.339137|
+|chunks-1 |species|Completeness          |0.725203|
+|chunks-5 |species|Completeness          |0.713924|
+|chunks-10|species|Completeness          |0.698402|
+|chunks-20|species|Completeness          |0.671732|
+|chunks-1 |species|F1 score              |0.629712|
+|chunks-5 |species|F1 score              |0.745917|
+|chunks-10|species|F1 score              |0.771154|
+|chunks-20|species|F1 score              |0.773635|
+|chunks-1 |species|L1 norm error         |0.520477|
+|chunks-5 |species|L1 norm error         |0.525122|
+|chunks-10|species|L1 norm error         |0.524143|
+|chunks-20|species|L1 norm error         |0.527089|
+|chunks-1 |species|Purity                |0.570523|
+|chunks-5 |species|Purity                |0.795017|
+|chunks-10|species|Purity                |0.869483|
+|chunks-20|species|Purity                |0.920199|
 
 Computing time (searching + profiling) and peak memory occupation.
 
@@ -291,13 +273,10 @@ Metrics of profiling accuracy
 
     # OPAL
     opal.py -g cami2_mouse_gut_gs.profile \
-        cami2_mouse_gut_bracken2.5.profile \
-        cami2_mouse_gut_metaphlan2.9.21.profile \
-        cami2_mouse_gut_motus2.5.1.profile \
         single-n10@refseq-cami2-k21-n10.c.profile \
         paired@refseq-cami2-k21-n10.c.profile \
         paired-se@refseq-cami2-k21-n10.c.profile \
-        -l Bracken,MetaPhlAn2,mOTUs2,KMCP-SE,KMCP-PE,KMCP-PESE \
+        -l "SE,PE,PE/SE" \
         -o opal
 
     cat opal/results.tsv \
@@ -305,10 +284,10 @@ Metrics of profiling accuracy
         | csvtk grep -t -f rank -p na -p species -p genus \
         | csvtk grep -t -f metric -p 'Completeness' -p 'Purity' -p 'F1 score' \
             -p 'L1 norm error' -p 'Weighted UniFrac error' \
+        | tee accuracy.tsv \
         | csvtk summary -t -g tool,metric,rank -f value:mean -w 6 \
         | csvtk rename -t -f value:mean -n value \
         | csvtk sort -t -k rank -k metric -k tool:N \
-        | tee accuracy.tsv \
         | csvtk grep -t -f rank -p genus -v \
         | csvtk csv2md -t
 
@@ -365,9 +344,6 @@ Metrics of profiling accuracy
 
     # OPAL
     opal.py -g cami2_mouse_gut_gs.profile \
-        cami2_mouse_gut_bracken2.5.profile \
-        cami2_mouse_gut_metaphlan2.9.21.profile \
-        cami2_mouse_gut_motus2.5.1.profile \
         single-modes@refseq-cami2-k21-n10.c-m0.profile \
         single-modes@refseq-cami2-k21-n10.c-m1.profile \
         single-modes@refseq-cami2-k21-n10.c-m2.profile \
@@ -380,7 +356,7 @@ Metrics of profiling accuracy
         single-modes@refseq-cami2-k21-n10.c-m3-nc.profile \
         single-modes@refseq-cami2-k21-n10.c-m4-nc.profile \
         single-modes@refseq-cami2-k21-n10.c-m5-nc.profile \
-        -l Bracken,MetaPhlAn2,mOTU2s,KMCP-m0,KMCP-m1,KMCP-m2,KMCP-m3,KMCP-m4,KMCP-m5,KMCP-m0-nc,KMCP-m1-nc,KMCP-m2-nc,KMCP-m3-nc,KMCP-m4-nc,KMCP-m5-nc \
+        -l m0,m1,m2,m3,m4,m5,m0-nc,m1-nc,m2-nc,m3-nc,m4-nc,m5-nc \
         -o opal
 
     cat opal/results.tsv \
@@ -388,8 +364,8 @@ Metrics of profiling accuracy
         | csvtk grep -t -f rank -p na -p species -p genus \
         | csvtk grep -t -f metric -p 'Completeness' -p 'Purity' -p 'F1 score' \
             -p 'L1 norm error' -p 'Weighted UniFrac error' \
+        | tee accuracy.tsv \
         | csvtk summary -t -g tool,metric,rank -f value:mean -w 6 \
         | csvtk rename -t -f value:mean -n value \
         | csvtk sort -t -k rank -k metric -k tool:N \
-        | tee accuracy.tsv \
         | csvtk csv2md -t

@@ -133,16 +133,16 @@ Next step:
 Examples:
   1. From few sequence files:
 
-        kmcp compute -k 21 -n 5 -l 100 -O tmp-k21-n5-l100 NC_045512.2.fna.gz
+        kmcp compute -k 21 -n 10 -l 150 -O tmp-k21-n10-l150 NC_045512.2.fna.gz
 
   2. From a list file:
 
-        kmcp compute -k 21 -n 10 -l 100 -O tmp-k21-10-l100 -i list.txt
+        kmcp compute -k 21 -n 10 -l 150 -O tmp-k21-210-l150 -i list.txt
 
   3. From a directory containing many sequence files:
 
-        kmcp compute -k 21 -n 10 -l 100 -B plasmid \
-            -O gtdb-k21-n10-l100 -I gtdb-genomes/
+        kmcp compute -k 21 -n 10 -l 150 -B plasmid \
+            -O gtdb-k21-n10-l150 -I gtdb-genomes/
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
