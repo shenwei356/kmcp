@@ -97,6 +97,11 @@ Performance tips:
      'kmcp search' could automatically scale to utilize as many cores
      as possible.
 
+Next step:
+  1. Use 'kmcp search' for searching.
+  2. Use 'kmcp utils ref-info' to check the number of k-mers and FPR
+     of each genome chunk.
+
 Examples:
   1. For bacterial genomes:
 

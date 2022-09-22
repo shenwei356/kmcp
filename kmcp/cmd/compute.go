@@ -57,6 +57,8 @@ Input:
   2. Or a directory containing sequence files via the flag -I/--in-dir,
      with multiple-level sub-directories allowed. A regular expression
      for matching sequencing files is available via the flag -r/--file-regexp.
+ *3. For taxonomic profiling, the sequences of each reference genome should be
+     saved in a separate file, with the reference identifier in the file name.
 
   Attention:
     You may rename the sequence files for convenience because the 
