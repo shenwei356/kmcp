@@ -61,7 +61,7 @@ KMCP can be used for fast sequence search against large scales of genomic datase
 as [BIGSI](https://github.com/Phelimb/BIGSI) and [COBS](https://github.com/bingmann/cobs) do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
 bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result)
- (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)). Also check [the algorithm and data structure differences between KMCP and COBS](#kmcp-vs-cobs)
+ (check the [tutorial](https://bioinf.shenwei.me/kmcp/tutorial/searching) and [benchmark](https://bioinf.shenwei.me/kmcp/benchmark/searching)). Also check [the algorithm and data structure differences between KMCP and COBS](#kmcp-vs-cobs).
  
 ### 3. Fast genome similarity estimation
 

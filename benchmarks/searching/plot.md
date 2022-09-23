@@ -29,9 +29,9 @@ KMCP vs COBS
 
 |group          |app |time:mean|
 |:--------------|:---|:--------|
-|1M 150-bp reads|KMCP|74.28    |
+|1M 150-bp reads|KMCP|62.22    |
 |1M 150-bp reads|COBS|749.32   |
-|One genome     |KMCP|12.83    |
+|One genome     |KMCP|13.32    |
 |One genome     |COBS|25.70    |
 
 KMCP vs Mash and Sourmash

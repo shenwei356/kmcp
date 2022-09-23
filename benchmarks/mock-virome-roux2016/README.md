@@ -603,13 +603,16 @@ Assembly
     reads=assembly
     ete3tax=ete3_ncbi_tax.sqlite
     
-    # about 8 hours
+    # about 2 hours
+    # https://github.com/EBI-Metagenomics/emg-viral-pipeline/issues/73
+    # the right way is changing directory to where the input file is before running the pipline.
     time fd ^contigs.fasta$ $reads/ \
         | grep -v work \
         | rush -j $j -v j=$J -v mem=$mem -v db=$db -v sg=$sg -v ete3tax=$ete3tax \
-            'nextflow run EBI-Metagenomics/emg-viral-pipeline -r v0.4.0 \
+            'cd {/}; \
+            nextflow run EBI-Metagenomics/emg-viral-pipeline -r v0.4.0 \
                 --databases {db} --cachedir {sg} --ncbi {ete3tax} \
-                --fasta {} --workdir {/}/work --output {/}/virify --length 2 \
+                --fasta {%} --workdir work --output virify --length 2 \
                 -profile local,singularity --memory {mem} --cores {j} ' \
             -c -C virify.rush --verbose
     
