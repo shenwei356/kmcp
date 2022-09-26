@@ -54,7 +54,7 @@ p1 <- ggplot(df,
     xlab(NULL) +
     ylab('Time (second)') +
     expand_limits(y = 0) + 
-    scale_y_continuous(expand = c(0, 0)) + 
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",
@@ -84,7 +84,7 @@ p2 <- ggplot(df2,
     xlab(NULL) +
     ylab('Time (second)') +
     expand_limits(y = 0) + 
-    scale_y_continuous(expand = c(0, 0)) + 
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + 
     scale_color_manual(values = colors) +
     theme1 +
     theme(legend.position = "none",
