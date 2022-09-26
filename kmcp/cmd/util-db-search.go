@@ -678,6 +678,7 @@ func NewUnikIndexDB(path string, opt SearchOptions, dbID int) (*UnikIndexDB, err
 		log.Infof("  number of extra workers for every index file: %d", nextraWorkers)
 	}
 
+	// this function is for computing query FPR with buffer
 	queryFPR := QueryFPRWithCacheWithConstantFPR(opt.FPRBufSize, info.FPR)
 
 	// the first idx
@@ -1435,7 +1436,13 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		// buf := make([]byte, PosPopCountBufSize)
 		var buf [PosPopCountBufSize]byte
 
-		// counters for < 64 hashes
+		// counters for < 64 hashes.
+		//
+		// We unroll all loops for 63 cases!
+		// And we retrieve bytes from these byte slices in an order of:
+		//    round i  : b0[i], b1[i], b2[i]
+		//    round i+1: b2[i], b1[i], b0[i]
+		// which is cache-friendly.
 
 		countKmers63 := func() {
 			forward := true
@@ -6530,6 +6537,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 			}
 		}
 
+		// choose function based on the number of remaining k-mers
 		countKmerss := [64]func(){
 			nil,
 			countKmers1,
@@ -6602,7 +6610,7 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 		for query := range idx.InCh {
 			// reset counts
 			bufIdx = 0
-			copy(counts, counts0)
+			copy(counts, counts0) // do not create new objects
 
 			// -------------------------------------------------------------------------
 			// counting

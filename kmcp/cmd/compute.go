@@ -478,9 +478,9 @@ Examples:
 		}
 
 		// wait group
-		var wg sync.WaitGroup
-		tokens := make(chan int, opt.NumCPUs)
-		threadsFloat := float64(opt.NumCPUs)
+		var wg sync.WaitGroup                 // ensure all jobs done
+		tokens := make(chan int, opt.NumCPUs) // control the max concurrency number
+		threadsFloat := float64(opt.NumCPUs)  // just avoid repeated type conversion
 
 		multiLevelFileTree := bySeq || len(files) > 1000
 
@@ -495,6 +495,7 @@ Examples:
 					<-tokens
 
 					if opt.Verbose || opt.Log2File {
+						// update duration of a file
 						chDuration <- time.Duration(float64(time.Since(startTime)) / threadsFloat)
 					}
 				}()
@@ -576,6 +577,7 @@ Examples:
 							break
 						}
 
+						// filter out sequences with names in the blast list
 						if filterNames {
 							ignoreSeq = false
 							for _, re = range reSeqNames {
@@ -625,12 +627,12 @@ Examples:
 
 				once := true
 				for {
-					if splitSeq {
+					if splitSeq { // only one loop for split seq mode
 						if !once {
 							break
 						}
 						once = false
-					} else {
+					} else { // regularly read one sequence
 						record, err = fastxReader.Read()
 						if err != nil {
 							if err == io.EOF {
@@ -640,6 +642,7 @@ Examples:
 							break
 						}
 
+						// filter out sequences with names in the blast list
 						if filterNames {
 							ignoreSeq = false
 							for _, re = range reSeqNames {
@@ -697,11 +700,12 @@ Examples:
 						}
 
 						if _splitNumber == 0 {
-							log.Warningf("sequence is too short to split into %d chunks with overlap of %d: %s", splitNumber, splitOverlap, file)
+							log.Warningf("sequence is too short to split into %d chunks with an overlap of %d: %s", splitNumber, splitOverlap, file)
 							return
 						}
 					}
 
+					// a method to extract subsequence with given window size and step size
 					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
 
 					if bySeq {
@@ -737,6 +741,7 @@ Examples:
 								}
 							}
 
+							// place the if branch of deciding sketch type out of the for loop
 							if syncmer {
 								for {
 									code, ok = sketch.NextSyncmer()
@@ -786,6 +791,8 @@ Examples:
 						n = len(*codes)
 
 						*codes2 = (*codes2)[:0]
+						// it's default now.
+						// k-mer hashes are sorted and then duplicated values are removed.
 						if exactNumber {
 							sortutil.Uint64s(*codes)
 							var pre uint64 = 0
@@ -798,6 +805,7 @@ Examples:
 							n = len(*codes2)
 						}
 
+						// output file
 						if splitSeq {
 							if splitByNumber {
 								if extractRefName {
@@ -822,6 +830,7 @@ Examples:
 
 						outFile = filepath.Join(outDir, dir1, dir2, dir3, outFileBase)
 
+						// meta data to save into the .unik files
 						meta := Meta{
 							SeqID:      seqID,
 							FragIdx:    slidIdx,
@@ -967,9 +976,9 @@ func writeKmers(k int, codes []uint64, n uint64,
 	var writer *unik.Writer
 	var mode uint32
 
-	mode |= unik.UnikCanonical
-	mode |= unik.UnikHashed
-	mode |= unik.UnikSorted
+	mode |= unik.UnikCanonical // cononical k-mers
+	mode |= unik.UnikHashed    // yes, we use ntHash
+	mode |= unik.UnikSorted    // sorted k-mers could reduce the .unik file for k <= 23. https://github.com/shenwei356/unik#compression-rate-comparison
 
 	writer, err = unik.NewWriter(outfh, k, mode)
 	if err != nil {

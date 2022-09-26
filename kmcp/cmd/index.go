@@ -195,6 +195,13 @@ Examples:
 		if numHashes > 4 {
 			checkError(fmt.Errorf("value of -n/--num-hash too big: %d", numHashes))
 		}
+
+		// At the beginning, I set the size of bloom as power of 2, so we can accelerate
+		// location computation by replacing 'hash % size' with 'hash & (size-1)'.
+		// But after a long time, I found it would increase the index size, and
+		// the speed is actually not faster. So we use the classical way, while the code
+		// in 'index' and 'search' command are not removed.
+
 		// faster := getFlagBool(cmd, "faster")
 		faster := false
 
@@ -310,6 +317,7 @@ Examples:
 
 		var reader0 *unik.Reader
 
+		// a method to retrieve basic information from an .unik file
 		getInfo := func(file string, first bool) UnikFileInfo {
 			infh, r, _, err := inStream(file)
 			checkError(err)
@@ -363,6 +371,8 @@ Examples:
 
 		fileInfos0 := make([]UnikFileInfo, 0, 1024)
 
+		// the fileInfoCache is added in later version, so it's optional in code
+		// but it always exist now.
 		hasInfoCache, err = pathutil.Exists(fileInfoCache)
 		if err != nil {
 			checkError(fmt.Errorf("check .unik file info file: %s", err))
@@ -410,6 +420,8 @@ Examples:
 		if hasInfoCache && InfoCacheOK {
 			// do not have to check file again
 		} else {
+			// in old days when the 'compute' do not output file info table,
+			// all .unik files are parsed to retrieve basic informations.
 
 			// ---------------------------------------------------------------
 			// input files
@@ -656,7 +668,7 @@ Examples:
 			nFiles := len(fileInfoGroups)
 			var sBlock int
 			if sBlock00 <= 0 { // block size from command line
-				sBlock = (int(float64(nFiles)/float64(opt.NumCPUs)) + 7) / 8 * 8
+				sBlock = (int(float64(nFiles)/float64(opt.NumCPUs)) + 7) / 8 * 8 // just ensure it's 8n
 			} else {
 				sBlock = sBlock00
 			}
@@ -1070,7 +1082,13 @@ Examples:
 									_gsizes[iii] = info.GenomeSize
 									// _kmers[iii] = info.Kmers
 									// _indices[iii] = info.Index
+
+									// for the compatibility of .uniki file,
+									//  we bit-pack the index of chunks and the number of chunks into one uint32,
+									// with the high 16 bits storing the number of chunks and the low 16 bits
+									// storing the index of chunks.
 									_indices[iii] = info.Index + info.Indexes<<16 // add number of indexes
+
 									_size += info.Kmers
 								}
 								names = append(names, _names)

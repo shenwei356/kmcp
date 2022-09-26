@@ -183,7 +183,6 @@ Examples:
 		deduplicateThreshold := getFlagPositiveInt(cmd, "kmer-dedup-threshold")
 		// immediateOutput := getFlagBool(cmd, "immediate-output")
 
-		// make it default
 		trySE := getFlagBool(cmd, "try-se")
 		// trySE := true
 
@@ -393,6 +392,7 @@ Examples:
 
 			TrySingleEnd: trySE,
 		}
+		// check util-db-search.go
 		sg, err := NewUnikIndexDBSearchEngine(searchOpt, dbDirs...)
 		if err != nil {
 			checkError(err)
@@ -534,6 +534,7 @@ Examples:
 					jacc = strconv.FormatFloat(match.JaccardIndex, 'f', 4, 64)
 					FPR = strconv.FormatFloat(match.FPR, 'e', 4, 64)
 
+					// method below is efficient than outfh.WriteString(fmt.Sprintf())
 					outfh.Write(query)
 					outfh.WriteByte('\t')
 					outfh.WriteString(qLen)
@@ -569,10 +570,11 @@ Examples:
 					outfh.WriteByte('\n')
 				}
 
-				//if immediateOutput {
+				//if immediateOutput { // it may sacrifice speed
 				// outfh.Flush()
 				//}
 
+				// recycle the objects
 				(*result.Matches) = (*(result.Matches))[:0]
 				poolMatches.Put(result.Matches)
 
@@ -589,6 +591,9 @@ Examples:
 				var target, chunkIdx, chunks, tLen, kSize, mKmers, qCov, tCov, jacc, queryIdx string
 				for result := range sg.OutCh {
 					total++
+
+					// you may notice I hard-copy the code of ouputting search result,
+					// yes, it brings a little speedup by reducing function calling.
 
 					// output(result)
 					if result.Matches == nil {
@@ -722,7 +727,7 @@ Examples:
 					poolQueryResult.Put(result)
 				}
 			} else {
-				m := make(map[uint64]*QueryResult, opt.NumCPUs)
+				m := make(map[uint64]*QueryResult, opt.NumCPUs) // the buffer to output sorte
 				var id, _id uint64
 				var ok bool
 
