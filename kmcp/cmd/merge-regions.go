@@ -168,13 +168,13 @@ Performance notes:
 			log.Infof("-------------------- [main parameters] --------------------")
 
 			log.Infof("match filtration: ")
-			log.Infof("  maximal false positive rate: %f", maxFPR)
-			log.Infof("  minimal query coverage: %4f", minQcov)
+			log.Infof("  maximum false positive rate: %f", maxFPR)
+			log.Infof("  minimum query coverage: %4f", minQcov)
 			log.Info()
 
 			log.Infof("region merging: ")
-			log.Infof("  minimal overlap of two adjacent regions: %d", minOverlap)
-			log.Infof("  maximal distance of starting positions of two adjacent regions: %d", maxGap)
+			log.Infof("  minimum overlap of two adjacent regions: %d", minOverlap)
+			log.Infof("  maximum distance of starting positions of two adjacent regions: %d", maxGap)
 
 			log.Infof("-------------------- [main parameters] --------------------")
 			log.Info()
@@ -401,12 +401,12 @@ func init() {
 	regionsCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
 
 	// for single read
-	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, formatFlagUsage(`Maximal false positive rate of a read in search result.`))
-	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, formatFlagUsage(`Minimal query coverage of a read in search result.`))
+	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, formatFlagUsage(`Maximum false positive rate of a read in search result.`))
+	regionsCmd.Flags().Float64P("min-query-cov", "t", 0.55, formatFlagUsage(`Minimum query coverage of a read in search result.`))
 
 	// for merge
-	regionsCmd.Flags().IntP("max-gap", "g", 0, formatFlagUsage(`Maximal distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging.`))
-	regionsCmd.Flags().IntP("min-overlap", "l", 1, formatFlagUsage(`Minimal overlap of two adjacent regions, recommend K-1.`))
+	regionsCmd.Flags().IntP("max-gap", "g", 0, formatFlagUsage(`Maximum distance of starting positions of two adjacent regions, 0 for no limitation, 1 for no merging.`))
+	regionsCmd.Flags().IntP("min-overlap", "l", 1, formatFlagUsage(`Minimum overlap of two adjacent regions, recommend K-1.`))
 	regionsCmd.Flags().BoolP("ignore-type", "I", false, formatFlagUsage("Merge species and assembly-specific regions."))
 
 	regionsCmd.Flags().StringP("regexp", "r", `^(.+)_sliding:(\d+)\-(\d+)$`, formatFlagUsage(`Regular expression for extract reference name and query locations.`))

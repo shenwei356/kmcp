@@ -267,7 +267,7 @@ Flags:
       --force                        ► Overwrite existed output directory.
   -h, --help                         help for index
   -I, --in-dir string                ► Directory containing .unik files. Directory symlinks are followed.
-  -F, --max-open-files int           ► Maximal number of opened files, please use a small value for
+  -F, --max-open-files int           ► Maximum number of opened files, please use a small value for
                                      hard disk drive storage. (default 256)
   -n, --num-hash int                 ► Number of hash functions in bloom filters. (default 1)
   -O, --out-dir string               ► Output directory. (default: ${indir}.kmcp-db)
@@ -379,12 +379,12 @@ Flags:
       --low-mem                    ► Do not load all index files into memory nor use mmap, the
                                    searching would be very very slow for a large number of queries.
                                    Please read "Index files loading modes" in "kmcp search -h".
-  -f, --max-fpr float              ► Maximal false positive rate of a query. (default 0.01)
-  -c, --min-kmers int              ► Minimal number of matched k-mers (sketches). (default 10)
-  -t, --min-query-cov float        ► Minimal query coverage, i.e., proportion of matched k-mers and
+  -f, --max-fpr float              ► Maximum false positive rate of a query. (default 0.01)
+  -c, --min-kmers int              ► Minimum number of matched k-mers (sketches). (default 10)
+  -t, --min-query-cov float        ► Minimum query coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a query. (default 0.55)
-  -m, --min-query-len int          ► Minimal query length. (default 30)
-  -T, --min-target-cov float       ► Minimal target coverage, i.e., proportion of matched k-mers and
+  -m, --min-query-len int          ► Minimum query length. (default 30)
+  -T, --min-target-cov float       ► Minimum target coverage, i.e., proportion of matched k-mers and
                                    unique k-mers of a target.
   -N, --name-map strings           ► Tabular two-column file(s) mapping reference IDs to user-defined
                                    values. Don't use this if you will use the result for metagenomic
@@ -442,7 +442,7 @@ Generate taxonomic profile from search results
 Methods:
   1. Reference genomes can be split into chunks when computing
      k-mers (sketches), which could help to increase the specificity
-     via a threshold, i.e., the minimal proportion of matched chunks
+     via a threshold, i.e., the minimum proportion of matched chunks
      (-p/--min-chunks-fraction). (***highly recommended***)
      Another flag -d/--max-chunks-depth-stdev further reduces false positives.
   2. We require a part of the uniquely matched reads of a reference
@@ -467,9 +467,9 @@ Accuracy notes:
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
-     *. -U/--min-hic-ureads,      minimal number, >= 1
-     *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
-     *. -P/--min-hic-ureads-prop, minimal proportion, higher values
+     *. -U/--min-hic-ureads,      minimum number, >= 1
+     *. -H/--min-hic-ureads-qcov, minimum query coverage, >= -t/--min-qcov
+     *. -P/--min-hic-ureads-prop, minimum proportion, higher values
         increase precision at the cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambiguous reads with the algorithm in MegaPath.
@@ -590,30 +590,30 @@ Flags:
                                           strain/assembly. (default "species")
       --line-chunk-size int               ► Number of lines to process for each thread, and 4 threads
                                           is fast enough. Type "kmcp profile -h" for details. (default 5000)
-  -d, --max-chunks-depth-stdev float      ► Maximal standard deviation of relative depths of all
+  -d, --max-chunks-depth-stdev float      ► Maximum standard deviation of relative depths of all
                                           chunks. (default 2)
-  -f, --max-fpr float                     ► Maximal false positive rate of a read in search result.
+  -f, --max-fpr float                     ► Maximum false positive rate of a read in search result.
                                           (default 0.01)
-  -R, --max-mismatch-err float            ► Maximal error rate of a read being matched to a wrong
+  -R, --max-mismatch-err float            ► Maximum error rate of a read being matched to a wrong
                                           reference, for determing the right reference for ambiguous
                                           reads. Range: (0, 1). (default 0.05)
       --max-qcov-gap float                ► Max qcov gap between adjacent matches. (default 0.4)
   -M, --metaphlan-report string           ► Save extra metaphlan-like report.
       --metaphlan-report-version string   ► Metaphlan report version (2 or 3) (default "3")
-  -p, --min-chunks-fraction float         ► Minimal fraction of matched reference chunks with reads >=
+  -p, --min-chunks-fraction float         ► Minimum fraction of matched reference chunks with reads >=
                                           -r/--min-chunks-reads. (default 0.8)
-  -r, --min-chunks-reads int              ► Minimal number of reads for a reference chunk. (default 50)
-  -D, --min-dreads-prop float             ► Minimal proportion of distinct reads, for determing the
+  -r, --min-chunks-reads int              ► Minimum number of reads for a reference chunk. (default 50)
+  -D, --min-dreads-prop float             ► Minimum proportion of distinct reads, for determing the
                                           right reference for ambiguous reads. Range: (0, 1). (default 0.05)
-  -U, --min-hic-ureads int                ► Minimal number of high-confidence uniquely matched reads
+  -U, --min-hic-ureads int                ► Minimum number of high-confidence uniquely matched reads
                                           for a reference. (default 5)
-  -P, --min-hic-ureads-prop float         ► Minimal proportion of high-confidence uniquely matched
+  -P, --min-hic-ureads-prop float         ► Minimum proportion of high-confidence uniquely matched
                                           reads. (default 0.1)
-  -H, --min-hic-ureads-qcov float         ► Minimal query coverage of high-confidence uniquely matched
+  -H, --min-hic-ureads-qcov float         ► Minimum query coverage of high-confidence uniquely matched
                                           reads. (default 0.75)
-  -t, --min-query-cov float               ► Minimal query coverage of a read in search result.
+  -t, --min-query-cov float               ► Minimum query coverage of a read in search result.
                                           (default 0.55)
-  -u, --min-uniq-reads int                ► Minimal number of uniquely matched reads for a reference.
+  -u, --min-uniq-reads int                ► Minimum number of uniquely matched reads for a reference.
                                           (default 20)
   -m, --mode int                          ► Profiling mode, type "kmcp profile -h" for details.
                                           available values: 0 (for pathogen detection), 1
@@ -771,13 +771,13 @@ Usage:
 Flags:
   -h, --help                   help for merge-regions
   -I, --ignore-type            ► Merge species and assembly-specific regions.
-  -f, --max-fpr float          ► Maximal false positive rate of a read in search result. (default 0.05)
-  -g, --max-gap int            ► Maximal distance of starting positions of two adjacent regions, 0 for
+  -f, --max-fpr float          ► Maximum false positive rate of a read in search result. (default 0.05)
+  -g, --max-gap int            ► Maximum distance of starting positions of two adjacent regions, 0 for
                                no limitation, 1 for no merging.
       --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
                                enough. Type "kmcp utils merge-regions -h" for details. (default 5000)
-  -l, --min-overlap int        ► Minimal overlap of two adjacent regions, recommend K-1. (default 1)
-  -t, --min-query-cov float    ► Minimal query coverage of a read in search result. (default 0.55)
+  -l, --min-overlap int        ► Minimum overlap of two adjacent regions, recommend K-1. (default 1)
+  -t, --min-query-cov float    ► Minimum query coverage of a read in search result. (default 0.55)
   -a, --name-assembly string   ► Name of assembly-specific regions. (default "assembly-specific")
   -s, --name-species string    ► Name of species-specific regions. (default "species-specific")
   -o, --out-prefix string      ► Out file prefix ("-" for stdout). (default "-")
@@ -811,8 +811,8 @@ Flags:
                               "species")
       --line-chunk-size int   ► Number of lines to process for each thread, and 4 threads is fast
                               enough. Type "kmcp utils filter" for details. (default 5000)
-  -f, --max-fpr float         ► Maximal false positive rate of a read in search result. (default 0.05)
-  -t, --min-query-cov float   ► Minimal query coverage of a read in search result. (default 0.55)
+  -f, --max-fpr float         ► Maximum false positive rate of a read in search result. (default 0.05)
+  -t, --min-query-cov float   ► Minimum query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
   -o, --out-prefix string     ► Out file prefix ("-" for stdout). (default "-")
   -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional

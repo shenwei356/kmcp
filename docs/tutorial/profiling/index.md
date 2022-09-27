@@ -7,7 +7,7 @@
     - Or [build custom databases](/kmcp/database/#custom-database).
 - Hardware.
     - CPU: ≥ 32 cores preferred.
-    - RAM: ≥ 64 GB, depends on file size of the maximal database.
+    - RAM: ≥ 64 GB, depends on file size of the biggest database.
 
 ## Datasets
 
@@ -80,9 +80,9 @@ and the results can be fastly merged for downstream analysis.
 **`kmcp search` and `kmcp profile` share some flags**, therefore users
 can use stricter criteria in `kmcp profile`.
 
-1. `-t/--min-query-cov`, minimal query coverage, i.e., 
+1. `-t/--min-query-cov`, minimum query coverage, i.e., 
    proportion of matched k-mers and unique k-mers of a query (default `0.55`, close to `~96.5%` sequence similarity)
-1. `-f/--max-fpr`, maximal false positive rate of a query. (default `0.05`)
+1. `-f/--max-fpr`, maximum false positive rate of a query. (default `0.05`)
 
 #### **Index files loading modes**
 
@@ -332,7 +332,7 @@ is used for batch submitting Slurm jobs via script templates.
 
 1. Reference genomes can be split into chunks when computing
     k-mers (sketches), which could help to increase the specificity
-    via a threshold, i.e., the minimal proportion of matched chunks
+    via a threshold, i.e., the minimum proportion of matched chunks
     (`-p/--min-chunks-fraction`). (***highly recommended***)
     Another flag `-d/--max-chunks-cov-stdev` further reduces false positives.
 2. We require a part of the uniquely matched reads of a reference
@@ -355,9 +355,9 @@ is used for batch submitting Slurm jobs via script templates.
     having high similarity, i.e., with high confidence to decrease
     the false positive.
     E.g., `-H >= 0.8` and `-P >= 0.1` equals to `90th percentile >= 0.8`
-    - `-U/--min-hic-ureads`,      minimal number, `>= 1`
-    - `-H/--min-hic-ureads-qcov`, minimal query coverage, `>= -t/--min-qcov`
-    - `-P/--min-hic-ureads-prop`, minimal proportion, higher values
+    - `-U/--min-hic-ureads`,      minimum number, `>= 1`
+    - `-H/--min-hic-ureads-qcov`, minimum query coverage, `>= -t/--min-qcov`
+    - `-P/--min-hic-ureads-prop`, minimum proportion, higher values
     increase precision at the cost of sensitivity.
 - `-R/--max-mismatch-err` and `-D/--min-dreads-prop` is for determing
     the right reference for ambigous reads with the algorithm in MegaPath.

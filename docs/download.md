@@ -21,7 +21,7 @@ in two packages for better searching performance.
 - `search`:
     - fix searching with paired-end reads where the read2 is shorter than the value of `--min-query-len`. [#10](https://github.com/shenwei356/kmcp/issues/10)
     - fix the log. [#8](https://github.com/shenwei356/kmcp/issues/8)
-    - a new flag `-f/--max-fpr`: maximal false positive rate of a query (default 0.05). It reduces the unnecessary output when searching with a low minimal query coverage (`-t/--min-query-cov`).
+    - a new flag `-f/--max-fpr`: maximum false positive rate of a query (default 0.05). It reduces the unnecessary output when searching with a low minimum query coverage (`-t/--min-query-cov`).
 - `profile`:
     - recommend using the flag `--no-amb-corr` to disable ambiguous reads correction when >= 1000 candidates are detected.
     - fix logging when using `--level strain` and no taxonomy given.
@@ -145,7 +145,7 @@ fish:
     - add warning for invalid input.
 - `profile`:
     - ***allow modifying parts of parameters in preset profiling modes***. [#5](https://github.com/shenwei356/kmcp/issues/5)
-    - decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
+    - decrease thresholds of minimum reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
       *the profiling results generated with mode 3 in the manuscript are not affected*.
 
 ### [v0.8.1](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1) - 2022-03-07 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.1)
@@ -156,7 +156,7 @@ fish:
 
 - commands:
     - new command `utils cov2simi`: Convert k-mer coverage to sequence similarity.
-    - new command `utils query-fpr`: Compute the maximal false positive rate of a query.
+    - new command `utils query-fpr`: Compute the maximum false positive rate of a query.
 - `compute`:
     - update doc.
     - add flags compatibility check.

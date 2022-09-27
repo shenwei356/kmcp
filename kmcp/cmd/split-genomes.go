@@ -836,7 +836,7 @@ type GenomeInfo struct {
 	Size    int
 }
 
-// choose the genome with minimal contigs and biggest genome size
+// choose the genome with minimum contigs and biggest genome size
 func chooseRef(opt *Options, files []string, reSeqNames []*regexp.Regexp) *GenomeInfo {
 	filterNames := len(reSeqNames) > 0
 

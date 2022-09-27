@@ -224,8 +224,8 @@ Performance notes:
 			log.Infof("-------------------- [main parameters] --------------------")
 
 			log.Infof("match filtration: ")
-			log.Infof("  maximal false positive rate: %f", maxFPR)
-			log.Infof("  minimal query coverage: %4f", minQcov)
+			log.Infof("  maximum false positive rate: %f", maxFPR)
+			log.Infof("  minimum query coverage: %4f", minQcov)
 			log.Info()
 
 			if mappingTaxids {
@@ -412,10 +412,10 @@ func init() {
 
 	// for single read
 	filterCmd.Flags().Float64P("max-fpr", "f", 0.05,
-		formatFlagUsage(`Maximal false positive rate of a read in search result.`))
+		formatFlagUsage(`Maximum false positive rate of a read in search result.`))
 
 	filterCmd.Flags().Float64P("min-query-cov", "t", 0.55,
-		formatFlagUsage(`Minimal query coverage of a read in search result.`))
+		formatFlagUsage(`Minimum query coverage of a read in search result.`))
 
 	// taxonomy
 	filterCmd.Flags().StringSliceP("taxid-map", "T", []string{},

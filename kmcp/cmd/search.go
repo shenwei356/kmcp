@@ -1052,18 +1052,18 @@ func init() {
 	searchCmd.Flags().StringP("query-id", "", "",
 		formatFlagUsage(`Custom query Id when using the whole file as a query.`))
 
-	searchCmd.Flags().IntP("min-kmers", "c", 10, formatFlagUsage(`Minimal number of matched k-mers (sketches).`))
+	searchCmd.Flags().IntP("min-kmers", "c", 10, formatFlagUsage(`Minimum number of matched k-mers (sketches).`))
 
-	searchCmd.Flags().IntP("min-query-len", "m", 30, formatFlagUsage(`Minimal query length.`))
+	searchCmd.Flags().IntP("min-query-len", "m", 30, formatFlagUsage(`Minimum query length.`))
 
 	searchCmd.Flags().Float64P("min-query-cov", "t", 0.55,
-		formatFlagUsage(`Minimal query coverage, i.e., proportion of matched k-mers and unique k-mers of a query.`))
+		formatFlagUsage(`Minimum query coverage, i.e., proportion of matched k-mers and unique k-mers of a query.`))
 
 	searchCmd.Flags().Float64P("min-target-cov", "T", 0,
-		formatFlagUsage(`Minimal target coverage, i.e., proportion of matched k-mers and unique k-mers of a target.`))
+		formatFlagUsage(`Minimum target coverage, i.e., proportion of matched k-mers and unique k-mers of a target.`))
 
 	searchCmd.Flags().Float64P("max-fpr", "f", 0.01,
-		formatFlagUsage(`Maximal false positive rate of a query.`))
+		formatFlagUsage(`Maximum false positive rate of a query.`))
 
 	// output
 	searchCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))

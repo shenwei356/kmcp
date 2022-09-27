@@ -52,7 +52,7 @@ var profileCmd = &cobra.Command{
 Methods:
   1. Reference genomes can be split into chunks when computing
      k-mers (sketches), which could help to increase the specificity
-     via a threshold, i.e., the minimal proportion of matched chunks
+     via a threshold, i.e., the minimum proportion of matched chunks
      (-p/--min-chunks-fraction). (***highly recommended***)
      Another flag -d/--max-chunks-depth-stdev further reduces false positives.
   2. We require a part of the uniquely matched reads of a reference
@@ -77,9 +77,9 @@ Accuracy notes:
      having high similarity, i.e., with high confidence for decreasing
      the false positive rate.
      E.g., -H >= 0.8 and -P >= 0.1 equals to 90th percentile >= 0.8
-     *. -U/--min-hic-ureads,      minimal number, >= 1
-     *. -H/--min-hic-ureads-qcov, minimal query coverage, >= -t/--min-qcov
-     *. -P/--min-hic-ureads-prop, minimal proportion, higher values
+     *. -U/--min-hic-ureads,      minimum number, >= 1
+     *. -H/--min-hic-ureads-qcov, minimum query coverage, >= -t/--min-qcov
+     *. -P/--min-hic-ureads-prop, minimum proportion, higher values
         increase precision at the cost of sensitivity.
   *. -R/--max-mismatch-err and -D/--min-dreads-prop is for determing
      the right reference for ambiguous reads with the algorithm in MegaPath.
@@ -671,24 +671,24 @@ Examples:
 			log.Infof("-------------------- [main parameters] --------------------")
 
 			log.Infof("match filtration: ")
-			log.Infof("  maximal false positive rate: %f", maxFPR)
-			log.Infof("  minimal query coverage: %4f", minQcov)
+			log.Infof("  maximum false positive rate: %f", maxFPR)
+			log.Infof("  minimum query coverage: %4f", minQcov)
 			log.Infof("  keep matches with the top N scores: N=%d", topNScore)
 			log.Infof("  only keep the full matches: %v", keepFullMatch)
-			log.Infof("  only keep main matches: %v, maximal score gap: %f", keepMainMatch, maxScoreGap)
+			log.Infof("  only keep main matches: %v, maximum score gap: %f", keepMainMatch, maxScoreGap)
 			log.Info()
 
 			log.Infof("deciding the existence of a reference:")
 			log.Infof("  preset profiling mode: %d", mode)
-			log.Infof("  minimal number of reads per reference chunk: %.0f", minReads)
-			log.Infof("  minimal number of uniquely matched reads: %.0f", minUReads)
-			log.Infof("  minimal proportion of matched reference chunks: %f", minFragsProp)
-			log.Infof("  maximal standard deviation of relative depths of all chunks: %f", maxFragsDepthStdev)
+			log.Infof("  minimum number of reads per reference chunk: %.0f", minReads)
+			log.Infof("  minimum number of uniquely matched reads: %.0f", minUReads)
+			log.Infof("  minimum proportion of matched reference chunks: %f", minFragsProp)
+			log.Infof("  maximum standard deviation of relative depths of all chunks: %f", maxFragsDepthStdev)
 			log.Info()
 
-			log.Infof("  minimal number of high-confidence uniquely matched reads: %.0f", minHicUreads)
-			log.Infof("  minimal query coverage of high-confidence uniquely matched reads: %f", hicUreadsMinQcov)
-			log.Infof("  minimal proportion of high-confidence uniquely matched reads: %f", HicUreadsMinProp)
+			log.Infof("  minimum number of high-confidence uniquely matched reads: %.0f", minHicUreads)
+			log.Infof("  minimum query coverage of high-confidence uniquely matched reads: %f", hicUreadsMinQcov)
+			log.Infof("  minimum proportion of high-confidence uniquely matched reads: %f", HicUreadsMinProp)
 			log.Info()
 
 			if mappingTaxids {
@@ -2964,10 +2964,10 @@ func init() {
 
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01,
-		formatFlagUsage(`Maximal false positive rate of a read in search result.`))
+		formatFlagUsage(`Maximum false positive rate of a read in search result.`))
 
 	profileCmd.Flags().Float64P("min-query-cov", "t", 0.55,
-		formatFlagUsage(`Minimal query coverage of a read in search result.`))
+		formatFlagUsage(`Minimum query coverage of a read in search result.`))
 
 	profileCmd.Flags().IntP("keep-top-qcovs", "n", 0,
 		formatFlagUsage(`Keep matches with the top N qcovs for a query, 0 for all.`))
@@ -2983,32 +2983,32 @@ func init() {
 
 	// for matches against a reference
 	profileCmd.Flags().IntP("min-chunks-reads", "r", minReads0,
-		formatFlagUsage(`Minimal number of reads for a reference chunk.`))
+		formatFlagUsage(`Minimum number of reads for a reference chunk.`))
 
 	profileCmd.Flags().IntP("min-uniq-reads", "u", minUReads0,
-		formatFlagUsage(`Minimal number of uniquely matched reads for a reference.`))
+		formatFlagUsage(`Minimum number of uniquely matched reads for a reference.`))
 
 	profileCmd.Flags().Float64P("min-chunks-fraction", "p", minFragsProp0,
-		formatFlagUsage(`Minimal fraction of matched reference chunks with reads >= -r/--min-chunks-reads.`))
+		formatFlagUsage(`Minimum fraction of matched reference chunks with reads >= -r/--min-chunks-reads.`))
 
 	profileCmd.Flags().Float64P("max-chunks-depth-stdev", "d", maxFragsDepthStdev0,
-		formatFlagUsage(`Maximal standard deviation of relative depths of all chunks.`))
+		formatFlagUsage(`Maximum standard deviation of relative depths of all chunks.`))
 
 	profileCmd.Flags().IntP("min-hic-ureads", "U", minHicUreads0,
-		formatFlagUsage(`Minimal number of high-confidence uniquely matched reads for a reference.`))
+		formatFlagUsage(`Minimum number of high-confidence uniquely matched reads for a reference.`))
 
 	profileCmd.Flags().Float64P("min-hic-ureads-qcov", "H", hicUreadsMinQcov0,
-		formatFlagUsage(`Minimal query coverage of high-confidence uniquely matched reads.`))
+		formatFlagUsage(`Minimum query coverage of high-confidence uniquely matched reads.`))
 
 	profileCmd.Flags().Float64P("min-hic-ureads-prop", "P", HicUreadsMinProp0,
-		formatFlagUsage(`Minimal proportion of high-confidence uniquely matched reads.`))
+		formatFlagUsage(`Minimum proportion of high-confidence uniquely matched reads.`))
 
 	// for the two-stage taxonomy assignment algorithm in MagaPath
 	profileCmd.Flags().Float64P("min-dreads-prop", "D", 0.05,
-		formatFlagUsage(`Minimal proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1).`))
+		formatFlagUsage(`Minimum proportion of distinct reads, for determing the right reference for ambiguous reads. Range: (0, 1).`))
 
 	profileCmd.Flags().Float64P("max-mismatch-err", "R", 0.05,
-		formatFlagUsage(`Maximal error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1).`))
+		formatFlagUsage(`Maximum error rate of a read being matched to a wrong reference, for determing the right reference for ambiguous reads. Range: (0, 1).`))
 
 	// name mapping
 	profileCmd.Flags().StringSliceP("name-map", "N", []string{},

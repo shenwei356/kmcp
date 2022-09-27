@@ -1462,9 +1462,9 @@ func init() {
 		formatFlagUsage(`Overwrite existed output directory.`))
 
 	indexCmd.Flags().IntP("max-open-files", "F", 256,
-		formatFlagUsage(`Maximal number of opened files, please use a small value for hard disk drive storage.`))
+		formatFlagUsage(`Maximum number of opened files, please use a small value for hard disk drive storage.`))
 
-	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximal number of writing files, please use a small value for hard disk drive storage`)
+	// indexCmd.Flags().IntP("max-write-files", "W", 4, `maximum number of writing files, please use a small value for hard disk drive storage`)
 
 	indexCmd.Flags().BoolP("dry-run", "", false,
 		formatFlagUsage(`Dry run, useful for adjusting parameters (highly recommended).`))
