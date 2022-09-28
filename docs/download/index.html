@@ -273,8 +273,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v083-2022-08-15" class="md-nav__link">
-    v0.8.3 - 2022-08-15
+  <a href="#v090-2022-09-28" class="md-nav__link">
+    v0.9.0 - 2022-09-28
   </a>
   
 </li>
@@ -339,6 +339,13 @@
   
     <nav class="md-nav" aria-label="Release History">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v083-2022-08-15" class="md-nav__link">
+    v0.8.3 - 2022-08-15
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#v082-2022-03-26" class="md-nav__link">
@@ -663,8 +670,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v083-2022-08-15" class="md-nav__link">
-    v0.8.3 - 2022-08-15
+  <a href="#v090-2022-09-28" class="md-nav__link">
+    v0.9.0 - 2022-09-28
   </a>
   
 </li>
@@ -729,6 +736,13 @@
   
     <nav class="md-nav" aria-label="Release History">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v083-2022-08-15" class="md-nav__link">
+    v0.8.3 - 2022-08-15
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#v082-2022-03-26" class="md-nav__link">
@@ -849,18 +863,38 @@ in two packages for better searching performance.</p>
   for batch counting matched k-mers in bloom filters.</li>
 </ul>
 <h2 id="current-version">Current Version</h2>
-<h3 id="v083-2022-08-15">v0.8.3 - 2022-08-15</h3>
+<h3 id="v090-2022-09-28">v0.9.0 - 2022-09-28 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.0"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.0/total.svg" /></a></h3>
 <ul>
-<li><code>kmcp</code>: fix compiling from source for ARM architectures.<a href="https://github.com/shenwei356/kmcp/issues/17">#17</a></li>
+<li><code>compute</code>:<ul>
+<li>smaller output files and faster speed.</li>
+<li>more even genome splitting.</li>
+</ul>
+</li>
+<li><code>index</code>:<ul>
+<li>faster speed due to smaller input files.</li>
+</ul>
+</li>
 <li><code>search</code>:<ul>
-<li>fix searching with paired-end reads where the read2 is shorter than the value of <code>--min-query-len</code>. <a href="https://github.com/shenwei356/kmcp/issues/10">#10</a></li>
-<li>fix the log. <a href="https://github.com/shenwei356/kmcp/issues/8">#8</a></li>
-<li>a new flag <code>-f/--max-fpr</code>: maximal false positive rate of a query (default 0.05). It reduces the unnecessary output when searching with a low minimal query coverage (<code>-t/--min-query-cov</code>).</li>
+<li><strong><em>more accurate and smaller query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound</em></strong>.</li>
+<li>change the default value of <code>-f/--max-fpr</code> from 0.05 to 0.01.</li>
+<li><strong><em>10-20% speedup</em></strong>.</li>
 </ul>
 </li>
 <li><code>profile</code>:<ul>
-<li>recommend using the flag <code>--no-amb-corr</code> to disable ambiguous reads correction when &gt;= 1000 candidates are detected.</li>
-<li>fix logging when using <code>--level strain</code> and no taxonomy given.</li>
+<li><strong><em>more accurate abundance estimation using EM algorithm</em></strong>.</li>
+<li>change the default value of <code>-f/--max-fpr</code> from 0.05 to 0.01.</li>
+<li>mode 0: change the default value of <code>-H/--min-hic-ureads-qcov</code> from 0.55 to 0.7.</li>
+<li>increase float width of reference coverage in KMCP profile format from 2 to 6.</li>
+</ul>
+</li>
+<li><code>util query-fpr</code>:<ul>
+<li>compute query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.</li>
+</ul>
+</li>
+<li>new commands:<ul>
+<li><code>utils split-genomes</code> for splitting genomes into chunks.</li>
+<li><code>utils ref-info</code> for printing information of reference (chunks), including the number of k-mers
+  and the actual false-positive rate.</li>
 </ul>
 </li>
 </ul>
@@ -878,32 +912,32 @@ in two packages for better searching performance.</p>
 <tr>
 <td align="left">Linux</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">Linux</td>
 <td align="left">arm64</td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_arm64.tar.gz"><strong>kmcp_linux_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_linux_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_linux_arm64.tar.gz"><strong>kmcp_linux_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_linux_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">macOS</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">macOS</td>
 <td align="left">arm64</td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_arm64.tar.gz"><strong>kmcp_darwin_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_darwin_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_darwin_arm64.tar.gz"><strong>kmcp_darwin_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_darwin_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">Windows</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.8.3/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.0/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 </tbody>
 </table>
@@ -968,7 +1002,7 @@ go get -v -u github.com/shenwei356/kmcp/kmcp
 mkdir -p $HOME/bin
 cp ~/go/bin/kmcp $HOME/bin/
 
-# --------------- the devlopment version --------------
+# --------------- the development version --------------
 
 git clone https://github.com/shenwei356/kmcp
 cd kmcp/kmcp/
@@ -1005,6 +1039,21 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 <pre><code>kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 </code></pre>
 <h2 id="release-history">Release History</h2>
+<h3 id="v083-2022-08-15">v0.8.3 - 2022-08-15 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.3"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.3/total.svg" /></a></h3>
+<ul>
+<li><code>kmcp</code>: fix compiling from source for ARM architectures.<a href="https://github.com/shenwei356/kmcp/issues/17">#17</a></li>
+<li><code>search</code>:<ul>
+<li>fix searching with paired-end reads where the read2 is shorter than the value of <code>--min-query-len</code>. <a href="https://github.com/shenwei356/kmcp/issues/10">#10</a></li>
+<li>fix the log. <a href="https://github.com/shenwei356/kmcp/issues/8">#8</a></li>
+<li>a new flag <code>-f/--max-fpr</code>: maximum false positive rate of a query (default 0.05). It reduces the unnecessary output when searching with a low minimum query coverage (<code>-t/--min-query-cov</code>).</li>
+</ul>
+</li>
+<li><code>profile</code>:<ul>
+<li>recommend using the flag <code>--no-amb-corr</code> to disable ambiguous reads correction when &gt;= 1000 candidates are detected.</li>
+<li>fix logging when using <code>--level strain</code> and no taxonomy given.</li>
+</ul>
+</li>
+</ul>
 <h3 id="v082-2022-03-26"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2">v0.8.2</a> - 2022-03-26 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.8.2"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.2/total.svg" /></a></h3>
 <ul>
 <li><code>search</code>: <ul>
@@ -1018,7 +1067,7 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 </li>
 <li><code>profile</code>:<ul>
 <li><strong><em>allow modifying parts of parameters in preset profiling modes</em></strong>. <a href="https://github.com/shenwei356/kmcp/issues/5">#5</a></li>
-<li>decrease thresholds of minimal reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
+<li>decrease thresholds of minimum reads and unique reads in preset profiling modes 1 and 2 for low coverage sequence data.
   <em>the profiling results generated with mode 3 in the manuscript are not affected</em>.</li>
 </ul>
 </li>
@@ -1031,7 +1080,7 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 <ul>
 <li>commands:<ul>
 <li>new command <code>utils cov2simi</code>: Convert k-mer coverage to sequence similarity.</li>
-<li>new command <code>utils query-fpr</code>: Compute the maximal false positive rate of a query.</li>
+<li>new command <code>utils query-fpr</code>: Compute the maximum false positive rate of a query.</li>
 </ul>
 </li>
 <li><code>compute</code>:<ul>

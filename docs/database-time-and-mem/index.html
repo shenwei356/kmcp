@@ -12,21 +12,21 @@
         <meta name="author" content="Wei Shen">
       
       
-        <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/benchmark/searching/">
+        <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/database-time-and-mem/">
       
-      <link rel="icon" href="../../favicon.svg">
+      <link rel="icon" href="../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Sequence and genome searching - KMCP - Metagenomic Profiler</title>
+        <title>Building KMCP database - KMCP - Metagenomic Profiler</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ee0f47ba.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ee0f47ba.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
         
           
           
@@ -44,7 +44,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#searching-benchmarks" class="md-skip">
+        <a href="#building-kmcp-database" class="md-skip">
           Skip to content
         </a>
       
@@ -82,9 +82,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  <img src="../../favicon.svg" alt="logo">
+  <img src="../favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Sequence and genome searching
+              Building KMCP database
             
           </span>
         </div>
@@ -179,9 +179,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href=".." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
       
-  <img src="../../favicon.svg" alt="logo">
+  <img src="../favicon.svg" alt="logo">
 
     </a>
     KMCP - Metagenomic Profiler
@@ -209,7 +209,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         Home
       </a>
     </li>
@@ -224,7 +224,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../download/" class="md-nav__link">
+      <a href="../download/" class="md-nav__link">
         Download
       </a>
     </li>
@@ -239,7 +239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../database/" class="md-nav__link">
+      <a href="../database/" class="md-nav__link">
         Databases
       </a>
     </li>
@@ -254,7 +254,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/" class="md-nav__link">
+      <a href="../usage/" class="md-nav__link">
         Usage
       </a>
     </li>
@@ -295,7 +295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorial/profiling/" class="md-nav__link">
+      <a href="../tutorial/profiling/" class="md-nav__link">
         Taxonomic profiling
       </a>
     </li>
@@ -309,7 +309,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorial/searching/" class="md-nav__link">
+      <a href="../tutorial/searching/" class="md-nav__link">
         Sequence and genome searching
       </a>
     </li>
@@ -329,14 +329,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
       
       
       
@@ -359,7 +357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../profiling/" class="md-nav__link">
+      <a href="../benchmark/profiling/" class="md-nav__link">
         Taxonomic profiling
       </a>
     </li>
@@ -371,66 +369,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Sequence and genome searching
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../benchmark/searching/" class="md-nav__link">
         Sequence and genome searching
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#kmcp-vs-cobs" class="md-nav__link">
-    KMCP vs COBS
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kmcp-vs-mash-and-sourmash" class="md-nav__link">
-    KMCP vs Mash and Sourmash
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#result" class="md-nav__link">
-    Result
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -450,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         FAQs
       </a>
     </li>
@@ -499,22 +442,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-cobs" class="md-nav__link">
-    KMCP vs COBS
+  <a href="#gtdb" class="md-nav__link">
+    GTDB
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-mash-and-sourmash" class="md-nav__link">
-    KMCP vs Mash and Sourmash
+  <a href="#refseq-fungi" class="md-nav__link">
+    RefSeq fungi
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#result" class="md-nav__link">
-    Result
+  <a href="#genbank-viral" class="md-nav__link">
+    Genbank viral
   </a>
   
 </li>
@@ -531,91 +474,97 @@
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/shenwei356/kmcp/edit/master/docs/benchmark/searching/index.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/database-time-and-mem.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
 </a>
 
 
-<h1 id="searching-benchmarks">Searching benchmarks</h1>
-<p><a href="https://github.com/shenwei356/kmcp/tree/main/benchmarks/searching">Software, datasets and commands details</a>.</p>
-<p>Softwares</p>
-<ul>
-<li><a href="https://github.com/bingmann/cobs">COBS</a> (<a href="https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15">1915fc0</a>)</li>
-<li><a href="https://github.com/dib-lab/sourmash">Sourmash</a> (v4.5.0)</li>
-<li>KMCP (<a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.0">v0.9.0</a>)</li>
-</ul>
-<p><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz">GTDB r202 representative genomes</a> are used for tests:</p>
-<ul>
-<li>file size: 46.26 GB</li>
-<li>files: 47,894</li>
-<li>bases: 151.94 Gb</li>
-</ul>
-<h2 id="kmcp-vs-cobs">KMCP vs COBS</h2>
-<p>All k-mers are indexed and searched.</p>
-<p>Database size and building time:</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="left">cobs</th>
-<th align="left">kmcp</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">database size</td>
-<td align="left">86.96GB</td>
-<td align="left"><strong>55.15GB</strong></td>
-</tr>
-<tr>
-<td align="left">building time</td>
-<td align="left">29m55s</td>
-<td align="left"><strong>21min04s</strong></td>
-</tr>
-<tr>
-<td align="left">temporary files</td>
-<td align="left"><strong>160.76GB</strong></td>
-<td align="left">935.11G</td>
-</tr>
-</tbody>
-</table>
-<p>Searching with bacterial genomes or short reads (~1M reads).</p>
-<h2 id="kmcp-vs-mash-and-sourmash">KMCP vs Mash and Sourmash</h2>
-<p>Only FracMinHash (Scaled MinHash) (scale=1000 for Sourmash and KMCP) or MinHash (scale=3400 for Mash) are indexed and searched.</p>
-<p>Database size and building time:</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="left">mash</th>
-<th align="left">sourmash</th>
-<th align="left">kmcp</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">database size</td>
-<td align="left"><strong>1.22GB</strong></td>
-<td align="left">5.19GB</td>
-<td align="left">1.52GB</td>
-</tr>
-<tr>
-<td align="left">buiding time</td>
-<td align="left">13m30s</td>
-<td align="left">40m39s</td>
-<td align="left"><strong>7min59s</strong></td>
-</tr>
-<tr>
-<td align="left">temporary files</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">1.85GB</td>
-</tr>
-</tbody>
-</table>
-<p>Searching with bacterial genomes.</p>
-<h2 id="result">Result</h2>
-<p><img src="bench.searching.jpg" alt="" width="600"/></p>
+<h1 id="building-kmcp-database">Building KMCP database</h1>
+<p>The steps below is same to theses in <a href="../database/">database.md</a>, but <code>memusg</code> is used to</p>
+<h2 id="gtdb">GTDB</h2>
+<pre><code>input=gtdb
+
+# compute k-mers
+#   sequence containing "plasmid" in name are ignored,
+#   reference genomes are split into 10 chunks with 100bp overlap
+#   k = 21
+#
+# elapsed time: 10m:34s
+# peak rss: 3.87 GB
+# file size: 978.37 GB
+#
+memusg -t -s "kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
+    --log gtdb-r202-k21-n10.log -j 32 --force" &gt; gtdb.kmcp.s1.log2 2&gt;&amp;1
+
+# build database
+#   number of index files: 32, for server with &gt;= 32 CPU cores
+#   bloom filter parameter:
+#     number of hash function: 1
+#     false positive rate: 0.3
+#
+# elapsed time: 11m:48s
+# peak rss: 13.95 GB
+# file size: 58.03 GB
+#
+memusg -t -s "kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
+    --log gtdb.kmcp.log --force" &gt; gtdb.kmcp.s2.log2 2&gt;&amp;1
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map gtdb.kmcp/
+</code></pre>
+<h2 id="refseq-fungi">RefSeq fungi</h2>
+<pre><code>name=fungi
+
+input=files.renamed
+
+# elapsed time: 1m:02s
+# peak rss: 11.72 GB
+# file size: 70.52 GB
+#
+memusg -t -s "kmcp compute -I $input -O refseq-$name-k21-n10 \
+    -k 21 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 150 \
+    --log refseq-$name-k21-n10.log -j 32 --force" &gt; refseq-fungi.kmcp.s1.log2 2&gt;&amp;1
+
+# elapsed time: 52.204s
+# peak rss: 1.19 GB
+# file size: 4.18 GB
+memusg -t -s "kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
+    -j 32 -f 0.3 -n 1 \
+    --log refseq-fungi.kmcp.log --force" &gt; refseq-fungi.kmcp.s2.log2 2&gt;&amp;1
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map refseq-fungi.kmcp/
+</code></pre>
+<h2 id="genbank-viral">Genbank viral</h2>
+<pre><code>name=viral
+
+input=files.renamed.slim
+
+# elapsed time: 21.051s
+# peak rss: 3.53 GB
+# file size: 9.16 GB
+# 
+memusg -t -s "kmcp compute -I $input -O genbank-$name-k21-n10 \
+    -k 21 --seq-name-filter plasmid \
+    --split-number 10 --split-overlap 150 \
+    --log genbank-$name-k21-n10.log -j 32 --force" &gt; genbank-viral.kmcp.s1.log2 2&gt;&amp;1
+
+# viral genomes are small:
+#   using small false positive rate: 0.05
+#   still using one hash function: 1
+#
+# elapsed time: 31.828s
+# peak rss: 3.36 GB
+# file size: 4.72 GB
+#
+memusg -t -s "kmcp index -I genbank-$name-k21-n10/ -O genbank-viral.kmcp \
+    -j 32 -f 0.05 -n 1 -x 100K -8 1M \
+    --log genbank-viral.kmcp.log --force" &gt; genbank-viral.kmcp.s2.log2 2&gt;&amp;1
+
+# cp taxid and name mapping file to database directory
+cp taxid.map name.map genbank-viral.kmcp/
+</code></pre>
 
               
             </article>
@@ -625,41 +574,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../profiling/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taxonomic profiling" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Taxonomic profiling
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../../faq/" class="md-footer__link md-footer__link--next" aria-label="Next: FAQs" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              FAQs
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -681,10 +595,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5e13d264.min.js"></script>
+      <script src="../assets/javascripts/bundle.5e13d264.min.js"></script>
       
     
   </body>

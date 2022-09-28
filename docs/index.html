@@ -250,6 +250,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    Table of contents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#documents" class="md-nav__link">
     Documents
   </a>
@@ -314,6 +321,13 @@
         <li class="md-nav__item">
   <a href="#quickstart" class="md-nav__link">
     Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kmcp-vs-cobs" class="md-nav__link">
+    KMCP vs COBS
   </a>
   
 </li>
@@ -580,6 +594,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    Table of contents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#documents" class="md-nav__link">
     Documents
   </a>
@@ -649,6 +670,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#kmcp-vs-cobs" class="md-nav__link">
+    KMCP vs COBS
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#support" class="md-nav__link">
     Support
   </a>
@@ -694,6 +722,24 @@
 Wei Shen, Hongyan Xiang, Tianquan Huang, Hui Tang, Mingli Peng, Dachuan Cai, Peng Hu, Hong Ren.<br>
 bioRxiv 2022.03.07.482835; doi: <a href="https://doi.org/10.1101/2022.03.07.482835">https://doi.org/10.1101/2022.03.07.482835</a></p>
 </blockquote>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#documents">Documents</a></li>
+<li><a href="#what-can-we-do-">What can we do?</a><ul>
+<li><a href="#1-accurate-metagenomic-profiling">1. Accurate metagenomic profiling</a></li>
+<li><a href="#2-fast-sequence-search-against-large-scales-of-genomic-datasets">2. Fast sequence search against large scales of genomic datasets</a></li>
+<li><a href="#3-fast-genome-similarity-estimation">3. Fast genome similarity estimation</a></li>
+</ul>
+</li>
+<li><a href="#features">Features</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#quickstart">Quickstart</a></li>
+<li><a href="#kmcp-vs-cobs">KMCP vs COBS</a></li>
+<li><a href="#support">Support</a></li>
+<li><a href="#license">License</a></li>
+<li><a href="#acknowledgments">Acknowledgments</a></li>
+</ul>
 <h2 id="documents">Documents</h2>
 <ul>
 <li><a href="https://bioinf.shenwei.me/kmcp/download">Installation</a></li>
@@ -710,13 +756,12 @@ bioRxiv 2022.03.07.482835; doi: <a href="https://doi.org/10.1101/2022.03.07.4828
 <h2 id="what-can-we-do">What can we do?</h2>
 <h3 id="1-accurate-metagenomic-profiling">1. Accurate metagenomic profiling</h3>
 <p>KMCP adopts a novel metagenomic profiling strategy
-by splitting reference genomes into 10 or 5 chunks and mappings reads to these
+by splitting reference genomes into 10 chunks and mappings reads to these
 chunks via fast k-mer matching, denoted as <strong><em>pseudo-mapping</em></strong>.</p>
 <p>Benchmarking results on both simulated and real data indicate that KMCP not only
 allows for accurate taxonomic profiling of archaea, bacteria, and viral populations
 from metagenomic shotgun sequence data, but also provides confident pathogen detection
-in infectious clinical samples of low depth
-(check the <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>).</p>
+in infectious clinical samples of low depth.</p>
 <p><strong><em>Genome collections with custom taxonomy</em></strong>,
 e.g., <a href="https://gtdb.ecogenomic.org/">GTDB</a> uses its own taxonomy and
 <a href="https://doi.org/10.1038/s41564-021-00928-6">MGV</a> uses <a href="https://talk.ictvonline.org/">ICTV taxonomy</a>,
@@ -725,8 +770,8 @@ are also supported by generating NCBI-style taxdump files with <a href="https://
 <p>KMCP can be used for fast sequence search against large scales of genomic datasets
 as <a href="https://github.com/Phelimb/BIGSI">BIGSI</a> and <a href="https://github.com/bingmann/cobs">COBS</a> do.
 We reimplemented and modified the Compact Bit-Sliced Signature index (COBS) algorithm,
-bringing a smaller index size and much faster searching speed (<a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">4x-10x faster than COBS</a>)
- (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
+bringing a smaller index size and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">much faster searching speed (2x for genome search and 10x for short reads) faster than COBS</a>
+ (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>). Also check <a href="#kmcp-vs-cobs">the algorithm and data structure differences between KMCP and COBS</a>.</p>
 <h3 id="3-fast-genome-similarity-estimation">3. Fast genome similarity estimation</h3>
 <p>KMCP can also be used for fast similarity estimation of assemblies/genomes against known reference genomes.</p>
 <p>Genome sketching is a method of utilizing small and approximate summaries of
@@ -738,12 +783,12 @@ KMCP supports multiple k-mer sketches
 <a href="https://www.biorxiv.org/content/10.1101/2022.01.11.475838v2">FracMinHash</a>
 (previously named <a href="https://f1000research.com/articles/8-1006">Scaled MinHash</a>), and
 <a href="https://peerj.com/articles/10805/">Closed Syncmers</a>) for genome similarity estimation.
-And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-7x faster than Mash/Sourmash</a>
+And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 5x-7x faster than Mash/Sourmash</a>
  (check the <a href="https://bioinf.shenwei.me/kmcp/tutorial/searching">tutorial</a> and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching">benchmark</a>).</p>
 <h2 id="features">Features</h2>
 <ul>
 <li><strong>Easy to install</strong><ul>
-<li><a href="https://bioinf.shenwei.me/kmcp/download">Statically linked executable binaries for multiple platforms</a> (Linux/Windows/macOS, amd64).</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/download">Statically linked executable binaries for multiple platforms</a> (Linux/Windows/macOS, AMD64/ARM64).</li>
 <li>No dependencies, no configurations.</li>
 <li><code>conda install -c bioconda kmcp</code></li>
 </ul>
@@ -758,9 +803,9 @@ And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is
 </ul>
 </li>
 <li><strong>Fast searching speed</strong><ul>
-<li>The index structure is modified from COBS, while <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 4x-10x faster</a>.</li>
+<li>The index structure is modified from COBS, while <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 2x-10x faster</a>.</li>
 <li>Automatically scales to exploit all available CPU cores.</li>
-<li>Searching time is linearly related to the number of reference genomes.</li>
+<li>Searching time is linearly related to the number of reference genomes (chunks).</li>
 </ul>
 </li>
 <li><strong>Scalable searching</strong>. <em>Searching results against multiple databases can be fast merged</em>.
@@ -773,9 +818,9 @@ And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is
 <li><strong>Accurate taxonomic profiling</strong><ul>
 <li>Some k-mer based taxonomic profilers suffer from high false positive rates,
   while <a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods">KMCP adopts multiple strategies</a>
-  to <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">improve specificity and keeps high sensitivity at the same time</a>.</li>
-<li>In addition to archaea and bacteria, <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#16-mock-virome-communities-from-roux-et-al-virusesphages">KMCP performed well on <strong>viruses/phages</strong></a>.</li>
-<li><a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling/#87-metagenomic-samples-of-infected-body-fluids-bacteria-pathogens-low-coverage">KMCP also provides <strong>confident infectious pathogen detection</strong></a>.</li>
+  to <strong>improve specificity and keeps high sensitivity at the same time</strong>.</li>
+<li>In addition to archaea and bacteria, KMCP performed well on <strong>viruses/phages</strong>.</li>
+<li>KMCP also provides <strong>confident infectious pathogen detection</strong>.</li>
 <li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes">Preset six modes for multiple scenarios</a>.</li>
 <li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats">Supports CAMI and MetaPhlAn profiling format</a>.</li>
 </ul>
@@ -833,12 +878,8 @@ in two packages for better searching performance.</p>
 <td align="left">Generate taxonomic profile from search results</td>
 </tr>
 <tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#filter">utils filter</a></td>
-<td align="left">Filter search results and find species/assembly-specific queries</td>
-</tr>
-<tr>
-<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge-regions">utils merge-regions</a></td>
-<td align="left">Merge species/assembly-specific regions</td>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#split-genomes">utils split-genomes</a></td>
+<td align="left">Split genomes into chunks</td>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#unik-info">utils unik-info</a></td>
@@ -849,19 +890,31 @@ in two packages for better searching performance.</p>
 <td align="left">Print information of index file</td>
 </tr>
 <tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#ref-info">utils ref-info</a></td>
+<td align="left">Print information of reference chunks in a database</td>
+</tr>
+<tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#icov2simi">utils cov2simi</a></td>
 <td align="left">Convert k-mer coverage to sequence similarity</td>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#query-fpr">utils query-fpr</a></td>
-<td align="left">Compute the maximal false positive rate of a query</td>
+<td align="left">Compute the false positive rate of a query</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#filter">utils filter</a></td>
+<td align="left">Filter search results and find species/assembly-specific queries</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge-regions">utils merge-regions</a></td>
+<td align="left">Merge species/assembly-specific regions</td>
 </tr>
 </tbody>
 </table>
 <h2 id="quickstart">Quickstart</h2>
 <p><img alt="" src="kmcp-workflow.jpg" /></p>
 <pre><code># compute k-mers
-kmcp compute -k 21 --split-number 10 --split-overlap 100 \
+kmcp compute -k 21 --split-number 10 --split-overlap 150 \
     --in-dir genomes/ --out-dir genomes-k21-n10
 
 # index k-mers
@@ -886,9 +939,107 @@ kmcp profile search.kmcp.tsv.gz \
     --cami-report      search.tsv.gz.c.profile \
     --binning-result   search.tsv.gz.binning.gz
 </code></pre>
+<p>Next:</p>
+<ul>
+<li><a href="https://github.com/shenwei356/kmcp/tree/main/demo-profiling">Demo of taxonomic profiling</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling">Tutorial of taxonomic profiling</a></li>
+</ul>
+<h2 id="kmcp-vs-cobs">KMCP vs COBS</h2>
+<p>We reimplemented and modified the Compact Bit-Sliced Signature index (<a href="https://github.com/bingmann/cobs">COBS</a>) algorithm,
+bringing a smaller index size and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">much faster searching speed (2x for genome search and 10x for short reads) faster than COBS</a>.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Category</th>
+<th align="left">Iterm</th>
+<th align="left">COBS</th>
+<th align="left">KMCP</th>
+<th align="left">Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Algorithm</td>
+<td align="left">K-mer hashing</td>
+<td align="left">xxhash</td>
+<td align="left">ntHash1</td>
+<td align="left">xxHash is a general-purpose hashing function while ntHash is a recursive hash function for DNA/RNA</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Bloom filter hashing</td>
+<td align="left">xxhash</td>
+<td align="left">Using k-mer hash values</td>
+<td align="left">Avoid hash computation</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Multiple-hash functions</td>
+<td align="left">xxhash with different seeds</td>
+<td align="left">Generating multiple values from a single one</td>
+<td align="left">Avoid hash computation</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Single-hash function</td>
+<td align="left">Same to multiple-hash functions</td>
+<td align="left">Separated workflow</td>
+<td align="left">Reducing loops</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">AND step</td>
+<td align="left">Serial bitwise AND</td>
+<td align="left">Vectorised bitwise AND</td>
+<td align="left">Bitwise AND for &gt;1 hash functions</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">PLUS step</td>
+<td align="left">Serial bit-unpacking</td>
+<td align="left">Vectorised positional popcount with pospop</td>
+<td align="left">Counting from bit-packed data</td>
+</tr>
+<tr>
+<td align="left">Index structure</td>
+<td align="left">Size of blocks</td>
+<td align="left">/</td>
+<td align="left">Using extra thresholds to split the last block with the most k-mers</td>
+<td align="left">Uneven genome size distribution would make bloom filters of the last block extremely huge</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Index files</td>
+<td align="left">Concatentated</td>
+<td align="left">Independent</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Index loading</td>
+<td align="left">mmap, loading complete index into RAM</td>
+<td align="left">mmap, loading complete index into RAM, seek</td>
+<td align="left">Index loading modes</td>
+</tr>
+<tr>
+<td align="left">Input/output</td>
+<td align="left">Input files</td>
+<td align="left">FASTA/Q, McCortex, text</td>
+<td align="left">FASTA/Q</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Output</td>
+<td align="left">Target and matched k-mers</td>
+<td align="left">Target, matched k-mers, query FPR, etc.</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
 <h2 id="support">Support</h2>
 <p>Please <a href="https://github.com/shenwei356/kmcp/issues">open an issue</a> to report bugs,
-propose new functions or ask for help.</p>
+propose new functions, or ask for help.</p>
 <h2 id="license">License</h2>
 <p><a href="https://github.com/shenwei356/kmcp/blob/master/LICENSE">MIT License</a></p>
 <h2 id="acknowledgments">Acknowledgments</h2>

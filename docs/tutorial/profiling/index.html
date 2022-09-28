@@ -778,7 +778,7 @@
 </li>
 <li>Hardware.<ul>
 <li>CPU: ≥ 32 cores preferred.</li>
-<li>RAM: ≥ 64 GB, depends on file size of the maximal database.</li>
+<li>RAM: ≥ 64 GB, depends on file size of the biggest database.</li>
 </ul>
 </li>
 </ul>
@@ -829,8 +829,7 @@ and the results can be fastly merged for downstream analysis.</p>
 <p>Single-end can be given as positional arguments or <code>-1</code>/<code>-2</code>.</p>
 <pre><code>kmcp search -d db file1.fq.gz file2.fq.gz -o result.tsv.gz
 </code></pre>
-<p><strong>Single-end mode is recommended for paired-end reads, for higher sensitivity</strong>.
-See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.</p>
+<p><strong>Single-end mode is recommended for paired-end reads, for higher sensitivity</strong>.</p>
 </li>
 <li>
 <p>A long query sequence may contain duplicated k-mers, which are
@@ -840,7 +839,7 @@ See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.<
 <li>
 <p>For long reads or contigs, you should split them into short reads
     using <code>seqkit sliding</code>, e.g.,</p>
-<pre><code>seqkit sliding -s 100 -W 300
+<pre><code>seqkit sliding -s 100 -W 300-f/--max-fpr
 </code></pre>
 </li>
 <li>
@@ -850,8 +849,9 @@ See <a href="https://bioinf.shenwei.me/kmcp/benchmark/profiling">benchmark</a>.<
 <p><strong><code>kmcp search</code> and <code>kmcp profile</code> share some flags</strong>, therefore users
 can use stricter criteria in <code>kmcp profile</code>.</p>
 <ol>
-<li><code>-t/--min-query-cov</code>, minimal query coverage, i.e., 
+<li><code>-t/--min-query-cov</code>, minimum query coverage, i.e., 
    proportion of matched k-mers and unique k-mers of a query (default <code>0.55</code>, close to <code>~96.5%</code> sequence similarity)</li>
+<li><code>-f/--max-fpr</code>, maximum false positive rate of a query. (default <code>0.05</code>)</li>
 </ol>
 <h4 id="index-files-loading-modes"><strong>Index files loading modes</strong></h4>
 <ol>
@@ -902,7 +902,8 @@ for db in refseq-fungi.kmcp genbank-viral.kmcp gtdb.kmcp ; do
         --min-kmers          10 \
         --min-query-len      30 \
         --min-query-cov    0.55 \
-        $read1   $read2         \
+        $read1                  \
+        $read2                  \
         --out-file         $sample.kmcp@$dbname.tsv.gz \
         --log              $sample.kmcp@$dbname.tsv.gz.log
 done
@@ -910,7 +911,7 @@ done
 # 2. Merging search results against multiple databases
 kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 </code></pre>
-<p>Pair-end reads:</p>
+<p>Paired-end reads:</p>
 <pre><code># ---------------------------------------------------
 # paired-end
 
@@ -957,7 +958,7 @@ kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 </code></pre>
 <p>Note: The header line starts with <code>#</code>, you need to assign another comment charactor
 if using <code>csvtk</code> for analysis. e.g.,</p>
-<pre><code>csvtk filter2 -C '$' -t -f '$qCov &gt; 0.7' mock.fastq.gz.kmcp.gz
+<pre><code>csvtk filter2 -C '$' -t -f '$qCov &gt; 0.55' mock.kmcp.gz
 </code></pre>
 <p>Demo result:</p>
 <table>
@@ -982,157 +983,157 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 </thead>
 <tbody>
 <tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">NC_003197.2-64416/1</td>
 <td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">6</td>
-<td align="left">NC_012971.2</td>
-<td align="left">2</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">9</td>
 <td align="left">10</td>
-<td align="left">4558953</td>
-<td align="left">31</td>
-<td align="left">120</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">90</td>
+<td align="left">0.6923</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">NC_003197.2-64414/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">6</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">130</td>
 <td align="left">1.0000</td>
 <td align="left">0.0003</td>
 <td align="left">0.0003</td>
-<td align="left">0</td>
+<td align="left">2</td>
 </tr>
 <tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">NC_003197.2-64412/1</td>
 <td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
 <td align="left">6</td>
-<td align="left">NC_000913.3</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">121</td>
+<td align="left">0.9308</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">NC_003197.2-64410/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">1</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">101</td>
+<td align="left">0.7769</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">NC_003197.2-64408/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">7.8754e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">83</td>
+<td align="left">0.6385</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">5</td>
+</tr>
+<tr>
+<td align="left">NC_003197.2-64406/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
 <td align="left">2</td>
 <td align="left">10</td>
-<td align="left">4641652</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0003</td>
-<td align="left">0.0003</td>
-<td align="left">0</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">103</td>
+<td align="left">0.7923</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">6</td>
 </tr>
 <tr>
-<td align="left">NC_000913.3_sliding:1244941-1245090</td>
+<td align="left">NC_003197.2-64404/1</td>
 <td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">6</td>
-<td align="left">NC_018658.1</td>
+<td align="left">130</td>
+<td align="left">7.4671e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
 <td align="left">5</td>
 <td align="left">10</td>
-<td align="left">5273097</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">86</td>
+<td align="left">0.6615</td>
 <td align="left">0.0002</td>
 <td align="left">0.0002</td>
-<td align="left">0</td>
-</tr>
-<tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NC_012971.2</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">4558953</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0003</td>
-<td align="left">0.0003</td>
-<td align="left">1</td>
-</tr>
-<tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NC_000913.3</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">4641652</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0003</td>
-<td align="left">0.0003</td>
-<td align="left">1</td>
-</tr>
-<tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NC_013654.1</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">4717338</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0003</td>
-<td align="left">0.0003</td>
-<td align="left">1</td>
-</tr>
-<tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NZ_CP007592.1</td>
-<td align="left">1</td>
-<td align="left">10</td>
-<td align="left">5104557</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0002</td>
-<td align="left">0.0002</td>
-<td align="left">1</td>
-</tr>
-<tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
-<td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NC_018658.1</td>
 <td align="left">7</td>
-<td align="left">10</td>
-<td align="left">5273097</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0002</td>
-<td align="left">0.0002</td>
-<td align="left">1</td>
 </tr>
 <tr>
-<td align="left">NC_013654.1_sliding:344871-345020</td>
+<td align="left">NC_003197.2-64402/1</td>
 <td align="left">150</td>
-<td align="left">120</td>
-<td align="left">1.5955e-26</td>
-<td align="left">8</td>
-<td align="left">NZ_CP028116.1</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">5648177</td>
-<td align="left">31</td>
-<td align="left">120</td>
-<td align="left">1.0000</td>
-<td align="left">0.0002</td>
-<td align="left">0.0002</td>
+<td align="left">130</td>
+<td align="left">7.5574e-15</td>
 <td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">3</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">84</td>
+<td align="left">0.6462</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">8</td>
+</tr>
+<tr>
+<td align="left">NC_003197.2-64400/1</td>
+<td align="left">150</td>
+<td align="left">130</td>
+<td align="left">7.4626e-15</td>
+<td align="left">1</td>
+<td align="left">GCF_000006945.2</td>
+<td align="left">1</td>
+<td align="left">10</td>
+<td align="left">4857450</td>
+<td align="left">21</td>
+<td align="left">89</td>
+<td align="left">0.6846</td>
+<td align="left">0.0002</td>
+<td align="left">0.0002</td>
+<td align="left">9</td>
 </tr>
 </tbody>
 </table>
@@ -1257,7 +1258,7 @@ fd kmcp.tsv.gz$ $reads/ \
 <ol>
 <li>Reference genomes can be split into chunks when computing
     k-mers (sketches), which could help to increase the specificity
-    via a threshold, i.e., the minimal proportion of matched chunks
+    via a threshold, i.e., the minimum proportion of matched chunks
     (<code>-p/--min-chunks-fraction</code>). (<strong><em>highly recommended</em></strong>)
     Another flag <code>-d/--max-chunks-cov-stdev</code> further reduces false positives.</li>
 <li>We require a part of the uniquely matched reads of a reference
@@ -1269,12 +1270,9 @@ fd kmcp.tsv.gz$ $reads/ \
     If stage 1/4 produces thousands of candidates, you can use
     the flag <code>--no-amb-corr</code> to reduce analysis time, which has very little
      effect on the results.</li>
-<li>Multi-aligned queries are proportionally assigned to references
-    with a similar strategy in <a href="https://doi.org/10.1186/s13059-020-02159-0">Metalign</a>.</li>
-<li>Input files are parsed 4 times, therefore STDIN is not supported.</li>
+<li>Abundance are estimated using an Expectation-Maximization (EM) algorithm..</li>
+<li>Input files are parsed for multiple times, therefore STDIN is not supported.</li>
 </ol>
-<p>Three-rounds profiling:</p>
-<p><img src="profiling-steps.jpg" alt="" width="500"/></p>
 <p><strong>Accuracy notes</strong>:</p>
 <ul>
 <li>Smaller <code>-t/--min-qcov</code> increase sensitivity at the cost of higher false
@@ -1283,9 +1281,9 @@ fd kmcp.tsv.gz$ $reads/ \
     having high similarity, i.e., with high confidence to decrease
     the false positive.
     E.g., <code>-H &gt;= 0.8</code> and <code>-P &gt;= 0.1</code> equals to <code>90th percentile &gt;= 0.8</code><ul>
-<li><code>-U/--min-hic-ureads</code>,      minimal number, <code>&gt;= 1</code></li>
-<li><code>-H/--min-hic-ureads-qcov</code>, minimal query coverage, <code>&gt;= -t/--min-qcov</code></li>
-<li><code>-P/--min-hic-ureads-prop</code>, minimal proportion, higher values
+<li><code>-U/--min-hic-ureads</code>,      minimum number, <code>&gt;= 1</code></li>
+<li><code>-H/--min-hic-ureads-qcov</code>, minimum query coverage, <code>&gt;= -t/--min-qcov</code></li>
+<li><code>-P/--min-hic-ureads-prop</code>, minimum proportion, higher values
 increase precision at the cost of sensitivity.</li>
 </ul>
 </li>
@@ -1313,7 +1311,7 @@ increase precision at the cost of sensitivity.</li>
 -d/--max-chunks-depth-stdev   10     2     2     2      2     1.5
 -u/--min-uniq-reads           1      2     5     20     50    50
 -U/--min-hic-ureads           1      1     2     5      10    10
--H/--min-hic-ureads-qcov      0.55   0.7   0.7   0.75   0.8   0.8
+-H/--min-hic-ureads-qcov      0.7    0.7   0.7   0.75   0.8   0.8
 -P/--min-hic-ureads-prop      0.01   0.1   0.2   0.1    0.1   0.15
 --keep-main-matches           true                            
 --max-qcov-gap                0.4
@@ -1323,9 +1321,9 @@ increase precision at the cost of sensitivity.</li>
 <li>Mapping references IDs to TaxIds: <code>-T/--taxid-map</code></li>
 <li>NCBI taxonomy dump files: <code>-X/--taxdump</code></li>
 </ol>
-<p>For databases built with a custom genome collection, you can use
+<p><strong>For databases built with a custom genome collection, you can use
 <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>
-to create NCBI-style taxdump files, which also generates a TaxId mapping file.</p>
+to create NCBI-style taxdump files, which also generates a TaxId mapping file</strong>.</p>
 <p><strong>Performance notes</strong>:</p>
 <ol>
 <li>Searching results are parsed in parallel, and the number of
@@ -1369,7 +1367,7 @@ kmcp profile \
     --binning-result   $sfile.binning.gz
 </code></pre>
 <h4 id="profiling-result-formats">Profiling result formats</h4>
-<p><strong>Supported profiling output formats</strong>:</p>
+<p>Taxonomic profiling output formats:</p>
 <ul>
 <li>KMCP      (<code>-o/--out-prefix</code>). 
   <strong>Note that: abundances are only computed for target references rather than
@@ -1377,28 +1375,28 @@ kmcp profile \
 <li>CAMI      (<code>-M/--metaphlan-report</code>, <code>--metaphlan-report-version</code>, sample name: <code>-s/--sample-id</code>, taxonomy data: <code>--taxonomy-id</code>)</li>
 <li>MetaPhlAn (<code>-C/--cami-report</code>, sample name: <code>-s/--sample-id</code>))</li>
 </ul>
-<p><strong>Supported taxonomic binning formats</strong>:</p>
+<p>Taxonomic binning formats:</p>
 <ul>
 <li>CAMI      (<code>-B/--binning-result</code>)</li>
 </ul>
-<p><strong>KMCP format</strong>:</p>
-<p>Tab-delimited format with 16 columns:</p>
+<p>KMCP format (Tab-delimited format with 17 columns):</p>
 <pre><code> 1. ref,                Identifier of the reference genome
  2. percentage,         Relative abundance of the reference
- 3. score,              The 90th percentile of qCov of uniquely matched reads
- 4. chunksFrac,         Genome chunks fraction
- 5. chunksRelDepth,     Relative depths of reference chunks
- 6. chunksRelDepthStd,  The strandard deviation of chunksRelDepth
- 7. reads,              Total number of matched reads of this reference
- 8. ureads,             Number of uniquely matched reads
- 9. hicureads,          Number of uniquely matched reads with high-confidence
-10. refsize,            Reference size
-11. refname,            Reference name, optional via name mapping file
-12. taxid,              TaxId of the reference
-13. rank,               Taxonomic rank
-14. taxname,            Taxonomic name
-15. taxpath,            Complete lineage
-16. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
+ 3. coverage,           Average coverage of the reference
+ 4. score,              The 90th percentile of qCov of uniquely matched reads
+ 5. chunksFrac,         Genome chunks fraction
+ 6. chunksRelDepth,     Relative depths of reference chunks
+ 7. chunksRelDepthStd,  The standard deviation of chunksRelDepth
+ 8. reads,              Total number of matched reads of this reference
+ 9. ureads,             Number of uniquely matched reads
+10. hicureads,          Number of uniquely matched reads with high-confidence
+11. refsize,            Reference size
+12. refname,            Reference name, optional via name mapping file
+13. taxid,              TaxId of the reference
+14. rank,               Taxonomic rank
+15. taxname,            Taxonomic name
+16. taxpath,            Complete lineage
+17. taxpathsn,          Corresponding TaxIds of taxa in the complete lineage
 </code></pre>
 <p>Demo output:</p>
 <table>
@@ -1406,6 +1404,7 @@ kmcp profile \
 <tr>
 <th align="left">ref</th>
 <th align="left">percentage</th>
+<th align="left">coverage</th>
 <th align="left">score</th>
 <th align="left">chunksFrac</th>
 <th align="left">chunksRelDepth</th>
@@ -1424,76 +1423,80 @@ kmcp profile \
 </thead>
 <tbody>
 <tr>
-<td align="left">NC_013654.1</td>
-<td align="left">48.321535</td>
+<td align="left">GCF_003697165.2</td>
+<td align="left">18.663804</td>
+<td align="left">1.864553</td>
 <td align="left">100.00</td>
 <td align="left">1.00</td>
-<td align="left">0.99;1.00;0.99;1.00;0.99;0.99;0.99;0.98;1.05;1.02</td>
+<td align="left">1.04;0.90;1.03;1.00;0.90;1.00;1.00;1.02;1.11;0.99</td>
+<td align="left">0.06</td>
+<td align="left">60952</td>
+<td align="left">27831</td>
+<td align="left">15850</td>
+<td align="left">4903501</td>
+<td align="left"></td>
+<td align="left">4093283224</td>
+<td align="left">species</td>
+<td align="left">Escherichia coli</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli</td>
+<td align="left">609216830;3788559933;329474883;3160438580;2234733759;3334977531;4093283224</td>
+</tr>
+<tr>
+<td align="left">GCF_002949675.1</td>
+<td align="left">18.201855</td>
+<td align="left">1.818404</td>
+<td align="left">97.69</td>
+<td align="left">1.00</td>
+<td align="left">1.04;0.93;1.02;1.03;1.04;0.97;1.04;1.02;0.95;0.98</td>
+<td align="left">0.04</td>
+<td align="left">53288</td>
+<td align="left">17152</td>
+<td align="left">8866</td>
+<td align="left">4395762</td>
+<td align="left"></td>
+<td align="left">524994882</td>
+<td align="left">species</td>
+<td align="left">Shigella dysenteriae</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Shigella;Shigella dysenteriae</td>
+<td align="left">609216830;3788559933;329474883;3160438580;2234733759;2258433137;524994882</td>
+</tr>
+<tr>
+<td align="left">GCF_000006945.2</td>
+<td align="left">18.143627</td>
+<td align="left">1.812587</td>
+<td align="left">100.00</td>
+<td align="left">1.00</td>
+<td align="left">1.02;0.98;0.98;0.99;1.03;0.99;0.98;1.03;0.97;1.02</td>
 <td align="left">0.02</td>
-<td align="left">287936</td>
-<td align="left">226225</td>
-<td align="left">226225</td>
-<td align="left">4717338</td>
+<td align="left">58697</td>
+<td align="left">57300</td>
+<td align="left">40690</td>
+<td align="left">4857450</td>
 <td align="left"></td>
-<td align="left">431946</td>
-<td align="left">strain</td>
-<td align="left">Escherichia coli SE15</td>
-<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli SE15</td>
-<td align="left">2;1224;1236;91347;543;561;562;431946</td>
+<td align="left">1678121664</td>
+<td align="left">species</td>
+<td align="left">Salmonella enterica</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Salmonella;Salmonella enterica</td>
+<td align="left">609216830;3788559933;329474883;3160438580;2234733759;794943543;1678121664</td>
 </tr>
 <tr>
-<td align="left">NC_000913.3</td>
-<td align="left">46.194629</td>
+<td align="left">GCF_000742135.1</td>
+<td align="left">17.738253</td>
+<td align="left">1.772089</td>
 <td align="left">100.00</td>
 <td align="left">1.00</td>
-<td align="left">1.04;0.99;1.00;1.00;0.99;0.99;0.99;0.97;1.04;0.98</td>
+<td align="left">1.01;1.01;1.02;0.99;1.01;1.01;1.00;0.97;0.96;1.03</td>
 <td align="left">0.02</td>
-<td align="left">270846</td>
-<td align="left">175686</td>
-<td align="left">175686</td>
-<td align="left">4641652</td>
+<td align="left">65518</td>
+<td align="left">63665</td>
+<td align="left">44088</td>
+<td align="left">5545864</td>
 <td align="left"></td>
-<td align="left">511145</td>
-<td align="left">no rank</td>
-<td align="left">Escherichia coli str. K-12 substr. MG1655</td>
-<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli K-12</td>
-<td align="left">2;1224;1236;91347;543;561;562;83333</td>
-</tr>
-<tr>
-<td align="left">NC_002695.2</td>
-<td align="left">5.014025</td>
-<td align="left">100.00</td>
-<td align="left">1.00</td>
-<td align="left">0.97;0.98;0.92;1.12;1.01;0.95;1.00;1.01;1.03;1.00</td>
-<td align="left">0.05</td>
-<td align="left">34825</td>
-<td align="left">22945</td>
-<td align="left">22945</td>
-<td align="left">5498578</td>
-<td align="left"></td>
-<td align="left">386585</td>
-<td align="left">strain</td>
-<td align="left">Escherichia coli O157:H7 str. Sakai</td>
-<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Escherichia;Escherichia coli;Escherichia coli O157:H7 str. Sakai</td>
-<td align="left">2;1224;1236;91347;543;561;562;386585</td>
-</tr>
-<tr>
-<td align="left">NC_010655.1</td>
-<td align="left">0.469811</td>
-<td align="left">100.00</td>
-<td align="left">1.00</td>
-<td align="left">1.03;0.87;0.90;0.98;1.15;1.17;0.90;0.96;0.96;1.09</td>
-<td align="left">0.10</td>
-<td align="left">1581</td>
-<td align="left">1581</td>
-<td align="left">1581</td>
-<td align="left">2664102</td>
-<td align="left"></td>
-<td align="left">349741</td>
-<td align="left">strain</td>
-<td align="left">Akkermansia muciniphila ATCC BAA-835</td>
-<td align="left">Bacteria;Verrucomicrobia;Verrucomicrobiae;Verrucomicrobiales;Akkermansiaceae;Akkermansia;Akkermansia muciniphila;Akkermansia muciniphila ATCC BAA-835</td>
-<td align="left">2;74201;203494;48461;1647988;239934;239935;349741</td>
+<td align="left">3958205156</td>
+<td align="left">species</td>
+<td align="left">Klebsiella pneumoniae</td>
+<td align="left">Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Enterobacteriaceae;Klebsiella;Klebsiella pneumoniae</td>
+<td align="left">609216830;3788559933;329474883;3160438580;2234733759;2440106587;3958205156</td>
 </tr>
 </tbody>
 </table>

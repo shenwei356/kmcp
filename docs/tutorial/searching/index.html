@@ -966,7 +966,7 @@ For examples, setting a smaller scale like 10.</li>
 <p>The searching process is simple and <a href="https://bioinf.shenwei.me/kmcp/benchmark">very fast</a> (&lt;1 second).</p>
 <pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
     --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-    --query-id genomme1 contigs.fasta -o result.tsv
+    --query-id genome1 contigs.fasta -o result.tsv
 </code></pre>
 <p>The output is in tab-delimited format:</p>
 <pre><code> 1. query,    Identifier of the query sequence
@@ -1008,7 +1008,7 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">9488952</td>
 <td align="left">18737</td>
 <td align="left">0.0000e+00</td>
@@ -1025,7 +1025,7 @@ For examples, setting a smaller scale like 10.</li>
 <td align="left">0</td>
 </tr>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">9488952</td>
 <td align="left">18737</td>
 <td align="left">3.1964e-183</td>
@@ -1047,7 +1047,7 @@ For examples, setting a smaller scale like 10.</li>
 <pre><code>kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
     --name-map name.map \
     --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-    --query-id genomme1 contigs.fasta \
+    --query-id genome1 contigs.fasta \
     | csvtk rename -t -C $ -f 1 -n query \
     | csvtk cut -t -f query,jacc,target \
     &gt; result.tsv
@@ -1062,12 +1062,12 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">0.3719</td>
 <td align="left">NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence</td>
 </tr>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">0.1954</td>
 <td align="left">NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence</td>
 </tr>
@@ -1077,7 +1077,7 @@ For examples, setting a smaller scale like 10.</li>
 <pre><code>kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ \
     --name-map name.map \
     --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-    --query-id genomme1 contigs.fasta \
+    --query-id genome1 contigs.fasta \
     | csvtk rename -t -C $ -f 1 -n query \
     | csvtk cut -t -f query,jacc,target
 </code></pre>
@@ -1091,12 +1091,12 @@ For examples, setting a smaller scale like 10.</li>
 </thead>
 <tbody>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">0.3712</td>
 <td align="left">NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence</td>
 </tr>
 <tr>
-<td align="left">genomme1</td>
+<td align="left">genome1</td>
 <td align="left">0.1974</td>
 <td align="left">NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence</td>
 </tr>
