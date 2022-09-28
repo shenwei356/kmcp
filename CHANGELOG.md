@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.9.0 - 2022-09-00
+### v0.9.0 - 2022-09-28 
 
 - `compute`:
     - smaller output files and faster speed.

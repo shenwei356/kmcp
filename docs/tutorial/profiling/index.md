@@ -129,7 +129,8 @@ can use stricter criteria in `kmcp profile`.
             --min-kmers          10 \
             --min-query-len      30 \
             --min-query-cov    0.55 \
-            $read1   $read2         \
+            $read1                  \
+            $read2                  \
             --out-file         $sample.kmcp@$dbname.tsv.gz \
             --log              $sample.kmcp@$dbname.tsv.gz.log
     done
@@ -137,7 +138,7 @@ can use stricter criteria in `kmcp profile`.
     # 2. Merging search results against multiple databases
     kmcp merge $sample.kmcp@*.tsv.gz --out-file $sample.kmcp.tsv.gz
 
-Pair-end reads:
+Paired-end reads:
 
     # ---------------------------------------------------
     # paired-end

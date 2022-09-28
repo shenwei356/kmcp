@@ -206,7 +206,7 @@ The searching process is simple and [very fast](https://bioinf.shenwei.me/kmcp/b
 
     kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
         --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-        --query-id genomme1 contigs.fasta -o result.tsv
+        --query-id genome1 contigs.fasta -o result.tsv
 
 The output is in tab-delimited format:
 
@@ -232,34 +232,34 @@ A full search result:
 
 |#query  |qLen   |qKmers|FPR        |hits|target         |chunkIdx|chunks|tLen   |kSize|mKmers|qCov  |tCov  |jacc  |queryIdx|
 |:-------|:------|:-----|:----------|:---|:--------------|:-------|:-----|:------|:----|:-----|:-----|:-----|:-----|:-------|
-|genomme1|9488952|18737 |0.0000e+00 |2   |GCF_000742135.1|0       |1     |5545784|31   |8037  |0.4289|0.7365|0.3719|0       |
-|genomme1|9488952|18737 |3.1964e-183|2   |GCF_000392875.1|0       |1     |2881400|31   |3985  |0.2127|0.7062|0.1954|0       |
+|genome1 |9488952|18737 |0.0000e+00 |2   |GCF_000742135.1|0       |1     |5545784|31   |8037  |0.4289|0.7365|0.3719|0       |
+|genome1 |9488952|18737 |3.1964e-183|2   |GCF_000392875.1|0       |1     |2881400|31   |3985  |0.2127|0.7062|0.1954|0       |
 
 Reference IDs can be optionally mapped to their names, let's print the main columns only:
 
     kmcp search --query-whole-file -d gtdb.minhash.kmcp/ \
         --name-map name.map \
         --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-        --query-id genomme1 contigs.fasta \
+        --query-id genome1 contigs.fasta \
         | csvtk rename -t -C $ -f 1 -n query \
         | csvtk cut -t -f query,jacc,target \
         > result.tsv
     
 |query   |jacc  |target                                                                                          |
 |:-------|:-----|:-----------------------------------------------------------------------------------------------|
-|genomme1|0.3719|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
-|genomme1|0.1954|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|
+|genome1 |0.3719|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
+|genome1 |0.1954|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|
 
 Using closed syncmer:
 
     kmcp search --query-whole-file -d gtdb.syncmer.kmcp/ \
         --name-map name.map \
         --query-whole-file --sort-by jacc --min-query-cov 0.2 \
-        --query-id genomme1 contigs.fasta \
+        --query-id genome1 contigs.fasta \
         | csvtk rename -t -C $ -f 1 -n query \
         | csvtk cut -t -f query,jacc,target
 
 |query   |jacc  |target                                                                                          |
 |:-------|:-----|:-----------------------------------------------------------------------------------------------|
-|genomme1|0.3712|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
-|genomme1|0.1974|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|
+|genome1 |0.3712|NZ_KN046818.1 Klebsiella pneumoniae strain ATCC 13883 scaffold1, whole genome shotgun sequence  |
+|genome1 |0.1974|NZ_KB944588.1 Enterococcus faecalis ATCC 19433 acAqW-supercont1.1, whole genome shotgun sequence|
