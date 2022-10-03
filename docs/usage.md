@@ -674,7 +674,7 @@ Columns:
     chunkIdx, the idx of the chunk, 0-based
     chunks,   the number of chunks of the reference
     kmers,    the number of k-mers of the chunk
-    fpr,      the actual false-positive reate of the chunk
+    fpr,      the actual false-positive rate of the chunk
 
 Usage:
   kmcp utils ref-info [flags] 

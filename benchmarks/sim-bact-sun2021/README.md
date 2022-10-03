@@ -16,7 +16,7 @@
 
 - KMCP,  GTDB-RS202 (2021-04-27) + Refseq-fungi (r208, 2021-09-30), 2021-12-06
 - Centrifuge, built with the genomes same to KMCP.
-- mOTUs, 3.0.1 (2021-06-28), 2019-01
+- mOTUs, 2.6.0 (2021-06-28), 2019-01
 - MetaPhlAn, mpa_v30_CHOCOPhlAn_201901 (?), 2019-01
 - Kraken, PlusPF (2021-05-17), 2021-05-17
 - Kraken, built with the genomes same to KMCP.
