@@ -292,6 +292,10 @@ Examples:
 		// ---------------------------------------------------------------
 		// check Database
 
+		if outputLog {
+			log.Infof("checking the database: %s", dbDir)
+		}
+
 		subFiles, err := os.ReadDir(dbDir)
 		if err != nil {
 			checkError(fmt.Errorf("read database error: %s", err))
