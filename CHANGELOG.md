@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.9.1
+
+- `kmcp search`
+    - faster speed for ARM architecture.
+
 ### v0.9.0 - 2022-09-28 
 
 - `compute`:

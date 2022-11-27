@@ -133,8 +133,10 @@ in two packages for better searching performance.
 
 - [pand](https://github.com/shenwei356/pand),
   for accelerating searching on databases constructed with multiple hash functions.
-- [pospop](https://github.com/clausecker/pospop/tree/677120eb417c111be2b18c5c16ac5228a094306d),
+- [pospop](https://github.com/shenwei356/pospop/tree/short-input2),
   for batch counting matched k-mers in bloom filters.
+
+ARM architecture is supported, but `kmcp search` would be slower.
 
 ## Commands
 
@@ -194,6 +196,9 @@ Next:
 We reimplemented and modified the Compact Bit-Sliced Signature index ([COBS](https://github.com/bingmann/cobs)) algorithm,
 bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
 
+<details>
+<summary>The differences between KMCP and COBS</summary>
+
 |Category       |Iterm                  |COBS                                 |KMCP                                                               |Comment                                                                                           |
 |:--------------|:----------------------|:------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
 |Algorithm      |K-mer hashing          |xxhash                               |ntHash1                                                            |xxHash is a general-purpose hashing function while ntHash is a recursive hash function for DNA/RNA|
@@ -208,6 +213,7 @@ bringing a smaller index size and [much faster searching speed (2x for genome se
 |Input/output   |Input files            |FASTA/Q, McCortex, text              |FASTA/Q                                                            |                                                                                                  |
 |               |Output                 |Target and matched k-mers            |Target, matched k-mers, query FPR, etc.                            |                                                                                                  |
 
+</details>
 
 ## Support
 

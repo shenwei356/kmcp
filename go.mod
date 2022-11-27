@@ -3,7 +3,6 @@ module github.com/shenwei356/kmcp
 go 1.17
 
 require (
-	github.com/clausecker/pospop v0.0.0-20200819135010-677120eb417c
 	github.com/dustin/go-humanize v1.0.0
 	github.com/edsrzf/mmap-go v1.1.0
 	github.com/grailbio/base v0.0.10 // indirect
@@ -16,6 +15,7 @@ require (
 	github.com/shenwei356/breader v0.3.2
 	github.com/shenwei356/go-logging v0.0.0-20171012171522-c6b9702d88ba
 	github.com/shenwei356/pand v0.0.6
+	github.com/shenwei356/pospop v1.2.1-0.20221127054734-474ce41772f4
 	github.com/shenwei356/unik/v5 v5.0.1
 	github.com/shenwei356/util v0.5.0
 	github.com/shenwei356/xopen v0.2.2
@@ -41,5 +41,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/will-rowe/nthash v0.4.0 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.2.0 // indirect
 )
