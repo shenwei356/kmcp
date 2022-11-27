@@ -10,7 +10,7 @@ in two packages for better searching performance.
 
 - [pand](https://github.com/shenwei356/pand),
   for accelerating searching on databases constructed with multiple hash functions.
-- [pospop](https://github.com/shenwei356/pospop/tree/short-input2),
+- [pospop](https://github.com/shenwei356/pospop/tree/short-input3),
   for batch counting matched k-mers in bloom filters.
 
 ARM architecture is supported, but `kmcp search` would be slower.
