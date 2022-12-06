@@ -87,6 +87,11 @@ If the speed is very slow.
 - Are the reference genomes are highly similar? E.g., tens of thousands of genomes of a same species?
     - If yes, check the search result to see if there are thousands of matches for a read.
       You may choose another graph-based sequence searching tool.
+      
+- Are you searching with metatranscriptomics data?
+    - If yes, the search results would show that a huge number of reads from 16 rRNA genes have thousands of matches,
+      therefore, writing results slow down the search.
+      So these reads should be filtered out before the search using tools like https://github.com/hzi-bifo/RiboDetector.
 
 ### Can I run multiple KMCP processes in a machine?
 

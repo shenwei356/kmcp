@@ -3,7 +3,8 @@
 ### v0.9.1
 
 - `kmcp search`
-    - faster speed for ARM architecture.
+    - faster speed for ARM architectures.
+    - fix compilation for ARM architectures.
 
 ### v0.9.0 - 2022-09-28 
 
