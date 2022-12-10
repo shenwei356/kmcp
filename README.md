@@ -1,7 +1,8 @@
+<center><img src="kmcp-logo.png" alt="Kmer-based Metagenomic Classification and Profiling" width="700"/></center>
+
 # KMCP: accurate metagenomic profiling of both prokaryotic and viral populations by pseudo-mapping
 
 
-![](kmcp-logo.png)
 
 ## The preprint
 
@@ -196,8 +197,8 @@ Next:
 We reimplemented and modified the Compact Bit-Sliced Signature index ([COBS](https://github.com/bingmann/cobs)) algorithm,
 bringing a smaller index size and [much faster searching speed (2x for genome search and 10x for short reads) faster than COBS](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
 
-<details>
-<summary>The differences between KMCP and COBS</summary>
+
+The differences between KMCP and COBS
 
 |Category       |Iterm                  |COBS                                 |KMCP                                                               |Comment                                                                                           |
 |:--------------|:----------------------|:------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
@@ -213,7 +214,6 @@ bringing a smaller index size and [much faster searching speed (2x for genome se
 |Input/output   |Input files            |FASTA/Q, McCortex, text              |FASTA/Q                                                            |                                                                                                  |
 |               |Output                 |Target and matched k-mers            |Target, matched k-mers, query FPR, etc.                            |                                                                                                  |
 
-</details>
 
 ## Support
 
