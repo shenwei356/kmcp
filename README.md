@@ -1,4 +1,4 @@
-<center><img src="kmcp-logo.png" alt="Kmer-based Metagenomic Classification and Profiling" width="700"/></center>
+<center><img src="kmcp-logo.jpg" alt="Kmer-based Metagenomic Classification and Profiling" width="800"/></center>
 
 # KMCP: accurate metagenomic profiling of both prokaryotic and viral populations by pseudo-mapping
 
