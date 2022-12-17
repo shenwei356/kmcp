@@ -1,8 +1,8 @@
-Category	Iterm	COBS	KMCP	Comment
+Category	Item	COBS	KMCP	Comment
 Algorithm	K-mer hashing	xxhash	ntHash1	xxHash is a general-purpose hashing function while ntHash is a recursive hash function for DNA/RNA
 	Bloom filter hashing	xxhash	Using k-mer hash values	Avoid hash computation
 	Multiple-hash functions	xxhash with different seeds	Generating multiple values from a single one	Avoid hash computation
-	Single-hash function	Same to multiple-hash functions	Separated workflow	Reducing loops
+	Single-hash function	Same as multiple-hash functions	Separated workflow	Reducing loops
 	AND step	Serial bitwise AND	Vectorised bitwise AND	Bitwise AND for >1 hash functions
 	PLUS step	Serial bit-unpacking	Vectorised positional popcount with pospop	Counting from bit-packed data
 Index structure	Size of blocks	/	Using extra thresholds to split the last block with the most k-mers	Uneven genome size distribution would make bloom filters of the last block extremely huge

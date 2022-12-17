@@ -1,4 +1,4 @@
-site_name: KMCP - Metagenomic Profiler
+site_name: KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching
 site_url: https://bioinf.shenwei.me/kmcp
 nav:
 - Home: index.md

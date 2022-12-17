@@ -179,13 +179,14 @@ custom_breaks_y2 <- seq(0,-log10(min(df3$SE150)), 1)
 
 df3 <- df3 %>% gather(-qcov, -pident, -recall, key = "rlen", value = "fpr")
 df3$rlen <- recode(df3$rlen, SE150="150 bp", SE100="100 bp", SE50="50 bp")
+df3$rlen <- factor(df3$rlen, levels = c("50 bp", "100 bp", "150 bp"))
 
 p5 <- ggplot(df3, aes(qcov, recall)) +
   xlab("k-mer similarity threshold(%)") +
   # geom_point(size = 1.2, color="grey30") +
   geom_smooth(color = "#0072B2", size = 0.9) +
   geom_line(aes(y = -log10(fpr) / s150, color = rlen), size = 0.9) +
-  scale_color_manual(values = c( "#E69F00", "#D55e00", "#FFDB3C")) +
+  scale_color_manual(values = c("#FFDB3C", "#E69F00", "#D55e00")) +
   labs(color = "read length") +
   theme1 +
   #   geom_hline(
