@@ -50,7 +50,9 @@ Users can also [build custom databases](#building-custom-databases), it's simple
 
 **Taxonomy data**:
 
-- Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ) (2021-12-06, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU))
+- NCBI Taxonomy dump file: [taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ) (2021-12-06, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU))
+- Alternately, we also provide a taxdump file [merging the GTDB taxonomy (for prokaryotic genomes from GTDB) and NCBI taxonomy (for genomes from NCBI)](#merging-gtdb-and-ncbi-taxonomy):
+  [gtdb+ncbi-taxdump.tar.gz](https://1drv.ms/u/s!Ag89cZ8NYcqtkGPCUefjtPBtdDk4?e=kZcMX5) (GTDB r202 + NCBI 2021-12-06, [md5](https://1drv.ms/t/s!Ag89cZ8NYcqtkGJSTgz0hhL_ex5f?e=EPAPcN))
 
 **Taxonomy data for HumGut**:
 
@@ -1596,3 +1598,115 @@ Output:
 Where `num-sigs` is the size of the bloom filters, and `num-names` is the number of genome (chunks).
 
 What's next? Check the [tutorials](/kmcp/tutorial).
+
+## Merging GTDB and NCBI taxonomy
+
+By default, we use NCBI taxonomy database for reference genomes from GTDB and Refseq.
+Alternately, we can also use the GTDB taxonomy.
+
+The idea is to export lineages from both GTDB and NCBI using [taxonkit reformat](https://bioinf.shenwei.me/taxonkit/usage/#reformat), and then create taxdump files from them with [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump).
+
+1. Mapping genome assembly accessions to GTDB lineages using existing [GTDB-taxdump](https://github.com/shenwei356/gtdb-taxdump),
+   which provids GTDB taxonomy taxdump files for each GTDB version and a `taxid.map` file mapping accessions to TaxIds of taxa at the subspecies rank.
+   Here, we only output lineages down to the species rank and leave name of taxa at the subspecies/strain rank empty.
+
+        taxonkit reformat \
+            --data-dir gtdb-taxdump/R202/ \
+            --taxid-field 2 \
+            --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t" \
+            gtdb-taxdump/R202/taxid.map \
+        | csvtk cut -H -t -f -2 -o gtdb-r202.tsv
+
+
+1. Exporting taxonomic lineages of viral and fungal taxa with rank equal to or lower than species from NCBI taxdump.
+   For taxa whose rank is "no rank" below the species, we treat them as tax of strain rank (`--pseudo-strain`, taxonkit v0.14.1 needed).
+
+        # for viral data
+        taxonkit reformat \
+            --data-dir taxdump/ \
+            --taxid-field 2 \
+            --pseudo-strain \
+            --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t{t}" \
+            taxid.map \
+        | csvtk cut -H -t -f -2 -o genbank-viral.tsv
+
+        # for fungal data
+        taxonkit reformat \
+            --data-dir taxdump/ \
+            --taxid-field 2 \
+            --pseudo-strain \
+            --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t{t}" \
+            taxid.map \
+        | csvtk cut -H -t -f -2 -o refseq-fungi.tsv
+
+
+1. Creating taxdump from lineages above.
+
+        cat gtdb-r202.tsv genbank-viral.tsv refseq-fungi.tsv \
+            | taxonkit create-taxdump \
+                --field-accession 1 \
+                -R "superkingdom,phylum,class,order,family,genus,species,strain" \
+                -O gtdb+ncbi-taxdump
+
+Some tests:
+
+    # SARS-COV-2 in NCBI taxonomy
+    $ echo 2697049 \
+        | taxonkit lineage -t --data-dir ~/.taxonkit \
+        | csvtk cut -Ht -f 3 \
+        | csvtk unfold -Ht -f 1 -s ";" \
+        | taxonkit lineage -r -n -L --data-dir ~/.taxonkit \
+        | csvtk cut -Ht -f 1,3,2 \
+        | csvtk pretty -Ht
+    10239     superkingdom   Viruses
+    2559587   clade          Riboviria
+    2732396   kingdom        Orthornavirae
+    2732408   phylum         Pisuviricota
+    2732506   class          Pisoniviricetes
+    76804     order          Nidovirales
+    2499399   suborder       Cornidovirineae
+    11118     family         Coronaviridae
+    2501931   subfamily      Orthocoronavirinae
+    694002    genus          Betacoronavirus
+    2509511   subgenus       Sarbecovirus
+    694009    species        Severe acute respiratory syndrome-related coronavirus
+    2697049   no rank        Severe acute respiratory syndrome coronavirus 2
+
+    $ echo "Severe acute respiratory syndrome coronavirus 2" | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+    Severe acute respiratory syndrome coronavirus 2 216305222
+
+    $ echo 216305222 \
+        | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+        | csvtk cut -Ht -f 3 \
+        | csvtk unfold -Ht -f 1 -s ";" \
+        | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+        | csvtk cut -Ht -f 1,3,2 \
+        | csvtk pretty -Ht
+    1287770734   superkingdom   Viruses
+    1506901452   phylum         Pisuviricota
+    1091693597   class          Pisoniviricetes
+    37745009     order          Nidovirales
+    738421640    family         Coronaviridae
+    906833049    genus          Betacoronavirus
+    1015862491   species        Severe acute respiratory syndrome-related coronavirus
+    216305222    strain         Severe acute respiratory syndrome coronavirus 2
+
+
+
+    $ echo "Escherichia coli"  | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+    Escherichia coli        1945799576
+
+    $ echo 1945799576 \
+        | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+        | csvtk cut -Ht -f 3 \
+        | csvtk unfold -Ht -f 1 -s ";" \
+        | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+        | csvtk cut -Ht -f 1,3,2 \
+        | csvtk pretty -Ht
+    609216830    superkingdom   Bacteria
+    1641076285   phylum         Proteobacteria
+    329474883    class          Gammaproteobacteria
+    1012954932   order          Enterobacterales
+    87250111     family         Enterobacteriaceae
+    1187493883   genus          Escherichia
+    1945799576   species        Escherichia coli

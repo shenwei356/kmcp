@@ -209,6 +209,9 @@ Demo result:
 
 #### Searching on a computer cluster
 
+Update: We recommend analyzing one sample using one computer node, which is easier to setup up.
+
+
 Here, we split genomes of GTDB into 16 partitions and build a database for 
 every partition, so we can use computer cluster to accelerate the searching.
 The genbank-viral genomes are also diveded into 4 partition.
@@ -334,7 +337,7 @@ is used for batch submitting Slurm jobs via script templates.
 1. Reference genomes can be split into chunks when computing
     k-mers (sketches), which could help to increase the specificity
     via a threshold, i.e., the minimum proportion of matched chunks
-    (`-p/--min-chunks-fraction`). (***highly recommended***)
+    (`-p/--min-chunks-fraction`) (***highly recommended***).
     Another flag `-d/--max-chunks-cov-stdev` further reduces false positives.
 2. We require a part of the uniquely matched reads of a reference
     having high similarity, i.e., with high confidence for decreasing
