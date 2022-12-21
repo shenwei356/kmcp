@@ -19,7 +19,7 @@
     
     
       
-        <title>Databases - KMCP - Metagenomic Profiler</title>
+        <title>Databases - KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching</title>
       
     
     
@@ -82,7 +82,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href=".." title="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" class="md-header__button md-logo" aria-label="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" data-md-component="logo">
       
   <img src="../favicon.svg" alt="logo">
 
@@ -94,7 +94,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP - Metagenomic Profiler
+            KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -179,12 +179,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href=".." title="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" class="md-nav__button md-logo" aria-label="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" data-md-component="logo">
       
   <img src="../favicon.svg" alt="logo">
 
     </a>
-    KMCP - Metagenomic Profiler
+    KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching
   </label>
   
     <div class="md-nav__source">
@@ -425,6 +425,13 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merging-gtdb-and-ncbi-taxonomy" class="md-nav__link">
+    Merging GTDB and NCBI taxonomy
+  </a>
   
 </li>
       
@@ -787,6 +794,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#merging-gtdb-and-ncbi-taxonomy" class="md-nav__link">
+    Merging GTDB and NCBI taxonomy
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -900,7 +914,9 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <p>*based on NCBI taxonomy data 2021-12-06. <code>+</code> is used because some species are unclassfied xxx.</p>
 <p><strong>Taxonomy data</strong>:</p>
 <ul>
-<li>Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ">taxdump.tar.gz</a> (2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU">md5</a>)</li>
+<li>NCBI Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ">taxdump.tar.gz</a> (2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU">md5</a>)</li>
+<li>Alternately, we also provide a taxdump file <a href="#merging-gtdb-and-ncbi-taxonomy">merging the GTDB taxonomy (for prokaryotic genomes from GTDB) and NCBI taxonomy (for genomes from NCBI)</a>:
+  <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtkGPCUefjtPBtdDk4?e=kZcMX5">gtdb+ncbi-taxdump.tar.gz</a> (GTDB r202 + NCBI 2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtkGJSTgz0hhL_ex5f?e=EPAPcN">md5</a>)</li>
 </ul>
 <p><strong>Taxonomy data for HumGut</strong>:</p>
 <ul>
@@ -2544,6 +2560,117 @@ kmcp index -I refs-k21-n10 \
 </table>
 <p>Where <code>num-sigs</code> is the size of the bloom filters, and <code>num-names</code> is the number of genome (chunks).</p>
 <p>What's next? Check the <a href="/kmcp/tutorial">tutorials</a>.</p>
+<h2 id="merging-gtdb-and-ncbi-taxonomy">Merging GTDB and NCBI taxonomy</h2>
+<p>By default, we use NCBI taxonomy database for reference genomes from GTDB and Refseq.
+Alternately, we can also use the GTDB taxonomy.</p>
+<p>The idea is to export lineages from both GTDB and NCBI using <a href="https://bioinf.shenwei.me/taxonkit/usage/#reformat">taxonkit reformat</a>, and then create taxdump files from them with <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>.</p>
+<ol>
+<li>
+<p>Mapping genome assembly accessions to GTDB lineages using existing <a href="https://github.com/shenwei356/gtdb-taxdump">GTDB-taxdump</a>,
+   which provids GTDB taxonomy taxdump files for each GTDB version and a <code>taxid.map</code> file mapping accessions to TaxIds of taxa at the subspecies rank.
+   Here, we only output lineages down to the species rank and leave name of taxa at the subspecies/strain rank empty.</p>
+<pre><code>taxonkit reformat \
+    --data-dir gtdb-taxdump/R202/ \
+    --taxid-field 2 \
+    --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t" \
+    gtdb-taxdump/R202/taxid.map \
+| csvtk cut -H -t -f -2 -o gtdb-r202.tsv
+</code></pre>
+</li>
+<li>
+<p>Exporting taxonomic lineages of viral and fungal taxa with rank equal to or lower than species from NCBI taxdump.
+   For taxa whose rank is "no rank" below the species, we treat them as tax of strain rank (<code>--pseudo-strain</code>, taxonkit v0.14.1 needed).</p>
+<pre><code># for viral data
+taxonkit reformat \
+    --data-dir taxdump/ \
+    --taxid-field 2 \
+    --pseudo-strain \
+    --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t{t}" \
+    taxid.map \
+| csvtk cut -H -t -f -2 -o genbank-viral.tsv
+
+# for fungal data
+taxonkit reformat \
+    --data-dir taxdump/ \
+    --taxid-field 2 \
+    --pseudo-strain \
+    --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t{t}" \
+    taxid.map \
+| csvtk cut -H -t -f -2 -o refseq-fungi.tsv
+</code></pre>
+</li>
+<li>
+<p>Creating taxdump from lineages above.</p>
+<pre><code>cat gtdb-r202.tsv genbank-viral.tsv refseq-fungi.tsv \
+    | taxonkit create-taxdump \
+        --field-accession 1 \
+        -R "superkingdom,phylum,class,order,family,genus,species,strain" \
+        -O gtdb+ncbi-taxdump
+</code></pre>
+</li>
+</ol>
+<p>Some tests:</p>
+<pre><code># SARS-COV-2 in NCBI taxonomy
+$ echo 2697049 \
+    | taxonkit lineage -t --data-dir ~/.taxonkit \
+    | csvtk cut -Ht -f 3 \
+    | csvtk unfold -Ht -f 1 -s ";" \
+    | taxonkit lineage -r -n -L --data-dir ~/.taxonkit \
+    | csvtk cut -Ht -f 1,3,2 \
+    | csvtk pretty -Ht
+10239     superkingdom   Viruses
+2559587   clade          Riboviria
+2732396   kingdom        Orthornavirae
+2732408   phylum         Pisuviricota
+2732506   class          Pisoniviricetes
+76804     order          Nidovirales
+2499399   suborder       Cornidovirineae
+11118     family         Coronaviridae
+2501931   subfamily      Orthocoronavirinae
+694002    genus          Betacoronavirus
+2509511   subgenus       Sarbecovirus
+694009    species        Severe acute respiratory syndrome-related coronavirus
+2697049   no rank        Severe acute respiratory syndrome coronavirus 2
+
+$ echo "Severe acute respiratory syndrome coronavirus 2" | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+Severe acute respiratory syndrome coronavirus 2 216305222
+
+$ echo 216305222 \
+    | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+    | csvtk cut -Ht -f 3 \
+    | csvtk unfold -Ht -f 1 -s ";" \
+    | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+    | csvtk cut -Ht -f 1,3,2 \
+    | csvtk pretty -Ht
+1287770734   superkingdom   Viruses
+1506901452   phylum         Pisuviricota
+1091693597   class          Pisoniviricetes
+37745009     order          Nidovirales
+738421640    family         Coronaviridae
+906833049    genus          Betacoronavirus
+1015862491   species        Severe acute respiratory syndrome-related coronavirus
+216305222    strain         Severe acute respiratory syndrome coronavirus 2
+
+
+
+$ echo "Escherichia coli"  | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+Escherichia coli        1945799576
+
+$ echo 1945799576 \
+    | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+    | csvtk cut -Ht -f 3 \
+    | csvtk unfold -Ht -f 1 -s ";" \
+    | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+    | csvtk cut -Ht -f 1,3,2 \
+    | csvtk pretty -Ht
+609216830    superkingdom   Bacteria
+1641076285   phylum         Proteobacteria
+329474883    class          Gammaproteobacteria
+1012954932   order          Enterobacterales
+87250111     family         Enterobacteriaceae
+1187493883   genus          Escherichia
+1945799576   species        Escherichia coli
+</code></pre>
 
               
             </article>

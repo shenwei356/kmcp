@@ -19,7 +19,7 @@
     
     
       
-        <title>KMCP - Metagenomic Profiler</title>
+        <title>KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching</title>
       
     
     
@@ -82,7 +82,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="KMCP - Metagenomic Profiler" class="md-header__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href="." title="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" class="md-header__button md-logo" aria-label="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" data-md-component="logo">
       
   <img src="favicon.svg" alt="logo">
 
@@ -94,7 +94,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            KMCP - Metagenomic Profiler
+            KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -179,12 +179,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="KMCP - Metagenomic Profiler" class="md-nav__button md-logo" aria-label="KMCP - Metagenomic Profiler" data-md-component="logo">
+    <a href="." title="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" class="md-nav__button md-logo" aria-label="KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching" data-md-component="logo">
       
   <img src="favicon.svg" alt="logo">
 
     </a>
-    KMCP - Metagenomic Profiler
+    KMCP - Accurate metagenomic profiling and Fast large-scale sequence/genome searching
   </label>
   
     <div class="md-nav__source">
@@ -714,8 +714,8 @@
 </a>
 
 
+<p><center><img src="kmcp-logo.jpg" alt="Kmer-based Metagenomic Classification and Profiling" width="800"/></center></p>
 <h1 id="kmcp-accurate-metagenomic-profiling-of-both-prokaryotic-and-viral-populations-by-pseudo-mapping">KMCP: accurate metagenomic profiling of both prokaryotic and viral populations by pseudo-mapping</h1>
-<p><img alt="" src="kmcp-logo.png" /></p>
 <h2 id="the-preprint">The preprint</h2>
 <blockquote>
 <p><strong>KMCP: accurate metagenomic profiling of both prokaryotic and viral populations by pseudo-mapping</strong>.<br>
@@ -845,9 +845,10 @@ in two packages for better searching performance.</p>
 <ul>
 <li><a href="https://github.com/shenwei356/pand">pand</a>,
   for accelerating searching on databases constructed with multiple hash functions.</li>
-<li><a href="https://github.com/clausecker/pospop/tree/677120eb417c111be2b18c5c16ac5228a094306d">pospop</a>,
+<li><a href="https://github.com/shenwei356/pospop/tree/short-input3">pospop</a>,
   for batch counting matched k-mers in bloom filters.</li>
 </ul>
+<p>ARM architecture is supported, but <code>kmcp search</code> would be slower.</p>
 <h2 id="commands">Commands</h2>
 <table>
 <thead>
@@ -947,11 +948,12 @@ kmcp profile search.kmcp.tsv.gz \
 <h2 id="kmcp-vs-cobs">KMCP vs COBS</h2>
 <p>We reimplemented and modified the Compact Bit-Sliced Signature index (<a href="https://github.com/bingmann/cobs">COBS</a>) algorithm,
 bringing a smaller index size and <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">much faster searching speed (2x for genome search and 10x for short reads) faster than COBS</a>.</p>
+<p>The differences between KMCP and COBS</p>
 <table>
 <thead>
 <tr>
 <th align="left">Category</th>
-<th align="left">Iterm</th>
+<th align="left">Item</th>
 <th align="left">COBS</th>
 <th align="left">KMCP</th>
 <th align="left">Comment</th>
@@ -982,7 +984,7 @@ bringing a smaller index size and <a href="https://bioinf.shenwei.me/kmcp/benchm
 <tr>
 <td align="left"></td>
 <td align="left">Single-hash function</td>
-<td align="left">Same to multiple-hash functions</td>
+<td align="left">Same as multiple-hash functions</td>
 <td align="left">Separated workflow</td>
 <td align="left">Reducing loops</td>
 </tr>
@@ -1010,7 +1012,7 @@ bringing a smaller index size and <a href="https://bioinf.shenwei.me/kmcp/benchm
 <tr>
 <td align="left"></td>
 <td align="left">Index files</td>
-<td align="left">Concatentated</td>
+<td align="left">Concatenated</td>
 <td align="left">Independent</td>
 <td align="left"></td>
 </tr>
