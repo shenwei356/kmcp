@@ -17,28 +17,11 @@ ARM architecture is supported, but `kmcp search` would be slower.
 
 ## Current Version
 
-### v0.9.0 - 2022-09-28 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0)
+### [v0.9.1](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1) - 2022-12-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1)
 
-- `compute`:
-    - smaller output files and faster speed.
-    - more even genome splitting.
-- `index`:
-    - faster speed due to smaller input files.
-- `search`:
-    - ***more accurate and smaller query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound***.
-    - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
-    - ***10-20% speedup***.
-- `profile`:
-    - ***more accurate abundance estimation using EM algorithm***.
-    - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
-    - mode 0: change the default value of `-H/--min-hic-ureads-qcov` from 0.55 to 0.7.
-    - increase float width of reference coverage in KMCP profile format from 2 to 6.
-- `util query-fpr`:
-    - compute query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
-- new commands:
-    - `utils split-genomes` for splitting genomes into chunks.
-    - `utils ref-info` for printing information of reference (chunks), including the number of k-mers
-      and the actual false-positive rate.
+- `kmcp search`
+    - faster speed for ARM architectures.
+    - fix compilation for ARM architectures.
 
 ### Links
 
@@ -149,8 +132,30 @@ fish:
 
 ## Release History
 
+### [v0.9.0](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0) - 2022-09-28 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0)
 
-### v0.8.3 - 2022-08-15 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.3/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.3)
+- `compute`:
+    - smaller output files and faster speed.
+    - more even genome splitting.
+- `index`:
+    - faster speed due to smaller input files.
+- `search`:
+    - ***more accurate and smaller query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound***.
+    - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
+    - ***10-20% speedup***.
+- `profile`:
+    - ***more accurate abundance estimation using EM algorithm***.
+    - change the default value of `-f/--max-fpr` from 0.05 to 0.01.
+    - mode 0: change the default value of `-H/--min-hic-ureads-qcov` from 0.55 to 0.7.
+    - increase float width of reference coverage in KMCP profile format from 2 to 6.
+- `util query-fpr`:
+    - compute query FPR following Theorem 2 in SBT paper, instead of the Chernoff bound.
+- new commands:
+    - `utils split-genomes` for splitting genomes into chunks.
+    - `utils ref-info` for printing information of reference (chunks), including the number of k-mers
+      and the actual false-positive rate.
+
+### [v0.8.3](https://github.com/shenwei356/kmcp/releases/tag/v0.8.3) - 2022-08-15 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.8.3/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.8.3)
 
 - `kmcp`: fix compiling from source for ARM architectures.[#17](https://github.com/shenwei356/kmcp/issues/17)
 - `search`:

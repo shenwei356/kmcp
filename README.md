@@ -42,19 +42,33 @@
 
 ### 1. Accurate metagenomic profiling
 
-KMCP adopts a novel metagenomic profiling strategy
-by splitting reference genomes into 10 chunks and mappings reads to these
-chunks via fast k-mer matching, denoted as ***pseudo-mapping***.
+KMCP utilizes genome coverage information by splitting the reference genomes
+into chunks and stores k-mers in a modified and optimized [COBS](https://github.com/bingmann/cobs) index for
+fast alignment-free sequence searching. KMCP **combines k-mer similarity and
+genome coverage information to reduce the false positive rate** of k-mer-based
+taxonomic classification and profiling methods.
 
-Benchmarking results on both simulated and real data indicate that KMCP not only
-allows for accurate taxonomic profiling of archaea, bacteria, and viral populations
-from metagenomic shotgun sequence data, but also provides confident pathogen detection
-in infectious clinical samples of low depth.
+The read mapping process in KMCP is referred to as **pseudo-mapping**,
+which is similar to but different from the lightweight algorithm in Sailfish (Patro et al., 2014),
+pseudoalignment in Kallisto (Bray et al., 2016), quasi-mapping in RapMap (Srivastava et al., 2016),
+and lightweight mapping in Salmon (Patro et al., 2017). All of these methods seek to elide the
+computation of base-to-base alignment using distinct strategies (Srivastava et al., 2016).
+*In KMCP, each reference genome is pre-split into chunks of equal size, and the k-mers of a query,
+as a whole, are compared to each genome chunk to find all possible ones sharing a predefined
+proportion of k-mers with the query*. Like quasi-mapping in RapMap, KMCP tracks the target
+and position for each query. However, the read position in KMCP is approximate and in a
+predefined resolution (the number of genome chunks).
+
+Benchmarking results based on simulated and real data demonstrate that **KMCP,
+despite a longer running time than some other methods,
+not only allows the accurate taxonomic profiling of prokaryotic and viral populations
+but also provides more confident pathogen detection in clinical samples of low depth**.
 
 ***Genome collections with custom taxonomy***,
 e.g., [GTDB](https://gtdb.ecogenomic.org/) uses its own taxonomy and
 [MGV](https://doi.org/10.1038/s41564-021-00928-6) uses [ICTV taxonomy](https://talk.ictvonline.org/),
 are also supported by generating NCBI-style taxdump files with [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump).
+You can even [merge the GTDB taxonomy (for prokaryotic genomes from GTDB) and NCBI taxonomy (for genomes from NCBI)](https://bioinf.shenwei.me/kmcp/database/#merging-gtdb-and-ncbi-taxonomy).
 
 ### 2. Fast sequence search against large scales of genomic datasets
 
@@ -89,18 +103,19 @@ And [KMCP is 5x-7x faster than Mash/Sourmash](https://bioinf.shenwei.me/kmcp/ben
     - `conda install -c bioconda kmcp`
 - **Easy to use**
     - Supporting [shell autocompletion](https://bioinf.shenwei.me/kmcp/usage/#autocompletion).
-    - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage) and [tutorials](https://bioinf.shenwei.me/kmcp/tutorial/).
+    - Detailed [usage](https://bioinf.shenwei.me/kmcp/usage), [database](https://bioinf.shenwei.me/kmcp/database),
+      [tutorials](https://bioinf.shenwei.me/kmcp/tutorial), and [FAQs](https://bioinf.shenwei.me/kmcp/faq).
 - **Building database is easy and fast**
     - [~25 min for 47894 genomes from GTDB-r202](https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs) on a sever with 40 CPU threads and solid disk drive.
 - **Fast searching speed**
-    - The index structure is modified from COBS, while [KMCP is 2x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result).
+    - The index structure is modified from COBS, while [KMCP is 2x-10x faster](https://bioinf.shenwei.me/kmcp/benchmark/searching/#result) in sequence searching.
     - Automatically scales to exploit all available CPU cores.
     - Searching time is linearly related to the number of reference genomes (chunks).
 - **Scalable searching**. *Searching results against multiple databases can be fast merged*.
     This brings many benefits:
     - *There's no need to re-built the database with newly added reference genomes*. 
-    - [**HPC cluster could linearly accelerate searching**](https://bioinf.shenwei.me/kmcp/benchmark/profiling/#analysis-time-and-storage-requirement) with each computation node hosting a database built with a part of reference genomes.
-    - Computers with limited main memory would also support searching by building small databases.
+    - The searching step can be parallelized with a computer cluster in which each computation node searches against a small database.
+    - Computers with limited main memory can also utilize an extensive collection of reference genomes by building and searching against small databases..
 - **Accurate taxonomic profiling**
     - Some k-mer based taxonomic profilers suffer from high false positive rates,
       while [KMCP adopts multiple strategies](https://bioinf.shenwei.me/kmcp/tutorial/profiling/#methods)

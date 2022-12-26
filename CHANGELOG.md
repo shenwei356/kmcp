@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.9.1
+### v0.9.1 - 2022-12-26
 
 - `kmcp search`
     - faster speed for ARM architectures.
