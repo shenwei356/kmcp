@@ -28,6 +28,8 @@
 
 ## Documents
 
+https://bioinf.shenwei.me/kmcp
+
 - [Installation](https://bioinf.shenwei.me/kmcp/download)
 - [Databases](https://bioinf.shenwei.me/kmcp/database)
 - Tutorials
