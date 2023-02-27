@@ -371,7 +371,7 @@ Downloading viral and fungi sequences:
 Building database (all k-mers, for profiling on short-reads):
         
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 chunks
+    # for viral, only splitting into 10 chunks
     name=viral
     
     input=files.renamed
@@ -423,7 +423,7 @@ Building database (k-mer sketches, for profiling on long-reads):
 
 
     # -----------------------------------------------------------------
-    # for viral, only splitting into 5 chunks
+    # for viral, only splitting into 10 chunks
     name=viral
     
     input=files.renamed
