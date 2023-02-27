@@ -1316,7 +1316,7 @@ brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' $input
 </code></pre>
 <p>Building database (all k-mers, for profiling on short-reads):</p>
 <pre><code># -----------------------------------------------------------------
-# for viral, only splitting into 5 chunks
+# for viral, only splitting into 10 chunks
 name=viral
 
 input=files.renamed
@@ -1364,7 +1364,7 @@ cp taxid.map name.map refseq-fungi.kmcp/
 </code></pre>
 <p>Building database (k-mer sketches, for profiling on long-reads):</p>
 <pre><code># -----------------------------------------------------------------
-# for viral, only splitting into 5 chunks
+# for viral, only splitting into 10 chunks
 name=viral
 
 input=files.renamed
