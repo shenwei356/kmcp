@@ -161,6 +161,8 @@ type IndexQuery struct {
 type SearchOptions struct {
 	LoadWholeFile bool
 
+	Faster bool
+
 	UseMMap bool
 	Threads int
 	Verbose bool
@@ -1276,6 +1278,40 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 			return nil, err
 		}
 		idx.sigsB = []byte(idx.sigs)
+	}
+
+	var bounderies []int
+	if opt.Faster {
+		numSigs := h.NumSigs
+		numRowBytes := h.NumRowBytes
+		sigs := idx.sigsB
+		_offset0 := int(offset)
+		var i uint64
+		var _loc int
+		var _offset int
+		bounderies = make([]int, numSigs*2)
+		var b byte
+		var j, begin, end int
+
+		for i = 0; i < numSigs; i++ {
+			_loc = int(i)
+			_offset = _offset0 + _loc*numRowBytes
+
+			begin = -1
+			end = 0
+
+			for j, b = range sigs[_offset : _offset+numRowBytes] {
+				if b > 0 {
+					if begin < 0 { // the first none-zero data
+						begin = j
+					}
+					end = j
+				}
+			}
+			bounderies[i*2] = begin
+			bounderies[i*2+1] = end
+			fmt.Println(file, numRowBytes, i, begin, end)
+		}
 	}
 
 	// -------------------------------------------------------

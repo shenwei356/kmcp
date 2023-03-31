@@ -372,6 +372,8 @@ Examples:
 		searchOpt := SearchOptions{
 			LoadWholeFile: loadWholeFile,
 
+			Faster: getFlagBool(cmd, "faster"),
+
 			UseMMap: useMmap,
 			Threads: opt.NumCPUs,
 			Verbose: opt.Verbose || opt.Log2File,
@@ -1042,6 +1044,9 @@ func init() {
 
 	searchCmd.Flags().BoolP("low-mem", "", false,
 		formatFlagUsage(`Do not load all index files into memory nor use mmap, the searching would be very very slow for a large number of queries. Please read "Index files loading modes" in "kmcp search -h".`))
+
+	searchCmd.Flags().BoolP("faster", "F", false,
+		formatFlagUsage(`accellerate quering by constraining the searching space in the bit matrix`))
 
 	// query option
 	searchCmd.Flags().IntP("kmer-dedup-threshold", "u", 256,
