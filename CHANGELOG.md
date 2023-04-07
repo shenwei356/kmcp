@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.9.2 - 2022-12-26
+
+- `kmcp profile`
+    - fix #reads belonging to references in profile when no matches found.
+
 ### v0.9.1 - 2022-12-26
 
 - `kmcp search`

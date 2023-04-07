@@ -2153,9 +2153,9 @@ Examples:
 					}
 				}
 
-				nAssignedReads++
 				uniqMatch = false
 				if len(matches) > 1 { // redistribute matches
+					nAssignedReads++
 					sumCoverages = 0
 
 					taxids = taxids[:0]
@@ -2230,9 +2230,8 @@ Examples:
 
 					uniqMatch = false
 				} else if len(matches) == 1 {
+					nAssignedReads++
 					uniqMatch = true
-				} else {
-					// the first query
 				}
 
 				if uniqMatch {
