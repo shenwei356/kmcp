@@ -1404,6 +1404,15 @@ The idea is to export lineages from both GTDB and NCBI using [taxonkit reformat]
                 -R "superkingdom,phylum,class,order,family,genus,species,strain" \
                 -O taxdump.gtdb+ncbi
 
+1. NCBI taxonomy of Viruses changed rapidly, of which some TaxIds might be deleted.
+   You may added them to the the `taxid.map` file for compatibility.
+
+        cat genbank-viral.tsv refseq-fungi.tsv gtdb-r214.tsv \
+            | csvtk grep -Ht -f 2 -r -p "^$" \
+            | cut -f 1 \
+            | awk '{print $1"\t0"}' \
+            >> taxdump.gtdb+ncbi/taxid.map
+
 Some tests:
 
     # SARS-COV-2 in NCBI taxonomy
