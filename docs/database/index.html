@@ -294,13 +294,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#c-databases-of-plasmid" class="md-nav__link">
-    C). Databases of plasmid
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -370,8 +363,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#progenomes2-12000-species" class="md-nav__link">
-    proGenomes2 (12,000 species)
+  <a href="#progenomes" class="md-nav__link">
+    proGenomes
   </a>
   
 </li>
@@ -390,8 +383,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mgv-54118-species" class="md-nav__link">
-    MGV (54,118 species)
+  <a href="#mgv" class="md-nav__link">
+    MGV
   </a>
   
 </li>
@@ -660,13 +653,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#c-databases-of-plasmid" class="md-nav__link">
-    C). Databases of plasmid
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -736,8 +722,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#progenomes2-12000-species" class="md-nav__link">
-    proGenomes2 (12,000 species)
+  <a href="#progenomes" class="md-nav__link">
+    proGenomes
   </a>
   
 </li>
@@ -756,8 +742,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mgv-54118-species" class="md-nav__link">
-    MGV (54,118 species)
+  <a href="#mgv" class="md-nav__link">
+    MGV
   </a>
   
 </li>
@@ -828,13 +814,63 @@
 </ul>
 <p style="color:Tomato;">Please check file integrity with `md5sum` after download the files:</p>
 
-<pre><code>md5sum -c gtdb.kmcp.tar.gz.md5.txt genbank-viral.kmcp.tar.gz.md5.txt refseq-fungi.kmcp.tar.gz.md5.txt
+<pre><code>md5sum -c *.kmcp.tar.gz.md5.txt
 </code></pre>
+<h3 id="a-databases-for-metagenomic-profiling">A). Databases for metagenomic profiling</h3>
+<p>These databases are created following <a href="#building-databases">steps below</a>.
+Users can also <a href="#building-custom-databases">build custom databases</a>, it's simple and fast.</p>
+<p><strong>Current version</strong>: v2023.05 (<a href="https://1drv.ms/f/s!Ag89cZ8NYcqtlgAtJo--uKPNVT4t?e=KEDFrc">OneDrive</a>, <a href="https://shenwei356.cowtransfer.com/s/1c5dfb28218748">CowTransfer</a>)</p>
+<table>
+<thead>
+<tr>
+<th align="left">kingdoms</th>
+<th align="left">source</th>
+<th align="left">#NCBI-species</th>
+<th align="left">#assemblies</th>
+<th align="left">db-parameters</th>
+<th align="left">size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Bacteria and Archaea</td>
+<td align="left">GTDB r214</td>
+<td align="left">34395+</td>
+<td align="left">85205</td>
+<td align="left">k=21, chunks=10; fpr=0.3, hashes=1</td>
+<td align="left">50+49 GB*</td>
+</tr>
+<tr>
+<td align="left">Fungi</td>
+<td align="left">Refseq r217</td>
+<td align="left">491</td>
+<td align="left">496</td>
+<td align="left">k=21, chunks=10; fpr=0.3, hashes=1</td>
+<td align="left">5.5 GB</td>
+</tr>
+<tr>
+<td align="left">Viruses</td>
+<td align="left">GenBank r255</td>
+<td align="left">26680</td>
+<td align="left">33479</td>
+<td align="left">k=21, chunks=5; fpr=0.05, hashes=1</td>
+<td align="left">5.9 GB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong>: *GTDB representative genomes were split into 2 parts to build relatively small databases
+which can be filled into workstations with small RAM (around 64GB).
+Users need to search reads on all these small databases and merge the results before running <code>kmcp profile</code>.</p>
+<p><strong>Taxonomy information</strong>: Either NCBI taxonomy or a combination of GTDB and NCBI are available:</p>
+<ul>
+<li>NCBI: taxdmp_2023-05-01</li>
+<li>GTDB+NCBI: GTDB r214 + NCBI taxdmp_2023-05-01</li>
+</ul>
 <p><strong>Hardware requirements</strong></p>
 <ul>
 <li>Prebuilt databases were built for computers with &gt;= 32 CPU cores
 in consideration of better parallelization,
-and computers should have at least 64 GB. </li>
+and computers should have at least 64 GB.</li>
 <li>By default, <code>kmcp search</code> loads the whole database into main memory
 (via <a href="https://en.wikipedia.org/wiki/Mmap">mmap</a> by default) for fast searching.
 Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
@@ -842,210 +878,50 @@ while it's much slower, &gt;10X slower on SSD and should be much slower on HDD d
 <li><strong>To reduce memory requirements on computers without enough memory,
 users can split the reference genomes into partitions
 and build a smaller database for each partition, so that the biggest
-database can be loaded into RAM</strong>. 
+database can be loaded into RAM</strong>.
 This can also <strong>accelerate searching on a computer cluster, where every node searches against a small database.
 After performing database searching,
 search results from all small databases can be merged with <code>kmcp merge</code>
 for downstream analysis</strong>.</li>
 </ul>
-<h3 id="a-databases-for-metagenomic-profiling">A). Databases for metagenomic profiling</h3>
-<p>These databases are created following <a href="#building-databases">steps below</a>.
-Users can also <a href="#building-custom-databases">build custom databases</a>, it's simple and fast.</p>
-<table>
-<thead>
-<tr>
-<th align="left">DB</th>
-<th align="left">source</th>
-<th align="left">#species</th>
-<th align="left">#assemblies</th>
-<th align="left">parameters</th>
-<th align="left">archive file</th>
-<th align="left">size</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left"><strong>Bacteria and Archaea</strong></td>
-<td align="left">GTDB r202</td>
-<td align="left">28073+</td>
-<td align="left">47894</td>
-<td align="left">k=21, chunks=10;<br>fpr=0.3, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtkBFGpARKkdzpfAxf?e=IPQN22">gtdb.kmcp.tar.gz</a> (50.34 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtkA8IUG1zuh2wuYCh?e=jUkUXQ">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/3426e055bee74a">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/a8e60e9040eb4c">md5</a>)</td>
-<td align="left">58.03 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Bacteria and Archaea</strong></td>
-<td align="left">HumGut</td>
-<td align="left">1594+</td>
-<td align="left">30691</td>
-<td align="left">k=21, chunks=10;<br>fpr=0.3, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUxZymOTLu1qJyDI?e=ZPWhDt">humgut.kmcp.tar.gz</a> (18.77 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUVZu1Y-Vtussvdc?e=wHlWdm">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/0b88a8ef2cff42">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/a04127a6bfb648">md5</a>)</td>
-<td align="left">21.52 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Fungi</strong></td>
-<td align="left">Refseq r208</td>
-<td align="left">398</td>
-<td align="left">403</td>
-<td align="left">k=21, chunks=10;<br>fpr=0.3, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtkBCf0vPMatJbSvtF?e=2jE0HH">refseq-fungi.kmcp.tar.gz</a> (3.68 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtkA0ZuDblb_hNJAtP?e=brrpFn">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/62e1abfa795443">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/09a50702304343">md5</a>)</td>
-<td align="left">4.18 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Viruses</strong></td>
-<td align="left">GenBank 246</td>
-<td align="left">23632</td>
-<td align="left">27936</td>
-<td align="left">k=21, chunks=10;<br>fpr=0.05, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtkA7ofenEH6ve7va7?e=rgb5Vz">genbank-viral.kmcp.tar.gz</a> (1.25 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtkAx0HPhHUSthZMxO?e=sUwaKM">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/351451ef4e6d41">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/e359c61253fb44">md5</a>)</td>
-<td align="left">4.72 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Human</strong></td>
-<td align="left">CHM13</td>
-<td align="left">1</td>
-<td align="left">1</td>
-<td align="left">k=21, chunks=1024;<br>fpr=0.3, hashes=1</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjVQgKPCZ7jciZqEp?e=jAO76U">human-chm13.kmcp.tar.gz</a> (818 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjU1nGeOJaFf70y_K?e=bzJPcE">md5</a>),<br><a href="https://shenwei356.cowtransfer.com/s/07e614a36b1a4b">CowTransfer link</a> (<a href="https://shenwei356.cowtransfer.com/s/c91d4c98677645">md5</a>)</td>
-<td align="left">946 MB</td>
-</tr>
-</tbody>
-</table>
-<p>*based on NCBI taxonomy data 2021-12-06. <code>+</code> is used because some species are unclassfied xxx.</p>
-<p><strong>Taxonomy data</strong>:</p>
-<ul>
-<li>NCBI Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhCcJiTgJ7-dZPg3?e=vUeMmJ">taxdump.tar.gz</a> (2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjg4lwBMJt6ryNrvS?e=lAKZjU">md5</a>)</li>
-<li>Alternately, we also provide a taxdump file <a href="#merging-gtdb-and-ncbi-taxonomy">merging the GTDB taxonomy (for prokaryotic genomes from GTDB) and NCBI taxonomy (for genomes from NCBI)</a>:
-  <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtkGPCUefjtPBtdDk4?e=kZcMX5">gtdb+ncbi-taxdump.tar.gz</a> (GTDB r202 + NCBI 2021-12-06, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtkGJSTgz0hhL_ex5f?e=EPAPcN">md5</a>)</li>
-</ul>
-<p><strong>Taxonomy data for HumGut</strong>:</p>
-<ul>
-<li>Taxonomy dump file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUeiSOIBztt87yfi?e=LqKhiC">taxdump-humgut.tar.gz</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUhiSa_tbjKHtRUl?e=k07pzf">md5</a>)</li>
-<li>Taxid mapping file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUusPDpqb2qfNKtj?e=PY9dxA">taxid-humgut.map</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUqDQMxCC_PwJC6K?e=VowaM2">md5</a>)</li>
-<li>Name mapping file: <a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUnwt8woH-HjN8TI?e=hM4iec">name-humgut.map</a> (<a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUZegCvp42p52yFv?e=6iqman">md5</a>)</li>
-</ul>
 <h3 id="b-databases-for-genome-similarity-estimation">B). Databases for genome similarity estimation</h3>
 <p>Check the <a href="/kmcp/tutorial/searching">tutorial</a>.</p>
-<p>FracMinHash (Scaled MinHash):</p>
+<p>FracMinHash (Scaled MinHash), links: <a href="https://1drv.ms/f/s!Ag89cZ8NYcqtlgEtskAjVVosItE7?e=CdkwhG">OneDrive</a>, <a href="https://shenwei356.cowtransfer.com/s/21f68041334440">CowTransfer</a></p>
 <table>
 <thead>
 <tr>
 <th align="left">kingdoms</th>
 <th align="left">source</th>
+<th align="left">#NCBI-species</th>
+<th align="left">#assemblies</th>
 <th align="left">parameters</th>
-<th align="left">file</th>
 <th align="left">size</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><strong>Bacteria and Archaea</strong></td>
-<td align="left">GTDB r202</td>
+<td align="left">Bacteria and Archaea</td>
+<td align="left">GTDB r214</td>
+<td align="left">34395+</td>
+<td align="left">85205</td>
 <td align="left">k=31, scale=1000</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQpRVpcW1zZJHWTR?e=A9Oh1q">gtdb.minhash.kmcp.tar.gz</a> (710 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r">md5</a>)</td>
-<td align="left">1.52 GB</td>
+<td align="left">2.7 GB</td>
 </tr>
 <tr>
-<td align="left"><strong>Fungi</strong></td>
-<td align="left">Refseq r208</td>
+<td align="left">Fungi</td>
+<td align="left">Refseq r217</td>
+<td align="left">491</td>
+<td align="left">496</td>
 <td align="left">k=31, scale=1000</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQTxGnMeL7n66_iY?e=kDwJi8">refseq-fungi.minhash.kmcp.tar.gz</a> (49 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQV_O4GTRoOUhc7W?e=w0p3l1">md5</a>)</td>
-<td align="left">98 MB</td>
+<td align="left">131 MB</td>
 </tr>
 <tr>
 <td align="left"><strong>Viruses</strong></td>
-<td align="left">Genbank 246</td>
+<td align="left">GenBank r255</td>
+<td align="left">26680</td>
+<td align="left">33479</td>
 <td align="left">k=31, scale=10</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhNMoB2v8OcXPwlB?e=dOCBL3">genbank-viral.minhash.kmcp.tar.gz</a> (580 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjhH5MRvKtbb-OW4v?e=dY6Yh9">md5</a>)</td>
-<td align="left">1.19 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Viruses</strong></td>
-<td align="left">Refseq r208</td>
-<td align="left">k=31, scale=10</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjH-2z4mrt4H3pcP8?e=irv43B">refseq-viral.minhash.kmcp.tar.gz</a> (205 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl">md5</a>)</td>
-<td align="left">555 MB</td>
-</tr>
-</tbody>
-</table>
-<p>Closed Syncmers:</p>
-<table>
-<thead>
-<tr>
-<th align="left">kingdoms</th>
-<th align="left">source</th>
-<th align="left">parameters</th>
-<th align="left">file</th>
-<th align="left">size</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left"><strong>Bacteria and Archaea</strong></td>
-<td align="left">GTDB r202</td>
-<td align="left">k=31, s=15, scale=60</td>
-<td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQuoumn3pK_jFMDq?e=6wUa4r">gtdb.syncmer.kmcp.tar.gz</a> (1.03 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQ06tZBHsxwPvTN5?e=XDKAJk">md5</a>)</td>
-<td align="left">2.28 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Fungi</strong></td>
-<td align="left">Refseq r208</td>
-<td align="left">k=31, s=15, scale=60</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjQZqTZrnLyiEJ0IX?e=aORH7a">refseq-fungi.syncmer.kmcp.tar.gz</a> (73 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQdqsq1rGf0YuCdz?e=g0gOtx">md5</a>)</td>
-<td align="left">145 MB</td>
-</tr>
-<tr>
-<td align="left"><strong>Viruses</strong></td>
-<td align="left">Genbank 246</td>
-<td align="left">k=31, s=10</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjhQiHSTYQNFUgqPx?e=xlJm35">genbank-viral.syncmer.kmcp.tar.gz</a> (473 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjhL1YSXJGeBmI_c7?e=lWVkON">md5</a>)</td>
-<td align="left">1.06 GB</td>
-</tr>
-<tr>
-<td align="left"><strong>Viruses</strong></td>
-<td align="left">Refseq r208</td>
-<td align="left">k=31, s=21</td>
-<td align="left"><a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQGBiyrNm8LOJcVZ?e=PzlBLl">refseq-viral.syncmer.kmcp.tar.gz</a> (162 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjQKyoa8lcPTO5yt_?e=e7Ki65">md5</a>)</td>
-<td align="left">441 MB</td>
-</tr>
-</tbody>
-</table>
-<h3 id="c-databases-of-plasmid">C). Databases of plasmid</h3>
-<table>
-<thead>
-<tr>
-<th align="left">source</th>
-<th align="left"># assembly</th>
-<th align="left">type</th>
-<th align="left">parameters</th>
-<th align="left">file</th>
-<th align="left">size</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">Refseq r208</td>
-<td align="left">37318</td>
-<td align="left">All k-mers</td>
-<td align="left">k=21</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUQpIuKC5ju2TIdD?e=yKdRs2">refseq-plasmid.kmcp.tar.gz</a> (5.29 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjT-TO94gsfpUpe8_?e=1RAvr1">md5</a>)</td>
-<td align="left">7.80 GB</td>
-</tr>
-<tr>
-<td align="left">Refseq r208</td>
-<td align="left">37318</td>
-<td align="left">FracMinHash</td>
-<td align="left">K=31, scale=10</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUF10X19vzRpOD86?e=Gfnau8">refseq-plasmid.minhash.kmcp.tar.gz</a> (1.01 GB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUB8HzWSO-hu8iI3?e=KbVXKp">md5</a>)</td>
-<td align="left">2.00 GB</td>
-</tr>
-<tr>
-<td align="left">Refseq r208</td>
-<td align="left">37318</td>
-<td align="left">Closed Syncmer</td>
-<td align="left">K=31, s=21</td>
-<td align="left"><a href="https://1drv.ms/u/s!Ag89cZ8NYcqtjUPv9o2SA4kiSxwU?e=UvkSDV">refseq-plasmid.syncmer.kmcp.tar.gz</a> (806 MB, <a href="https://1drv.ms/t/s!Ag89cZ8NYcqtjUKt3A_p7Q7BE7qT?e=dApTX8">md5</a>)</td>
-<td align="left">1.54 GB</td>
+<td align="left">2.0 GB</td>
 </tr>
 </tbody>
 </table>
@@ -1060,30 +936,32 @@ Users can also <a href="#building-custom-databases">build custom databases</a>, 
 <li><a href="https://github.com/shenwei356/taxonkit/releases">taxonkit</a> for NCBI taxonomy data manipulations.</li>
 <li><a href="/kmcp/download">kmcp</a> for metagenomic profiling.</li>
 </ul>
-<p>Files:</p>
+<p>Files (https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/)</p>
 <ul>
-<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz">gtdb_genomes_reps_r202.tar.gz</a></li>
-<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/ar122_metadata_r202.tar.gz">ar122_metadata_r202.tar.gz</a></li>
-<li><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/bac120_metadata_r202.tar.gz">bac120_metadata_r202.tar.gz</a></li>
+<li>representative genomes: gtdb_genomes_reps.tar.gz</li>
+<li>metagdata: ar53_metadata.tar.gz</li>
+<li>metagdata: bac120_metadata.tar.gz</li>
+<li>taxdump file: https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump_archive/</li>
 </ul>
 <p>Uncompressing and renaming:</p>
 <pre><code># uncompress
 mkdir -p gtdb
-tar -zxvf gtdb_genomes_reps_r202.tar.gz -C gtdb
+tar -zxvf gtdb_genomes_reps.tar.gz -C gtdb
 
 # rename
 brename -R -p '^(\w{3}_\d{9}\.\d+).+' -r '$1.fna.gz' gtdb
 </code></pre>
 <p>Mapping file:</p>
-<pre><code>tar -zxvf ar122_metadata_r202.tar.gz  bac120_metadata_r202.tar.gz
-
-# assembly accession -&gt; full head
+<pre><code># assembly accession -&gt; full head
 find gtdb/ -name "*.fna.gz" \
     | rush -k 'echo -ne "{%@(.+).fna}\t$(seqkit sort --quiet -lr {} | head -n 1 | seqkit seq -n)\n" ' \
     &gt; name.map
 
+tar -zxvf ar53_metadata.tar.gz
+tar -zxvf bac120_metadata.tar.gz
+
 # assembly accession -&gt; taxid
-(cat ar122_metadata_r202.tsv; sed 1d bac120_metadata_r202.tsv) \
+cat *_metadata*.tsv \
     | csvtk cut -t -f accession,ncbi_taxid \
     | csvtk replace -t -p '^.._' \
     | csvtk grep -t -P &lt;(cut -f 1 name.map) \
@@ -1092,12 +970,13 @@ find gtdb/ -name "*.fna.gz" \
 
 
 # stats (optional)
+# taxdump is a directory containing NCBI taxdump files, including names.dmp, nodes.dmp, delnodes.dmp and merged.dmp
 cat taxid.map  \
     | csvtk freq -Ht -f 2 -nr \
     | taxonkit lineage -r -n -L --data-dir taxdump/ \
     | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
     | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
-    &gt; taxid.map.stats.tsv
+    &gt; gtdb.taxid.map.stats.tsv
 
 
 # number of unique species/strains
@@ -1107,13 +986,12 @@ cat taxid.map \
     | csvtk freq -Ht -f 4 -nr \
     | csvtk pretty -H -t \
     | tee taxid.map.uniq.stats
-species           24743
-strain            4097
-subspecies        90
-forma specialis   58
-no rank           26
-isolate           23
-serotype          1
+species           31165
+strain            4073
+subspecies        104
+forma specialis   59
+no rank           31
+isolate           26
 </code></pre>
 <p>Building database (all k-mers, for profiling on short-reads):</p>
 <pre><code>input=gtdb
@@ -1122,19 +1000,22 @@ serotype          1
 #   sequence containing "plasmid" in name are ignored,
 #   reference genomes are split into 10 chunks with 100bp overlap
 #   k = 21
-kmcp compute -I $input -O gtdb-r202-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
-    --log gtdb-r202-k21-n10.log -j 32 --force
+kmcp compute -I $input -O gtdb-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
+    --log gtdb-k21-n10.log -j 32 --force
 
 # build database
 #   number of index files: 32, for server with &gt;= 32 CPU cores
 #   bloom filter parameter:
 #     number of hash function: 1
 #     false positive rate: 0.3
-kmcp index -j 32 -I gtdb-r202-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
+kmcp index -j 32 -I gtdb-k21-n10 -O gtdb.kmcp -n 1 -f 0.3 \
     --log gtdb.kmcp.log --force
 
 # cp taxid and name mapping file to database directory
 cp taxid.map name.map gtdb.kmcp/
+
+# clean up
+rm -rf gtdb-k21-n10
 </code></pre>
 <p>Building small databases (all k-mers, for profiling with a computer cluster or computer with limited RAM):</p>
 <pre><code>input=gtdb
@@ -1152,7 +1033,7 @@ cat $input.files0.size.txt \
     &gt; $input.files.txt
 
 # number of databases
-n=16
+n=2
 
 # split into $n chunks using round robin distribution
 split -n r/$n -d  $input.files.txt $input.n$n-
@@ -1166,99 +1047,38 @@ for f in $input.n$n-*; do
     #   reference genomes are split into 10 chunks with 100bp overlap
     #   k = 21
     kmcp compute -i $f -O $f-k21-n10 -k 21 -n 10 -l 150 -B plasmid \
-        --log $f-k21-n10.log -j 24 --force
+        --log $f-k21-n10.log --force
 
     # build database
-    #   number of index files: 24, for server with &gt;= 24 CPU cores
+    #   number of index files: 32, for server with &gt;= 32 CPU cores
     #   bloom filter parameter:
     #     number of hash function: 1
     #     false positive rate: 0.3
-    kmcp index -j 24 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
+    kmcp index -j 32 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
         --log $f.kmcp.log
 
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map $f.kmcp/
 done
-</code></pre>
-<p>Building database (k-mer sketches, for profiling on long-reads):</p>
-<pre><code># -------------------------------------------------------------------------------------
-# Closed Syncmers with s=16
 
-input=gtdb
+# rename small databases
+# for example:
+#   [INFO] checking: [ ok ] 'gtdb.n2-00.kmcp' -&gt; 'gtdb.part_1.kmcp'
+#   [INFO] checking: [ ok ] 'gtdb.n2-01.kmcp' -&gt; 'gtdb.part_2.kmcp'
+#   [INFO] 2 path(s) to be renamed
 
-# compute k-mers
-#   sequence containing "plasmid" in name are ignored,
-#   reference genomes are split into 10 chunks with 100bp overlap
-#   k = 21
-#   s = 16 # Closed Syncmers
-kmcp compute -I $input -O gtdb-r202-k21-n10-S16 -k 21 -S 16 -n 10 -l 150 -B plasmid \
-    --log gtdb-r202-k21-n10-S16.log -j 32 --force
-
-# build database
-#   number of index files: 32, for server with &gt;= 32 CPU cores
-#   bloom filter parameter:
-#     number of hash function: 1
-#     false positive rate: 0.2
-kmcp index -j 32 -I gtdb-r202-k21-n10-S16 -O gtdb.sync16.kmcp -n 1 -f 0.2 \
-    --log gtdb.sync16.kmcp.log
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map gtdb.sync16.kmcp/
+brename -D --only-dir -p "n$n-\d+" -r "part_{nr}" -d
 
 
-# -------------------------------------------------------------------------------------
-# FracMinhash/Scaled MinHash with d=5
-
-input=gtdb
-
-# compute k-mers
-#   sequence containing "plasmid" in name are ignored,
-#   reference genomes are split into 10 chunks with 100bp overlap
-#   k = 21
-#   D = 5 # FracMinhash
-kmcp compute -I $input -O gtdb-r202-k21-n10-D5 -k 21 -D 5 -n 10 -l 150 -B plasmid \
-    --log gtdb-r202-k21-n10-D5.log -j 32 --force
-
-# build database
-#   number of index files: 32, for server with &gt;= 32 CPU cores
-#   bloom filter parameter:
-#     number of hash function: 1
-#     false positive rate: 0.2
-kmcp index -j 32 -I gtdb-r202-k21-n10-D5 -O gtdb.minh5.kmcp -n 1 -f 0.2 \
-    --log gtdb.minh5.kmcp.log
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map gtdb.minh5.kmcp/
-
-
-# -------------------------------------------------------------------------------------
-# Minimizer with W=5
-
-input=gtdb
-
-# compute k-mers
-#   sequence containing "plasmid" in name are ignored,
-#   reference genomes are split into 10 chunks with 100bp overlap
-#   k = 21
-#   W = 5 # Minimizer
-kmcp compute -I $input -O gtdb-r202-k21-n10-W5 -k 21 -W 5 -n 10 -l 150 -B plasmid \
-    --log gtdb-r202-k21-n10-W5.log -j 32 --force
-
-# build database
-#   number of index files: 32, for server with &gt;= 32 CPU cores
-#   bloom filter parameter:
-#     number of hash function: 1
-#     false positive rate: 0.2
-kmcp index -j 32 -I gtdb-r202-k21-n10-W5 -O gtdb.mini5.kmcp -n 1 -f 0.2 \
-    --log gtdb.mini5.kmcp.log
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map gtdb.mini5.kmcp/
+# clean up
+for f in $input.n$n-*; do
+    rm -rf $f-k21-n10
+done
 </code></pre>
 <h3 id="refseq-viral-or-fungi">RefSeq viral or fungi</h3>
 <p>Tools</p>
 <ul>
-<li><a href="https://github.com/pirovc/genome_updater">genome_updater</a> (0.4.1) for downloading genomes from NCBI.</li>
+<li><a href="https://github.com/pirovc/genome_updater">genome_updater</a> (0.5.1) for downloading genomes from NCBI.</li>
 </ul>
 <p>Downloading viral and fungi sequences:</p>
 <pre><code>name=fungi
@@ -1294,7 +1114,7 @@ cat taxid.map  \
     | taxonkit lineage -r -n -L --data-dir taxdump/ \
     | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
     | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
-    &gt; taxid.map.stats.tsv
+    &gt; refseq-$name.taxid.map.stats.tsv
 
 seqkit stats -T -j 12 --infile-list &lt;(find files -name "*.fna.gz") &gt; files.stats.tsv
 
@@ -1353,7 +1173,7 @@ input=files.renamed
 kmcp compute -I $input -O refseq-$name-k21-n10 \
     -k 21 --seq-name-filter plasmid \
     --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10.log -j 32 --force
+    --log refseq-$name-k21-n10.log --force
 
 kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
     -j 32 -f 0.3 -n 1 \
@@ -1361,105 +1181,6 @@ kmcp index -I refseq-$name-k21-n10/ -O refseq-fungi.kmcp \
 
 # cp taxid and name mapping file to database directory
 cp taxid.map name.map refseq-fungi.kmcp/
-</code></pre>
-<p>Building database (k-mer sketches, for profiling on long-reads):</p>
-<pre><code># -----------------------------------------------------------------
-# for viral, only splitting into 10 chunks
-name=viral
-
-input=files.renamed
-
-
-# ---------------------------------------------
-# here we compute Closed Syncmers with s=16
-
-kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
-    -k 21 -S 16 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10-S16.log -j 32 --force
-
-# viral genomes are small:
-#   using small false positive rate: 0.001
-#   using more hash functions: 3
-kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-viral.sync16.kmcp \
-    -j 32 -f 0.001 -n 3 -x 100K \
-    --log refseq-viral.sync16.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map refseq-viral.sync16.kmcp/
-
-
-# ---------------------------------------------
-# here we compute FracMinHash with D=5
-
-kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
-    -k 21 -D 5 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10-D5.log -j 32 --force
-
-# viral genomes are small:
-#   using small false positive rate: 0.001
-#   using more hash functions: 3
-kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-viral.minh5.kmcp \
-    -j 32 -f 0.001 -n 3 -x 100K \
-    --log refseq-viral.minh5.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map refseq-viral.minh5.kmcp/
-
-
-# -----------------------------------------------------------------
-# for fungi
-name=fungi
-
-input=files.renamed
-
-# ---------------------------------------------
-# here we compute Closed Syncmers with s=16
-
-kmcp compute -I $input -O refseq-$name-k21-n10-S16 \
-    -k 21 -S 16 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10-S16.log -j 32 --force
-
-kmcp index -I refseq-$name-k21-n10-S16/ -O refseq-fungi.sync16.kmcp \
-    -j 32 -f 0.2 -n 1 \
-    --log refseq-fungi.sync16.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map refseq-fungi.sync16.kmcp/
-
-
-# ---------------------------------------------
-# here we compute FracMinHash with D=5
-
-kmcp compute -I $input -O refseq-$name-k21-n10-D5 \
-    -k 21 -D 5 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10-D5.log -j 32 --force
-
-kmcp index -I refseq-$name-k21-n10-D5/ -O refseq-fungi.minh5.kmcp \
-    -j 32 -f 0.2 -n 1 \
-    --log refseq-fungi.minh5.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map refseq-fungi.minh5.kmcp/
-
-
-# ---------------------------------------------
-# here we compute Minimizer with W=5
-
-kmcp compute -I $input -O refseq-$name-k21-n10-W5 \
-    -k 21 -W 5 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log refseq-$name-k21-n10-W5.log -j 32 --force
-
-kmcp index -I refseq-$name-k21-n10-W5/ -O refseq-fungi.mini5.kmcp \
-    -j 32 -f 0.2 -n 1 \
-    --log refseq-fungi.mini5.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map refseq-fungi.mini5.kmcp/
 </code></pre>
 <h3 id="genbank-viral">Genbank viral</h3>
 <p>Tools</p>
@@ -1472,7 +1193,7 @@ cp taxid.map name.map refseq-fungi.mini5.kmcp/
 # -k for dry-run
 # -i for fix
 # keep at most 5 genomes for a taxid:
-#    genome_updater v0.4.1: -A 5 -c "" -l ""
+#    genome_updater v0.5.1: -A 5 -c "" -l ""
 #    genome_updater v0.2.5: -j taxids:5 -c "all" -l "all"
 time genome_updater.sh \
     -d "genbank"\
@@ -1503,7 +1224,7 @@ cat taxid.map  \
     | taxonkit lineage -r -n -L --data-dir taxdump/ \
     | taxonkit reformat -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' --data-dir taxdump/ \
     | csvtk add-header -t -n 'taxid,count,name,rank,superkindom,phylum,class,order,family,genus,species' \
-    &gt; taxid.map.stats.tsv
+    &gt; genbank-viral.taxid.map.stats.tsv
 
 seqkit stats -T -j 12 --infile-list &lt;(find files -name "*.fna.gz") &gt; files.stats.tsv
 
@@ -1560,7 +1281,8 @@ wc -l taxid.map
 <pre><code># -----------------------------------------------------------------
 name=viral
 
-input=files.renamed.slim
+# input=files.renamed.slim
+input=files.renamed
 
 
 # ----------------
@@ -1569,7 +1291,7 @@ input=files.renamed.slim
 kmcp compute -I $input -O genbank-$name-k21-n10 \
     -k 21 --seq-name-filter plasmid \
     --split-number 10 --split-overlap 150 \
-    --log genbank-$name-k21-n10.log -j 32 --force
+    --log genbank-$name-k21-n10.log --force
 
 # viral genomes are small:
 #   using small false positive rate: 0.05
@@ -1623,68 +1345,6 @@ for f in $name.n$n-*; do
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map $f.kmcp/
 done
-</code></pre>
-<p>Building database (k-mer sketches, for profiling on long-reads):</p>
-<pre><code>name=viral
-
-input=files.renamed.slim
-
-
-# ----------------------------------------------
-# here we compute Closed Syncmers with s=16
-
-kmcp compute -I $input -O genbank-$name-k21-n10-S16 \
-    -k 21 -S 16 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log genbank-$name-k21-n10-S16.log -j 32 --force
-
-# viral genomes are small:
-#   using small false positive rate: 0.001
-#   using more hash functions: 3
-kmcp index -I genbank-$name-k21-n10-S16/ -O genbank-viral.sync16.kmcp \
-    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
-    --log genbank-viral.sync16.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map genbank-viral.sync16.kmcp/
-
-
-# ----------------------------------------------
-# here we compute FracMinHash with D=5
-
-kmcp compute -I $input -O genbank-$name-k21-n10-D5 \
-    -k 21 -D 5 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log genbank-$name-k21-n10-D5.log -j 32 --force
-
-# viral genomes are small:
-#   using small false positive rate: 0.001
-#   using more hash functions: 3
-kmcp index -I genbank-$name-k21-n10-D5/ -O genbank-viral.minh5.kmcp \
-    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
-    --log genbank-viral.minh5.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map genbank-viral.minh5.kmcp/
-
-
-# ----------------------------------------------
-# here we compute Minimizer with W=5
-
-kmcp compute -I $input -O genbank-$name-k21-n10-W5 \
-    -k 21 -W 5 --seq-name-filter plasmid \
-    --split-number 10 --split-overlap 150 \
-    --log genbank-$name-k21-n10-W5.log -j 32 --force
-
-# viral genomes are small:
-#   using small false positive rate: 0.001
-#   using more hash functions: 3
-kmcp index -I genbank-$name-k21-n10-W5/ -O genbank-viral.mini5.kmcp \
-    -j 32 -f 0.001 -n 3 -x 50K -8 1M \
-    --log genbank-viral.mini5.kmcp.log --force
-
-# cp taxid and name mapping file to database directory
-cp taxid.map name.map genbank-viral.mini5.kmcp/
 </code></pre>
 <h3 id="human-genome">Human genome</h3>
 <p>Downloading human genome file from <a href="https://github.com/marbl/CHM13">CHM13</a>:</p>
@@ -1918,7 +1578,7 @@ kmcp index -j 32 -I humgut-k21-n10 -O humgut.kmcp -n 1 -f 0.3
 
 cp taxid.map taxid-gtdb.map humgut.kmcp/
 </code></pre>
-<h3 id="progenomes2-12000-species">proGenomes2 (12,000 species)</h3>
+<h3 id="progenomes">proGenomes</h3>
 <p><a href="https://progenomes.embl.de/">proGenomes</a> v2.1 provides 84,096 consistently annotated bacterial
 and archaeal genomes from over 12000 species.</p>
 <p>Dataset:</p>
@@ -1993,7 +1653,7 @@ kmcp index -j 32 -I progenomes-k21-n10 -O progenomes.kmcp -n 1 -f 0.3
 cp taxid.map name.map progenomes.kmcp/
 </code></pre>
 <h2 id="building-databases-viral-genome-collections">Building databases (viral genome collections)</h2>
-<h3 id="mgv-54118-species">MGV (54,118 species)</h3>
+<h3 id="mgv">MGV</h3>
 <blockquote>
 <p>Bacteriophages have important roles in the ecology of the human gut microbiome but are under-represented in reference data-
 bases. To address this problem, we assembled the Metagenomic Gut Virus catalogue that comprises 189,680 viral genomes
@@ -2570,16 +2230,16 @@ Alternately, we can also use the GTDB taxonomy.</p>
    which provids GTDB taxonomy taxdump files for each GTDB version and a <code>taxid.map</code> file mapping accessions to TaxIds of taxa at the subspecies rank.
    Here, we only output lineages down to the species rank and leave name of taxa at the subspecies/strain rank empty.</p>
 <pre><code>taxonkit reformat \
-    --data-dir gtdb-taxdump/R202/ \
+    --data-dir gtdb-taxdump/R214/ \
     --taxid-field 2 \
     --format "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}\t" \
-    gtdb-taxdump/R202/taxid.map \
-| csvtk cut -H -t -f -2 -o gtdb-r202.tsv
+    gtdb-taxdump/R214/taxid.map \
+| csvtk cut -H -t -f -2 -o gtdb-r214.tsv
 </code></pre>
 </li>
 <li>
 <p>Exporting taxonomic lineages of viral and fungal taxa with rank equal to or lower than species from NCBI taxdump.
-   For taxa whose rank is "no rank" below the species, we treat them as tax of strain rank (<code>--pseudo-strain</code>, taxonkit v0.14.1 needed).</p>
+   For taxa whose rank is "no rank" below the species, we treat them as tax of strain rank (<code>--pseudo-strain</code>, taxonkit v0.14.1 or later versionsneeded).</p>
 <pre><code># for viral data
 taxonkit reformat \
     --data-dir taxdump/ \
@@ -2601,21 +2261,24 @@ taxonkit reformat \
 </li>
 <li>
 <p>Creating taxdump from lineages above.</p>
-<pre><code>cat gtdb-r202.tsv genbank-viral.tsv refseq-fungi.tsv \
+<pre><code># move the lineage files to current directory
+# cp gtdb/gtdb-r214.tsv genbank-viral/genbank-viral.tsv refseq-fungi/refseq-fungi.tsv .
+
+cat gtdb-r214.tsv genbank-viral.tsv refseq-fungi.tsv \
     | taxonkit create-taxdump \
         --field-accession 1 \
         -R "superkingdom,phylum,class,order,family,genus,species,strain" \
-        -O gtdb+ncbi-taxdump
+        -O taxdump.gtdb+ncbi
 </code></pre>
 </li>
 </ol>
 <p>Some tests:</p>
 <pre><code># SARS-COV-2 in NCBI taxonomy
 $ echo 2697049 \
-    | taxonkit lineage -t --data-dir ~/.taxonkit \
+    | taxonkit lineage -t --data-dir taxdump/ \
     | csvtk cut -Ht -f 3 \
     | csvtk unfold -Ht -f 1 -s ";" \
-    | taxonkit lineage -r -n -L --data-dir ~/.taxonkit \
+    | taxonkit lineage -r -n -L --data-dir taxdump/ \
     | csvtk cut -Ht -f 1,3,2 \
     | csvtk pretty -Ht
 10239     superkingdom   Viruses
@@ -2632,14 +2295,14 @@ $ echo 2697049 \
 694009    species        Severe acute respiratory syndrome-related coronavirus
 2697049   no rank        Severe acute respiratory syndrome coronavirus 2
 
-$ echo "Severe acute respiratory syndrome coronavirus 2" | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+$ echo "Severe acute respiratory syndrome coronavirus 2" | taxonkit name2taxid --data-dir taxdump.gtdb+ncbi/
 Severe acute respiratory syndrome coronavirus 2 216305222
 
 $ echo 216305222 \
-    | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+    | taxonkit lineage -t --data-dir taxdump.gtdb+ncbi/ \
     | csvtk cut -Ht -f 3 \
     | csvtk unfold -Ht -f 1 -s ";" \
-    | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+    | taxonkit lineage -r -n -L --data-dir taxdump.gtdb+ncbi/ \
     | csvtk cut -Ht -f 1,3,2 \
     | csvtk pretty -Ht
 1287770734   superkingdom   Viruses
@@ -2653,14 +2316,14 @@ $ echo 216305222 \
 
 
 
-$ echo "Escherichia coli"  | taxonkit name2taxid --data-dir gtdb+ncbi-taxdump/
+$ echo "Escherichia coli"  | taxonkit name2taxid --data-dir taxdump.gtdb+ncbi/
 Escherichia coli        1945799576
 
 $ echo 1945799576 \
-    | taxonkit lineage -t --data-dir gtdb+ncbi-taxdump/ \
+    | taxonkit lineage -t --data-dir taxdump.gtdb+ncbi/ \
     | csvtk cut -Ht -f 3 \
     | csvtk unfold -Ht -f 1 -s ";" \
-    | taxonkit lineage -r -n -L --data-dir gtdb+ncbi-taxdump/ \
+    | taxonkit lineage -r -n -L --data-dir taxdump.gtdb+ncbi/ \
     | csvtk cut -Ht -f 1,3,2 \
     | csvtk pretty -Ht
 609216830    superkingdom   Bacteria
