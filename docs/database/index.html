@@ -2271,6 +2271,16 @@ cat gtdb-r214.tsv genbank-viral.tsv refseq-fungi.tsv \
         -O taxdump.gtdb+ncbi
 </code></pre>
 </li>
+<li>
+<p>NCBI taxonomy of Viruses changed rapidly, of which some TaxIds might be deleted.
+   You may added them to the the <code>taxid.map</code> file for compatibility.</p>
+<pre><code>cat genbank-viral.tsv refseq-fungi.tsv gtdb-r214.tsv \
+    | csvtk grep -Ht -f 2 -r -p "^$" \
+    | cut -f 1 \
+    | awk '{print $1"\t0"}' \
+    &gt;&gt; taxdump.gtdb+ncbi/taxid.map
+</code></pre>
+</li>
 </ol>
 <p>Some tests:</p>
 <pre><code># SARS-COV-2 in NCBI taxonomy
