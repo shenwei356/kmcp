@@ -817,7 +817,7 @@ And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is
 <li><a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#kmcp-vs-cobs">~25 min for 47894 genomes from GTDB-r202</a> on a sever with 40 CPU threads and solid disk drive.</li>
 </ul>
 </li>
-<li><strong>Fast searching speed</strong><ul>
+<li><strong>Fast searching speed (for sequence/genome search)</strong><ul>
 <li>The index structure is modified from COBS, while <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is 2x-10x faster</a> in sequence searching.</li>
 <li>Automatically scales to exploit all available CPU cores.</li>
 <li>Searching time is linearly related to the number of reference genomes (chunks).</li>
@@ -838,6 +838,14 @@ And <a href="https://bioinf.shenwei.me/kmcp/benchmark/searching/#result">KMCP is
 <li>KMCP also provides <strong>confident infectious pathogen detection</strong>.</li>
 <li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-modes">Preset six modes for multiple scenarios</a>.</li>
 <li><a href="https://bioinf.shenwei.me/kmcp/tutorial/profiling/#profiling-result-formats">Supports CAMI and MetaPhlAn profiling format</a>.</li>
+</ul>
+</li>
+<li><strong>Flexible support of taxonomy database</strong><ul>
+<li>Taxonomy data, in the format of NCBI taxdump files, are only needed in the profiling step.
+  Therefore, it is easy to utilize an updated version of taxonomy data.</li>
+<li>GTDB, ICTV and custom taxonomy database are supported by creating taxdump files with <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>.</li>
+<li><a href="https://bioinf.shenwei.me/kmcp/database/#merging-gtdb-and-ncbi-taxonomy">You can even merge the GTDB taxonomy (for prokaryotic genomes from GTDB) and NCBI taxonomy (for genomes from NCBI)</a>.</li>
+<li>Profiling without taxonomy data is also supported by setting <code>--level strain</code> in <code>kmcp profile</code>.</li>
 </ul>
 </li>
 </ul>

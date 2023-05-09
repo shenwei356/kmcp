@@ -2,67 +2,67 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/PREBUILT_DB_README/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/database-time-and-mem-v2021.12/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/database/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/download/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/faq/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/usage/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/benchmark/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/benchmark/profiling/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/benchmark/searching/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/tutorial/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/tutorial/profiling/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bioinf.shenwei.me/kmcp/tutorial/searching/</loc>
-         <lastmod>2023-05-04</lastmod>
+         <lastmod>2023-05-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
