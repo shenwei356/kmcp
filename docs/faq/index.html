@@ -543,6 +543,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#are-the-elements-in-the-bloom-filters-uniformly-distributed" class="md-nav__link">
+    Are the elements in the bloom filters uniformly distributed?
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -714,6 +721,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#are-the-elements-in-the-bloom-filters-uniformly-distributed" class="md-nav__link">
+    Are the elements in the bloom filters uniformly distributed?
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -874,6 +888,90 @@ profiling which needs the original reference IDs. We add a note now:</p>
 <p><s>Sorry it's not supported due to the limitation of the command-line argument parsers.
 You need explicitly set all relevant options of the mode.</s></p>
 <p>It's available since v0.8.2.</p>
+<h3 id="are-the-elements-in-the-bloom-filters-uniformly-distributed">Are the elements in the bloom filters uniformly distributed?</h3>
+<p>Some one asked me this when I were giving a talk of KMCP.
+The answers is yes. I created a new command <a href="https://bioinf.shenwei.me/kmcp/usage/#index-density"><code>kmcp utils index-density</code></a> to plot the density of a index file.</p>
+<p>Here's are some example outputs. The width is the number of bins and the height is the number of names (references or reference chunks).</p>
+<ol>
+<li>
+<p>v2023.05-genbank-viral-_block001.uniki (FPR of bloom filter: 0.3), only a part of image is shown.</p>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">k</th>
+<th align="left">canonical</th>
+<th align="left">num-hashes</th>
+<th align="left">num-sigs</th>
+<th align="left">num-names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">21</td>
+<td align="left">true</td>
+<td align="left">1</td>
+<td align="left">6395</td>
+<td align="left">10400</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="" src="../v2023.05-genbank-viral-_block001.uniki.part.jpg" /></p>
+</li>
+<li>
+<p>v2023.05-refseq-fungi-_block001.uniki (FPR of bloom filter: 0.3)</p>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">k</th>
+<th align="left">canonical</th>
+<th align="left">num-hashes</th>
+<th align="left">num-sigs</th>
+<th align="left">num-names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">21</td>
+<td align="left">true</td>
+<td align="left">1</td>
+<td align="left">2089979</td>
+<td align="left">160</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="" src="../v2023.05-refseq-fungi-_block001.uniki.jpg" /></p>
+</li>
+<li>
+<p>v2023.05-refseq-fungi-_block002.uniki (FPR of bloom filter: 0.3)</p>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">k</th>
+<th align="left">canonical</th>
+<th align="left">num-hashes</th>
+<th align="left">num-sigs</th>
+<th align="left">num-names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">21</td>
+<td align="left">true</td>
+<td align="left">1</td>
+<td align="left">2599648</td>
+<td align="left">160</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="" src="../v2023.05-refseq-fungi-_block002.uniki.jpg" /></p>
+</li>
+</ol>
 
               
             </article>

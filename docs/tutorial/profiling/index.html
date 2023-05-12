@@ -1361,7 +1361,7 @@ kmcp profile \
     --min-hic-ureads-qcov  0.75 \
     --min-hic-ureads-prop   0.1 \
     $sfile                      \
-    --out-prefix       $sfile.kmcp.profile \
+    --out-file         $sfile.kmcp.profile \
     --metaphlan-report $sfile.metaphlan.profile \
     --cami-report      $sfile.cami.profile \
     --sample-id        "0" \
@@ -1370,7 +1370,7 @@ kmcp profile \
 <h4 id="profiling-result-formats">Profiling result formats</h4>
 <p>Taxonomic profiling output formats:</p>
 <ul>
-<li>KMCP      (<code>-o/--out-prefix</code>). 
+<li>KMCP      (<code>-o/--out-file</code>).
   <strong>Note that: abundances are only computed for target references rather than
      each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format</strong>.</li>
 <li>CAMI      (<code>-M/--metaphlan-report</code>, <code>--metaphlan-report-version</code>, sample name: <code>-s/--sample-id</code>, taxonomy data: <code>--taxonomy-id</code>)</li>

@@ -344,6 +344,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#index-density" class="md-nav__link">
+    index-density
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#unik-info" class="md-nav__link">
     unik-info
   </a>
@@ -637,6 +644,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#index-density" class="md-nav__link">
+    index-density
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#unik-info" class="md-nav__link">
     unik-info
   </a>
@@ -707,7 +721,7 @@
 <p>KMCP is a command-line tool consisting of several subcommands.</p>
 <pre><code class="language-text">
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.9.0
+    Version: v0.9.2
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -1201,7 +1215,7 @@ Performance notes:
      ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
-  1. KMCP      (-o/--out-prefix)
+  1. KMCP      (-o/--out-file)
      Note that: abundances are only computed for target references rather than
      each taxon at all taxonomic ranks, so please also output CAMI or MetaPhlAn format.
   2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
@@ -1308,7 +1322,8 @@ Flags:
       --norm-abund string                 ► Method for normalize abundance of a reference by the
                                           mean/min/max abundance in all chunks, available values: mean,
                                           min, max. (default &quot;mean&quot;)
-  -o, --out-prefix string                 ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -o, --out-file string                   ► Out file, supports a &quot;.gz&quot; suffix (&quot;-&quot; for stdout).
+                                          (default &quot;-&quot;)
       --rank-prefix strings               ► Prefixes of taxon name in certain ranks, used with
                                           --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
   -s, --sample-id string                  ► Sample ID in result file.
@@ -1363,16 +1378,54 @@ Flags:
 
 </code></pre>
 <h2 id="index-info">index-info</h2>
-<pre><code class="language-text">Print information of index file
+<pre><code class="language-text">Print information of a index file
 
 Usage:
   kmcp utils index-info [flags] 
 
 Flags:
-  -a, --all                 ► Show all information.
-  -b, --basename            ► Only output basenames of files.
-  -h, --help                help for index-info
-  -o, --out-prefix string   ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -a, --all               ► Show all information.
+  -b, --basename          ► Only output basenames of files.
+  -h, --help              help for index-info
+  -o, --out-file string   ► Out file, supports a &quot;.gz&quot; suffix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+
+</code></pre>
+<h2 id="index-density">index-density</h2>
+<pre><code class="language-text">Plot the density of a index file
+
+Purposes:
+  1. Checking whether elements (Ones) in bloom filters are uniformly distributed
+     via an intuitive grayscale image.
+
+Outputs:
+  1. default output (a TSV file), columns:
+      1) target:   reference id
+      2) chunkIdx: the index of genome chunk
+      3) bins:     the number of bins for counting
+      4) binSize:  the size of a bin
+      5) counts:   comma-seperated counts in each bin
+  2. the density image (a grayscale JPEG image):
+      - width: the number of bins
+      - height: the number of names (references or reference chunks)
+
+Examples:
+  1. common use:
+      kmcp utils index-density gtdb.kmcp/R001/_block001.uniki \
+          --bins 1024  --out-file t.tsv --out-img t.jpg
+  2. export every bit of each position, the image could fail to create:
+      kmcp utils index-density gtdb.kmcp/R001/_block001.uniki \
+          --bin-size 1 --out-file t.tsv
+
+Usage:
+  kmcp utils index-density [flags]
+
+Flags:
+  -s, --bin-size int      ► bin size
+  -b, --bins int          ► number of bins (default 1024)
+  -h, --help              help for index-density
+  -o, --out-file string   ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for stdout).
+                          (default &quot;-&quot;)
+      --out-img string    ► Out density image, in format of jpeg
 
 </code></pre>
 <h2 id="unik-info">unik-info</h2>
@@ -1389,7 +1442,7 @@ Flags:
   -a, --all                   ► All information, including the number of k-mers.
   -b, --basename              ► Only output basename of files.
   -h, --help                  help for unik-info
-  -o, --out-file string       ► Out file (&quot;-&quot; for stdout, suffix .gz for gzipped out.) (default &quot;-&quot;)
+  -o, --out-file string       ► Out file, supports a &quot;.gz&quot; suffix (&quot;-&quot; for stdout). (default &quot;-&quot;)
   -e, --skip-err              ► Skip error, only show warning message.
       --symbol-false string   ► Smybol for false. (default &quot;✕&quot;)
       --symbol-true string    ► Smybol for true. (default &quot;✓&quot;)
@@ -1436,16 +1489,17 @@ Usage:
 Flags:
   -h, --help                   help for merge-regions
   -I, --ignore-type            ► Merge species and assembly-specific regions.
+      --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
+                               enough. Type &quot;kmcp utils merge-regions -h&quot; for details. (default 5000)
   -f, --max-fpr float          ► Maximum false positive rate of a read in search result. (default 0.05)
   -g, --max-gap int            ► Maximum distance of starting positions of two adjacent regions, 0 for
                                no limitation, 1 for no merging.
-      --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
-                               enough. Type &quot;kmcp utils merge-regions -h&quot; for details. (default 5000)
   -l, --min-overlap int        ► Minimum overlap of two adjacent regions, recommend K-1. (default 1)
   -t, --min-query-cov float    ► Minimum query coverage of a read in search result. (default 0.55)
   -a, --name-assembly string   ► Name of assembly-specific regions. (default &quot;assembly-specific&quot;)
   -s, --name-species string    ► Name of species-specific regions. (default &quot;species-specific&quot;)
-  -o, --out-prefix string      ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -o, --out-file string        ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for stdout).
+                               (default &quot;-&quot;)
   -r, --regexp string          ► Regular expression for extract reference name and query locations.
                                (default &quot;^(.+)_sliding:(\\d+)\\-(\\d+)$&quot;)
 
@@ -1464,7 +1518,7 @@ Performance notes:
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 Usage:
-  kmcp utils filter [flags] 
+  kmcp utils filter [flags]
 
 Flags:
   -h, --help                  help for filter
@@ -1475,7 +1529,8 @@ Flags:
   -f, --max-fpr float         ► Maximum false positive rate of a read in search result. (default 0.05)
   -t, --min-query-cov float   ► Minimum query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
-  -o, --out-prefix string     ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -o, --out-file string       ► Out file, supports and recommends a &quot;.gz&quot; suffix (&quot;-&quot; for stdout).
+                              (default &quot;-&quot;)
   -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
                               with merged.dmp and delnodes.dmp.
   -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
@@ -1530,10 +1585,10 @@ Usage:
   kmcp utils cov2simi [flags]
 
 Flags:
-  -h, --help                help for cov2simi
-  -o, --out-prefix string   ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
-  -t, --query-cov float     ► K-mer query coverage, i.e., proportion of matched k-mers and unique
-                            k-mers of a query. range: [0, 1]
+  -h, --help              help for cov2simi
+  -o, --out-file string   ► Out file, supports a &quot;.gz&quot; suffix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -t, --query-cov float   ► K-mer query coverage, i.e., proportion of matched k-mers and unique k-mers
+                          of a query. range: [0, 1]
 
 </code></pre>
 <h2 id="query-fpr">query-fpr</h2>
@@ -1561,7 +1616,7 @@ Flags:
   -h, --help                        help for query-fpr
   -m, --matched-kmers int           ► The number of matched k-mers of a query. (default 35)
   -n, --num-kmers int               ► Number of unique k-mers of the query. (default 70)
-  -o, --out-prefix string           ► Out file prefix (&quot;-&quot; for stdout). (default &quot;-&quot;)
+  -o, --out-file string             ► Out file, supports a &quot;.gz&quot; suffix (&quot;-&quot; for stdout). (default &quot;-&quot;)
 
 </code></pre>
 <h2 id="autocompletion">autocompletion</h2>

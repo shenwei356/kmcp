@@ -907,11 +907,15 @@ in two packages for better searching performance.</p>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#unik-info">utils unik-info</a></td>
-<td align="left">Print information of .unik file</td>
+<td align="left">Print information of .unik files</td>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-info">utils index-info</a></td>
-<td align="left">Print information of index file</td>
+<td align="left">Print information of index files</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-density">utils index-density</a></td>
+<td align="left">Plot the density of a index file</td>
 </tr>
 <tr>
 <td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#ref-info">utils ref-info</a></td>
@@ -958,7 +962,7 @@ kmcp merge -o search.kmcp.tsv.gz search.kmcp@*.kmcp.tsv.gz
 kmcp profile search.kmcp.tsv.gz \
     --taxid-map        taxid.map \
     --taxdump          taxdump/ \
-    --out-prefix       search.tsv.gz.k.profile \
+    --out-file         search.tsv.gz.k.profile \
     --metaphlan-report search.tsv.gz.m.profile \
     --cami-report      search.tsv.gz.c.profile \
     --binning-result   search.tsv.gz.binning.gz
