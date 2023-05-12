@@ -68,6 +68,47 @@ my tests).
     you can extract URLs using `grep -f failed.txt -v *url_downloaded.txt` or some other ways,
     and batch redownload them using `parallel`.
 
+### Are the elements in the bloom filters uniformly distributed?
+
+Some one asked me this when I were giving a talk of KMCP.
+The answers is yes.
+
+I created a new command [`kmcp utils index-density`](https://bioinf.shenwei.me/kmcp/usage/#index-density) to plot the density of a index file.
+
+In a image,
+
+- The width (X) is the number of bins for counting the elements (1s) number of each bloom filter,
+- The height (Y) is the number of names (references or reference chunks).
+- Each pix indicates the density of a bin, the darker the higher of the density.
+
+Here's are some example outputs.
+
+
+1. v2023.05-genbank-viral-_block001.uniki (FPR of bloom filter: 0.3), only a part of image is shown.
+
+    |file           |k  |canonical|num-hashes|num-sigs|num-names|
+    |:--------------|:--|:--------|:---------|:-------|:--------|
+    |_block001.uniki|21 |true     |1         |6395    |10400    |
+
+    ![](v2023.05-genbank-viral-_block001.uniki.part.jpg)
+
+1. v2023.05-refseq-fungi-_block001.uniki (FPR of bloom filter: 0.3)
+
+    |file           |k  |canonical|num-hashes|num-sigs|num-names|
+    |:--------------|:--|:--------|:---------|:-------|:--------|
+    |_block001.uniki|21 |true     |1         |2089979 |160      |
+
+    ![](v2023.05-refseq-fungi-_block001.uniki.jpg)
+
+2. v2023.05-refseq-fungi-_block002.uniki (FPR of bloom filter: 0.3)
+
+    |file           |k  |canonical|num-hashes|num-sigs|num-names|
+    |:--------------|:--|:--------|:---------|:-------|:--------|
+    |_block002.uniki|21 |true     |1         |2599648 |160      |
+
+    ![](v2023.05-refseq-fungi-_block002.uniki.jpg)
+
+
 ## Searching
 
 ### Why are the CPU usages are very low, not 100%?
@@ -155,33 +196,3 @@ You need explicitly set all relevant options of the mode.</s>
 
 It's available since v0.8.2.
 
-### Are the elements in the bloom filters uniformly distributed?
-
-Some one asked me this when I were giving a talk of KMCP.
-The answers is yes. I created a new command [`kmcp utils index-density`](https://bioinf.shenwei.me/kmcp/usage/#index-density) to plot the density of a index file.
-
-Here's are some example outputs. The width is the number of bins and the height is the number of names (references or reference chunks).
-
-1. v2023.05-genbank-viral-_block001.uniki (FPR of bloom filter: 0.3), only a part of image is shown.
-
-    |file           |k  |canonical|num-hashes|num-sigs|num-names|
-    |:--------------|:--|:--------|:---------|:-------|:--------|
-    |_block001.uniki|21 |true     |1         |6395    |10400    |
-
-    ![](v2023.05-genbank-viral-_block001.uniki.part.jpg)
-
-1. v2023.05-refseq-fungi-_block001.uniki (FPR of bloom filter: 0.3)
-
-    |file           |k  |canonical|num-hashes|num-sigs|num-names|
-    |:--------------|:--|:--------|:---------|:-------|:--------|
-    |_block001.uniki|21 |true     |1         |2089979 |160      |
-
-    ![](v2023.05-refseq-fungi-_block001.uniki.jpg)
-
-2. v2023.05-refseq-fungi-_block002.uniki (FPR of bloom filter: 0.3)
-
-    |file           |k  |canonical|num-hashes|num-sigs|num-names|
-    |:--------------|:--|:--------|:---------|:-------|:--------|
-    |_block002.uniki|21 |true     |1         |2599648 |160      |
-
-    ![](v2023.05-refseq-fungi-_block002.uniki.jpg)
