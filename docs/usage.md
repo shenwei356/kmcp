@@ -709,7 +709,7 @@ Flags:
 ## index-density
 
 ```text
-Plot the density of a index file
+Plot the element density of bloom filters for an index file
 
 Purposes:
   1. Checking whether elements (Ones) in bloom filters are uniformly distributed
@@ -719,12 +719,15 @@ Outputs:
   1. default output (a TSV file), columns:
       1) target:   reference id
       2) chunkIdx: the index of genome chunk
-      3) bins:     the number of bins for counting
-      4) binSize:  the size of a bin
+      3) bins:     the number of bins in bloom filters for counting 1s
+      4) binSize:  the size/width of a bin
       5) counts:   comma-seperated counts in each bin
   2. the density image (a grayscale JPEG image):
-      - width: the number of bins
-      - height: the number of names (references or reference chunks)
+      - X: bins. The width is the number of bins
+      - Y: bloom filters, with each representing a genome (chunk).
+        The height is the number of names (genome or genome chunks)
+      - greyscale/darkness of a pixel: the density of a bin, calculated as:
+            255 - 255 * ${the number of 1s in the bin} / ${bin-size}
 
 Examples:
   1. common use:
@@ -738,8 +741,8 @@ Usage:
   kmcp utils index-density [flags]
 
 Flags:
-  -s, --bin-size int      ► bin size
-  -b, --bins int          ► number of bins (default 1024)
+  -s, --bin-size int      ► bin size/width
+  -b, --bins int          ► number of bins for counting the number of 1s. (default 1024)
   -h, --help              help for index-density
   -o, --out-file string   ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
                           (default "-")

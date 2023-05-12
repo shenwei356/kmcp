@@ -75,38 +75,108 @@ The answers is yes.
 
 I created a new command [`kmcp utils index-density`](https://bioinf.shenwei.me/kmcp/usage/#index-density) to plot the density of a index file.
 
-In a image,
+In the image,
 
-- The width (X) is the number of bins for counting the elements (1s) number of each bloom filter,
-- The height (Y) is the number of names (references or reference chunks).
-- Each pix indicates the density of a bin, the darker the higher of the density.
+- X: bins. The width is the number of bins
+- Y: bloom filters, with each representing a genome (chunk).
+The height is the number of names (genome or genome chunks)
+- greyscale/darkness of a pixel: the density of a bin, calculated as:
+    255 - 255 * ${the number of 1s in the bin} / ${bin-size}
 
 Here's are some example outputs.
 
-
 1. v2023.05-genbank-viral-_block001.uniki (FPR of bloom filter: 0.3), only a part of image is shown.
+
+    ![](v2023.05-genbank-viral-_block001.uniki.part.jpg)
+
+    Note that the genome sizes (base pairs) of this genome chunk vary widely, so the densities of the preceding bloom files are relatively spare.
+
+    Information of k-mers:
+
+        kmcp utils ref-info -d genbank-viral.kmcp \
+            | csvtk grep -t -p _block001.uniki \
+            | csvtk cut -t -f -2 \
+            | csvtk head -n 10 \
+            | csvtk csv2md -t
+
+    |file           |target         |chunkIdx|chunks|kmers|fpr     |
+    |:--------------|:--------------|:-------|:-----|:----|:-------|
+    |_block001.uniki|GCA_008766775.1|0       |1     |145  |0.022419|
+    |_block001.uniki|GCA_003330005.1|8       |10    |150  |0.023183|
+    |_block001.uniki|GCA_002814895.1|0       |1     |154  |0.023794|
+    |_block001.uniki|GCA_001967255.1|9       |10    |165  |0.025471|
+    |_block001.uniki|GCA_002219745.1|4       |10    |197  |0.030336|
+    |_block001.uniki|GCA_000839085.1|0       |1     |200  |0.030790|
+    |_block001.uniki|GCA_000919055.1|9       |10    |207  |0.031851|
+    |_block001.uniki|GCA_000848385.1|6       |10    |207  |0.031851|
+    |_block001.uniki|GCA_002820565.1|9       |10    |208  |0.032002|
+    |_block001.uniki|GCA_002820505.1|9       |10    |208  |0.032002|
+
+    Information of bloom filters:
+
+        kmcp utils index-info -b genbank-viral.kmcp/R001/_block001.uniki | csvtk csv2md -t
 
     |file           |k  |canonical|num-hashes|num-sigs|num-names|
     |:--------------|:--|:--------|:---------|:-------|:--------|
     |_block001.uniki|21 |true     |1         |6395    |10400    |
 
-    ![](v2023.05-genbank-viral-_block001.uniki.part.jpg)
-
 1. v2023.05-refseq-fungi-_block001.uniki (FPR of bloom filter: 0.3)
+
+    ![](v2023.05-refseq-fungi-_block001.uniki.jpg)
+
+    Information of k-mers:
+
+        kmcp utils ref-info -d refseq-fungi.kmcp \
+            | csvtk grep -t -p _block001.uniki \
+            | csvtk cut -t -f -2 \
+            | csvtk head -n 10 \
+            | csvtk csv2md -t
+
+    |file           |target         |chunkIdx|chunks|kmers |fpr     |
+    |:--------------|:--------------|:-------|:-----|:-----|:-------|
+    |_block001.uniki|GCF_000277815.2|0       |10    |207084|0.094334|
+    |_block001.uniki|GCF_000146465.1|0       |10    |209422|0.095346|
+    |_block001.uniki|GCF_000091225.2|0       |10    |209787|0.095504|
+    |_block001.uniki|GCF_000280035.1|8       |10    |216972|0.098608|
+    |_block001.uniki|GCF_000280035.1|9       |10    |217529|0.098849|
+    |_block001.uniki|GCF_000280035.1|3       |10    |217631|0.098892|
+    |_block001.uniki|GCF_000280035.1|6       |10    |218560|0.099293|
+    |_block001.uniki|GCF_000280035.1|7       |10    |218763|0.099380|
+    |_block001.uniki|GCF_000280035.1|4       |10    |218830|0.099409|
+    |_block001.uniki|GCF_000280035.1|0       |10    |218860|0.099422|
+
+
+    Information of bloom filters:
+
+        kmcp utils index-info -b refseq-fungi.kmcp/R001/_block001.uniki | csvtk csv2md -t
+
 
     |file           |k  |canonical|num-hashes|num-sigs|num-names|
     |:--------------|:--|:--------|:---------|:-------|:--------|
     |_block001.uniki|21 |true     |1         |2089979 |160      |
 
-    ![](v2023.05-refseq-fungi-_block001.uniki.jpg)
 
 2. v2023.05-refseq-fungi-_block002.uniki (FPR of bloom filter: 0.3)
+
+    ![](v2023.05-refseq-fungi-_block002.uniki.jpg)
+
+    |file           |target         |chunkIdx|chunks|kmers |fpr     |
+    |:--------------|:--------------|:-------|:-----|:-----|:-------|
+    |_block002.uniki|GCF_000349005.2|5       |10    |745638|0.249355|
+    |_block002.uniki|GCF_000349005.2|2       |10    |746237|0.249528|
+    |_block002.uniki|GCF_000349005.2|9       |10    |747586|0.249917|
+    |_block002.uniki|GCF_000349005.2|0       |10    |748331|0.250132|
+    |_block002.uniki|GCF_000349005.2|7       |10    |749497|0.250469|
+    |_block002.uniki|GCF_001477545.1|5       |10    |751685|0.251099|
+    |_block002.uniki|GCF_002251995.1|3       |10    |753439|0.251604|
+    |_block002.uniki|GCF_001477545.1|4       |10    |755317|0.252145|
+    |_block002.uniki|GCF_001477545.1|0       |10    |758418|0.253036|
+    |_block002.uniki|GCF_001477545.1|8       |10    |760460|0.253623|
 
     |file           |k  |canonical|num-hashes|num-sigs|num-names|
     |:--------------|:--|:--------|:---------|:-------|:--------|
     |_block002.uniki|21 |true     |1         |2599648 |160      |
 
-    ![](v2023.05-refseq-fungi-_block002.uniki.jpg)
 
 
 ## Searching
