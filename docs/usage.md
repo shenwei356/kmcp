@@ -706,6 +706,47 @@ Flags:
 
 ```
 
+## index-density
+
+```text
+Plot the density of a index file
+
+Purposes:
+  1. Checking whether elements (Ones) in bloom filters are uniformly distributed
+     via an intuitive grayscale image.
+
+Outputs:
+  1. default output (a TSV file), columns:
+      1) target:   reference id
+      2) chunkIdx: the index of genome chunk
+      3) bins:     the number of bins for counting
+      4) binSize:  the size of a bin
+      5) counts:   comma-seperated counts in each bin
+  2. the density image (a grayscale JPEG image):
+      - width: the number of bins
+      - height: the number of names (references or reference chunks)
+
+Examples:
+  1. common use:
+      kmcp utils index-density gtdb.kmcp/R001/_block001.uniki \
+          --bins 1024  --out-file t.tsv --out-img t.jpg
+  2. export every bit of each position, the image could fail to create:
+      kmcp utils index-density gtdb.kmcp/R001/_block001.uniki \
+          --bin-size 1 --out-file t.tsv
+
+Usage:
+  kmcp utils index-density [flags]
+
+Flags:
+  -s, --bin-size int      ► bin size
+  -b, --bins int          ► number of bins (default 1024)
+  -h, --help              help for index-density
+  -o, --out-file string   ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
+                          (default "-")
+      --out-img string    ► Out density image, in format of jpeg
+
+```
+
 ## unik-info
 
 ```text

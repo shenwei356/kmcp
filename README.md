@@ -174,6 +174,7 @@ ARM architecture is supported, but `kmcp search` would be slower.
 |[utils split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)|Split genomes into chunks                                       |
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik files                                |
 |[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index files                                |
+|[utils index-density](https://bioinf.shenwei.me/kmcp/usage/#index-density)|Plot the density of a index file                                |
 |[utils ref-info](https://bioinf.shenwei.me/kmcp/usage/#ref-info)          |Print information of reference chunks in a database             |
 |[utils cov2simi](https://bioinf.shenwei.me/kmcp/usage/#icov2simi)         |Convert k-mer coverage to sequence similarity                   |
 |[utils query-fpr](https://bioinf.shenwei.me/kmcp/usage/#query-fpr)        |Compute the false positive rate of a query                      |

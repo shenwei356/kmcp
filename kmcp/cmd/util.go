@@ -84,7 +84,7 @@ func checkFileSuffix(opt *Options, suffix string, files ...string) {
 		}
 
 		if suffix != "" && !strings.HasSuffix(file, suffix) {
-			checkError(fmt.Errorf("input should be stdin or %s file: %s", suffix, file))
+			checkError(fmt.Errorf("input should be stdin or %s files: %s", suffix, file))
 		}
 	}
 }

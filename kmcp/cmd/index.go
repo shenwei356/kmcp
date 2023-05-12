@@ -153,7 +153,7 @@ Examples:
 		}
 
 		if filepath.Clean(inDir) == filepath.Clean(outDir) {
-			checkError(fmt.Errorf("intput and output paths should not be the same"))
+			checkError(fmt.Errorf("intput and output paths should not be the same: %s", outDir))
 		}
 
 		readFromDir := inDir != ""
