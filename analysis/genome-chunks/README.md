@@ -50,7 +50,7 @@ Reference genomes are split into 1, 5, 10, and 20 chunks respectively.
             --taxdump taxdump-custom/ \
             $f \
             --mode 1 \
-            --out-prefix $f.kmcp.profile \
+            --out-file $f.kmcp.profile \
             --metaphlan-report $f.metaphlan.profile \
             --sample-id 0 \
             --cami-report $f.cami.profile \

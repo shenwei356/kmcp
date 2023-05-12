@@ -4,6 +4,8 @@
 
 - `kmcp profile`
     - fix #reads belonging to references in profile when no matches found.
+- `kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr`
+    - rename long flag `--out-prefix` to `--out-file`.
 
 ### v0.9.1 - 2022-12-26
 

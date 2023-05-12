@@ -93,7 +93,7 @@ Performance notes:
 
 		var err error
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
@@ -398,7 +398,7 @@ func init() {
 	utilsCmd.AddCommand(regionsCmd)
 
 	regionsCmd.Flags().IntP("line-chunk-size", "", 5000, formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp utils merge-regions -h" for details.`))
-	regionsCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	regionsCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))
 
 	// for single read
 	regionsCmd.Flags().Float64P("max-fpr", "f", 0.05, formatFlagUsage(`Maximum false positive rate of a read in search result.`))

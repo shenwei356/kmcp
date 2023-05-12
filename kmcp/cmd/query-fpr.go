@@ -66,7 +66,7 @@ Reference:
 		all := getFlagBool(cmd, "all")
 		addHeader := getFlagBool(cmd, "add-header")
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 
 		outfh, gw, w, err := outStream(outFile, strings.HasSuffix(strings.ToLower(outFile), ".gz"), opt.CompressionLevel)
 		checkError(err)
@@ -102,7 +102,7 @@ func init() {
 	queryFPRCmd.Flags().BoolP("add-header", "H", false, formatFlagUsage(`Add header line (column names`))
 	queryFPRCmd.Flags().BoolP("all", "a", false, formatFlagUsage(`Also show the value of -f, -n, and -t`))
 
-	queryFPRCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	queryFPRCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports a ".gz" suffix ("-" for stdout).`))
 
 	queryFPRCmd.Flags().Float64P("false-positive-rate", "f", 0.3,
 		formatFlagUsage(`False positive rate of a single k-mer, i.e., FPR of the bloom filters in the database. range: (0, 1)`))

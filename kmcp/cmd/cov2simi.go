@@ -45,7 +45,7 @@ Visit https://github.com/shenwei356/kmcp/tree/main/analysis/kmer-similarity
 
 		var err error
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 
 		queryCov := getFlagFloat64(cmd, "query-cov")
 		if queryCov < 0 || queryCov > 1 {
@@ -114,7 +114,7 @@ Visit https://github.com/shenwei356/kmcp/tree/main/analysis/kmer-similarity
 func init() {
 	utilsCmd.AddCommand(cov2simiCmd)
 
-	cov2simiCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	cov2simiCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports a ".gz" suffix ("-" for stdout).`))
 
 	cov2simiCmd.Flags().Float64P("query-cov", "t", 0,
 		formatFlagUsage(`K-mer query coverage, i.e., proportion of matched k-mers and unique k-mers of a query. range: [0, 1]`))

@@ -441,7 +441,7 @@ to create NCBI-style taxdump files, which also generates a TaxId mapping file**.
         --min-hic-ureads-qcov  0.75 \
         --min-hic-ureads-prop   0.1 \
         $sfile                      \
-        --out-prefix       $sfile.kmcp.profile \
+        --out-file         $sfile.kmcp.profile \
         --metaphlan-report $sfile.metaphlan.profile \
         --cami-report      $sfile.cami.profile \
         --sample-id        "0" \
@@ -451,7 +451,7 @@ to create NCBI-style taxdump files, which also generates a TaxId mapping file**.
 
 Taxonomic profiling output formats:
 
-- KMCP      (`-o/--out-prefix`). 
+- KMCP      (`-o/--out-file`).
   **Note that: abundances are only computed for target references rather than
      each taxon at all taxonomic ranks, so please output CAMI or MetaPhlAn format**.
 - CAMI      (`-M/--metaphlan-report`, `--metaphlan-report-version`, sample name: `-s/--sample-id`, taxonomy data: `--taxonomy-id`)

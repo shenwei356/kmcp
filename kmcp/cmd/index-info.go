@@ -32,8 +32,8 @@ import (
 
 var infoCmd = &cobra.Command{
 	Use:   "index-info",
-	Short: "Print information of index file",
-	Long: `Print information of index file
+	Short: "Print information of index files",
+	Long: `Print information of index files
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -41,7 +41,7 @@ var infoCmd = &cobra.Command{
 
 		var err error
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 		all := getFlagBool(cmd, "all")
 		basename := getFlagBool(cmd, "basename")
 
@@ -119,7 +119,7 @@ var infoCmd = &cobra.Command{
 func init() {
 	utilsCmd.AddCommand(infoCmd)
 
-	infoCmd.Flags().StringP("out-prefix", "o", "-", formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	infoCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports a ".gz" suffix ("-" for stdout).`))
 	infoCmd.Flags().BoolP("all", "a", false, formatFlagUsage("Show all information."))
 	infoCmd.Flags().BoolP("basename", "b", false, formatFlagUsage("Only output basenames of files."))
 }

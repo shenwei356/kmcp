@@ -286,7 +286,7 @@ Profiling using mode 1 for low-depth data:
             --taxdump taxdump-custom/ \
             $f \
             --mode 1 \
-            --out-prefix $f.kmcp.profile \
+            --out-file $f.kmcp.profile \
             --metaphlan-report $f.metaphlan.profile \
             --sample-id 0 \
             --cami-report $f.cami.profile \

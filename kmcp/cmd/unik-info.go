@@ -40,8 +40,8 @@ import (
 
 var statCmd = &cobra.Command{
 	Use:   "unik-info",
-	Short: "Print information of .unik file",
-	Long: `Print information of .unik file
+	Short: "Print information of .unik files",
+	Long: `Print information of .unik files
 
 Tips:
   1. For lots of small files (especially on SDD), use big value of '-j' to
@@ -527,7 +527,7 @@ type statInfo struct {
 func init() {
 	utilsCmd.AddCommand(statCmd)
 
-	statCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file ("-" for stdout, suffix .gz for gzipped out.)`))
+	statCmd.Flags().StringP("out-file", "o", "-", formatFlagUsage(`Out file, supports a ".gz" suffix ("-" for stdout).`))
 
 	statCmd.Flags().BoolP("all", "a", false, formatFlagUsage("All information, including the number of k-mers."))
 

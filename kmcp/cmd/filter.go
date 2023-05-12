@@ -77,7 +77,7 @@ Performance notes:
 
 		noHeaderRow := getFlagBool(cmd, "no-header-row")
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
@@ -407,8 +407,8 @@ func init() {
 	filterCmd.Flags().BoolP("no-header-row", "H", false,
 		formatFlagUsage(`Do not print header row.`))
 
-	filterCmd.Flags().StringP("out-prefix", "o", "-",
-		formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	filterCmd.Flags().StringP("out-file", "o", "-",
+		formatFlagUsage(`Out file, supports and recommends a ".gz" suffix ("-" for stdout).`))
 
 	// for single read
 	filterCmd.Flags().Float64P("max-fpr", "f", 0.05,

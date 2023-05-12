@@ -129,7 +129,7 @@ Performance notes:
      ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
-  1. KMCP      (-o/--out-prefix)
+  1. KMCP      (-o/--out-file)
      Note that: abundances are only computed for target references rather than
      each taxon at all taxonomic ranks, so please also output CAMI or MetaPhlAn format.
   2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
@@ -338,7 +338,7 @@ Examples:
 
 		noAmbCorr := getFlagBool(cmd, "no-amb-corr")
 
-		outFile := getFlagString(cmd, "out-prefix")
+		outFile := getFlagString(cmd, "out-file")
 
 		maxFPR := getFlagPositiveFloat64(cmd, "max-fpr")
 		minQcov := getFlagNonNegativeFloat64(cmd, "min-query-cov")
@@ -2958,8 +2958,8 @@ func init() {
 	profileCmd.Flags().IntP("line-chunk-size", "", 5000,
 		formatFlagUsage(`Number of lines to process for each thread, and 4 threads is fast enough. Type "kmcp profile -h" for details.`))
 
-	profileCmd.Flags().StringP("out-prefix", "o", "-",
-		formatFlagUsage(`Out file prefix ("-" for stdout).`))
+	profileCmd.Flags().StringP("out-file", "o", "-",
+		formatFlagUsage(`Out file, supports a ".gz" suffix ("-" for stdout).`))
 
 	// for single read
 	profileCmd.Flags().Float64P("max-fpr", "f", 0.01,

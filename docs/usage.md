@@ -7,7 +7,7 @@ KMCP is a command-line tool consisting of several subcommands.
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.9.0
+    Version: v0.9.2
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -519,7 +519,7 @@ Performance notes:
      ambiguous reads correction which has very little effect on the results.
 
 Profiling output formats:
-  1. KMCP      (-o/--out-prefix)
+  1. KMCP      (-o/--out-file)
      Note that: abundances are only computed for target references rather than
      each taxon at all taxonomic ranks, so please also output CAMI or MetaPhlAn format.
   2. CAMI      (-M/--metaphlan-report, --metaphlan-report-version,
@@ -626,7 +626,8 @@ Flags:
       --norm-abund string                 ► Method for normalize abundance of a reference by the
                                           mean/min/max abundance in all chunks, available values: mean,
                                           min, max. (default "mean")
-  -o, --out-prefix string                 ► Out file prefix ("-" for stdout). (default "-")
+  -o, --out-file string                   ► Out file, supports a ".gz" suffix ("-" for stdout).
+                                          (default "-")
       --rank-prefix strings               ► Prefixes of taxon name in certain ranks, used with
                                           --metaphlan-report. (default [k__,p__,c__,o__,f__,g__,s__,t__])
   -s, --sample-id string                  ► Sample ID in result file.
@@ -692,16 +693,16 @@ Flags:
 ## index-info
 
 ```text
-Print information of index file
+Print information of a index file
 
 Usage:
   kmcp utils index-info [flags] 
 
 Flags:
-  -a, --all                 ► Show all information.
-  -b, --basename            ► Only output basenames of files.
-  -h, --help                help for index-info
-  -o, --out-prefix string   ► Out file prefix ("-" for stdout). (default "-")
+  -a, --all               ► Show all information.
+  -b, --basename          ► Only output basenames of files.
+  -h, --help              help for index-info
+  -o, --out-file string   ► Out file, supports a ".gz" suffix ("-" for stdout). (default "-")
 
 ```
 
@@ -721,7 +722,7 @@ Flags:
   -a, --all                   ► All information, including the number of k-mers.
   -b, --basename              ► Only output basename of files.
   -h, --help                  help for unik-info
-  -o, --out-file string       ► Out file ("-" for stdout, suffix .gz for gzipped out.) (default "-")
+  -o, --out-file string       ► Out file, supports a ".gz" suffix ("-" for stdout). (default "-")
   -e, --skip-err              ► Skip error, only show warning message.
       --symbol-false string   ► Smybol for false. (default "✕")
       --symbol-true string    ► Smybol for true. (default "✓")
@@ -771,16 +772,17 @@ Usage:
 Flags:
   -h, --help                   help for merge-regions
   -I, --ignore-type            ► Merge species and assembly-specific regions.
+      --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
+                               enough. Type "kmcp utils merge-regions -h" for details. (default 5000)
   -f, --max-fpr float          ► Maximum false positive rate of a read in search result. (default 0.05)
   -g, --max-gap int            ► Maximum distance of starting positions of two adjacent regions, 0 for
                                no limitation, 1 for no merging.
-      --line-chunk-size int    ► Number of lines to process for each thread, and 4 threads is fast
-                               enough. Type "kmcp utils merge-regions -h" for details. (default 5000)
   -l, --min-overlap int        ► Minimum overlap of two adjacent regions, recommend K-1. (default 1)
   -t, --min-query-cov float    ► Minimum query coverage of a read in search result. (default 0.55)
   -a, --name-assembly string   ► Name of assembly-specific regions. (default "assembly-specific")
   -s, --name-species string    ► Name of species-specific regions. (default "species-specific")
-  -o, --out-prefix string      ► Out file prefix ("-" for stdout). (default "-")
+  -o, --out-file string        ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
+                               (default "-")
   -r, --regexp string          ► Regular expression for extract reference name and query locations.
                                (default "^(.+)_sliding:(\\d+)\\-(\\d+)$")
 
@@ -803,7 +805,7 @@ Performance notes:
      processing, 4 threads with a chunk size of 500-5000 is fast enough.
 
 Usage:
-  kmcp utils filter [flags] 
+  kmcp utils filter [flags]
 
 Flags:
   -h, --help                  help for filter
@@ -814,7 +816,8 @@ Flags:
   -f, --max-fpr float         ► Maximum false positive rate of a read in search result. (default 0.05)
   -t, --min-query-cov float   ► Minimum query coverage of a read in search result. (default 0.55)
   -H, --no-header-row         ► Do not print header row.
-  -o, --out-prefix string     ► Out file prefix ("-" for stdout). (default "-")
+  -o, --out-file string       ► Out file, supports and recommends a ".gz" suffix ("-" for stdout).
+                              (default "-")
   -X, --taxdump string        ► Directory of NCBI taxonomy dump files: names.dmp, nodes.dmp, optional
                               with merged.dmp and delnodes.dmp.
   -T, --taxid-map strings     ► Tabular two-column file(s) mapping reference IDs to TaxIds.
@@ -878,10 +881,10 @@ Usage:
   kmcp utils cov2simi [flags]
 
 Flags:
-  -h, --help                help for cov2simi
-  -o, --out-prefix string   ► Out file prefix ("-" for stdout). (default "-")
-  -t, --query-cov float     ► K-mer query coverage, i.e., proportion of matched k-mers and unique
-                            k-mers of a query. range: [0, 1]
+  -h, --help              help for cov2simi
+  -o, --out-file string   ► Out file, supports a ".gz" suffix ("-" for stdout). (default "-")
+  -t, --query-cov float   ► K-mer query coverage, i.e., proportion of matched k-mers and unique k-mers
+                          of a query. range: [0, 1]
 
 ```
 
@@ -912,7 +915,7 @@ Flags:
   -h, --help                        help for query-fpr
   -m, --matched-kmers int           ► The number of matched k-mers of a query. (default 35)
   -n, --num-kmers int               ► Number of unique k-mers of the query. (default 70)
-  -o, --out-prefix string           ► Out file prefix ("-" for stdout). (default "-")
+  -o, --out-file string             ► Out file, supports a ".gz" suffix ("-" for stdout). (default "-")
 
 ```
 

@@ -172,8 +172,8 @@ ARM architecture is supported, but `kmcp search` would be slower.
 |[**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)                  |Merge search results from multiple databases                    |
 |[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate taxonomic profile from search results                  |
 |[utils split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)|Split genomes into chunks                                       |
-|[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik file                                 |
-|[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index file                                 |
+|[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik files                                |
+|[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index files                                |
 |[utils ref-info](https://bioinf.shenwei.me/kmcp/usage/#ref-info)          |Print information of reference chunks in a database             |
 |[utils cov2simi](https://bioinf.shenwei.me/kmcp/usage/#icov2simi)         |Convert k-mer coverage to sequence similarity                   |
 |[utils query-fpr](https://bioinf.shenwei.me/kmcp/usage/#query-fpr)        |Compute the false positive rate of a query                      |
@@ -205,7 +205,7 @@ ARM architecture is supported, but `kmcp search` would be slower.
     kmcp profile search.kmcp.tsv.gz \
         --taxid-map        taxid.map \
         --taxdump          taxdump/ \
-        --out-prefix       search.tsv.gz.k.profile \
+        --out-file         search.tsv.gz.k.profile \
         --metaphlan-report search.tsv.gz.m.profile \
         --cami-report      search.tsv.gz.c.profile \
         --binning-result   search.tsv.gz.binning.gz
