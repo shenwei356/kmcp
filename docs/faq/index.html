@@ -812,16 +812,124 @@ and batch redownload them using <code>parallel</code>.</p>
 <p>Some one asked me this when I were giving a talk of KMCP.
 The answers is yes.</p>
 <p>I created a new command <a href="https://bioinf.shenwei.me/kmcp/usage/#index-density"><code>kmcp utils index-density</code></a> to plot the density of a index file.</p>
-<p>In a image,</p>
+<p>In the image,</p>
 <ul>
-<li>The width (X) is the number of bins for counting the elements (1s) number of each bloom filter,</li>
-<li>The height (Y) is the number of names (references or reference chunks).</li>
-<li>Each pix indicates the density of a bin, the darker the higher of the density.</li>
+<li>X: bins. The width is the number of bins</li>
+<li>Y: bloom filters, with each representing a genome (chunk).
+The height is the number of names (genome or genome chunks)</li>
+<li>greyscale/darkness of a pixel: the density of a bin, calculated as:
+    255 - 255 * ${the number of 1s in the bin} / ${bin-size}</li>
 </ul>
 <p>Here's are some example outputs.</p>
 <ol>
 <li>
 <p>v2023.05-genbank-viral-_block001.uniki (FPR of bloom filter: 0.3), only a part of image is shown.</p>
+<p><img alt="" src="../v2023.05-genbank-viral-_block001.uniki.part.jpg" /></p>
+<p>Note that the genome sizes (base pairs) of this genome chunk vary widely, so the densities of the preceding bloom files are relatively spare.</p>
+<p>Information of k-mers:</p>
+<pre><code>kmcp utils ref-info -d genbank-viral.kmcp \
+    | csvtk grep -t -p _block001.uniki \
+    | csvtk cut -t -f -2 \
+    | csvtk head -n 10 \
+    | csvtk csv2md -t
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">target</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
+<th align="left">kmers</th>
+<th align="left">fpr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_008766775.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">145</td>
+<td align="left">0.022419</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_003330005.1</td>
+<td align="left">8</td>
+<td align="left">10</td>
+<td align="left">150</td>
+<td align="left">0.023183</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_002814895.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">154</td>
+<td align="left">0.023794</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_001967255.1</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">165</td>
+<td align="left">0.025471</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_002219745.1</td>
+<td align="left">4</td>
+<td align="left">10</td>
+<td align="left">197</td>
+<td align="left">0.030336</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_000839085.1</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">200</td>
+<td align="left">0.030790</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_000919055.1</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">207</td>
+<td align="left">0.031851</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_000848385.1</td>
+<td align="left">6</td>
+<td align="left">10</td>
+<td align="left">207</td>
+<td align="left">0.031851</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_002820565.1</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">208</td>
+<td align="left">0.032002</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCA_002820505.1</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">208</td>
+<td align="left">0.032002</td>
+</tr>
+</tbody>
+</table>
+<p>Information of bloom filters:</p>
+<pre><code>kmcp utils index-info -b genbank-viral.kmcp/R001/_block001.uniki | csvtk csv2md -t
+</code></pre>
 <table>
 <thead>
 <tr>
@@ -844,10 +952,114 @@ The answers is yes.</p>
 </tr>
 </tbody>
 </table>
-<p><img alt="" src="../v2023.05-genbank-viral-_block001.uniki.part.jpg" /></p>
 </li>
 <li>
 <p>v2023.05-refseq-fungi-_block001.uniki (FPR of bloom filter: 0.3)</p>
+<p><img alt="" src="../v2023.05-refseq-fungi-_block001.uniki.jpg" /></p>
+<p>Information of k-mers:</p>
+<pre><code>kmcp utils ref-info -d refseq-fungi.kmcp \
+    | csvtk grep -t -p _block001.uniki \
+    | csvtk cut -t -f -2 \
+    | csvtk head -n 10 \
+    | csvtk csv2md -t
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">target</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
+<th align="left">kmers</th>
+<th align="left">fpr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000277815.2</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">207084</td>
+<td align="left">0.094334</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000146465.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">209422</td>
+<td align="left">0.095346</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000091225.2</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">209787</td>
+<td align="left">0.095504</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">8</td>
+<td align="left">10</td>
+<td align="left">216972</td>
+<td align="left">0.098608</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">217529</td>
+<td align="left">0.098849</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">3</td>
+<td align="left">10</td>
+<td align="left">217631</td>
+<td align="left">0.098892</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">6</td>
+<td align="left">10</td>
+<td align="left">218560</td>
+<td align="left">0.099293</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">7</td>
+<td align="left">10</td>
+<td align="left">218763</td>
+<td align="left">0.099380</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">4</td>
+<td align="left">10</td>
+<td align="left">218830</td>
+<td align="left">0.099409</td>
+</tr>
+<tr>
+<td align="left">_block001.uniki</td>
+<td align="left">GCF_000280035.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">218860</td>
+<td align="left">0.099422</td>
+</tr>
+</tbody>
+</table>
+<p>Information of bloom filters:</p>
+<pre><code>kmcp utils index-info -b refseq-fungi.kmcp/R001/_block001.uniki | csvtk csv2md -t
+</code></pre>
 <table>
 <thead>
 <tr>
@@ -870,10 +1082,104 @@ The answers is yes.</p>
 </tr>
 </tbody>
 </table>
-<p><img alt="" src="../v2023.05-refseq-fungi-_block001.uniki.jpg" /></p>
 </li>
 <li>
 <p>v2023.05-refseq-fungi-_block002.uniki (FPR of bloom filter: 0.3)</p>
+<p><img alt="" src="../v2023.05-refseq-fungi-_block002.uniki.jpg" /></p>
+<table>
+<thead>
+<tr>
+<th align="left">file</th>
+<th align="left">target</th>
+<th align="left">chunkIdx</th>
+<th align="left">chunks</th>
+<th align="left">kmers</th>
+<th align="left">fpr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_000349005.2</td>
+<td align="left">5</td>
+<td align="left">10</td>
+<td align="left">745638</td>
+<td align="left">0.249355</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_000349005.2</td>
+<td align="left">2</td>
+<td align="left">10</td>
+<td align="left">746237</td>
+<td align="left">0.249528</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_000349005.2</td>
+<td align="left">9</td>
+<td align="left">10</td>
+<td align="left">747586</td>
+<td align="left">0.249917</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_000349005.2</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">748331</td>
+<td align="left">0.250132</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_000349005.2</td>
+<td align="left">7</td>
+<td align="left">10</td>
+<td align="left">749497</td>
+<td align="left">0.250469</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_001477545.1</td>
+<td align="left">5</td>
+<td align="left">10</td>
+<td align="left">751685</td>
+<td align="left">0.251099</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_002251995.1</td>
+<td align="left">3</td>
+<td align="left">10</td>
+<td align="left">753439</td>
+<td align="left">0.251604</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_001477545.1</td>
+<td align="left">4</td>
+<td align="left">10</td>
+<td align="left">755317</td>
+<td align="left">0.252145</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_001477545.1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">758418</td>
+<td align="left">0.253036</td>
+</tr>
+<tr>
+<td align="left">_block002.uniki</td>
+<td align="left">GCF_001477545.1</td>
+<td align="left">8</td>
+<td align="left">10</td>
+<td align="left">760460</td>
+<td align="left">0.253623</td>
+</tr>
+</tbody>
+</table>
 <table>
 <thead>
 <tr>
@@ -896,7 +1202,6 @@ The answers is yes.</p>
 </tr>
 </tbody>
 </table>
-<p><img alt="" src="../v2023.05-refseq-fungi-_block002.uniki.jpg" /></p>
 </li>
 </ol>
 <h2 id="searching">Searching</h2>
