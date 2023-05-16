@@ -17,21 +17,26 @@ ARM architecture is supported, but `kmcp search` would be slower.
 
 ## Current Version
 
-### [v0.9.1](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1) - 2022-12-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1)
+### [v0.9.2](https://github.com/shenwei356/kmcp/releases/tag/v0.9.2) - 2023-05-16 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.2/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.2)
 
-- `kmcp search`
-    - faster speed for ARM architectures.
-    - fix compilation for ARM architectures.
+- `kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr`:
+    - **rename/unify the long flag `--out-prefix` to `--out-file`**.
+- `kmcp profile`:
+    - fix the number of reads belonging to references in the profile when no matches are found, which should be 0 instead of 1.
+- new command:
+    - `kmcp utils index-density`: plotting the element density of bloom filters for an index file.
+       An audience was concerned about it, but the results showed the elements (1s) are uniformly distributed in all BFs.
+
 
 ### Links
 
 OS     |Arch      |File, 中国镜像                                                                                                                                                                                  |Download Count
 :------|:---------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_linux_amd64.tar.gz)
-Linux  |arm64     |[**kmcp_linux_arm64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_linux_arm64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_linux_arm64.tar.gz)
-macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_darwin_amd64.tar.gz)
-macOS  |arm64     |[**kmcp_darwin_arm64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_darwin_arm64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_darwin_arm64.tar.gz)
-Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.1/kmcp_windows_amd64.exe.tar.gz)
+Linux  |**64-bit**|[**kmcp_linux_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_linux_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_linux_amd64.tar.gz)
+Linux  |arm64     |[**kmcp_linux_arm64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_linux_arm64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz)                  |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_linux_arm64.tar.gz)
+macOS  |**64-bit**|[**kmcp_darwin_amd64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_darwin_amd64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_darwin_amd64.tar.gz)
+macOS  |arm64     |[**kmcp_darwin_arm64.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_darwin_arm64.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz)               |[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_darwin_arm64.tar.gz)
+Windows|**64-bit**|[**kmcp_windows_amd64.exe.tar.gz**](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_windows_amd64.exe.tar.gz), <br/> [中国镜像](http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz)|[![Github Releases (by Asset)](https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600)](https://github.com/shenwei356/kmcp/releases/download/v0.9.2/kmcp_windows_amd64.exe.tar.gz)
 
 *Notes:*
 
@@ -131,6 +136,12 @@ fish:
     kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 
 ## Release History
+
+### [v0.9.1](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1) - 2022-12-26 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.1/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.1)
+
+- `kmcp search`
+    - faster speed for ARM architectures.
+    - fix compilation for ARM architectures.
 
 ### [v0.9.0](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0) - 2022-09-28 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.0/total.svg)](https://github.com/shenwei356/kmcp/releases/tag/v0.9.0)
 

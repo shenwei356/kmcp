@@ -160,7 +160,7 @@ Examples:
 		}
 
 		if outImg != "" && bins >= 65536 {
-			log.Warningf("the number of bins is too large for ploting: %d.", bins)
+			log.Warningf("the number of bins is too large for plotting: %d.", bins)
 		}
 
 		counts := make([][]int, numRowBytes<<3)

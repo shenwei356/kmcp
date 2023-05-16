@@ -70,8 +70,7 @@ my tests).
 
 ### Are the elements in the bloom filters uniformly distributed?
 
-Some one asked me this when I were giving a talk of KMCP.
-The answers is yes.
+Someone asked me this when I was giving a talk on KMCP. The answer is yes.
 
 I created a new command [`kmcp utils index-density`](https://bioinf.shenwei.me/kmcp/usage/#index-density) to plot the density of a index file.
 

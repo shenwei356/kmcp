@@ -167,14 +167,14 @@ ARM architecture is supported, but `kmcp search` would be slower.
 |Subcommand                                                                |Function                                                        |
 |:-------------------------------------------------------------------------|:---------------------------------------------------------------|
 |[**compute**](https://bioinf.shenwei.me/kmcp/usage/#compute)              |Generate k-mers (sketch) from FASTA/Q sequences                 |
-|[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)                  |Construct database from k-mer files                             |
+|[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)                  |Construct adatabase from k-mer files                            |
 |[**search**](https://bioinf.shenwei.me/kmcp/usage/#search)                |Search sequences against a database                             |
 |[**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)                  |Merge search results from multiple databases                    |
-|[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate taxonomic profile from search results                  |
+|[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate the taxonomic profile from search results              |
 |[utils split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)|Split genomes into chunks                                       |
 |[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik files                                |
 |[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index files                                |
-|[utils index-density](https://bioinf.shenwei.me/kmcp/usage/#index-density)|Plot the density of a index file                                |
+|[utils index-density](https://bioinf.shenwei.me/kmcp/usage/#index-density)|Plot the element density of bloom filters for an index file     |
 |[utils ref-info](https://bioinf.shenwei.me/kmcp/usage/#ref-info)          |Print information of reference chunks in a database             |
 |[utils cov2simi](https://bioinf.shenwei.me/kmcp/usage/#icov2simi)         |Convert k-mer coverage to sequence similarity                   |
 |[utils query-fpr](https://bioinf.shenwei.me/kmcp/usage/#query-fpr)        |Compute the false positive rate of a query                      |

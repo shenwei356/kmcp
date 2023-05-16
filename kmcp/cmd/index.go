@@ -51,8 +51,8 @@ import (
 
 var indexCmd = &cobra.Command{
 	Use:   "index",
-	Short: "Construct database from k-mer files",
-	Long: `Construct database from k-mer files
+	Short: "Construct a database from k-mer files",
+	Long: `Construct a database from k-mer files
 
 We build the index for k-mers (sketches) with a modified compact bit-sliced
 signature index (COBS). We totally rewrite the algorithms, data structure,

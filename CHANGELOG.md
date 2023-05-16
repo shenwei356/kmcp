@@ -1,11 +1,14 @@
 # Changelog
 
-### v0.9.2 - 2022-12-26
+### v0.9.2 - 2023-05-16
 
-- `kmcp profile`
-    - fix #reads belonging to references in profile when no matches found.
-- `kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr`
-    - rename long flag `--out-prefix` to `--out-file`.
+- `kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr`:
+    - **rename/unify the long flag `--out-prefix` to `--out-file`**.
+- `kmcp profile`:
+    - fix the number of reads belonging to references in the profile when no matches are found, which should be 0 instead of 1.
+- new command:
+    - `kmcp utils index-density`: plotting the element density of bloom filters for an index file.
+       An audience was concerned about it, but the results showed the elements (1s) are uniformly distributed in all BFs.
 
 ### v0.9.1 - 2022-12-26
 

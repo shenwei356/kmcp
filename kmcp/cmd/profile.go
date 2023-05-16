@@ -46,8 +46,8 @@ import (
 
 var profileCmd = &cobra.Command{
 	Use:   "profile",
-	Short: "Generate taxonomic profile from search results",
-	Long: `Generate taxonomic profile from search results
+	Short: "Generate the taxonomic profile from search results",
+	Long: `Generate the taxonomic profile from search results
 
 Methods:
   1. Reference genomes can be split into chunks when computing

@@ -94,9 +94,9 @@ can use stricter criteria in `kmcp profile`.
     And multiple KMCP processes can not share the database in memory.
     - **It's slightly faster due to the use of physically contiguous memory.
     The speedup is more significant for smaller databases**.
-    - **Please switch on this flag when searching on computer clusters,
+    - <p style="color:Tomato;">**Please switch on this flag (`-w`) when searching on computer clusters,
         where the default mmap mode would be very slow for network-attached
-        storage (NAS)**.
+        storage (NAS).**</p>
 3. Low memory mode (`--low-mem`):
     - Do not load all index files into memory nor use mmap, using file seeking.
     - It's much slower, >4X slower on SSD and would be much slower on HDD disks.

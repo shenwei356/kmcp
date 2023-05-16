@@ -4,6 +4,25 @@
 
 KMCP is a command-line tool consisting of several subcommands.
 
+|Subcommand                                                                |Function                                                        |
+|:-------------------------------------------------------------------------|:---------------------------------------------------------------|
+|[**compute**](https://bioinf.shenwei.me/kmcp/usage/#compute)              |Generate k-mers (sketch) from FASTA/Q sequences                 |
+|[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)                  |Construct adatabase from k-mer files                            |
+|[**search**](https://bioinf.shenwei.me/kmcp/usage/#search)                |Search sequences against a database                             |
+|[**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)                  |Merge search results from multiple databases                    |
+|[**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)              |Generate the taxonomic profile from search results              |
+|[utils split-genomes](https://bioinf.shenwei.me/kmcp/usage/#split-genomes)|Split genomes into chunks                                       |
+|[utils unik-info](https://bioinf.shenwei.me/kmcp/usage/#unik-info)        |Print information of .unik files                                |
+|[utils index-info](https://bioinf.shenwei.me/kmcp/usage/#index-info)      |Print information of index files                                |
+|[utils index-density](https://bioinf.shenwei.me/kmcp/usage/#index-density)|Plot the element density of bloom filters for an index file     |
+|[utils ref-info](https://bioinf.shenwei.me/kmcp/usage/#ref-info)          |Print information of reference chunks in a database             |
+|[utils cov2simi](https://bioinf.shenwei.me/kmcp/usage/#icov2simi)         |Convert k-mer coverage to sequence similarity                   |
+|[utils query-fpr](https://bioinf.shenwei.me/kmcp/usage/#query-fpr)        |Compute the false positive rate of a query                      |
+|[utils filter](https://bioinf.shenwei.me/kmcp/usage/#filter)              |Filter search results and find species/assembly-specific queries|
+|[utils merge-regions](https://bioinf.shenwei.me/kmcp/usage/#merge-regions)|Merge species/assembly-specific regions                         |
+
+## kmcp
+
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
@@ -25,9 +44,9 @@ Usage:
 Available Commands:
   autocompletion Generate shell autocompletion script
   compute        Generate k-mers (sketches) from FASTA/Q sequences
-  index          Construct database from k-mer files
+  index          Construct a database from k-mer files
   merge          Merge search results from multiple databases
-  profile        Generate taxonomic profile from search results
+  profile        Generate the taxonomic profile from search results
   search         Search sequences against a database
   utils          Some utilities
   version        Print version information and check for update
@@ -181,7 +200,7 @@ Flags:
 ## index
 
 ```text
-Construct database from k-mer files
+Construct a database from k-mer files
 
 We build the index for k-mers (sketches) with a modified compact bit-sliced
 signature index (COBS). We totally rewrite the algorithms, data structure,
@@ -437,7 +456,7 @@ Flags:
 
 
 ```text
-Generate taxonomic profile from search results
+Generate the taxonomic profile from search results
 
 Methods:
   1. Reference genomes can be split into chunks when computing
@@ -652,12 +671,13 @@ Usage:
 Available Commands:
   cov2simi      Convert k-mer coverage to sequence similarity
   filter        Filter search results and find species/assembly-specific queries
-  index-info    Print information of index file
+  index-density Plot the element density of bloom filters for an index file
+  index-info    Print information of index files
   merge-regions Merge species/assembly-specific regions
   query-fpr     Compute the false positive rate of a query
-  ref-info      Print information of reference (chunks) in a database
+  ref-info      Print information of reference chunks in a database
   split-genomes Split genomes into chunks
-  unik-info     Print information of .unik file
+  unik-info     Print information of .unik files
 
 ```
 
@@ -749,6 +769,8 @@ Flags:
       --out-img string    ► Out density image, in format of jpeg
 
 ```
+
+Example:  [https://bioinf.shenwei.me/kmcp/faq/#are-the-elements-in-the-bloom-filters-uniformly-distributed](https://bioinf.shenwei.me/kmcp/faq/#are-the-elements-in-the-bloom-filters-uniformly-distributed)
 
 ## unik-info
 
