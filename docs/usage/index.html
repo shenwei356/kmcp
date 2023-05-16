@@ -288,6 +288,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#kmcp" class="md-nav__link">
+    kmcp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#compute" class="md-nav__link">
     compute
   </a>
@@ -588,6 +595,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#kmcp" class="md-nav__link">
+    kmcp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#compute" class="md-nav__link">
     compute
   </a>
@@ -719,6 +733,73 @@
 <h1 id="usage">Usage</h1>
 <p><img alt="" src="../kmcp-workflow.jpg" /></p>
 <p>KMCP is a command-line tool consisting of several subcommands.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Subcommand</th>
+<th align="left">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#compute"><strong>compute</strong></a></td>
+<td align="left">Generate k-mers (sketch) from FASTA/Q sequences</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index"><strong>index</strong></a></td>
+<td align="left">Construct adatabase from k-mer files</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#search"><strong>search</strong></a></td>
+<td align="left">Search sequences against a database</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge"><strong>merge</strong></a></td>
+<td align="left">Merge search results from multiple databases</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#profile"><strong>profile</strong></a></td>
+<td align="left">Generate the taxonomic profile from search results</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#split-genomes">utils split-genomes</a></td>
+<td align="left">Split genomes into chunks</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#unik-info">utils unik-info</a></td>
+<td align="left">Print information of .unik files</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-info">utils index-info</a></td>
+<td align="left">Print information of index files</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#index-density">utils index-density</a></td>
+<td align="left">Plot the element density of bloom filters for an index file</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#ref-info">utils ref-info</a></td>
+<td align="left">Print information of reference chunks in a database</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#icov2simi">utils cov2simi</a></td>
+<td align="left">Convert k-mer coverage to sequence similarity</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#query-fpr">utils query-fpr</a></td>
+<td align="left">Compute the false positive rate of a query</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#filter">utils filter</a></td>
+<td align="left">Filter search results and find species/assembly-specific queries</td>
+</tr>
+<tr>
+<td align="left"><a href="https://bioinf.shenwei.me/kmcp/usage/#merge-regions">utils merge-regions</a></td>
+<td align="left">Merge species/assembly-specific regions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="kmcp">kmcp</h2>
 <pre><code class="language-text">
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
     Version: v0.9.2
@@ -739,9 +820,9 @@ Usage:
 Available Commands:
   autocompletion Generate shell autocompletion script
   compute        Generate k-mers (sketches) from FASTA/Q sequences
-  index          Construct database from k-mer files
+  index          Construct a database from k-mer files
   merge          Merge search results from multiple databases
-  profile        Generate taxonomic profile from search results
+  profile        Generate the taxonomic profile from search results
   search         Search sequences against a database
   utils          Some utilities
   version        Print version information and check for update
@@ -887,7 +968,7 @@ Flags:
 
 </code></pre>
 <h2 id="index">index</h2>
-<pre><code class="language-text">Construct database from k-mer files
+<pre><code class="language-text">Construct a database from k-mer files
 
 We build the index for k-mers (sketches) with a modified compact bit-sliced
 signature index (COBS). We totally rewrite the algorithms, data structure,
@@ -1133,7 +1214,7 @@ Flags:
 
 </code></pre>
 <h2 id="profile">profile</h2>
-<pre><code class="language-text">Generate taxonomic profile from search results
+<pre><code class="language-text">Generate the taxonomic profile from search results
 
 Methods:
   1. Reference genomes can be split into chunks when computing
@@ -1345,12 +1426,13 @@ Usage:
 Available Commands:
   cov2simi      Convert k-mer coverage to sequence similarity
   filter        Filter search results and find species/assembly-specific queries
-  index-info    Print information of index file
+  index-density Plot the element density of bloom filters for an index file
+  index-info    Print information of index files
   merge-regions Merge species/assembly-specific regions
   query-fpr     Compute the false positive rate of a query
-  ref-info      Print information of reference (chunks) in a database
+  ref-info      Print information of reference chunks in a database
   split-genomes Split genomes into chunks
-  unik-info     Print information of .unik file
+  unik-info     Print information of .unik files
 
 </code></pre>
 <h2 id="ref-info">ref-info</h2>
@@ -1431,6 +1513,7 @@ Flags:
       --out-img string    ► Out density image, in format of jpeg
 
 </code></pre>
+<p>Example:  <a href="https://bioinf.shenwei.me/kmcp/faq/#are-the-elements-in-the-bloom-filters-uniformly-distributed">https://bioinf.shenwei.me/kmcp/faq/#are-the-elements-in-the-bloom-filters-uniformly-distributed</a></p>
 <h2 id="unik-info">unik-info</h2>
 <pre><code class="language-text">Print information of .unik file
 

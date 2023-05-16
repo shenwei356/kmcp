@@ -865,9 +865,9 @@ can use stricter criteria in <code>kmcp profile</code>.</p>
 And multiple KMCP processes can not share the database in memory.</li>
 <li><strong>It's slightly faster due to the use of physically contiguous memory.
 The speedup is more significant for smaller databases</strong>.</li>
-<li><strong>Please switch on this flag when searching on computer clusters,
+<li><p style="color:Tomato;"><strong>Please switch on this flag (<code>-w</code>) when searching on computer clusters,
     where the default mmap mode would be very slow for network-attached
-    storage (NAS)</strong>.</li>
+    storage (NAS).</strong></p></li>
 </ul>
 </li>
 <li>Low memory mode (<code>--low-mem</code>):<ul>
