@@ -1,6 +1,6 @@
 Subcommand	Function
 [**compute**](https://bioinf.shenwei.me/kmcp/usage/#compute)	Generate k-mers (sketch) from FASTA/Q sequences
-[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)	Construct adatabase from k-mer files
+[**index**](https://bioinf.shenwei.me/kmcp/usage/#index)	Construct a database from k-mer files
 [**search**](https://bioinf.shenwei.me/kmcp/usage/#search)	Search sequences against a database
 [**merge**](https://bioinf.shenwei.me/kmcp/usage/#merge)	Merge search results from multiple databases
 [**profile**](https://bioinf.shenwei.me/kmcp/usage/#profile)	Generate the taxonomic profile from search results
