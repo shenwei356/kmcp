@@ -176,7 +176,9 @@ Here's are some example outputs.
     |:--------------|:--|:--------|:---------|:-------|:--------|
     |_block002.uniki|21 |true     |1         |2599648 |160      |
 
+## Some other useful genome catalogs
 
+- [WormBase ParaSite](https://parasite.wormbase.org/index.html)
 
 ## Searching
 

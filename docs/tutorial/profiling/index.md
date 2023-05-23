@@ -73,7 +73,7 @@ and the results can be fastly merged for downstream analysis.
 3. For long reads or contigs, you should split them into short reads
     using `seqkit sliding`, e.g.,
 
-        seqkit sliding -s 100 -W 300-f/--max-fpr
+        seqkit sliding -s 100 -W 300
 
 4. The values of `tCov` and `jacc` in results only apply to databases built with a single size of k-mer.
 
