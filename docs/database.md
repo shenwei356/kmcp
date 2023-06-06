@@ -518,7 +518,7 @@ Downloading human genome file from [CHM13](https://github.com/marbl/CHM13):
     # v2.0
     wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.4_T2T-CHM13v2.0/GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz
     
-Building database (all k-mers, < 6min):
+Building database (all k-mers, < 10min):
     
     # v1.1: input=GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz
     
@@ -533,10 +533,10 @@ Building database (all k-mers, < 6min):
         --split-number 1024 --split-overlap 150 \
         --log human-chm13-k21-n1024.log -j 32 --force
     
-    #   using small false positive rate: 0.3
-    #   using more hash functions: 1
+    # using a small false positive rate: 0.05
+    # using one hash function: 1
     kmcp index -I human-chm13-k21-n1024/ -O human-chm13.kmcp \
-        -j 8 -f 0.3 -n 1 \
+        -j 8 -f 0.05 -n 1 \
         --log human-chm13.kmcp.log --force
     
     # taxid.map
