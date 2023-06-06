@@ -1359,28 +1359,32 @@ wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/914/755/GCA_009914755.4_T2
 # v2.0
 input=GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz
 
-# splitting human genome into 1024 chunks.
+# splitting human genome into 3072 chunks, each with ~1Mb
 # The regular expression '^(\w{3}_\d{9}\.\d+).+' is for extracting 'GCA_009914755.4' from the file name.
-kmcp compute $input -O human-chm13-k21-n1024 \
+kmcp compute $input -O human-chm13-k21-n3072 \
     --ref-name-regexp '^(\w{3}_\d{9}\.\d+).+' \
     -k 21 \
-    --split-number 1024 --split-overlap 150 \
-    --log human-chm13-k21-n1024.log -j 32 --force
+    --split-number 3072 --split-overlap 150 \
+    --log human-chm13-k21-n3072.log -j 32 --force
 
 # using a small false positive rate: 0.05
 # using one hash function: 1
-kmcp index -I human-chm13-k21-n1024/ -O human-chm13.kmcp \
+kmcp index -I human-chm13-k21-n3072/ -O human-chm13.kmcp \
     -j 8 -f 0.05 -n 1 \
     --log human-chm13.kmcp.log --force
 
 # taxid.map
 echo -ne "GCA_009914755.4\t9606\n" &gt; taxid.map
 
-# name.mapp
+# name.map
 echo -ne "GCA_009914755.4\tHomo sapiens isolate CHM13\n" &gt; name.map
 
 # cp name mapping file to database directory
 cp taxid.map name.map human-chm13.kmcp/
+
+# database size
+$ du -sh human-chm13.kmcp
+6.7G    human-chm13.kmcp
 </code></pre>
 <h3 id="refseq-plasmid">Refseq plasmid</h3>
 <p>Downloading plasmid sequences:</p>
