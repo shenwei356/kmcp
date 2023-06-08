@@ -175,7 +175,8 @@ Flags:
       --force                     ► Overwrite existed output directory.
   -h, --help                      help for compute
   -I, --in-dir string             ► Directory containing FASTA/Q files. Directory symlinks are followed.
-  -k, --kmer ints                 ► K-mer size(s). (default [21])
+  -k, --kmer ints                 ► K-mer size(s). K needs to be <=64. Multiple values are supported,
+                                  e.g., "-k 21,31" or "-k 21 -k 31" (default [21])
   -W, --minimizer-w int           ► Minimizer window size.
   -O, --out-dir string            ► Output directory.
   -N, --ref-name-regexp string    ► Regular expression (must contains "(" and ")") for extracting

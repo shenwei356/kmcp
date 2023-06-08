@@ -27,6 +27,7 @@ to create NCBI-style taxdump files for profiling, which also generates a `taxid.
 ### What k-mer size should I use to build the database?
 
 Multiple k-mer sizes are supported, but one value is good enough.
+And the K needs to be equal or less than 64, due to [the bug of older versions of ntHash](https://github.com/bcgsc/ntHash/issues/41).
 
 Bigger k-mer sizes bring high specificity at the cost of decrease
 of sensitivity. `k = 21` is recommended for metagenomic profiling.

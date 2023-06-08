@@ -1019,7 +1019,7 @@ func init() {
 	computeCmd.Flags().BoolP("force", "", false,
 		formatFlagUsage(`Overwrite existed output directory.`))
 
-	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, formatFlagUsage(`K-mer size(s).`))
+	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, formatFlagUsage(`K-mer size(s). K needs to be <=64. Multiple values are supported, e.g., "-k 21,31" or "-k 21 -k 31"`))
 
 	computeCmd.Flags().BoolP("circular", "", false,
 		formatFlagUsage(`Input sequences are circular.`))
