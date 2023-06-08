@@ -138,7 +138,35 @@ Mapping file:
     forma specialis   59
     no rank           31
     isolate           26
-  
+
+Masking prophage regions and removing plasmid sequences (optional):
+
+    conda activate genomad
+
+    # https://github.com/shenwei356/cluster_files
+    cluster_files -p '^(.+).fna.gz$' gtdb -o gtdb.genomad
+
+    # indentify prophages and plasmids sequences
+    db=~/ws/db/genomad/genomad_db
+    find gtdb.genomad/ -name "*.fna.gz" \
+        | rush -j 6 -v db=$db \
+            'genomad end-to-end --relaxed --cleanup --threads 25 {} {/}/genomad {db}' \
+            -c -C genomad.rush --eta
+
+    # mask proviruses and remove plasmid sequences
+    find gtdb.genomad/ -name "*.fna.gz" \
+        | grep -v masked \
+        | rush -j 10 -v 'p={/}/genomad/{/%}_summary/{/%}' \
+            'cat {p}_virus_summary.tsv | sed 1d | cut -f 1 \
+                | perl -ne "/^(.+)\|.+_(\d+)_(\d+)$/; \$s=\$2-1; print qq/\$1\t\$s\t\$3\n/;" \
+                > {p}.v.bed; \
+            cut -f 1 {p}_plasmid_summary.tsv | sed 1d > {p}.p.id; \
+            bedtools maskfasta -fi <(seqkit grep -v -f {p}.p.id {}) -bed {p}.v.bed -fo {}.masked.fna; \
+            gzip -f {}.masked.fna'
+
+    # move masked genomes to another directory, and rename
+    cluster_files --mv -p '^(.+).fna.gz$' gtdb.genomad -o gtdb.masked
+    brename -R -p .masked.fna.gz$ gtdb.masked -d
         
 Building database (all k-mers, for profiling on short-reads):
     
