@@ -34,6 +34,7 @@ https://bioinf.shenwei.me/kmcp
 - [Databases](https://bioinf.shenwei.me/kmcp/database)
 - Tutorials
     - [Taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
+    - [Detecting specific pathogens](https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens)
     - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
 - [Usage](https://bioinf.shenwei.me/kmcp/usage)
 - [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)
