@@ -249,7 +249,11 @@ chunk of the reference genome.
 
 			log.Infof("  k-mer size: %d", k)
 
-			log.Infof("  circular genome: %v", circular0)
+			if circular0 {
+				log.Infof("  circular genome: %v (only applies to genomes with a single chromosome)", circular0) // circular2
+			} else {
+				log.Infof("  circular genome: %v", circular0)
+			}
 			log.Info()
 
 			log.Infof("-------------------- [main parameters] --------------------")

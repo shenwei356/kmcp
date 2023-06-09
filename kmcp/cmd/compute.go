@@ -298,6 +298,13 @@ Examples:
 			bySeq = true
 		}
 
+		var circular bool // for computting k-mers
+		if !splitSeq {
+			circular = circular0
+		} else {
+			circular = false // split seq is linear, isn't it?
+		}
+
 		// ---------------------------------------------------------------
 		// flags of sketch
 
@@ -392,6 +399,11 @@ Examples:
 				} else {
 					log.Infof("  split sequence size: %d bp, overlap: %d bp", splitSize0, splitOverlap)
 				}
+				if circular0 {
+					log.Infof("  circular genome: %v (only applies to genomes with a single chromosome)", circular0) // circular2
+				} else {
+					log.Infof("  circular genome: %v", circular0)
+				}
 			}
 			log.Info()
 
@@ -403,11 +415,8 @@ Examples:
 
 			log.Infof("  k-mer size(s): %s", strings.Join(IntSlice2StringSlice(ks), ", "))
 
-			if circular0 {
-				log.Infof("  circular genome: %v (only applies to genomes with a single chromosome)", circular0)
-			} else {
-				log.Infof("  circular genome: %v", circular0)
-			}
+			log.Infof("  circular genome: %v (only applies to non-split modes)", circular) // circular
+
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
 			}
@@ -551,13 +560,6 @@ Examples:
 					dir2 = fmt.Sprintf("%03d", (fileHash>>10)&1023)
 				}
 				var outFileBase, dir3 string
-
-				var circular bool // for computting k-mers
-				if !splitSeq {
-					circular = circular0
-				} else {
-					circular = false // split seq is linear, isn't it?
-				}
 
 				fastxReader, err = fastx.NewDefaultReader(file)
 				checkError(errors.Wrap(err, file))
