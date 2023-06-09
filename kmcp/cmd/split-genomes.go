@@ -658,6 +658,11 @@ func splitGenome(opt *Options, info *GenomeInfo, reSeqNames []*regexp.Regexp,
 	lenSum := 0
 	first := true
 
+	circular2 := circular0 // for computing sliding window and step
+	if circular0 && info.Contigs > 1 {
+		circular2 = false
+	}
+
 	if info.Contigs == 1 { // just read the first valid sequence
 		for {
 			record, err = fastxReader.Read()
@@ -770,13 +775,28 @@ func splitGenome(opt *Options, info *GenomeInfo, reSeqNames []*regexp.Regexp,
 			splitSize = seqLen
 			step = seqLen
 			greedy = false
+		} else if circular2 {
+			greedy = false
+			splitSize = (seqLen + splitNumber*splitOverlap + splitNumber - 1) / splitNumber
+			step = splitSize - splitOverlap
 		} else {
 			splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
 			step = splitSize - splitOverlap
 		}
 	}
 	if opt.Verbose || opt.Log2File {
-		log.Infof("  genome size: %d, splitNumber: %d, splitOverlap: %d, splitSize: %d, step: %d, greedy: %v\n", seqLen, splitNumber, splitOverlap, splitSize, step, greedy)
+		if circular0 {
+			if circular2 {
+				log.Infof("  genome size: %d, circular genome: %v, splitNumber: %d, splitOverlap: %d, splitSize: %d, step: %d, greedy: %v\n",
+					seqLen, circular2, splitNumber, splitOverlap, splitSize, step, greedy)
+			} else {
+				log.Infof("  genome size: %d, circular genome: %v (set to false for >1 seqs), splitNumber: %d, splitOverlap: %d, splitSize: %d, step: %d, greedy: %v\n",
+					seqLen, circular2, splitNumber, splitOverlap, splitSize, step, greedy)
+			}
+		} else {
+			log.Infof("  genome size: %d, circular genome: %v, splitNumber: %d, splitOverlap: %d, splitSize: %d, step: %d, greedy: %v\n",
+				seqLen, circular0, splitNumber, splitOverlap, splitSize, step, greedy)
+		}
 	}
 	var code uint64
 	var iter *sketches.Iterator
@@ -789,7 +809,7 @@ func splitGenome(opt *Options, info *GenomeInfo, reSeqNames []*regexp.Regexp,
 
 	seqs := make([]*seq.Seq, 0, splitNumber0)
 
-	slider = record.Seq.Slider(splitSize, step, circular0, greedy)
+	slider = record.Seq.Slider(splitSize, step, circular2, greedy)
 	for {
 		_seq, _ok = slider()
 		if !_ok {
@@ -947,7 +967,7 @@ func init() {
 	splitGenomeCmd.Flags().IntP("kmer", "k", 21, formatFlagUsage(`K-mer size.`))
 
 	splitGenomeCmd.Flags().BoolP("circular", "", false,
-		formatFlagUsage(`Input sequences are circular.`))
+		formatFlagUsage(`Input sequences are circular. Note that it only applies to genomes with a single chromosome.`))
 
 	splitGenomeCmd.Flags().IntP("split-number", "n", 0,
 		formatFlagUsage(`Chunk number for splitting sequences, incompatible with -s/--split-size.`))

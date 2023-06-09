@@ -403,7 +403,11 @@ Examples:
 
 			log.Infof("  k-mer size(s): %s", strings.Join(IntSlice2StringSlice(ks), ", "))
 
-			log.Infof("  circular genome: %v", circular0)
+			if circular0 {
+				log.Infof("  circular genome: %v (only applies to genomes with a single chromosome)", circular0)
+			} else {
+				log.Infof("  circular genome: %v", circular0)
+			}
 			if minimizer {
 				log.Infof("  minimizer window: %d", minimizerW)
 			}
@@ -518,7 +522,6 @@ Examples:
 				var seqID string
 				var outFile string
 				var baseFile = filepath.Base(file)
-				var circular bool
 				var seqLen int
 				var splitSize int
 				var splitNumber int
@@ -549,6 +552,7 @@ Examples:
 				}
 				var outFileBase, dir3 string
 
+				var circular bool // for computting k-mers
 				if !splitSeq {
 					circular = circular0
 				} else {
@@ -622,12 +626,16 @@ Examples:
 					genomeSize = uint64(len(record.Seq.Seq))
 				}
 
+				nSeqs := len(allSeqs)
+
 				slidIdx = 0
 				var _splitNumber int
 
+				circular2 := circular0 // for computing sliding window and step
+
 				once := true
 				for {
-					if splitSeq { // only one loop for split seq mode
+					if splitSeq { // only one loop for split seq mode, the records has already loaded into record
 						if !once {
 							break
 						}
@@ -671,8 +679,16 @@ Examples:
 						splitNumber = 1
 					} else if splitSeq {
 						if splitNumber > 1 {
-							splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
-							step = splitSize - splitOverlap
+							if circular0 && nSeqs == 1 {
+								circular2 = true
+								greedy = false
+								splitSize = (seqLen + splitNumber*splitOverlap + splitNumber - 1) / splitNumber
+								step = splitSize - splitOverlap
+							} else {
+								circular2 = false
+								splitSize = (seqLen + (splitNumber-1)*splitOverlap + splitNumber - 1) / splitNumber
+								step = splitSize - splitOverlap
+							}
 						} else if splitSize > 0 { // --split-size
 							step = splitSize - splitOverlap
 						} else { // splitNumber == 1 , no split
@@ -685,7 +701,7 @@ Examples:
 					// get the actual split number
 					_splitNumber = 1
 					if splitSeq {
-						slider = record.Seq.Slider(splitSize, step, false, true)
+						slider = record.Seq.Slider(splitSize, step, circular2, greedy)
 						_splitNumber = 0
 						for {
 							_seq, _ok = slider()
@@ -706,7 +722,7 @@ Examples:
 					}
 
 					// a method to extract subsequence with given window size and step size
-					slider = record.Seq.Slider(splitSize, step, circular0, greedy)
+					slider = record.Seq.Slider(splitSize, step, circular2, greedy)
 
 					if bySeq {
 						slidIdx = 0
@@ -1022,7 +1038,7 @@ func init() {
 	computeCmd.Flags().IntSliceP("kmer", "k", []int{21}, formatFlagUsage(`K-mer size(s). K needs to be <=64. Multiple values are supported, e.g., "-k 21,31" or "-k 21 -k 31"`))
 
 	computeCmd.Flags().BoolP("circular", "", false,
-		formatFlagUsage(`Input sequences are circular.`))
+		formatFlagUsage(`Input sequences are circular. Note that it only applies to genomes with a single chromosome.`))
 
 	computeCmd.Flags().IntP("scale", "D", 1,
 		formatFlagUsage(`Scale of the FracMinHash (Scaled MinHash), or down-sample factor for Syncmers and Minimizer.`))

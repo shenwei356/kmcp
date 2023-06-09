@@ -168,7 +168,8 @@ Usage:
 
 Flags:
       --by-seq                    ► Compute k-mers (sketches) for each sequence, instead of the whole file.
-      --circular                  ► Input sequences are circular.
+      --circular                  ► Input sequences are circular. Note that it only applies to genomes
+                                  with a single chromosome.
   -c, --compress                  ► Output gzipped .unik files, it's slower and can save little space.
   -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
                                   case ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
@@ -913,7 +914,8 @@ Usage:
   kmcp utils split-genomes [flags] [-k <k>] [-n <chunks>] [-l <overlap>] {[-I <seqs dir>] | <seq files>} -O <out dir>
 
 Flags:
-      --circular                  ► Input sequences are circular.
+      --circular                  ► Input sequences are circular. Note that it only applies to genomes
+                                  with a single chromosome.
   -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
                                   case ignored. (default "\\.(f[aq](st[aq])?|fna)(.gz)?$")
       --force                     ► Overwrite existed output directory.

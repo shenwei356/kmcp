@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.9.3 - 2023-05-16
+
+- `kmcp compute/split-genomes`:
+    - fix a bug in chunk computation when splitting circular genomes (`--circular`).
+
 ### v0.9.2 - 2023-05-16
 
 - `kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr`:
