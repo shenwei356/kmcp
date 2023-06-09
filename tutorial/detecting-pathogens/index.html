@@ -12,14 +12,14 @@
         <meta name="author" content="Wei Shen">
       
       
-        <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/benchmark/searching/">
+        <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens/">
       
       <link rel="icon" href="../../favicon.svg">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
     
     
       
-        <title>Sequence and genome searching - KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching</title>
+        <title>Detecting specific pathogens - KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#searching-benchmarks" class="md-skip">
+        <a href="#detecting-specific-pathogens-in-sequencing-data" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Sequence and genome searching
+              Detecting specific pathogens
             
           </span>
         </div>
@@ -267,12 +267,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
       
       
@@ -295,86 +297,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorial/profiling/" class="md-nav__link">
-        Taxonomic profiling
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tutorial/searching/" class="md-nav__link">
-        Sequence and genome searching
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tutorial/detecting-pathogens/" class="md-nav__link">
-        Detecting specific pathogens
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-    
-  
-  
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_6">
-          Benchmarks
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
-          <span class="md-nav__icon md-icon"></span>
-          Benchmarks
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../profiling/" class="md-nav__link">
         Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching/" class="md-nav__link">
+        Sequence and genome searching
       </a>
     </li>
   
@@ -397,12 +335,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Sequence and genome searching
+          Detecting specific pathogens
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Sequence and genome searching
+        Detecting specific pathogens
       </a>
       
         
@@ -421,22 +359,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-cobs" class="md-nav__link">
-    KMCP vs COBS
+  <a href="#data" class="md-nav__link">
+    Data
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-mash-and-sourmash" class="md-nav__link">
-    KMCP vs Mash and Sourmash
+  <a href="#preprocessing-reference-genomes" class="md-nav__link">
+    Preprocessing reference genomes
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#result" class="md-nav__link">
-    Result
+  <a href="#creating-a-kmcp-database" class="md-nav__link">
+    Creating a KMCP database
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-reads-against-the-kmcp-database" class="md-nav__link">
+    Searching reads against the KMCP database
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling" class="md-nav__link">
+    Profiling
   </a>
   
 </li>
@@ -445,6 +397,68 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Benchmarks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Benchmarks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/profiling/" class="md-nav__link">
+        Taxonomic profiling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
     </li>
   
 
@@ -513,22 +527,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-cobs" class="md-nav__link">
-    KMCP vs COBS
+  <a href="#data" class="md-nav__link">
+    Data
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#kmcp-vs-mash-and-sourmash" class="md-nav__link">
-    KMCP vs Mash and Sourmash
+  <a href="#preprocessing-reference-genomes" class="md-nav__link">
+    Preprocessing reference genomes
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#result" class="md-nav__link">
-    Result
+  <a href="#creating-a-kmcp-database" class="md-nav__link">
+    Creating a KMCP database
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-reads-against-the-kmcp-database" class="md-nav__link">
+    Searching reads against the KMCP database
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling" class="md-nav__link">
+    Profiling
   </a>
   
 </li>
@@ -545,91 +573,105 @@
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/shenwei356/kmcp/edit/master/docs/benchmark/searching/index.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/shenwei356/kmcp/edit/master/docs/tutorial/detecting-pathogens/index.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
 </a>
 
 
-<h1 id="searching-benchmarks">Searching benchmarks</h1>
-<p><a href="https://github.com/shenwei356/kmcp/tree/main/benchmarks/searching">Software, datasets and commands details</a>.</p>
-<p>Softwares</p>
+<h1 id="detecting-specific-pathogens-in-sequencing-data">Detecting specific pathogens in sequencing data</h1>
+<p>KMCP v0.9.3 or later versions is needed, which fixed a bug in chunk computation when splitting circular genomes.</p>
+<h2 id="data">Data</h2>
+<ol>
+<li>
+<p>Reference genomes (taken HBV virus for example).</p>
+<pre><code>wget https://hbvdb.lyon.inserm.fr/data/nucleic/fasta/all_Genomes.fas
+
+# removing duplicated sequences
+seqkit rmdup -s all_Genomes.fas -o refs.fa
+
+seqkit stats refs.fa
+file    format  type  num_seqs     sum_len  min_len  avg_len  max_len
+refs.fa  FASTA   DNA      9,248  29,673,289    3,182  3,208.6    3,275
+
+# --- only for HBV ref genomes -----
+
+# only keep at most 10 genomes for each genotype
+seqkit fx2tab -i refs.fa \
+    | csvtk mutate -Ht -p '_([A-Z\-]+)$' \
+    | csvtk uniq -Ht -f 4 -n 10 \
+    | seqkit tab2fx -o refs.slim.fa
+
+file          format  type  num_seqs  sum_len  min_len  avg_len  max_len
+refs.slim.fa  FASTA   DNA        221  709,855    3,182    3,212    3,257
+</code></pre>
+</li>
+<li>
+<p>NCBI taxdump files, only needed for multiple reference genomes.</p>
+<pre><code>wget https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz
+
+mkdir -p taxdump
+tar -zxvf taxdump.tar.gz -C taxdump/
+</code></pre>
+</li>
+</ol>
+<h2 id="preprocessing-reference-genomes">Preprocessing reference genomes</h2>
+<p>Saving genomes in separated files, with the genome ID as the file name.</p>
+<pre><code># 1. split into separated files, each with one genome
+seqkit split2 -s 1 refs.slim.fa -O refs --force
+
+# 2. rename files
+# rush: https://github.com/shenwei356/rush
+find refs/ -name "*.fa" \
+    | rush 'id=$(seqkit seq -ni {} | head -n 1); mv {} "refs/$id.fa"'
+
+tree refs/ | head -n 8
+refs/
+├── gnl|hbvnuc|AB010290_FT00000_P-B.fa
+├── gnl|hbvnuc|AB014392_FT00000_P-C.fa
+├── gnl|hbvnuc|AB033558_FT00000_P-RF-DE.fa
+├── gnl|hbvnuc|AB059660_FT00000_P-H.fa
+├── gnl|hbvnuc|AB059661_FT00000_P-H.fa
+├── gnl|hbvnuc|AB064310_FT00000_P-G.fa
+├── gnl|hbvnuc|AB064311_FT00000_P-G.fa
+</code></pre>
+<h2 id="creating-a-kmcp-database">Creating a KMCP database</h2>
+<p>Spliting each genome into 10 chunks with 150-bp overlaps, and computing k-mers.</p>
+<pre><code># the default k-mer size is 21.
+# but for many highly similar reference genomes, you may need a larger k value.
+kmcp compute --circular -k 31 -n 10 -l 150 -I refs/ -O refs.tmp --force
+</code></pre>
+<p>Indexing the k-mers, using a small false-positive rate for small genomes.</p>
+<pre><code># you can add the flag --dry-run to see the size of database in advance
+kmcp index -f 0.001 -I refs.tmp/ -O refs.kmcp --force
+</code></pre>
+<p>Creating the taxid mapping file (only needed for multiple reference genomes).</p>
+<pre><code># 10407 is the taxid of Hepatitis B virus species
+cut -f 1 refs.kmcp/R001/__name_mapping.tsv \
+    | awk '{print $0"\t10407"}' \
+    &gt; taxid.map
+
+cp taxid.map refs.kmcp/
+</code></pre>
+<h2 id="searching-reads-against-the-kmcp-database">Searching reads against the KMCP database</h2>
+<pre><code>kmcp search -d refs.kmcp/ sample_1.fq.gz sample_2.fq.gz -o sample.kmcp.tsv.gz
+</code></pre>
+<h2 id="profiling">Profiling</h2>
 <ul>
-<li><a href="https://github.com/bingmann/cobs">COBS</a> (<a href="https://github.com/bingmann/cobs/commit/1915fc061bbe47946116b4a051ed7b4e3f3eca15">1915fc0</a>)</li>
-<li><a href="https://github.com/dib-lab/sourmash">Sourmash</a> (v4.5.0)</li>
-<li>KMCP (<a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.0">v0.9.0</a>)</li>
+<li>
+<p>For the database with a single reference genome.</p>
+<pre><code># the preset profiling mode 1 with a higher sensitivity is used here.
+kmcp profile --level strain -m 1 \
+    sample.kmcp.tsv.gz -o sample.k.profile -C sample.c.profile -M sample.m.profile
+</code></pre>
+</li>
+<li>
+<p>For the database with multiple reference genomes.</p>
+<pre><code># the preset profiling mode 1 with a higher sensitivity is used here.
+kmcp profile -X taxdump/ -T taxid.map -m 1 \
+    sample.kmcp.tsv.gz -o sample.k.profile -C sample.c.profile -M sample.m.profile
+</code></pre>
+</li>
 </ul>
-<p><a href="https://data.ace.uq.edu.au/public/gtdb/data/releases/release202/202.0/genomic_files_reps/gtdb_genomes_reps_r202.tar.gz">GTDB r202 representative genomes</a> are used for tests:</p>
-<ul>
-<li>file size: 46.26 GB</li>
-<li>files: 47,894</li>
-<li>bases: 151.94 Gb</li>
-</ul>
-<h2 id="kmcp-vs-cobs">KMCP vs COBS</h2>
-<p>All k-mers are indexed and searched.</p>
-<p>Database size and building time:</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="left">cobs</th>
-<th align="left">kmcp</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">database size</td>
-<td align="left">86.96GB</td>
-<td align="left"><strong>55.15GB</strong></td>
-</tr>
-<tr>
-<td align="left">building time</td>
-<td align="left">29m55s</td>
-<td align="left"><strong>21min04s</strong></td>
-</tr>
-<tr>
-<td align="left">temporary files</td>
-<td align="left"><strong>160.76GB</strong></td>
-<td align="left">935.11G</td>
-</tr>
-</tbody>
-</table>
-<p>Searching with bacterial genomes or short reads (~1M reads).</p>
-<h2 id="kmcp-vs-mash-and-sourmash">KMCP vs Mash and Sourmash</h2>
-<p>Only FracMinHash (Scaled MinHash) (scale=1000 for Sourmash and KMCP) or MinHash (scale=3400 for Mash) are indexed and searched.</p>
-<p>Database size and building time:</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="left">mash</th>
-<th align="left">sourmash</th>
-<th align="left">kmcp</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">database size</td>
-<td align="left"><strong>1.22GB</strong></td>
-<td align="left">5.19GB</td>
-<td align="left">1.52GB</td>
-</tr>
-<tr>
-<td align="left">buiding time</td>
-<td align="left">13m30s</td>
-<td align="left">40m39s</td>
-<td align="left"><strong>7min59s</strong></td>
-</tr>
-<tr>
-<td align="left">temporary files</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">1.85GB</td>
-</tr>
-</tbody>
-</table>
-<p>Searching with bacterial genomes.</p>
-<h2 id="result">Result</h2>
-<p><img src="bench.searching.jpg" alt="" width="600"/></p>
 
               
             </article>
@@ -643,7 +685,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../profiling/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taxonomic profiling" rel="prev">
+        <a href="../searching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sequence and genome searching" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -652,20 +694,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Taxonomic profiling
+              Sequence and genome searching
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../faq/" class="md-footer__link md-footer__link--next" aria-label="Next: FAQs" rel="next">
+        <a href="../../benchmark/profiling/" class="md-footer__link md-footer__link--next" aria-label="Next: Taxonomic profiling" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              FAQs
+              Taxonomic profiling
             </div>
           </div>
           <div class="md-footer__button md-icon">

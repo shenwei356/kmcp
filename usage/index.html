@@ -470,6 +470,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/detecting-pathogens/" class="md-nav__link">
+        Detecting specific pathogens
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -940,14 +954,16 @@ Usage:
 
 Flags:
       --by-seq                    ► Compute k-mers (sketches) for each sequence, instead of the whole file.
-      --circular                  ► Input sequences are circular.
+      --circular                  ► Input sequences are circular. Note that it only applies to genomes
+                                  with a single chromosome.
   -c, --compress                  ► Output gzipped .unik files, it's slower and can save little space.
   -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
                                   case ignored. (default &quot;\\.(f[aq](st[aq])?|fna)(.gz)?$&quot;)
       --force                     ► Overwrite existed output directory.
   -h, --help                      help for compute
   -I, --in-dir string             ► Directory containing FASTA/Q files. Directory symlinks are followed.
-  -k, --kmer ints                 ► K-mer size(s). (default [21])
+  -k, --kmer ints                 ► K-mer size(s). K needs to be &lt;=64. Multiple values are supported,
+                                  e.g., &quot;-k 21,31&quot; or &quot;-k 21 -k 31&quot; (default [21])
   -W, --minimizer-w int           ► Minimizer window size.
   -O, --out-dir string            ► Output directory.
   -N, --ref-name-regexp string    ► Regular expression (must contains &quot;(&quot; and &quot;)&quot;) for extracting
@@ -1641,7 +1657,8 @@ Usage:
   kmcp utils split-genomes [flags] [-k &lt;k&gt;] [-n &lt;chunks&gt;] [-l &lt;overlap&gt;] {[-I &lt;seqs dir&gt;] | &lt;seq files&gt;} -O &lt;out dir&gt;
 
 Flags:
-      --circular                  ► Input sequences are circular.
+      --circular                  ► Input sequences are circular. Note that it only applies to genomes
+                                  with a single chromosome.
   -r, --file-regexp string        ► Regular expression for matching sequence files in -I/--in-dir,
                                   case ignored. (default &quot;\\.(f[aq](st[aq])?|fna)(.gz)?$&quot;)
       --force                     ► Overwrite existed output directory.

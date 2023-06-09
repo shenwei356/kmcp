@@ -317,6 +317,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/detecting-pathogens/" class="md-nav__link">
+        Detecting specific pathogens
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -782,7 +796,8 @@ where every node searches a part of the database.</p>
 <p>Yes, you can use <a href="https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump">taxonkit create-taxdump</a>
 to create NCBI-style taxdump files for profiling, which also generates a <code>taxid.map</code> file.</p>
 <h3 id="what-k-mer-size-should-i-use-to-build-the-database">What k-mer size should I use to build the database?</h3>
-<p>Multiple k-mer sizes are supported, but one value is good enough.</p>
+<p>Multiple k-mer sizes are supported, but one value is good enough.
+And the K needs to be equal or less than 64, due to <a href="https://github.com/bcgsc/ntHash/issues/41">the bug of older versions of ntHash</a>.</p>
 <p>Bigger k-mer sizes bring high specificity at the cost of decrease
 of sensitivity. <code>k = 21</code> is recommended for metagenomic profiling.</p>
 <h3 id="how-to-add-new-genomes-to-the-database">How to add new genomes to the database?</h3>
