@@ -482,8 +482,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../searching/" class="md-nav__link">
-        Sequence and genome searching
+      <a href="../detecting-pathogens/" class="md-nav__link">
+        Detecting specific pathogens
       </a>
     </li>
   
@@ -496,8 +496,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../detecting-pathogens/" class="md-nav__link">
-        Detecting specific pathogens
+      <a href="../searching/" class="md-nav__link">
+        Sequence and genome searching
       </a>
     </li>
   
@@ -806,6 +806,7 @@
 <pre><code>fastp -i in_1.fq.gz -I in_2.fq.gz  \
     -o out_1.fq.gz -O out_2.fq.gz \
     -l 75 -q 20 -W 4 -M 20 -3 20 --thread 32 \
+    --trim_poly_g --poly_g_min_len 10 --low_complexity_filter \
     --html out.fastp.html
 </code></pre>
 <h3 id="step-2-removing-host-reads">Step 2. Removing host reads</h3>
@@ -813,22 +814,19 @@
 <ul>
 <li><a href="https://github.com/BenLangmead/bowtie2">bowtie2</a> is <a href="https://doi.org/10.1099/mgen.0.000393">recommended</a> for removing host reads.</li>
 <li><a href="https://github.com/samtools/samtools">samtools</a> is also used for processing reads mapping file.</li>
-<li><a href="https://zlib.net/pigz/">pigz</a> is a parallel implementation of <code>gzip</code>, which is much faster than <code>gzip</code>.</li>
 </ul>
 <p>Host reference genomes:</p>
 <ul>
 <li>Human: <a href="https://github.com/marbl/CHM13">CHM13</a>. We also provide a database of CHM13 for fast removing human reads.</li>
 </ul>
 <p>Building the index (~60min):</p>
-<pre><code>bowtie2-build --threads 32 GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz chm13
+<pre><code>bowtie2-build --threads 32 GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz chm13v2.0
 </code></pre>
 <p>Mapping and removing mapped reads:</p>
-<pre><code>index=~/ws/db/bowtie2/chm13
+<pre><code>index=~/ws/db/bowtie2/chm13v2.0
 
-bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz  \
-    | samtools view -buS -f 4 - \
-    | samtools fastq - \
-    | gzip -c &gt; sample.fq.gz
+bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz \
+    | samtools fastq -f 4 -o sample.fq.gz -
 </code></pre>
 <h3 id="step-3-searching">Step 3. Searching</h3>
 <p><strong>Reads can be searched against multiple databases which can be built with different parameters</strong>,
@@ -1152,7 +1150,8 @@ if using <code>csvtk</code> for analysis. e.g.,</p>
 </tbody>
 </table>
 <h4 id="searching-on-a-computer-cluster">Searching on a computer cluster</h4>
-<p>Update: We recommend analyzing one sample using one computer node, which is easier to setup up.</p>
+<p style="color:Tomato;">Update: We recommend analyzing one sample using one computer node, which is easier to setup up.</p>
+
 <p>Here, we split genomes of GTDB into 16 partitions and build a database for 
 every partition, so we can use computer cluster to accelerate the searching.
 The genbank-viral genomes are also diveded into 4 partition.</p>
@@ -1633,13 +1632,13 @@ NC_013654.1_sliding:437671-437820       431946
       
       
         
-        <a href="../searching/" class="md-footer__link md-footer__link--next" aria-label="Next: Sequence and genome searching" rel="next">
+        <a href="../detecting-pathogens/" class="md-footer__link md-footer__link--next" aria-label="Next: Detecting specific pathogens" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Sequence and genome searching
+              Detecting specific pathogens
             </div>
           </div>
           <div class="md-footer__button md-icon">

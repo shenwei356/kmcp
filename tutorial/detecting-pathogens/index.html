@@ -309,20 +309,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../searching/" class="md-nav__link">
-        Sequence and genome searching
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -397,6 +383,20 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching/" class="md-nav__link">
+        Sequence and genome searching
+      </a>
     </li>
   
 
@@ -653,7 +653,7 @@ cut -f 1 refs.kmcp/R001/__name_mapping.tsv \
 cp taxid.map refs.kmcp/
 </code></pre>
 <h2 id="searching-reads-against-the-kmcp-database">Searching reads against the KMCP database</h2>
-<pre><code>kmcp search -d refs.kmcp/ sample_1.fq.gz sample_2.fq.gz -o sample.kmcp.tsv.gz
+<pre><code>kmcp search -w -d refs.kmcp/ sample_1.fq.gz sample_2.fq.gz -o sample.kmcp.tsv.gz
 </code></pre>
 <h2 id="profiling">Profiling</h2>
 <ul>
@@ -685,7 +685,7 @@ kmcp profile -X taxdump/ -T taxid.map -m 1 \
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../searching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sequence and genome searching" rel="prev">
+        <a href="../profiling/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taxonomic profiling" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -694,20 +694,20 @@ kmcp profile -X taxdump/ -T taxid.map -m 1 \
               <span class="md-footer__direction">
                 Previous
               </span>
-              Sequence and genome searching
+              Taxonomic profiling
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../benchmark/profiling/" class="md-footer__link md-footer__link--next" aria-label="Next: Taxonomic profiling" rel="next">
+        <a href="../searching/" class="md-footer__link md-footer__link--next" aria-label="Next: Sequence and genome searching" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Taxonomic profiling
+              Sequence and genome searching
             </div>
           </div>
           <div class="md-footer__button md-icon">
