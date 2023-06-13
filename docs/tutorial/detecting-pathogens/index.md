@@ -80,7 +80,7 @@ Creating the taxid mapping file (only needed for multiple reference genomes).
 
 ## Searching reads against the KMCP database
 
-    kmcp search -d refs.kmcp/ sample_1.fq.gz sample_2.fq.gz -o sample.kmcp.tsv.gz
+    kmcp search -w -d refs.kmcp/ sample_1.fq.gz sample_2.fq.gz -o sample.kmcp.tsv.gz
 
 ## Profiling
 

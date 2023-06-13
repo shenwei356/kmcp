@@ -22,6 +22,7 @@ For example, removing adapters and trimming using [fastp](https://github.com/Ope
     fastp -i in_1.fq.gz -I in_2.fq.gz  \
         -o out_1.fq.gz -O out_2.fq.gz \
         -l 75 -q 20 -W 4 -M 20 -3 20 --thread 32 \
+        --trim_poly_g --poly_g_min_len 10 --low_complexity_filter \
         --html out.fastp.html
 
 ### Step 2. Removing host reads
@@ -30,7 +31,6 @@ Tools:
 
 - [bowtie2](https://github.com/BenLangmead/bowtie2) is [recommended](https://doi.org/10.1099/mgen.0.000393) for removing host reads.
 - [samtools](https://github.com/samtools/samtools) is also used for processing reads mapping file.
-- [pigz](https://zlib.net/pigz/) is a parallel implementation of `gzip`, which is much faster than `gzip`.
 
 Host reference genomes:
 
@@ -38,16 +38,14 @@ Host reference genomes:
 
 Building the index (~60min):
     
-    bowtie2-build --threads 32 GCA_009914755.3_CHM13_T2T_v1.1_genomic.fna.gz chm13
+    bowtie2-build --threads 32 GCA_009914755.4_T2T-CHM13v2.0_genomic.fna.gz chm13v2.0
 
 Mapping and removing mapped reads:
 
-    index=~/ws/db/bowtie2/chm13
+    index=~/ws/db/bowtie2/chm13v2.0
     
-    bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz  \
-        | samtools view -buS -f 4 - \
-        | samtools fastq - \
-        | gzip -c > sample.fq.gz
+    bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz \
+        | samtools fastq -f 4 -o sample.fq.gz -
 
 ### Step 3. Searching
 
@@ -209,7 +207,7 @@ Demo result:
 
 #### Searching on a computer cluster
 
-Update: We recommend analyzing one sample using one computer node, which is easier to setup up.
+<p style="color:Tomato;">Update: We recommend analyzing one sample using one computer node, which is easier to setup up.</p>
 
 
 Here, we split genomes of GTDB into 16 partitions and build a database for 
