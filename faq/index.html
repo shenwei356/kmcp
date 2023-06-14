@@ -449,6 +449,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#does-kmcp-support-long-read-metagenomic-profiling" class="md-nav__link">
+    Does KMCP support long read metagenomic profiling?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-can-i-run-kmcp-on-a-computer-without-enough-main-memory" class="md-nav__link">
     How can I run KMCP on a computer without enough main memory?
   </a>
@@ -634,6 +641,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#does-kmcp-support-long-read-metagenomic-profiling" class="md-nav__link">
+    Does KMCP support long read metagenomic profiling?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-can-i-run-kmcp-on-a-computer-without-enough-main-memory" class="md-nav__link">
     How can I run KMCP on a computer without enough main memory?
   </a>
@@ -780,6 +794,27 @@
 
 <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
 <h2 id="general">General</h2>
+<h3 id="does-kmcp-support-long-read-metagenomic-profiling">Does KMCP support long read metagenomic profiling?</h3>
+<p>Note: This was asked <a href="https://github.com/shenwei356/kmcp/issues/27">here</a>.</p>
+<p>KMCP is only suitable for short-read metagenomic profiling, with much lower sensitivity on long-read datasets.
+My initial plan was to support both short and long reads. But the read matching strategy, i.e., keeping reads
+with enough (&gt;= 55% by default) k-mers contained in a genome chunk, is of low sensitivity for long reads, even for HIFI reads.</p>
+<p>Some strategies were tried, but the results were out of expectation.</p>
+<ol>
+<li>Setting a lower similarity threshold. For our probabilistic data structure,
+   lower thresholds will significantly increase the false-positive rates of a read,
+   though the FPR can also be reduced at the cost of bigger databases.</li>
+<li>Using sketching algorithm. ScaledMinash, Closed Syncmers, and Minimizer were all implemented
+   (available in the current version) and tested, but they didn't work well on error-prone long
+   reads with lower sensitivity. Though tools like minimap2 benefit from Minimizer with location
+   information for seeding and chaining in sequence alignment, we failed to utilize them in taxonomic profiling.</li>
+<li>Using multiple k-mers. K-mers of different lengths, e.g., 17, 21, 31, didn't do better than
+   a single value and doubled the database size.</li>
+<li>Using Simhash with a higher tolerance than k-mer on base substitution.
+   It's slower and has a lower sensitivity unexpectedly.</li>
+<li>Breaking long reads into short fragments.
+   It only applies to HIFI  reads, but the strength of the long reads is wasted.</li>
+</ol>
 <h3 id="how-can-i-run-kmcp-on-a-computer-without-enough-main-memory">How can I run KMCP on a computer without enough main memory?</h3>
 <p>By default, <code>kmcp search</code> loads the whole database into main memory (RAM) for fast searching.
 Optionally, the flag <code>--low-mem</code> can be set to avoid loading the whole database,
