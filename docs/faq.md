@@ -2,6 +2,30 @@
 
 ## General
 
+### Does KMCP support long read metagenomic profiling?
+
+Note: This was asked [here](https://github.com/shenwei356/kmcp/issues/27).
+
+KMCP is only suitable for short-read metagenomic profiling, with much lower sensitivity on long-read datasets.
+My initial plan was to support both short and long reads. But the read matching strategy, i.e., keeping reads
+with enough (>= 55% by default) k-mers contained in a genome chunk, is of low sensitivity for long reads, even for HIFI reads.
+
+Some strategies were tried, but the results were out of expectation.
+
+1. Setting a lower similarity threshold. For our probabilistic data structure,
+   lower thresholds will significantly increase the false-positive rates of a read,
+   though the FPR can also be reduced at the cost of bigger databases.
+2. Using sketching algorithm. ScaledMinash, Closed Syncmers, and Minimizer were all implemented
+   (available in the current version) and tested, but they didn't work well on error-prone long
+   reads with lower sensitivity. Though tools like minimap2 benefit from Minimizer with location
+   information for seeding and chaining in sequence alignment, we failed to utilize them in taxonomic profiling.
+3. Using multiple k-mers. K-mers of different lengths, e.g., 17, 21, 31, didn't do better than
+   a single value and doubled the database size.
+4. Using Simhash with a higher tolerance than k-mer on base substitution.
+   It's slower and has a lower sensitivity unexpectedly.
+5. Breaking long reads into short fragments.
+   It only applies to HIFI  reads, but the strength of the long reads is wasted.
+
 ### How can I run KMCP on a computer without enough main memory?
 
 By default, `kmcp search` loads the whole database into main memory (RAM) for fast searching.
