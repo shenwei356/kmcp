@@ -4,6 +4,8 @@
 
 - `kmcp compute/split-genomes`:
     - fix a bug in chunk computation when splitting circular genomes (`--circular`).
+- `kmcp profile`:
+    - fix format of metaphlan. [#34](https://github.com/shenwei356/kmcp/issues/34)
 
 ### v0.9.2 - 2023-05-16
 

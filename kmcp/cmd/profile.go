@@ -2868,8 +2868,10 @@ Examples:
 			}
 
 			var lineageNames string
+			var lineageTaxids string
 			filterByRank := len(showRanksMap) > 0
 			names := make([]string, 0, 8)
+			taxids := make([]string, 0, 8)
 			for _, node := range nodes {
 				if filterByRank {
 					if _, ok = showRanksMap[taxdb.Rank(node.Taxid)]; !ok {
@@ -2877,20 +2879,28 @@ Examples:
 					}
 
 					names = names[:0]
+					taxids = taxids[:0]
 					for i, taxid := range node.LineageTaxids {
 						if _, ok = showRanksMap[taxdb.Rank(taxid)]; ok {
 							names = append(names, rankPrefixesMap[taxdb.Rank(taxid)]+node.LineageNames[i])
+							taxids = append(taxids, fmt.Sprintf("%d", taxid))
 						}
 					}
 					lineageNames = strings.Join(names, "|")
+					lineageTaxids = strings.Join(taxids, "|")
 				} else {
 					lineageNames = strings.Join(node.LineageNames, "|")
+					taxids = taxids[:0]
+					for _, taxid := range node.LineageTaxids {
+						taxids = append(taxids, fmt.Sprintf("%d", taxid))
+					}
+					lineageTaxids = strings.Join(taxids, "|")
 				}
 
 				if metaphlanReportVersion == "2" {
 					outfh2.WriteString(fmt.Sprintf("%s\t%.6f\n", lineageNames, node.Percentage))
 				} else if metaphlanReportVersion == "3" {
-					outfh2.WriteString(fmt.Sprintf("%s\t%d\t%.6f\t%s\n", lineageNames, node.Taxid, node.Percentage, ""))
+					outfh2.WriteString(fmt.Sprintf("%s\t%s\t%.6f\t%s\n", lineageNames, lineageTaxids, node.Percentage, ""))
 				}
 			}
 		}
