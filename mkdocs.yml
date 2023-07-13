@@ -8,6 +8,7 @@ nav:
 - Tutorials:
     - Taxonomic profiling: tutorial/profiling/index.md
     - Detecting specific pathogens: tutorial/detecting-pathogens/index.md
+    - Detecting contaminated sequences: tutorial/detect-contaminated-seqs/index.md
     - Sequence and genome searching: tutorial/searching/index.md
 - Benchmarks:
     - Taxonomic profiling: benchmark/profiling/index.md

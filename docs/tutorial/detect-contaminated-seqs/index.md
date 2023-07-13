@@ -1,4 +1,4 @@
-## Detecting contaminated sequences in a bacteria genome
+## Detecting contaminated sequences in a bacteria assembly
 
 ## tools
 
