@@ -15,7 +15,6 @@
     - taxdump.tar.gz, need to be uncompressed.
     - taxid.map
 
-
 ## hardware
 
 - RAM >= 64GB

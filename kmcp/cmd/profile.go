@@ -1898,6 +1898,60 @@ Examples:
 		}
 		timeStart1 = time.Now()
 
+		// for reads stats ---------------------------
+
+		chStat := make(chan [2]string, 128)
+		doneStats := make(chan int)
+		var total int
+		go func() {
+			var ok bool
+			var stat [2]string
+			var err error
+			var n int
+			for {
+				stat, ok = <-chStat
+				if !ok {
+					break
+				}
+				if stat[0] == "input queries" {
+					n, err = strconv.Atoi(stat[1])
+					if err != nil {
+						checkError(fmt.Errorf("invalid value of input queries"))
+					}
+					total += n
+				}
+			}
+
+			doneStats <- 1
+		}()
+
+		fn2 := func(line string) (interface{}, bool, error) {
+			if line == "" { // ignoring blank line
+				return "", false, nil
+			}
+
+			if line[0] == '#' {
+				found := reSearchResultStats.FindStringSubmatch(line)
+				if len(found) > 0 {
+					chStat <- [2]string{found[1], found[2]}
+				}
+				return "", false, nil
+			}
+
+			items := pool.Get().(*[]string)
+
+			match, ok := parseMatchResult(line, numFields, items, maxFPR, minQcov)
+			if !ok {
+				pool.Put(items)
+				return nil, false, nil
+			}
+
+			pool.Put(items)
+			return match, true, nil
+		}
+
+		// for reads stats ---------------------------
+
 		profile3 := make(map[uint64]*Target, len(profile2))
 
 		targets := make([]*Target, 0, 256)
@@ -1917,6 +1971,13 @@ Examples:
 					log.Infof("  iteration #%d", iter)
 				}
 				timeStart2 = time.Now()
+			}
+
+			var _fn func(line string) (interface{}, bool, error)
+			if iter == 0 {
+				_fn = fn2
+			} else {
+				_fn = fn
 			}
 
 			nAssignedReads = 0
@@ -1947,7 +2008,7 @@ Examples:
 				var taxid1, taxid2 uint32
 				var theSameSpecies bool
 
-				reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, fn)
+				reader, err := breader.NewBufferedReader(file, opt.NumCPUs, chunkSize, _fn)
 				checkError(err)
 				var data interface{}
 
@@ -2276,6 +2337,11 @@ Examples:
 
 			}
 
+			if iter == 0 {
+				close(chStat)
+				<-doneStats
+			}
+
 			// --------------------
 			// sum up #4
 
@@ -2495,8 +2561,12 @@ Examples:
 			log.Infof("  number of estimated references: %d", len(targets))
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
-			log.Infof("#input matched reads: %.0f, #reads belonging to references in profile: %0.f, proportion: %.6f%%",
-				nReads, nAssignedReads, nAssignedReads/nReads*100)
+			if total > 0 {
+				log.Infof("%.4f%% (%.0f/%d) reads matched", float64(nAssignedReads)/float64(total)*100, nAssignedReads, total)
+				log.Info()
+			}
+			log.Infof("%.4f%% (%.0f/%.0f) matched reads belong to the %d references in the profile",
+				nAssignedReads/nReads*100, nAssignedReads, nReads, len(targets))
 		}
 
 		// ---------------------------------------------------------------

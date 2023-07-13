@@ -4,8 +4,19 @@
 
 - `kmcp compute/split-genomes`:
     - fix a bug in chunk computation when splitting circular genomes (`--circular`).
+- `kmcp search/merge`:
+    - append simple stats to the search result as comment lines, including the number of input and matched queries. e.g.,
+
+            # input queries: 930254
+            # matched queries: 923820
+            # matched percentage: 99.3084%
+
 - `kmcp profile`:
-    - fix format of metaphlan. [#34](https://github.com/shenwei356/kmcp/issues/34)
+    - fix metaphlan out format. [#34](https://github.com/shenwei356/kmcp/issues/34)
+    - show stats of the number of input and matched queries in log. It would be helpful to hint at whether the reference genomes cover all microorganisms in the sample.
+
+            20:00:55.295 [INFO] 99.3084% (923820/930254) reads matched
+            20:00:55.295 [INFO] 100.0000% (923820/923820) matched reads belong to the 2 references in the profile
 
 ### v0.9.2 - 2023-05-16
 

@@ -493,28 +493,54 @@ Demo output:
 
 [CAMI format](https://github.com/CAMI-challenge/contest_information/blob/master/file_formats/CAMI_TP_specification.mkd):
 
-    @SampleID:
+    @SampleID:0
     @Version:0.10.0
     @Ranks:superkingdom|phylum|class|order|family|genus|species|strain
-    @TaxonomyID:ncbi-taxonomy
+    @TaxonomyID:
     @@TAXID	RANK	TAXPATH	TAXPATHSN	PERCENTAGE
-    2	superkingdom	2	Bacteria	100.000000
-    1224	phylum	2|1224	Bacteria|Proteobacteria	99.530189
-    74201	phylum	2|74201	Bacteria|Verrucomicrobia	0.469811
-    1236	class	2|1224|1236	Bacteria|Proteobacteria|Gammaproteobacteria	99.530189
-    203494	class	2|74201|203494	Bacteria|Verrucomicrobia|Verrucomicrobiae	0.469811
-    91347	order	2|1224|1236|91347	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales	99.530189
-    48461	order	2|74201|203494|48461	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales	0.469811
-    543	family	2|1224|1236|91347|543	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae	99.530189
-    1647988	family	2|74201|203494|48461|1647988	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae	0.469811
-    561	genus	2|1224|1236|91347|543|561	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia	99.530189
-    239934	genus	2|74201|203494|48461|1647988|239934	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia	0.469811
-    562	species	2|1224|1236|91347|543|561|562	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli	99.530189
-    239935	species	2|74201|203494|48461|1647988|239934|239935	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila	0.469811
-    431946	strain	2|1224|1236|91347|543|561|562|431946	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli SE15	48.321535
-    83333	strain	2|1224|1236|91347|543|561|562|83333	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli K-12	46.194629
-    386585	strain	2|1224|1236|91347|543|561|562|386585	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli|Escherichia coli O157:H7 str. Sakai	5.014025
-    349741	strain	2|74201|203494|48461|1647988|239934|239935|349741	Bacteria|Verrucomicrobia|Verrucomicrobiae|Verrucomicrobiales|Akkermansiaceae|Akkermansia|Akkermansia muciniphila|Akkermansia muciniphila ATCC BAA-835	0.469811
+    609216830	superkingdom	609216830	Bacteria	100.000000
+    3788559933	phylum	609216830|3788559933	Bacteria|Proteobacteria	94.259786
+    3642462009	phylum	609216830|3642462009	Bacteria|Firmicutes	5.740214
+    329474883	class	609216830|3788559933|329474883	Bacteria|Proteobacteria|Gammaproteobacteria	94.259786
+    1845768359	class	609216830|3642462009|1845768359	Bacteria|Firmicutes|Bacilli	5.740214
+    3160438580	order	609216830|3788559933|329474883|3160438580	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales	90.475599
+    185544332	order	609216830|3642462009|1845768359|185544332	Bacteria|Firmicutes|Bacilli|Lactobacillales	3.952422
+    1718572462	order	609216830|3788559933|329474883|1718572462	Bacteria|Proteobacteria|Gammaproteobacteria|Pasteurellales	3.596852
+    813944714	order	609216830|3642462009|1845768359|813944714	Bacteria|Firmicutes|Bacilli|Bacillales	1.787792
+    2185117029	order	609216830|3788559933|329474883|2185117029	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales	0.098158
+    86398254	order	609216830|3788559933|329474883|86398254	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales	0.089177
+    2234733759	family	609216830|3788559933|329474883|3160438580|2234733759	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae	90.475599
+    2871800275	family	609216830|3788559933|329474883|1718572462|2871800275	Bacteria|Proteobacteria|Gammaproteobacteria|Pasteurellales|Pasteurellaceae	3.596852
+    3209851916	family	609216830|3642462009|1845768359|185544332|3209851916	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae	3.595973
+    1997712377	family	609216830|3642462009|1845768359|813944714|1997712377	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae	1.787792
+    1255484345	family	609216830|3642462009|1845768359|185544332|1255484345	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae	0.356449
+    943158193	family	609216830|3788559933|329474883|2185117029|943158193	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae	0.098158
+    1478401337	family	609216830|3788559933|329474883|86398254|1478401337	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae	0.089177
+    2258433137	genus	609216830|3788559933|329474883|3160438580|2234733759|2258433137	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella	35.929915
+    3334977531	genus	609216830|3788559933|329474883|3160438580|2234733759|3334977531	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia	18.663804
+    794943543	genus	609216830|3788559933|329474883|3160438580|2234733759|794943543	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Salmonella	18.143627
+    2440106587	genus	609216830|3788559933|329474883|3160438580|2234733759|2440106587	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Klebsiella	17.738253
+    2077617176	genus	609216830|3788559933|329474883|1718572462|2871800275|2077617176	Bacteria|Proteobacteria|Gammaproteobacteria|Pasteurellales|Pasteurellaceae|Haemophilus	3.596852
+    602175708	genus	609216830|3642462009|1845768359|185544332|3209851916|602175708	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus	3.595973
+    1824050977	genus	609216830|3642462009|1845768359|813944714|1997712377|1824050977	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus	1.787792
+    2394826844	genus	609216830|3642462009|1845768359|185544332|1255484345|2394826844	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus	0.356449
+    568178587	genus	609216830|3788559933|329474883|2185117029|943158193|568178587	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae|Acinetobacter	0.098158
+    1616653803	genus	609216830|3788559933|329474883|86398254|1478401337|1616653803	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae|Pseudomonas	0.089177
+    4093283224	species	609216830|3788559933|329474883|3160438580|2234733759|3334977531|4093283224	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Escherichia|Escherichia coli	18.663804
+    524994882	species	609216830|3788559933|329474883|3160438580|2234733759|2258433137|524994882	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella|Shigella dysenteriae	18.201855
+    1678121664	species	609216830|3788559933|329474883|3160438580|2234733759|794943543|1678121664	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Salmonella|Salmonella enterica	18.143627
+    3958205156	species	609216830|3788559933|329474883|3160438580|2234733759|2440106587|3958205156	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Klebsiella|Klebsiella pneumoniae	17.738253
+    2695851945	species	609216830|3788559933|329474883|3160438580|2234733759|2258433137|2695851945	Bacteria|Proteobacteria|Gammaproteobacteria|Enterobacterales|Enterobacteriaceae|Shigella|Shigella flexneri	17.728060
+    1063930303	species	609216830|3788559933|329474883|1718572462|2871800275|2077617176|1063930303	Bacteria|Proteobacteria|Gammaproteobacteria|Pasteurellales|Pasteurellaceae|Haemophilus|Haemophilus parainfluenzae	1.809292
+    3809813362	species	609216830|3642462009|1845768359|185544332|3209851916|602175708|3809813362	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus|Enterococcus faecalis	1.800250
+    4145431389	species	609216830|3642462009|1845768359|185544332|3209851916|602175708|4145431389	Bacteria|Firmicutes|Bacilli|Lactobacillales|Enterococcaceae|Enterococcus|Enterococcus faecium	1.795723
+    328800344	species	609216830|3788559933|329474883|1718572462|2871800275|2077617176|328800344	Bacteria|Proteobacteria|Gammaproteobacteria|Pasteurellales|Pasteurellaceae|Haemophilus|Haemophilus influenzae	1.787560
+    1920251658	species	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1920251658	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus|Staphylococcus epidermidis	0.906778
+    1569132721	species	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1569132721	Bacteria|Firmicutes|Bacilli|Bacillales|Staphylococcaceae|Staphylococcus|Staphylococcus aureus	0.881014
+    1527235303	species	609216830|3642462009|1845768359|185544332|1255484345|2394826844|1527235303	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus|Streptococcus mitis	0.178996
+    2983929374	species	609216830|3642462009|1845768359|185544332|1255484345|2394826844|2983929374	Bacteria|Firmicutes|Bacilli|Lactobacillales|Streptococcaceae|Streptococcus|Streptococcus pneumoniae	0.177453
+    72054943	species	609216830|3788559933|329474883|2185117029|943158193|568178587|72054943	Bacteria|Proteobacteria|Gammaproteobacteria|Moraxellales|Moraxellaceae|Acinetobacter|Acinetobacter baumannii	0.098158
+    3843752343	species	609216830|3788559933|329474883|86398254|1478401337|1616653803|3843752343	Bacteria|Proteobacteria|Gammaproteobacteria|Pseudomonadales|Pseudomonadaceae|Pseudomonas|Pseudomonas aeruginosa	0.089177
 
 Related tools:
 
@@ -525,25 +551,52 @@ remove taxa of given TaxIds and their descendants in CAMI metagenomic profile.
     
 Metaphlan3 format (`--metaphlan-report`):
 
-    #SampleID	
+    #SampleID	0
     #clade_name	NCBI_tax_id	relative_abundance	additional_species
-    k__Bacteria	2	100.000000	
-    k__Bacteria|p__Proteobacteria	1224	99.530189	
-    k__Bacteria|p__Verrucomicrobia	74201	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	1236	99.530189	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae	203494	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales	91347	99.530189	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales	48461	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae	543	99.530189	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae	1647988	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia	561	99.530189	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia	239934	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli	562	99.530189	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila	239935	0.469811	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli SE15	431946	48.321535	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli K-12	83333	46.194629	
-    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli|t__Escherichia coli O157:H7 str. Sakai	386585	5.014025	
-    k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia muciniphila|t__Akkermansia muciniphila ATCC BAA-835	349741	0.469811	
+    k__Bacteria	609216830	100.000000
+    k__Bacteria|p__Proteobacteria	609216830|3788559933	94.259786
+    k__Bacteria|p__Firmicutes	609216830|3642462009	5.740214
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	609216830|3788559933|329474883	94.259786
+    k__Bacteria|p__Firmicutes|c__Bacilli	609216830|3642462009|1845768359	5.740214
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales	609216830|3788559933|329474883|3160438580	90.475599
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales	609216830|3642462009|1845768359|185544332	3.952422
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales	609216830|3788559933|329474883|1718572462	3.596852
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales	609216830|3642462009|1845768359|813944714	1.787792
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Moraxellales	609216830|3788559933|329474883|2185117029	0.098158
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales	609216830|3788559933|329474883|86398254	0.089177
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae	609216830|3788559933|329474883|3160438580|2234733759	90.475599
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae	609216830|3788559933|329474883|1718572462|2871800275	3.596852
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae	609216830|3642462009|1845768359|185544332|3209851916	3.595973
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae	609216830|3642462009|1845768359|813944714|1997712377	1.787792
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae	609216830|3642462009|1845768359|185544332|1255484345	0.356449
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Moraxellales|f__Moraxellaceae	609216830|3788559933|329474883|2185117029|943158193	0.098158
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae	609216830|3788559933|329474883|86398254|1478401337	0.089177
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Shigella	609216830|3788559933|329474883|3160438580|2234733759|2258433137	35.929915
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia	609216830|3788559933|329474883|3160438580|2234733759|3334977531	18.663804
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Salmonella	609216830|3788559933|329474883|3160438580|2234733759|794943543	18.143627
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella	609216830|3788559933|329474883|3160438580|2234733759|2440106587	17.738253
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus	609216830|3788559933|329474883|1718572462|2871800275|2077617176	3.596852
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae|g__Enterococcus	609216830|3642462009|1845768359|185544332|3209851916|602175708	3.595973
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus	609216830|3642462009|1845768359|813944714|1997712377|1824050977	1.787792
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus	609216830|3642462009|1845768359|185544332|1255484345|2394826844	0.356449
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Moraxellales|f__Moraxellaceae|g__Acinetobacter	609216830|3788559933|329474883|2185117029|943158193|568178587	0.098158
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas	609216830|3788559933|329474883|86398254|1478401337|1616653803	0.089177
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia coli	609216830|3788559933|329474883|3160438580|2234733759|3334977531|4093283224	18.663804
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Shigella|s__Shigella dysenteriae	609216830|3788559933|329474883|3160438580|2234733759|2258433137|524994882	18.201855
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Salmonella|s__Salmonella enterica	609216830|3788559933|329474883|3160438580|2234733759|794943543|1678121664	18.143627
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella pneumoniae	609216830|3788559933|329474883|3160438580|2234733759|2440106587|3958205156	17.738253
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Shigella|s__Shigella flexneri	609216830|3788559933|329474883|3160438580|2234733759|2258433137|2695851945	17.728060
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus parainfluenzae	609216830|3788559933|329474883|1718572462|2871800275|2077617176|1063930303	1.809292
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae|g__Enterococcus|s__Enterococcus faecalis	609216830|3642462009|1845768359|185544332|3209851916|602175708|3809813362	1.800250
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae|g__Enterococcus|s__Enterococcus faecium	609216830|3642462009|1845768359|185544332|3209851916|602175708|4145431389	1.795723
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus influenzae	609216830|3788559933|329474883|1718572462|2871800275|2077617176|328800344	1.787560
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus|s__Staphylococcus epidermidis	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1920251658	0.906778
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus|s__Staphylococcus aureus	609216830|3642462009|1845768359|813944714|1997712377|1824050977|1569132721	0.881014
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus mitis	609216830|3642462009|1845768359|185544332|1255484345|2394826844|1527235303	0.178996
+    k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus pneumoniae	609216830|3642462009|1845768359|185544332|1255484345|2394826844|2983929374	0.177453
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Moraxellales|f__Moraxellaceae|g__Acinetobacter|s__Acinetobacter baumannii	609216830|3788559933|329474883|2185117029|943158193|568178587|72054943	0.098158
+    k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas|s__Pseudomonas aeruginosa	609216830|3788559933|329474883|86398254|1478401337|1616653803|3843752343	0.089177
+
 
 Metaphlan2 format (`--metaphlan-report-version 2 --metaphlan-report`):
 

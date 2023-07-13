@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -181,6 +182,7 @@ Example:
 		// output channel, the results from all files are piped in in order.
 		chOut := make(chan *SearchResult, 1024)
 		done := make(chan int)
+		var matched int
 
 		go func() {
 			var preId uint64
@@ -203,6 +205,8 @@ Example:
 				}
 
 				if r.QueryIdx != preId {
+					matched++
+
 					sorts.Quicksort(_Matches(buf0))
 					hits = strconv.Itoa(len(buf0))
 					for _, match = range buf0 {
@@ -236,6 +240,8 @@ Example:
 				// poolMatches.Put(r.Matches)
 			}
 
+			matched++
+
 			// last one
 			sorts.Quicksort(_Matches(buf0))
 			hits = strconv.Itoa(len(buf0))
@@ -258,11 +264,69 @@ Example:
 		// ---------------------------------------------------------------
 
 		readers := make(map[int]chan *SearchResult, len(files))
+		chStats := make(map[int]chan [2]string, len(files))
 		for i, file := range files {
-			ch, err := NewSearchResultParser(file, poolStrings, poolMatches, scoreField, queryIdxField, 128)
+			ch, chStat, err := NewSearchResultParser(file, poolStrings, poolMatches, scoreField, queryIdxField, 128)
 			checkError(err)
 			readers[i] = ch
+			chStats[i] = chStat
 		}
+
+		// read stasts
+		doneStats := make(chan int)
+		var total int
+		go func() {
+			querySizes := make([]int, len(chStats))
+			var i int
+			var chStat chan [2]string
+			nFiles := len(chStats)
+			var n int
+			var ok bool
+			var stat [2]string
+			var val int
+			var err error
+		LOOP:
+			for {
+				for i, chStat = range chStats {
+					if n == nFiles {
+						break LOOP
+					}
+					if chStat == nil {
+						continue
+					}
+					stat, ok = <-chStat
+					if !ok {
+						chStats[i] = nil
+						n++
+						continue
+					}
+					if stat[0] == "input queries" {
+						val, err = strconv.Atoi(stat[1])
+						if err != nil {
+							checkError(fmt.Errorf("invalid value of input queries"))
+						}
+						querySizes[i] = val
+					}
+				}
+			}
+			first := querySizes[0]
+			total = first
+			for i, n := range querySizes[1:] {
+				if first == 0 { // may be from a old kmcp version
+					total = n
+					continue
+				}
+				if n == 0 { // may be from a old kmcp version
+					continue
+				}
+
+				if n != first {
+					checkError(fmt.Errorf("different numbers of queries in %s (%d) and %s (%d), please make sure they come from the same input query", files[0], first, files[i], n))
+				}
+				total = n
+			}
+			doneStats <- 1
+		}()
 
 		entries := make([]*resultEntry, 0, len(files))
 		buf := resultEntryHeap{entries: &entries}
@@ -302,6 +366,23 @@ Example:
 
 		close(chOut)
 		<-done
+		<-doneStats
+
+		// statistics of matched, unmatched reads
+		fmt.Fprintf(outfh, "# input queries: %d\n", total)
+		fmt.Fprintf(outfh, "# matched queries: %d\n", matched)
+		fmt.Fprintf(outfh, "# matched percentage: %.4f%%\n", float64(matched)/float64(total)*100)
+
+		if opt.Verbose || opt.Log2File {
+			if total > 0 {
+				log.Info()
+				log.Infof("%.4f%% (%d/%d) queries matched", float64(matched)/float64(total)*100, matched, total)
+				log.Infof("done searching")
+				if outFile != "-" {
+					log.Infof("search results saved to: %s", outFile)
+				}
+			}
+		}
 	},
 }
 
@@ -374,8 +455,12 @@ type SearchResult struct {
 	Matches    *[]*_Match
 }
 
-func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, scoreField int, numFields int, bufferSize int) (chan *SearchResult, error) {
+var reSearchResultStats = regexp.MustCompile(`^# ([\w ]+): (.+)`)
+
+func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *sync.Pool, scoreField int, numFields int, bufferSize int) (chan *SearchResult, chan [2]string, error) {
 	ch := make(chan *SearchResult, bufferSize)
+
+	chStat := make(chan [2]string, 16)
 
 	go func() {
 		infh, r, _, err := inStream(file)
@@ -395,9 +480,18 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 		var line string
 		var preSeqId string
 		first := true
+		var found []string
 		for scanner.Scan() {
 			line = scanner.Text()
-			if line == "" || line[0] == '#' {
+			if line == "" {
+				continue
+			}
+
+			if line[0] == '#' {
+				found = reSearchResultStats.FindStringSubmatch(line)
+				if len(found) > 0 {
+					chStat <- [2]string{found[1], found[2]}
+				}
 				continue
 			}
 
@@ -469,7 +563,9 @@ func NewSearchResultParser(file string, poolStrings *sync.Pool, poolMatches *syn
 			}
 		}
 		close(ch)
+
+		close(chStat)
 	}()
 
-	return ch, nil
+	return ch, chStat, nil
 }

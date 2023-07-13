@@ -1019,6 +1019,11 @@ Examples:
 
 		}
 
+		// statistics of matched, unmatched reads
+		fmt.Fprintf(outfh, "# input queries: %d\n", total)
+		fmt.Fprintf(outfh, "# matched queries: %d\n", matched)
+		fmt.Fprintf(outfh, "# matched percentage: %.4f%%\n", float64(matched)/float64(total)*100)
+
 		checkError(sg.Close()) // cleanup
 	},
 }
