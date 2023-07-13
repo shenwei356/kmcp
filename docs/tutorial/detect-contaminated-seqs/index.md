@@ -34,10 +34,10 @@ and performing metagenomoic profiling with them.
     # search against GTDB databases
     # !!! if the KMCP databases are in a network-attached storage disk (NAS),
     # !!! please add the flag "-w" to kmcp
-    seqkit sliding -s 30 -W 150 $input \
+    seqkit sliding -g -s 30 -W 150 $input \
         | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_1.kmcp/ -o $input.kmcp@gtdb.part_1.tsv.gz
 
-    seqkit sliding -s 30 -W 150 $input \
+    seqkit sliding -g -s 30 -W 150 $input \
         | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_2.kmcp/ -o $input.kmcp@gtdb.part_2.tsv.gz
 
     # merge seach results
