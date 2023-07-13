@@ -9,7 +9,7 @@
 
 ## database
 
-- KMCP r214: https://1drv.ms/f/s!Ag89cZ8NYcqtlgEtskAjVVosItE7?e=CdkwhG
+- GTDB r214: https://1drv.ms/f/s!Ag89cZ8NYcqtlgEtskAjVVosItE7?e=CdkwhG
     - gtdb.part_1.kmcp.tar.gz, need to be uncompressed.
     - gtdb.part_2.kmcp.tar.gz, need to be uncompressed.
     - taxdump.tar.gz, need to be uncompressed.
@@ -23,7 +23,8 @@
 
 ## steps
 
-Generating reads from the genome, and perform metagenomoic profiling with them.
+Generating reads (sliding a 150bp windows with a step of 30bp) from the genome,
+and performing metagenomoic profiling with them.
 
     # variables
     input=SAMN02360712.contigs.fa.gz
@@ -31,16 +32,18 @@ Generating reads from the genome, and perform metagenomoic profiling with them.
     taxmap=~/ws/data/kmcp2023/taxid.map
 
     # search against GTDB databases
+    # !!! if the KMCP databases are in a network-attached storage disk (NAS),
+    # !!! please add the flag "-w" to kmcp
     seqkit sliding -s 30 -W 150 $input \
         | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_1.kmcp/ -o $input.kmcp@gtdb.part_1.tsv.gz
 
     seqkit sliding -s 30 -W 150 $input \
         | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_2.kmcp/ -o $input.kmcp@gtdb.part_2.tsv.gz
 
-    # merge result
+    # merge seach results
     kmcp merge -o $input.kmcp.tsv.gz $input.kmcp@gtdb.part_*.tsv.gz
 
-    # profiling and output reads classification results.
+    # profiling and outputing read classification results.
     # here the profiling mode 0 with the highest sensitivity is used.
     kmcp profile -X $taxdump -T $taxmap t.kmcp.tsv.gz -m 0 \
         -o $input.kmcp.tsv.gz.k.profile -B $input.kmcp.tsv.gz.binning.gz
@@ -63,7 +66,7 @@ Generating reads from the genome, and perform metagenomoic profiling with them.
     GCF_005877905.1   0.020988     74.61    0.20         42       2571105   Pseudomonas nicosulfuronedens
     GCF_900187975.1   0.003064     70.39    0.20         6        366289    Pseudomonas delhiensis
 
-Check contaminated regions
+Checking contaminated regions
 
     # the taxid of the predominant target
     taxidMain=$(csvtk cut -t -f taxid $input.kmcp.tsv.gz.k.profile | sed 1d | head -n 1)
