@@ -30,7 +30,7 @@ ARM architecture is supported, but `kmcp search` would be slower.
 
 - `kmcp profile`:
     - fix metaphlan out format. [#34](https://github.com/shenwei356/kmcp/issues/34)
-    - show stats of the number of input and matched queries in log. It would be helpful to hint at whether the reference genomes cover all microorganisms in the sample.
+    - show stats of the number of input and matched queries in log. **It would be helpful to show whether the reference genomes cover all microorganisms in the sample**.
 
             20:00:55.295 [INFO] 99.3084% (923820/930254) reads matched
             20:00:55.295 [INFO] 100.0000% (923820/923820) matched reads belong to the 2 references in the profile
