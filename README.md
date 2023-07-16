@@ -35,6 +35,7 @@ https://bioinf.shenwei.me/kmcp
 - Tutorials
     - [Taxonomic profiling](https://bioinf.shenwei.me/kmcp/tutorial/profiling)
     - [Detecting specific pathogens](https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens)
+    - [Detecting contaminated sequences](https://bioinf.shenwei.me/kmcp/tutorial/detecting-contaminated-seqs)
     - [Sequence and genome searching](https://bioinf.shenwei.me/kmcp/tutorial/searching)
 - [Usage](https://bioinf.shenwei.me/kmcp/usage)
 - [Benchmarks](https://bioinf.shenwei.me/kmcp/benchmark)

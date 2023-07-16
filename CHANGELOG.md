@@ -1,6 +1,6 @@
 # Changelog
 
-### v0.9.3 - 2023-05-16
+### v0.9.3 - 2023-07-16
 
 - `kmcp compute/split-genomes`:
     - fix a bug in chunk computation when splitting circular genomes (`--circular`).
@@ -17,6 +17,10 @@
 
             20:00:55.295 [INFO] 99.3084% (923820/930254) reads matched
             20:00:55.295 [INFO] 100.0000% (923820/923820) matched reads belong to the 2 references in the profile
+
+- new tutorials:
+    - [Detecting specific pathogens](https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens)
+    - [Detecting contaminated sequences](https://bioinf.shenwei.me/kmcp/tutorial/detecting-contaminated-seqs)
 
 ### v0.9.2 - 2023-05-16
 

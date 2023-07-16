@@ -139,7 +139,7 @@ Mapping file:
     no rank           31
     isolate           26
 
-Masking prophage regions and removing plasmid sequences (optional):
+Masking prophage regions and removing plasmid sequences with [genomad](https://github.com/apcamargo/genomad) (optional):
 
     conda activate genomad
 

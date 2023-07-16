@@ -3,7 +3,7 @@
 ## tools
 
 - kmcp: https://github.com/shenwei356/kmcp
-- seqkit: >= v2.5.0, https://github.com/shenwei356/seqkit/issues/390#issuecomment-1633495130
+- seqkit: >= v2.5.0 which has the new command `seqkit merge-slides`.
 - taxonkit: https://github.com/shenwei356/taxonkit
 - csvtk: https://github.com/shenwei356/csvtk
 
@@ -18,7 +18,7 @@
 ## hardware
 
 - RAM >= 64GB
-- #CPUs >= 32 preferred.
+- CPUs >= 32 preferred.
 
 ## steps
 
@@ -32,12 +32,12 @@ and performing metagenomoic profiling with them.
 
     # search against GTDB databases
     # !!! if the KMCP databases are in a network-attached storage disk (NAS),
-    # !!! please add the flag "-w" to kmcp
+    # !!! please add the flag "-w" to "kmcp search"
     seqkit sliding -g -s 50 -W 200 $input \
-        | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_1.kmcp/ -o $input.kmcp@gtdb.part_1.tsv.gz
+        | kmcp search -w -d ~/ws/data/kmcp2023/gtdb.part_1.kmcp/ -o $input.kmcp@gtdb.part_1.tsv.gz
 
     seqkit sliding -g -s 50 -W 200 $input \
-        | kmcp search -d ~/ws/data/kmcp2023/gtdb.part_2.kmcp/ -o $input.kmcp@gtdb.part_2.tsv.gz
+        | kmcp search -w -d ~/ws/data/kmcp2023/gtdb.part_2.kmcp/ -o $input.kmcp@gtdb.part_2.tsv.gz
 
     # merge seach results
     kmcp merge -o $input.kmcp.tsv.gz $input.kmcp@gtdb.part_*.tsv.gz
@@ -74,7 +74,7 @@ Checking contaminated regions
                                         | sed 1d | head -n 1 | sed "s/;/\n/g") \
             -o $input.kmcp.tsv.gz.binning.filtered.tsv
 
-    # merge regions
+    # merge regions. seqkit v2.5.0 is needed.
     seqkit merge-slides $input.kmcp.tsv.gz.binning.filtered.tsv --quiet \
         -o $input.kmcp.tsv.gz.cont.tsv
 
@@ -90,14 +90,16 @@ Checking contaminated regions
     csvtk join -Ht $input.kmcp.tsv.gz.cont.tsv <(seqkit fx2tab -ni -l $input) \
         | awk '{print $0"\t"($3-$2)"\t"($3-$2)/$4}' \
         | csvtk join -Ht - $input.kmcp.tsv.gz.binning.filtered.tsv.taxa \
-        | csvtk add-header -Ht -n chr,begin,end,contig_len,len,frac,taxa \
-        | csvtk sort -t -k frac:nr \
+        | csvtk add-header -Ht -n chr,begin,end,contig_len,len,proportion,taxa \
+        | csvtk sort -t -k proportion:nr \
         | tee $input.kmcp.tsv.gz.cont.details.tsv \
         | csvtk pretty -t
 
-    chr                        begin    end      contig_len   len    frac          taxa
+    chr                        begin    end      contig_len   len    proportion    taxa
     ------------------------   ------   ------   ----------   ----   -----------   --------------------------------------------------------
     SAMN02360712.contig00044   0        1151     1151         1151   1             177416(Francisella tularensis subsp. tularensis SCHU S4)
     SAMN02360712.contig00012   163600   163900   164357       300    0.00182529    1028746(Christiangramia aestuarii)
     SAMN02360712.contig00008   64850    65150    279605       300    0.00107294    1028746(Christiangramia aestuarii)
     SAMN02360712.contig00002   362200   362500   622965       300    0.000481568   1028746(Christiangramia aestuarii)
+
+We can see the whole (proportion: 1) contig `SAMN02360712.contig00044` is from a totally different species, which should be a contaminated sequence.
