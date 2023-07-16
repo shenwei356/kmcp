@@ -513,6 +513,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../tutorial/detect-contaminated-seqs/index.md" class="md-nav__link">
+        Detecting contaminated sequences
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tutorial/searching/" class="md-nav__link">
         Sequence and genome searching
       </a>
@@ -1007,13 +1021,14 @@ forma specialis   59
 no rank           31
 isolate           26
 </code></pre>
-<p>Masking prophage regions and removing plasmid sequences (optional):</p>
+<p>Masking prophage regions and removing plasmid sequences with <a href="https://github.com/apcamargo/genomad">genomad</a> (optional):</p>
 <pre><code>conda activate genomad
 
 # https://github.com/shenwei356/cluster_files
 cluster_files -p '^(.+).fna.gz$' gtdb -o gtdb.genomad
 
 # indentify prophages and plasmids sequences
+# &gt; 10 days
 db=~/ws/db/genomad/genomad_db
 find gtdb.genomad/ -name "*.fna.gz" \
     | rush -j 6 -v db=$db \
@@ -1024,16 +1039,32 @@ find gtdb.genomad/ -name "*.fna.gz" \
 find gtdb.genomad/ -name "*.fna.gz" \
     | grep -v masked \
     | rush -j 10 -v 'p={/}/genomad/{/%}_summary/{/%}' \
-        'cat {p}_virus_summary.tsv | sed 1d | cut -f 1 \
+        'csvtk grep -t -f coordinates -p NA {p}_virus_summary.tsv \
+            | sed 1d | cut -f 1 \
+            &gt; {p}.v.id; \
+         csvtk grep -t -f coordinates -p NA {p}_virus_summary.tsv -v \
+            | sed 1d | cut -f 1 \
             | perl -ne "/^(.+)\|.+_(\d+)_(\d+)$/; \$s=\$2-1; print qq/\$1\t\$s\t\$3\n/;" \
             &gt; {p}.v.bed; \
         cut -f 1 {p}_plasmid_summary.tsv | sed 1d &gt; {p}.p.id; \
-        bedtools maskfasta -fi &lt;(seqkit grep -v -f {p}.p.id {}) -bed {p}.v.bed -fo {}.masked.fna; \
-        gzip -f {}.masked.fna'
+        bedtools maskfasta -fi &lt;(seqkit grep --quiet -v -f &lt;(cat {p}.p.id {p}.v.id) {}) \
+                            -bed {p}.v.bed -fo {}.masked.fna; \
+        gzip -f {}.masked.fna' \
+        -c -C genomad.b.rush --eta
 
-# move masked genomes to another directory, and rename
-cluster_files --mv -p '^(.+).fna.gz$' gtdb.genomad -o gtdb.masked
-brename -R -p .masked.fna.gz$ gtdb.masked -d
+# replace masked sequence with k-Ns, for more accurate genome size.
+find gtdb.genomad/ -name "*.fna.gz.masked.fna.gz" \
+    | rush -j 20 'seqkit replace -s -i -p N+ -r NNNNNNNNNNNNNNNNNNNNN {} -o {...}.masked2.fna.gz' \
+        -c -C genomad.c.rush --eta
+
+# stats
+time find gtdb.genomad/ -name "*.fna.gz" \
+    | seqkit stats -j 20 --infile-list - -T -b -o gtdb.genomad.stats.tsv
+
+# create symbol links in another directory, and rename
+mkdir -p gtdb_masked
+cluster_files  -p '^(.+).fna.gz.masked.fna.gz$' gtdb.genomad -o gtdb_masked
+brename -R -p .masked.fna.gz$ gtdb_masked -d
 </code></pre>
 <p>Building database (all k-mers, for profiling on short-reads):</p>
 <pre><code>input=gtdb
@@ -1067,7 +1098,7 @@ find $input -name "*.fna.gz" &gt; $input.files.txt
 # sort files by genome size, so we can split them into chunks with similar genome sizes
 cp $input.files.txt $input.files0.txt
 cat $input.files0.txt \
-    | rush -k 'echo -e {}"\t"$(seqkit stats -T {} | sed 1d | cut -f 5)' \
+    | rush --eta -k 'echo -e {}"\t"$(seqkit stats -T {} | sed 1d | cut -f 5)' \
     &gt; $input.files0.size.txt
 cat $input.files0.size.txt \
     | csvtk sort -Ht -k 2:nr \
@@ -1097,7 +1128,7 @@ for f in $input.n$n-*; do
     #     number of hash function: 1
     #     false positive rate: 0.3
     kmcp index -j 32 -I $f-k21-n10 -O $f.kmcp -n 1 -f 0.3 \
-        --log $f.kmcp.log
+        --log $f.kmcp.log --force
 
     # cp taxid and name mapping file to database directory
     cp taxid.map name.map $f.kmcp/
