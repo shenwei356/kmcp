@@ -359,6 +359,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
     Tools
   </a>
@@ -534,6 +541,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
     Tools
   </a>
@@ -579,6 +593,19 @@
 
 
 <h1 id="detecting-contaminated-sequences-in-a-bacteria-assembly">Detecting contaminated sequences in a bacteria assembly</h1>
+<h2 id="changelog">Changelog</h2>
+<p>Tracked changes in <a href="https://github.com/shenwei356/kmcp/commits/main/docs/tutorial/detecting-contaminated-seqs/index.md">github</a></p>
+<ul>
+<li>2023-07-20<ul>
+<li>Recommend using masked GTDB index files</li>
+<li>Recommend using GTDB taxdump files rather than NCBI taxdump files.</li>
+</ul>
+</li>
+<li>2023-07-16<ul>
+<li>First public version.</li>
+</ul>
+</li>
+</ul>
 <h2 id="tools">Tools</h2>
 <ul>
 <li>kmcp: https://github.com/shenwei356/kmcp</li>
@@ -588,9 +615,9 @@
 </ul>
 <h2 id="database">Database</h2>
 <ul>
-<li>GTDB r214: please choose files below to download at https://1drv.ms/f/s!Ag89cZ8NYcqtlhYlyHuaKweYNu93?e=9NOxqg<ul>
+<li>KMCP database v2023.05: please choose files below to download from <a href="https://1drv.ms/f/s!Ag89cZ8NYcqtlhYlyHuaKweYNu93?e=9NOxqg">here</a>.<ul>
 <li>GTDB index files (need to be uncompressed)<ul>
-<li>Option 1: (recommended) <strong>with both plasmid and prophage masked</strong> with <a href="https://github.com/apcamargo/genomad">genomad</a>.<ul>
+<li>Option 1: <strong>(Recommended) with both plasmid and prophage masked</strong> with <a href="https://github.com/apcamargo/genomad">genomad</a>.<ul>
 <li><code>gtdb_masked.part_1.kmcp.tar.gz</code></li>
 <li><code>gtdb_masked.part_2.kmcp.tar.gz</code></li>
 </ul>
@@ -602,8 +629,19 @@
 </li>
 </ul>
 </li>
-<li><code>taxdump.tar.gz</code>, need to be uncompressed.</li>
+<li>Taxdump files and TaxId mapping file:<ul>
+<li>Option 1: <strong>(Recommended) GTDB+NCBI taxonomy</strong>. Actually, only the GTDB taxonomy is used here, cause we only use the GTDB KMCP database, no viral or fungal databases are used.<ul>
+<li><code>taxdump.gtdbR214.1+ncbi.tar.gz</code>, uncompressed directory is <code>taxdump.gtdb+ncbi/</code></li>
+<li><code>taxid.gtdbR214.1+ncbi.map</code></li>
+</ul>
+</li>
+<li>Option 2: <strong>NCBI taxonomy</strong><ul>
+<li><code>taxdump.tar.gz</code>, uncompressed directory is <code>taxdump/</code></li>
 <li><code>taxid.map</code></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -617,8 +655,8 @@
 and performing metagenomoic profiling with them.</p>
 <pre><code># variables
 input=SAMN02360712.contigs.fa.gz
-taxdump=~/ws/data/kmcp2023/taxdump/
-taxmap=~/ws/data/kmcp2023/taxid.map
+taxdump=~/ws/data/kmcp2023/taxdump.gtdb+ncbi/
+taxmap=~/ws/data/kmcp2023/taxid.gtdbR214.1+ncbi.map
 
 # search against GTDB databases
 # !!! if the KMCP databases are in a network-attached storage disk (NAS),
@@ -640,30 +678,42 @@ cat $input.kmcp.tsv.gz.k.profile \
     | csvtk cut -t -f ref,percentage,score,chunksFrac,reads,taxid,taxname \
     | csvtk pretty -t
 
-ref               percentage   score    chunksFrac   reads    taxid     taxname
----------------   ----------   ------   ----------   ------   -------   ------------------------------------------------
-GCF_001457615.1   99.571989    100.00   1.00         113696   287       Pseudomonas aeruginosa
-GCF_000008985.1   0.062945     100.00   1.00         23       177416    Francisella tularensis subsp. tularensis SCHU S4
-GCF_000017205.1   0.296496     90.56    1.00         353      381754    Pseudomonas aeruginosa PA7
-GCF_002091755.1   0.037176     83.61    0.40         39       1215112   Pseudomonas nitroreducens NBRC 12694
-GCF_003797765.1   0.012409     85.83    0.20         14       1882741   Ramlibacter sp. WS9
-GCF_009735585.1   0.006522     77.50    0.20         4        1028746   Christiangramia aestuarii
-GCF_900112375.1   0.012463     66.94    0.20         13       53408     Pseudomonas citronellolis
+ref               percentage   score    chunksFrac   reads    taxid        taxname
+---------------   ----------   ------   ----------   ------   ----------   -------------------------
+GCF_001457615.1   99.579056    100.00   1.00         113704   1696268695   Pseudomonas aeruginosa
+GCF_000008985.1   0.062945     100.00   1.00         23       418881019    Francisella tularensis
+GCF_000017205.1   0.289416     90.83    1.00         345      1859336444   Pseudomonas aeruginosa_A
+GCF_002091755.1   0.037182     83.61    0.40         39       744524063    Pseudomonas nitroreducens
+GCF_003797765.1   0.012409     85.83    0.20         14       49646394     Ramlibacter sp003797765
+GCF_009735585.1   0.006522     77.50    0.20         4        182564388    Gramella aestuarii
+GCF_900112375.1   0.012470     66.94    0.20         13       132541362    Pseudomonas citronellolis
 </code></pre>
-<p>Checking contaminated regions</p>
-<pre><code># the taxid of the predominant target
+<p>Checking contaminated regions. Here we check "inter-genus" contamination.</p>
+<pre><code># the taxid of the predominant target of the highest percentage
 taxidMain=$(csvtk cut -t -f taxid $input.kmcp.tsv.gz.k.profile | sed 1d | head -n 1)
-# the genus taxid of the target
+
+# the genus taxid of the target.
+# the placeholders of different ranks:
+#    {k}: superkingdom
+#    {K}: kingdom
+#    {p}: phylum
+#    {c}: class
+#    {o}: order
+#    {f}: family
+#    {g}: genus
+#    {s}: species
 taxidMainGenus=$(echo $taxidMain | taxonkit reformat --data-dir $taxdump -I 1 -t -f '{g}' | cut -f 3)
 
-# find out sequence IDs belonging to other genera (potential contaminated contigs)
+# find out sequence IDs belonging to other genera (potential contaminated contigs).
+#   1. filter out reads with taxids equal to and below the genus node of the predominant target.
+#   2. filter out reads with taxids above the genus node of the predominant target.
 zcat $input.kmcp.tsv.gz.binning.gz | grep -v ^@ \
     | csvtk grep -Ht -f 2 -v -P &lt;(taxonkit list --data-dir $taxdump --ids $taxidMainGenus -I "") \
     | csvtk grep -Ht -f 2 -v -P &lt;(csvtk cut -t -f taxpathsn $input.kmcp.tsv.gz.k.profile \
                                     | sed 1d | head -n 1 | sed "s/;/\n/g") \
         -o $input.kmcp.tsv.gz.binning.filtered.tsv
 
-# merge regions. seqkit v2.5.0 is needed.
+# merge regions. seqkit &gt;=v2.5.0 is needed.
 seqkit merge-slides $input.kmcp.tsv.gz.binning.filtered.tsv --quiet \
     -o $input.kmcp.tsv.gz.cont.tsv
 
@@ -686,14 +736,56 @@ csvtk join -Ht $input.kmcp.tsv.gz.cont.tsv &lt;(seqkit fx2tab -ni -l $input) \
 
 chr                        begin    end      contig_len   len    proportion    taxa
 ------------------------   ------   ------   ----------   ----   -----------   ---------------------------------------------------------------
-SAMN02360712.contig00044   0        1151     1151         1151   1             177416(Francisella tularensis subsp. tularensis SCHU S4)
-SAMN02360712.contig00028   26600    26800    47311        200    0.00422735    1882741(Ramlibacter sp. WS9)
-SAMN02360712.contig00012   163700   163900   164357       200    0.00121686    1028746(Christiangramia aestuarii),1882741(Ramlibacter sp. WS9)
-SAMN02360712.contig00012   155750   155950   164357       200    0.00121686    1028746(Christiangramia aestuarii),1882741(Ramlibacter sp. WS9)
-SAMN02360712.contig00001   454500   455250   670989       750    0.00111775    1882741(Ramlibacter sp. WS9)
-SAMN02360712.contig00002   362200   362500   622965       300    0.000481568   1028746(Christiangramia aestuarii)
+SAMN02360712.contig00044   0        1151     1151         1151   1             418881019(Francisella tularensis)
+SAMN02360712.contig00028   26600    26800    47311        200    0.00422735    49646394(Ramlibacter sp003797765)
+SAMN02360712.contig00012   163700   163900   164357       200    0.00121686    182564388(Gramella aestuarii),49646394(Ramlibacter sp003797765)
+SAMN02360712.contig00012   155750   155950   164357       200    0.00121686    182564388(Gramella aestuarii),49646394(Ramlibacter sp003797765)
+SAMN02360712.contig00001   454500   455250   670989       750    0.00111775    49646394(Ramlibacter sp003797765)
+SAMN02360712.contig00002   362200   362500   622965       300    0.000481568   182564388(Gramella aestuarii)
 </code></pre>
-<p>We can see the whole (proportion: 1) contig <code>SAMN02360712.contig00044</code> is from a totally different species, which should be a contaminated sequence.</p>
+<p>We can see the whole (proportion: 1) contig <code>SAMN02360712.contig00044</code> is from a species belonging to a different genus even a different order (see the table below). So it is likely be a contaminated sequence.</p>
+<pre><code>echo 1696268695 418881019 \
+    | sed -E 's/\s+/\n/g' \
+    | taxonkit reformat --data-dir $taxdump -I 1 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' \
+    | csvtk add-header -t -n taxid,kingdom,phylum,class,order,family,genus,species \
+    | csvtk csv2md -t
+</code></pre>
+<table>
+<thead>
+<tr>
+<th align="left">taxid</th>
+<th align="left">kingdom</th>
+<th align="left">phylum</th>
+<th align="left">class</th>
+<th align="left">order</th>
+<th align="left">family</th>
+<th align="left">genus</th>
+<th align="left">species</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">1696268695</td>
+<td align="left">Bacteria</td>
+<td align="left">Pseudomonadota</td>
+<td align="left">Gammaproteobacteria</td>
+<td align="left">Pseudomonadales</td>
+<td align="left">Pseudomonadaceae</td>
+<td align="left">Pseudomonas</td>
+<td align="left">Pseudomonas aeruginosa</td>
+</tr>
+<tr>
+<td align="left">418881019</td>
+<td align="left">Bacteria</td>
+<td align="left">Pseudomonadota</td>
+<td align="left">Gammaproteobacteria</td>
+<td align="left">Francisellales</td>
+<td align="left">Francisellaceae</td>
+<td align="left">Francisella</td>
+<td align="left">Francisella tularensis</td>
+</tr>
+</tbody>
+</table>
 
               
             </article>
