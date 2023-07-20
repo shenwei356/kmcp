@@ -360,28 +360,28 @@
       
         <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
-    tools
+    Tools
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#database" class="md-nav__link">
-    database
+    Database
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#hardware" class="md-nav__link">
-    hardware
+    Hardware
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#steps" class="md-nav__link">
-    steps
+    Steps
   </a>
   
 </li>
@@ -535,28 +535,28 @@
       
         <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
-    tools
+    Tools
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#database" class="md-nav__link">
-    database
+    Database
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#hardware" class="md-nav__link">
-    hardware
+    Hardware
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#steps" class="md-nav__link">
-    steps
+    Steps
   </a>
   
 </li>
@@ -579,29 +579,40 @@
 
 
 <h1 id="detecting-contaminated-sequences-in-a-bacteria-assembly">Detecting contaminated sequences in a bacteria assembly</h1>
-<h2 id="tools">tools</h2>
+<h2 id="tools">Tools</h2>
 <ul>
 <li>kmcp: https://github.com/shenwei356/kmcp</li>
 <li>seqkit: &gt;= v2.5.0 which has the new command <code>seqkit merge-slides</code>.</li>
 <li>taxonkit: https://github.com/shenwei356/taxonkit</li>
 <li>csvtk: https://github.com/shenwei356/csvtk</li>
 </ul>
-<h2 id="database">database</h2>
+<h2 id="database">Database</h2>
 <ul>
-<li>GTDB r214: https://1drv.ms/f/s!Ag89cZ8NYcqtlgEtskAjVVosItE7?e=CdkwhG<ul>
-<li>gtdb.part_1.kmcp.tar.gz, need to be uncompressed.</li>
-<li>gtdb.part_2.kmcp.tar.gz, need to be uncompressed.</li>
-<li>taxdump.tar.gz, need to be uncompressed.</li>
-<li>taxid.map</li>
+<li>GTDB r214: please choose files below to download at https://1drv.ms/f/s!Ag89cZ8NYcqtlhYlyHuaKweYNu93?e=9NOxqg<ul>
+<li>GTDB index files (need to be uncompressed)<ul>
+<li>Option 1: (recommended) <strong>with both plasmid and prophage masked</strong> with <a href="https://github.com/apcamargo/genomad">genomad</a>.<ul>
+<li><code>gtdb_masked.part_1.kmcp.tar.gz</code></li>
+<li><code>gtdb_masked.part_2.kmcp.tar.gz</code></li>
+</ul>
+</li>
+<li>Option 2: <strong>only plasmid filtered out</strong> according to sequence names.<ul>
+<li><code>gtdb.part_1.kmcp.tar.gz</code></li>
+<li><code>gtdb.part_2.kmcp.tar.gz</code></li>
 </ul>
 </li>
 </ul>
-<h2 id="hardware">hardware</h2>
+</li>
+<li><code>taxdump.tar.gz</code>, need to be uncompressed.</li>
+<li><code>taxid.map</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="hardware">Hardware</h2>
 <ul>
 <li>RAM &gt;= 64GB</li>
 <li>CPUs &gt;= 32 preferred.</li>
 </ul>
-<h2 id="steps">steps</h2>
+<h2 id="steps">Steps</h2>
 <p>Generating reads (sliding a 200-bp windows with a step of 50-bp) from the genome,
 and performing metagenomoic profiling with them.</p>
 <pre><code># variables
@@ -612,14 +623,13 @@ taxmap=~/ws/data/kmcp2023/taxid.map
 # search against GTDB databases
 # !!! if the KMCP databases are in a network-attached storage disk (NAS),
 # !!! please add the flag "-w" to "kmcp search"
-seqkit sliding -g -s 50 -W 200 $input \
-    | kmcp search -w -d ~/ws/data/kmcp2023/gtdb.part_1.kmcp/ -o $input.kmcp@gtdb.part_1.tsv.gz
-
-seqkit sliding -g -s 50 -W 200 $input \
-    | kmcp search -w -d ~/ws/data/kmcp2023/gtdb.part_2.kmcp/ -o $input.kmcp@gtdb.part_2.tsv.gz
+for db in ~/ws/data/kmcp2023/gtdb_masked.part_{1,2}.kmcp/; do
+    seqkit sliding -g -s 50 -W 200 $input \
+        | kmcp search -w -d $db -o $input.kmcp@$(basename $db).tsv.gz
+done
 
 # merge seach results
-kmcp merge -o $input.kmcp.tsv.gz $input.kmcp@gtdb.part_*.tsv.gz
+kmcp merge -o $input.kmcp.tsv.gz $input.kmcp@*.tsv.gz
 
 # profiling and outputing read classification results.
 # here the profiling mode 0 with the highest sensitivity is used.
@@ -632,12 +642,13 @@ cat $input.kmcp.tsv.gz.k.profile \
 
 ref               percentage   score    chunksFrac   reads    taxid     taxname
 ---------------   ----------   ------   ----------   ------   -------   ------------------------------------------------
-GCF_001457615.1   99.405509    100.00   1.00         114023   287       Pseudomonas aeruginosa
-GCF_000008985.1   0.062663     100.00   1.00         23       177416    Francisella tularensis subsp. tularensis SCHU S4
-GCF_000017205.1   0.453168     90.56    1.00         542      381754    Pseudomonas aeruginosa PA7
-GCF_900112375.1   0.037236     100.00   0.40         49       53408     Pseudomonas citronellolis
-GCF_002091755.1   0.026943     86.39    0.20         30       1215112   Pseudomonas nitroreducens NBRC 12694
-GCF_009735585.1   0.014481     85.56    0.20         9        1028746   Christiangramia aestuarii
+GCF_001457615.1   99.571989    100.00   1.00         113696   287       Pseudomonas aeruginosa
+GCF_000008985.1   0.062945     100.00   1.00         23       177416    Francisella tularensis subsp. tularensis SCHU S4
+GCF_000017205.1   0.296496     90.56    1.00         353      381754    Pseudomonas aeruginosa PA7
+GCF_002091755.1   0.037176     83.61    0.40         39       1215112   Pseudomonas nitroreducens NBRC 12694
+GCF_003797765.1   0.012409     85.83    0.20         14       1882741   Ramlibacter sp. WS9
+GCF_009735585.1   0.006522     77.50    0.20         4        1028746   Christiangramia aestuarii
+GCF_900112375.1   0.012463     66.94    0.20         13       53408     Pseudomonas citronellolis
 </code></pre>
 <p>Checking contaminated regions</p>
 <pre><code># the taxid of the predominant target
@@ -674,10 +685,12 @@ csvtk join -Ht $input.kmcp.tsv.gz.cont.tsv &lt;(seqkit fx2tab -ni -l $input) \
     | csvtk pretty -t
 
 chr                        begin    end      contig_len   len    proportion    taxa
-------------------------   ------   ------   ----------   ----   -----------   --------------------------------------------------------
+------------------------   ------   ------   ----------   ----   -----------   ---------------------------------------------------------------
 SAMN02360712.contig00044   0        1151     1151         1151   1             177416(Francisella tularensis subsp. tularensis SCHU S4)
-SAMN02360712.contig00012   163600   163900   164357       300    0.00182529    1028746(Christiangramia aestuarii)
-SAMN02360712.contig00008   64850    65150    279605       300    0.00107294    1028746(Christiangramia aestuarii)
+SAMN02360712.contig00028   26600    26800    47311        200    0.00422735    1882741(Ramlibacter sp. WS9)
+SAMN02360712.contig00012   163700   163900   164357       200    0.00121686    1028746(Christiangramia aestuarii),1882741(Ramlibacter sp. WS9)
+SAMN02360712.contig00012   155750   155950   164357       200    0.00121686    1028746(Christiangramia aestuarii),1882741(Ramlibacter sp. WS9)
+SAMN02360712.contig00001   454500   455250   670989       750    0.00111775    1882741(Ramlibacter sp. WS9)
 SAMN02360712.contig00002   362200   362500   622965       300    0.000481568   1028746(Christiangramia aestuarii)
 </code></pre>
 <p>We can see the whole (proportion: 1) contig <code>SAMN02360712.contig00044</code> is from a totally different species, which should be a contaminated sequence.</p>
