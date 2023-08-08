@@ -2562,7 +2562,7 @@ Examples:
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
 			if total > 0 {
-				log.Infof("%.4f%% (%.0f/%d) reads matched", float64(nAssignedReads)/float64(total)*100, nAssignedReads, total)
+				log.Infof("%.4f%% (%.0f/%d) reads matched", float64(nReads)/float64(total)*100, nReads, total)
 				log.Info()
 			}
 			log.Infof("%.4f%% (%.0f/%.0f) matched reads belong to the %d references in the profile",

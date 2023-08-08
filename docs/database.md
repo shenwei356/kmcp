@@ -182,7 +182,7 @@ Masking prophage regions and removing plasmid sequences with [genomad](https://g
 
     # create symbol links in another directory, and rename
     mkdir -p gtdb_masked
-    cluster_files  -p '^(.+).fna.gz.masked.fna.gz$' gtdb.genomad -o gtdb_masked
+    cluster_files  -p '^(.+).fna.gz.masked2.fna.gz$' gtdb.genomad -o gtdb_masked
     brename -R -p .masked.fna.gz$ gtdb_masked -d
         
 Building database (all k-mers, for profiling on short-reads):

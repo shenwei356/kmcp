@@ -1,15 +1,11 @@
 # Changelog
 
+### v0.9.4 - 2023-07-16
+
+- `kmcp profile`:
+    - fix log of "xx% (yy/zz) reads matched", the numerator should be the number of matched reads instead of reads belonging to references.
+
 ### v0.9.3 - 2023-07-16
-
-- `kmcp compute/split-genomes`:
-    - fix a bug in chunk computation when splitting circular genomes (`--circular`).
-- `kmcp search/merge`:
-    - append simple stats to the search result as comment lines, including the number of input and matched queries. e.g.,
-
-            # input queries: 930254
-            # matched queries: 923820
-            # matched percentage: 99.3084%
 
 - `kmcp profile`:
     - fix metaphlan out format. [#34](https://github.com/shenwei356/kmcp/issues/34)
