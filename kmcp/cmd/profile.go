@@ -1100,6 +1100,12 @@ Examples:
 
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(profile))
+		}
+		if len(profile) == 0 {
+			log.Warningf("  no target found, please adjust parameters")
+			return
+		}
+		if opt.Verbose || opt.Log2File {
 			if len(profile) >= 1000 && !noAmbCorr {
 				log.Warningf("  too many candidates detected, the next stage would be very slow")
 				log.Warningf("  the flag --no-amb-corr is recommended to disable ambiguous reads correction which has very little effect on the results")
@@ -1887,6 +1893,12 @@ Examples:
 
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(profile2))
+		}
+		if len(profile) == 0 {
+			log.Warningf("  no target found, please adjust parameters")
+			return
+		}
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
 		}
@@ -2559,6 +2571,12 @@ Examples:
 
 		if opt.Verbose || opt.Log2File {
 			log.Infof("  number of estimated references: %d", len(targets))
+		}
+		if len(profile) == 0 {
+			log.Warningf("  no target found, please adjust parameters")
+			return
+		}
+		if opt.Verbose || opt.Log2File {
 			log.Infof("  elapsed time: %s", time.Since(timeStart1))
 			log.Info()
 			if total > 0 {

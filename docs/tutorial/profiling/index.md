@@ -44,8 +44,13 @@ Mapping and removing mapped reads:
 
     index=~/ws/db/bowtie2/chm13v2.0
     
+    # paired-end reads
     bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz \
         | samtools fastq -f 4 -o sample.fq.gz -
+
+    # unpaired reads
+    bowtie2 --threads 32 -x $index -U in.fq.gz \
+        | samtools fastq -f 4 | pigz -c > sample.fq.gz
 
 ### Step 3. Searching
 
