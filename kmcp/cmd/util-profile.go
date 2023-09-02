@@ -102,21 +102,6 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 	var err error
 
 	// slow
-	m.FPR, err = strconv.ParseFloat((*items)[3], 64)
-	if err != nil {
-		checkError(fmt.Errorf("failed to parse FPR: %s", (*items)[3]))
-	}
-	// did not bring final speedup
-	// if len((*items)[3]) < 2 {
-	// 	checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[3]))
-	// }
-	// m.FPR = parseFPR((*items)[3])
-
-	if m.FPR > maxPFR {
-		return m, false
-	}
-
-	// slow
 	m.QCov, err = strconv.ParseFloat((*items)[11], 64)
 	if err != nil {
 		checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[11]))
@@ -129,6 +114,21 @@ func parseMatchResult(line string, numFields int, items *[]string, maxPFR float6
 	// m.QCov = parseQcov((*items)[11])
 
 	if m.QCov < minQcov {
+		return m, false
+	}
+
+	// slow
+	m.FPR, err = strconv.ParseFloat((*items)[3], 64)
+	if err != nil {
+		checkError(fmt.Errorf("failed to parse FPR: %s", (*items)[3]))
+	}
+	// did not bring final speedup
+	// if len((*items)[3]) < 2 {
+	// 	checkError(fmt.Errorf("failed to parse qCov: %s", (*items)[3]))
+	// }
+	// m.FPR = parseFPR((*items)[3])
+
+	if m.FPR > maxPFR {
 		return m, false
 	}
 

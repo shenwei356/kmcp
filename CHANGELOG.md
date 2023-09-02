@@ -7,6 +7,7 @@
 - `kmcp profile`:
     - fix log of "xx% (yy/zz) reads matched", the numerator should be the number of matched reads instead of reads belonging to references.
     - early quit when no target detected.
+    - slightly speedup.
 
 ### v0.9.3 - 2023-07-16
 
