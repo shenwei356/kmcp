@@ -212,10 +212,11 @@ Example:
 					for _, match = range buf0 {
 						(*match.Data)[hitsFieldM1] = hits
 
-						for _, item = range *match.Data {
+						for _, item = range (*match.Data)[:len(*match.Data)-1] {
 							outfh.WriteString(item)
 							outfh.WriteByte('\t')
 						}
+						outfh.WriteString((*match.Data)[len(*match.Data)-1])
 						outfh.WriteByte('\n')
 
 						// poolStrings.Put(match.Data)
@@ -248,10 +249,11 @@ Example:
 			for _, match = range buf0 {
 				(*match.Data)[hitsFieldM1] = hits
 
-				for _, item = range *match.Data {
+				for _, item = range (*match.Data)[:len(*match.Data)-1] {
 					outfh.WriteString(item)
 					outfh.WriteByte('\t')
 				}
+				outfh.WriteString((*match.Data)[len(*match.Data)-1])
 				outfh.WriteByte('\n')
 
 				// poolStrings.Put(match.Data)

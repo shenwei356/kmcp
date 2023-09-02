@@ -2,9 +2,11 @@
 
 ### v0.9.4 - 2023-07-16
 
+- `kmcp merge`:
+    - trim tailing tab in merged result, download results are not affected. [#38](https://github.com/shenwei356/kmcp/issues/38)
 - `kmcp profile`:
     - fix log of "xx% (yy/zz) reads matched", the numerator should be the number of matched reads instead of reads belonging to references.
-    - early quick when no target detected.
+    - early quit when no target detected.
 
 ### v0.9.3 - 2023-07-16
 
