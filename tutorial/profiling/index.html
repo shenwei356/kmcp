@@ -839,8 +839,13 @@
 <p>Mapping and removing mapped reads:</p>
 <pre><code>index=~/ws/db/bowtie2/chm13v2.0
 
+# paired-end reads
 bowtie2 --threads 32 -x $index -1 in_1.fq.gz -2 in_2.fq.gz \
     | samtools fastq -f 4 -o sample.fq.gz -
+
+# unpaired reads
+bowtie2 --threads 32 -x $index -U in.fq.gz \
+    | samtools fastq -f 4 | pigz -c &gt; sample.fq.gz
 </code></pre>
 <h3 id="step-3-searching">Step 3. Searching</h3>
 <p><strong>Reads can be searched against multiple databases which can be built with different parameters</strong>,

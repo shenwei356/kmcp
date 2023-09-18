@@ -273,8 +273,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v093-2023-07-16" class="md-nav__link">
-    v0.9.3 - 2023-07-16
+  <a href="#v094-2023-09-18" class="md-nav__link">
+    v0.9.4 - 2023-09-18
   </a>
   
 </li>
@@ -339,6 +339,13 @@
   
     <nav class="md-nav" aria-label="Release History">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v093-2023-07-16" class="md-nav__link">
+    v0.9.3 - 2023-07-16
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#v092-2023-05-16" class="md-nav__link">
@@ -719,8 +726,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#v093-2023-07-16" class="md-nav__link">
-    v0.9.3 - 2023-07-16
+  <a href="#v094-2023-09-18" class="md-nav__link">
+    v0.9.4 - 2023-09-18
   </a>
   
 </li>
@@ -785,6 +792,13 @@
   
     <nav class="md-nav" aria-label="Release History">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v093-2023-07-16" class="md-nav__link">
+    v0.9.3 - 2023-07-16
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#v092-2023-05-16" class="md-nav__link">
@@ -934,37 +948,16 @@ in two packages for better searching performance.</p>
 </ul>
 <p>ARM architecture is supported, but <code>kmcp search</code> would be slower.</p>
 <h2 id="current-version">Current Version</h2>
-<h3 id="v093-2023-07-16"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.3">v0.9.3</a> - 2023-07-16 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.3"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.3/total.svg" /></a></h3>
+<h3 id="v094-2023-09-18"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.4">v0.9.4</a> - 2023-09-18 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.4"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.4/total.svg" /></a></h3>
 <ul>
-<li><code>kmcp compute/split-genomes</code>:<ul>
-<li>fix a bug in chunk computation when splitting circular genomes (<code>--circular</code>).</li>
+<li><code>kmcp merge</code>:<ul>
+<li>trim tailing tab in merged result, down-stream results are not affected. <a href="https://github.com/shenwei356/kmcp/issues/38">#38</a></li>
 </ul>
 </li>
-<li>
-<p><code>kmcp search/merge</code>:</p>
-<ul>
-<li>append simple stats to the search result as comment lines, including the number of input and matched queries. e.g.,<pre><code># input queries: 930254
-# matched queries: 923820
-# matched percentage: 99.3084%
-</code></pre>
-</li>
-</ul>
-</li>
-<li>
-<p><code>kmcp profile</code>:</p>
-<ul>
-<li>fix metaphlan out format. <a href="https://github.com/shenwei356/kmcp/issues/34">#34</a></li>
-<li>show stats of the number of input and matched queries in log. <strong>It would be helpful to show whether the reference genomes cover all microorganisms in the sample</strong>.<pre><code>20:00:55.295 [INFO] 99.3084% (923820/930254) reads matched
-20:00:55.295 [INFO] 100.0000% (923820/923820) matched reads belong to the 2 references in the profile
-</code></pre>
-</li>
-</ul>
-</li>
-<li>
-<p>new tutorials:</p>
-<ul>
-<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens">Detecting specific pathogens</a></li>
-<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/detecting-contaminated-seqs">Detecting contaminated sequences</a></li>
+<li><code>kmcp profile</code>:<ul>
+<li>fix log of "xx% (yy/zz) reads matched", the numerator should be the number of matched reads instead of reads belonging to references.</li>
+<li>early quit when no target detected.</li>
+<li>slightly speedup.</li>
 </ul>
 </li>
 </ul>
@@ -982,32 +975,32 @@ in two packages for better searching performance.</p>
 <tr>
 <td align="left">Linux</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_linux_amd64.tar.gz"><strong>kmcp_linux_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_linux_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_amd64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">Linux</td>
 <td align="left">arm64</td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_linux_arm64.tar.gz"><strong>kmcp_linux_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_linux_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_linux_arm64.tar.gz"><strong>kmcp_linux_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_linux_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_linux_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_linux_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">macOS</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_darwin_amd64.tar.gz"><strong>kmcp_darwin_amd64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_amd64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_darwin_amd64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_amd64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">macOS</td>
 <td align="left">arm64</td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_darwin_arm64.tar.gz"><strong>kmcp_darwin_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_darwin_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_darwin_arm64.tar.gz"><strong>kmcp_darwin_arm64.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_darwin_arm64.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_darwin_arm64.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_darwin_arm64.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 <tr>
 <td align="left">Windows</td>
 <td align="left"><strong>64-bit</strong></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
-<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.3/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_windows_amd64.exe.tar.gz"><strong>kmcp_windows_amd64.exe.tar.gz</strong></a>, <br/> <a href="http://app.shenwei.me/data/kmcp/kmcp_windows_amd64.exe.tar.gz">中国镜像</a></td>
+<td align="left"><a href="https://github.com/shenwei356/kmcp/releases/download/v0.9.4/kmcp_windows_amd64.exe.tar.gz"><img alt="Github Releases (by Asset)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/latest/kmcp_windows_amd64.exe.tar.gz.svg?maxAge=3600" /></a></td>
 </tr>
 </tbody>
 </table>
@@ -1109,6 +1102,40 @@ echo "autoload -U compinit; compinit" &gt;&gt; ~/.zshrc
 <pre><code>kmcp autocompletion --shell fish --file ~/.config/fish/completions/kmcp.fish
 </code></pre>
 <h2 id="release-history">Release History</h2>
+<h3 id="v093-2023-07-16"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.3">v0.9.3</a> - 2023-07-16 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.3"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.3/total.svg" /></a></h3>
+<ul>
+<li><code>kmcp compute/split-genomes</code>:<ul>
+<li>fix a bug in chunk computation when splitting circular genomes (<code>--circular</code>).</li>
+</ul>
+</li>
+<li>
+<p><code>kmcp search/merge</code>:</p>
+<ul>
+<li>append simple stats to the search result as comment lines, including the number of input and matched queries. e.g.,<pre><code># input queries: 930254
+# matched queries: 923820
+# matched percentage: 99.3084%
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>kmcp profile</code>:</p>
+<ul>
+<li>fix metaphlan out format. <a href="https://github.com/shenwei356/kmcp/issues/34">#34</a></li>
+<li>show stats of the number of input and matched queries in log. <strong>It would be helpful to show whether the reference genomes cover all microorganisms in the sample</strong>.<pre><code>20:00:55.295 [INFO] 99.3084% (923820/930254) reads matched
+20:00:55.295 [INFO] 100.0000% (923820/923820) matched reads belong to the 2 references in the profile
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>new tutorials:</p>
+<ul>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/detecting-pathogens">Detecting specific pathogens</a></li>
+<li><a href="https://bioinf.shenwei.me/kmcp/tutorial/detecting-contaminated-seqs">Detecting contaminated sequences</a></li>
+</ul>
+</li>
+</ul>
 <h3 id="v092-2023-05-16"><a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.2">v0.9.2</a> - 2023-05-16 <a href="https://github.com/shenwei356/kmcp/releases/tag/v0.9.2"><img alt="Github Releases (by Release)" src="https://img.shields.io/github/downloads/shenwei356/kmcp/v0.9.2/total.svg" /></a></h3>
 <ul>
 <li><code>kmcp profile/cos2simi/filter/index-info/merge-regions/query-fpr</code>:<ul>
