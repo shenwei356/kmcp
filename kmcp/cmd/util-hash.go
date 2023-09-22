@@ -22,6 +22,8 @@ package cmd
 
 import (
 	"math"
+
+	"github.com/bmkessler/fastdiv"
 )
 
 // CalcSignatureSize is from https://github.com/bingmann/cobs/blob/master/cobs/util/calc_signature_size.cpp .
@@ -75,6 +77,27 @@ func hashLocations(hash uint64, numHashes int, numSigs uint64) []int {
 	a, b := baseHashes(hash)
 	for i := uint32(0); i < uint32(numHashes); i++ {
 		locs[i] = int(uint64(a+b*i) % numSigs)
+	}
+	return locs
+}
+
+// return locations in bitset for a hash
+func hashLocationsFastMod(hash uint64, numHashes int, div *fastdiv.Uint64) []int {
+	if numHashes < 1 {
+		return nil
+	}
+
+	locs := make([]int, numHashes)
+	if numHashes == 1 {
+		// locs[0] = int(hash % numSigs)
+		locs[0] = int(div.Mod(hash))
+		return locs
+	}
+
+	a, b := baseHashes(hash)
+	for i := uint32(0); i < uint32(numHashes); i++ {
+		// locs[i] = int(uint64(a+b*i) % numSigs)
+		locs[i] = int(div.Mod(uint64(a + b*i)))
 	}
 	return locs
 }

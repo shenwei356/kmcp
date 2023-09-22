@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.9.5 - 2023-09-18
+
+- `kmcp search`:
+    - slightly (~5%) faster by using a fast modulus computation package: github.com/bmkessler/fastdiv.
+
 ### v0.9.4 - 2023-09-18
 
 - `kmcp merge`:

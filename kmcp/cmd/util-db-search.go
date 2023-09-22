@@ -29,6 +29,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/bmkessler/fastdiv"
 	"github.com/edsrzf/mmap-go"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/bio/seq"
@@ -6607,6 +6608,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 
 		var forward bool
 
+		div := fastdiv.NewUint64(numSigsUint)
+
 		for query := range idx.InCh {
 			// reset counts
 			bufIdx = 0
@@ -6624,7 +6627,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 
 					for _, hs = range *hashes {
 						for i, _h = range hs {
-							loc = int(_h % numSigsUint)
+							loc = int(div.Mod(_h))
+							// loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 							offset = offset0 + loc*numRowBytes
 
@@ -6804,7 +6808,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 					nHashesInt = len(*hashes1)
 
 					for _, _h = range *hashes1 {
-						loc = int(_h % numSigsUint)
+						loc = int(div.Mod(_h))
+						// loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						offset = offset0 + loc*numRowBytes
 
@@ -6976,7 +6981,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 
 					for _, hs = range *hashes {
 						for i, _h = range hs {
-							loc = int(_h % numSigsUint)
+							loc = int(div.Mod(_h))
+							// loc = int(_h % numSigsUint)
 							// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 							// offset = offset0 + loc*numRowBytes
 
@@ -7160,7 +7166,8 @@ func NewUnikIndex(file string, opt SearchOptions, fpr float64, nextraWorkers int
 					nHashesInt = len(*hashes1)
 
 					for _, _h = range *hashes1 {
-						loc = int(_h % numSigsUint)
+						loc = int(div.Mod(_h))
+						// loc = int(_h % numSigsUint)
 						// loc = int(_h & numSigsUintM1) // & X is faster than % X when X is power of 2
 						// offset = offset0 + loc*numRowBytes
 

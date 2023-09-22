@@ -34,6 +34,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bmkessler/fastdiv"
 	"github.com/pkg/errors"
 	"github.com/shenwei356/kmcp/kmcp/cmd/index"
 	"github.com/shenwei356/unik/v5"
@@ -1100,6 +1101,8 @@ Examples:
 
 							sigs := make([]byte, numSigs)
 
+							div := fastdiv.NewUint64(numSigs)
+
 							numSigsM1 := numSigs - 1
 
 							// every file in 8 file groups
@@ -1146,7 +1149,8 @@ Examples:
 														checkError(errors.Wrap(err, info.Path))
 													}
 
-													sigs[code%numSigs] |= 1 << (7 - _k)
+													sigs[div.Mod(code)] |= 1 << (7 - _k)
+													// sigs[code%numSigs] |= 1 << (7 - _k)
 													// sigs[code&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
 												}
 											}
@@ -1176,7 +1180,8 @@ Examples:
 														checkError(errors.Wrap(err, info.Path))
 													}
 
-													for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFastMod(code, numHashes, &div) {
+														// for _, loc = range hashLocations(code, numHashes, numSigs) {
 														// for _, loc = range hashLocationsFaster(code, numHashes, numSigsM1) {
 														sigs[loc] |= 1 << (7 - _k)
 													}
@@ -1208,7 +1213,8 @@ Examples:
 														checkError(errors.Wrap(err, info.Path))
 													}
 
-													sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
+													sigs[div.Mod(hash64(code))] |= 1 << (7 - _k)
+													// sigs[hash64(code)%numSigs] |= 1 << (7 - _k)
 													// sigs[hash64(code)&numSigsM1] |= 1 << (7 - _k) // &Xis faster than %X when X is power of 2
 												}
 											}
@@ -1237,8 +1243,8 @@ Examples:
 														}
 														checkError(errors.Wrap(err, info.Path))
 													}
-
-													for _, loc = range hashLocations(code, numHashes, numSigs) {
+													for _, loc = range hashLocationsFastMod(code, numHashes, &div) {
+														// for _, loc = range hashLocations(code, numHashes, numSigs) {
 														// for _, loc = range hashLocationsFaster(hash64(code), numHashes, numSigsM1) {
 														sigs[loc] |= 1 << (7 - _k)
 													}
