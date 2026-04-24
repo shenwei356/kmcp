@@ -28,30 +28,30 @@ Taxonomy information (NCBI Taxonomy):
     
     
     cat taxid.map \
-        | taxonkit reformat -I 2 -f '{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}' \
+        | taxonkit reformat2 -I 2 -f "{domain|acellular root|superkingdom}\t{phylum}\t{class}\t{order}\t{family}\t{genus}\t{species}" \
         | csvtk cut -t -f -2 \
         | csvtk add-header -t -n id,superkingdom,phylum,class,order,family,genus,species \
         > taxonomy.tsv
     
     csvtk pretty -t taxonomy.tsv
 
-    id                superkingdom   phylum           class                 order              family               genus            species
+    id                superkingdom   phylum           class                 order              family               genus            species                   
     ---------------   ------------   --------------   -------------------   ----------------   ------------------   --------------   --------------------------
-    GCF_003697165.2   Bacteria       Proteobacteria   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Escherichia      Escherichia coli
-    GCF_002949675.1   Bacteria       Proteobacteria   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Shigella         Shigella dysenteriae
-    GCF_002950215.1   Bacteria       Proteobacteria   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Shigella         Shigella flexneri
-    GCF_000742135.1   Bacteria       Proteobacteria   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Klebsiella       Klebsiella pneumoniae
-    GCF_000006945.2   Bacteria       Proteobacteria   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Salmonella       Salmonella enterica
-    GCF_001544255.1   Bacteria       Firmicutes       Bacilli               Lactobacillales    Enterococcaceae      Enterococcus     Enterococcus faecium
-    GCF_000392875.1   Bacteria       Firmicutes       Bacilli               Lactobacillales    Enterococcaceae      Enterococcus     Enterococcus faecalis
-    GCF_001457655.1   Bacteria       Proteobacteria   Gammaproteobacteria   Pasteurellales     Pasteurellaceae      Haemophilus      Haemophilus influenzae
-    GCF_900638025.1   Bacteria       Proteobacteria   Gammaproteobacteria   Pasteurellales     Pasteurellaceae      Haemophilus      Haemophilus parainfluenzae
-    GCF_001027105.1   Bacteria       Firmicutes       Bacilli               Bacillales         Staphylococcaceae    Staphylococcus   Staphylococcus aureus
-    GCF_006742205.1   Bacteria       Firmicutes       Bacilli               Bacillales         Staphylococcaceae    Staphylococcus   Staphylococcus epidermidis
-    GCF_001096185.1   Bacteria       Firmicutes       Bacilli               Lactobacillales    Streptococcaceae     Streptococcus    Streptococcus pneumoniae
-    GCF_000148585.2   Bacteria       Firmicutes       Bacilli               Lactobacillales    Streptococcaceae     Streptococcus    Streptococcus mitis
-    GCF_009759685.1   Bacteria       Proteobacteria   Gammaproteobacteria   Moraxellales       Moraxellaceae        Acinetobacter    Acinetobacter baumannii
-    GCF_000017205.1   Bacteria       Proteobacteria   Gammaproteobacteria   Pseudomonadales    Pseudomonadaceae     Pseudomonas      Pseudomonas aeruginosa
+    GCF_003697165.2   Bacteria       Pseudomonadota   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Escherichia      Escherichia coli          
+    GCF_002949675.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Shigella         Shigella dysenteriae      
+    GCF_002950215.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Shigella         Shigella flexneri         
+    GCF_000742135.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Klebsiella       Klebsiella pneumoniae     
+    GCF_000006945.2   Bacteria       Pseudomonadota   Gammaproteobacteria   Enterobacterales   Enterobacteriaceae   Salmonella       Salmonella enterica       
+    GCF_001544255.1   Bacteria       Bacillota        Bacilli               Lactobacillales    Enterococcaceae      Enterococcus     Enterococcus faecium      
+    GCF_000392875.1   Bacteria       Bacillota        Bacilli               Lactobacillales    Enterococcaceae      Enterococcus     Enterococcus faecalis     
+    GCF_001457655.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Pasteurellales     Pasteurellaceae      Haemophilus      Haemophilus influenzae    
+    GCF_900638025.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Pasteurellales     Pasteurellaceae      Haemophilus      Haemophilus parainfluenzae
+    GCF_001027105.1   Bacteria       Bacillota        Bacilli               Bacillales         Staphylococcaceae    Staphylococcus   Staphylococcus aureus     
+    GCF_006742205.1   Bacteria       Bacillota        Bacilli               Bacillales         Staphylococcaceae    Staphylococcus   Staphylococcus epidermidis
+    GCF_001096185.1   Bacteria       Bacillota        Bacilli               Lactobacillales    Streptococcaceae     Streptococcus    Streptococcus pneumoniae  
+    GCF_000148585.2   Bacteria       Bacillota        Bacilli               Lactobacillales    Streptococcaceae     Streptococcus    Streptococcus mitis       
+    GCF_009759685.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Moraxellales       Moraxellaceae        Acinetobacter    Acinetobacter baumannii   
+    GCF_000017205.1   Bacteria       Pseudomonadota   Gammaproteobacteria   Pseudomonadales    Pseudomonadaceae     Pseudomonas      Pseudomonas aeruginosa    
 
 Genome details:
 
@@ -184,9 +184,9 @@ Steps:
       
     # stats
     seqkit stats -a  mock*.fastq.gz
-    file             format  type  num_seqs     sum_len  min_len  avg_len  max_len  Q1   Q2  Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
-    mock_1.fastq.gz  FASTQ   DNA    174,542  26,181,300      150      150      150  75  150  75        0  150   98.01   91.67  51.69
-    mock_2.fastq.gz  FASTQ   DNA    174,542  26,181,300      150      150      150  75  150  75        0  150   97.31   89.63  51.69
+    file             format  type  num_seqs     sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  N50_num  Q20(%)  Q30(%)  AvgQual  GC(%)  sum_n
+    mock_1.fastq.gz  FASTQ   DNA    174,542  26,181,300      150      150      150  150  150  150        0  150        1   98.01   91.67    27.79  51.69      2
+    mock_2.fastq.gz  FASTQ   DNA    174,542  26,181,300      150      150      150  150  150  150        0  150        1   97.31   89.63    26.52  51.69      6
 
 The gold standard (gound-truth) of taxonomic abundance:
 

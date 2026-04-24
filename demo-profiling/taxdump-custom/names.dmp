@@ -1,44 +1,44 @@
 1	|	root	|		|	scientific name	|
-72054943	|	Acinetobacter baumannii	|		|	scientific name	|
-86398254	|	Pseudomonadales	|		|	scientific name	|
-185544332	|	Lactobacillales	|		|	scientific name	|
-328800344	|	Haemophilus influenzae	|		|	scientific name	|
-329474883	|	Gammaproteobacteria	|		|	scientific name	|
-524994882	|	Shigella dysenteriae	|		|	scientific name	|
-568178587	|	Acinetobacter	|		|	scientific name	|
-602175708	|	Enterococcus	|		|	scientific name	|
-609216830	|	Bacteria	|		|	scientific name	|
-794943543	|	Salmonella	|		|	scientific name	|
-813944714	|	Bacillales	|		|	scientific name	|
-943158193	|	Moraxellaceae	|		|	scientific name	|
-1063930303	|	Haemophilus parainfluenzae	|		|	scientific name	|
-1255484345	|	Streptococcaceae	|		|	scientific name	|
-1478401337	|	Pseudomonadaceae	|		|	scientific name	|
-1527235303	|	Streptococcus mitis	|		|	scientific name	|
-1569132721	|	Staphylococcus aureus	|		|	scientific name	|
-1616653803	|	Pseudomonas	|		|	scientific name	|
-1678121664	|	Salmonella enterica	|		|	scientific name	|
-1718572462	|	Pasteurellales	|		|	scientific name	|
-1824050977	|	Staphylococcus	|		|	scientific name	|
-1845768359	|	Bacilli	|		|	scientific name	|
-1920251658	|	Staphylococcus epidermidis	|		|	scientific name	|
-1997712377	|	Staphylococcaceae	|		|	scientific name	|
-2077617176	|	Haemophilus	|		|	scientific name	|
-2185117029	|	Moraxellales	|		|	scientific name	|
-2234733759	|	Enterobacteriaceae	|		|	scientific name	|
-2258433137	|	Shigella	|		|	scientific name	|
-2394826844	|	Streptococcus	|		|	scientific name	|
-2440106587	|	Klebsiella	|		|	scientific name	|
-2695851945	|	Shigella flexneri	|		|	scientific name	|
-2871800275	|	Pasteurellaceae	|		|	scientific name	|
-2983929374	|	Streptococcus pneumoniae	|		|	scientific name	|
-3160438580	|	Enterobacterales	|		|	scientific name	|
-3209851916	|	Enterococcaceae	|		|	scientific name	|
-3334977531	|	Escherichia	|		|	scientific name	|
-3642462009	|	Firmicutes	|		|	scientific name	|
-3788559933	|	Proteobacteria	|		|	scientific name	|
-3809813362	|	Enterococcus faecalis	|		|	scientific name	|
-3843752343	|	Pseudomonas aeruginosa	|		|	scientific name	|
-3958205156	|	Klebsiella pneumoniae	|		|	scientific name	|
-4093283224	|	Escherichia coli	|		|	scientific name	|
-4145431389	|	Enterococcus faecium	|		|	scientific name	|
+51306968	|	Bacillales	|		|	scientific name	|
+57970979	|	Lactobacillales	|		|	scientific name	|
+81602897	|	Bacteria	|		|	scientific name	|
+131003083	|	Bacillota	|		|	scientific name	|
+155920919	|	Pasteurellaceae	|		|	scientific name	|
+182402976	|	Enterococcus faecium	|		|	scientific name	|
+381934173	|	Staphylococcus	|		|	scientific name	|
+402532150	|	Acinetobacter	|		|	scientific name	|
+561101225	|	Shigella flexneri	|		|	scientific name	|
+599451526	|	Escherichia coli	|		|	scientific name	|
+614420664	|	Pseudomonadaceae	|		|	scientific name	|
+633760779	|	Moraxellales	|		|	scientific name	|
+648851728	|	Shigella	|		|	scientific name	|
+665612259	|	Pasteurellales	|		|	scientific name	|
+773201972	|	Staphylococcus aureus	|		|	scientific name	|
+793223984	|	Acinetobacter baumannii	|		|	scientific name	|
+843567210	|	Haemophilus	|		|	scientific name	|
+891083107	|	Streptococcus pneumoniae	|		|	scientific name	|
+946597398	|	Haemophilus parainfluenzae	|		|	scientific name	|
+1028471294	|	Escherichia	|		|	scientific name	|
+1129186632	|	Salmonella	|		|	scientific name	|
+1220345221	|	Pseudomonas aeruginosa	|		|	scientific name	|
+1243614534	|	Klebsiella	|		|	scientific name	|
+1250912789	|	Pseudomonadales	|		|	scientific name	|
+1295317147	|	Staphylococcus epidermidis	|		|	scientific name	|
+1310362800	|	Haemophilus influenzae	|		|	scientific name	|
+1357145446	|	Streptococcus mitis	|		|	scientific name	|
+1438135273	|	Moraxellaceae	|		|	scientific name	|
+1489315499	|	Bacilli	|		|	scientific name	|
+1566113429	|	Enterococcus faecalis	|		|	scientific name	|
+1607767996	|	Enterococcaceae	|		|	scientific name	|
+1691888815	|	Enterobacteriaceae	|		|	scientific name	|
+1712663402	|	Pseudomonadota	|		|	scientific name	|
+1804775135	|	Streptococcus	|		|	scientific name	|
+1812825877	|	Pseudomonas	|		|	scientific name	|
+1851777887	|	Enterobacterales	|		|	scientific name	|
+1857721238	|	Streptococcaceae	|		|	scientific name	|
+1859674812	|	Klebsiella pneumoniae	|		|	scientific name	|
+1969112428	|	Shigella dysenteriae	|		|	scientific name	|
+1969409366	|	Gammaproteobacteria	|		|	scientific name	|
+2030310987	|	Enterococcus	|		|	scientific name	|
+2034984046	|	Salmonella enterica	|		|	scientific name	|
+2105860973	|	Staphylococcaceae	|		|	scientific name	|

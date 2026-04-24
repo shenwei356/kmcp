@@ -1,9 +1,11 @@
 # Changelog
 
-### v0.9.5 - 2023-09-18
+### v0.9.5 - 2026-xx-xx
 
 - `kmcp search`:
     - slightly (~5%) faster by using a fast modulus computation package: github.com/bmkessler/fastdiv.
+- `kmcp index`:
+    - fix the computation of the block size for input files fewer than 8. [#57](https://github.com/shenwei356/kmcp/issues/57)
 
 ### v0.9.4 - 2023-09-18
 

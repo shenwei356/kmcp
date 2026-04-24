@@ -674,17 +674,18 @@ Examples:
 				sBlock = sBlock00
 			}
 
+			if sBlock > nFiles {
+				sBlock = nFiles
+			}
+			if sBlock < 8 {
+				sBlock = 8
+			}
+
 			var skipBlockX bool
 			if blockSizeX >= sBlock {
 				skipBlockX = true
 				log.Warningf("ignore -X/--block-size (%d) which is >= -b/--block-size (%d)", blockSizeX, sBlock)
 				blockSizeX = sBlock
-			}
-
-			if sBlock < 8 {
-				sBlock = 8
-			} else if sBlock > nFiles {
-				sBlock = nFiles
 			}
 
 			if opt.Verbose || opt.Log2File {
@@ -923,7 +924,11 @@ Examples:
 					startTime := time.Now()
 
 					var wg sync.WaitGroup
-					tokens := make(chan int, opt.NumCPUs/maxConc)
+					nTokens := opt.NumCPUs / maxConc
+					if nTokens < 1 {
+						nTokens = 1
+					}
+					tokens := make(chan int, nTokens)
 
 					// max elements of UNION of all sets,
 					// but it takes time to compute for reading whole data,
@@ -1443,7 +1448,7 @@ func init() {
 		formatFlagUsage(`Number of hash functions in bloom filters.`))
 
 	indexCmd.Flags().IntP("block-size", "b", 0,
-		formatFlagUsage(`Block size, better be multiple of 64 for large number of input files. (default: min(#.files/#theads, 8))`))
+		formatFlagUsage(`Block size, better be multiple of 64 for large number of input files. (default: max(#.files/#theads, 8))`))
 
 	indexCmd.Flags().StringP("block-sizeX-kmers-t", "x", "10M",
 		formatFlagUsage(`If k-mers of single .unik file exceeds this threshold, block size is changed to --block-sizeX. Supported units: K, M, G.`))

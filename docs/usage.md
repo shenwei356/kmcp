@@ -26,7 +26,7 @@ KMCP is a command-line tool consisting of several subcommands.
 ```text
 
     Program: kmcp (K-mer-based Metagenomic Classification and Profiling)
-    Version: v0.9.4
+    Version: v0.9.5
   Documents: https://bioinf.shenwei.me/kmcp
 Source code: https://github.com/shenwei356/kmcp
 
@@ -269,7 +269,7 @@ Flags:
   -a, --alias string                 ► Database alias/name. (default: basename of --out-dir). You can
                                      also manually edit it in info file: ${outdir}/__db.yml.
   -b, --block-size int               ► Block size, better be multiple of 64 for large number of input
-                                     files. (default: min(#.files/#theads, 8))
+                                     files. (default: max(#.files/#theads, 8))
   -1, --block-size1-kmers-t string   ► If k-mers of single .unik file exceeds this threshold, an
                                      individual index is created for this file. Supported units: K, M,
                                      G. (default "200M")
