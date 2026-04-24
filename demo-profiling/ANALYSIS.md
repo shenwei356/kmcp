@@ -1,7 +1,10 @@
 ## Analysis of ambiguous and unambiguous reads
     
     # clean
-    zcat mock.kmcp.gz  | csvtk rename -C$ -t -f 1 -n query | csvtk uniq -t -f query,target -o t.gz
+    zcat mock.kmcp.gz \
+        | sed '1s/^#//' \
+        | csvtk rename -t -f 1 -n query \
+        | csvtk uniq -t -f query,target -o t.gz
     
     # frequency of the number of hits
     csvtk freq -t -f query -nr t.gz -o t.gz.freq1

@@ -124,12 +124,16 @@ Reference IDs (column `target`) can be optionally mapped to their names during s
     
 Or after searching using `csvtk`:
 
-    csvtk replace -t -C $ -f target -k name.map -p '(.+)' -r '{kv}' result.tsv.gz
+    zcat result.tsv.gz \
+        | sed '1s/^#//' \
+        | csvtk replace -t -f target -k name.map -p '(.+)' -r '{kv}'
 
 Print the main columns only:
 
-    csvtk head -t -C $ -n 5 result.tsv.gz \
-        | csvtk rename -t -C $ -f 1 -n query \
+    zcat result.tsv.gz \
+        | sed '1s/^#//' \
+        | csvtk head -t -n 5 result.tsv.gz \
+        | csvtk rename -t -f 1 -n query \
         | csvtk cut -t -f query,FPR,qCov,target \
         | csvtk csv2md -t 
 
