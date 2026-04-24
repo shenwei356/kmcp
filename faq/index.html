@@ -14,8 +14,13 @@
       
         <link rel="canonical" href="https://bioinf.shenwei.me/kmcp/faq/">
       
+      
+        <link rel="prev" href="../benchmark/searching/">
+      
+      
+      
       <link rel="icon" href="../favicon.svg">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
     
     
       
@@ -23,31 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ee0f47ba.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
-        
-          
-          
-          <meta name="theme-color" content="#009485">
-        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
       
-    
+      
+
+
     
     
       
+    
+    
+      
+        
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
     
-    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
+    
     
     
   </head>
@@ -58,7 +65,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="blue-grey">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="blue-grey">
   
     
     
@@ -80,7 +87,9 @@
     
       
 
-<header class="md-header" data-md-component="header">
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching" class="md-header__button md-logo" aria-label="KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching" data-md-component="logo">
       
@@ -88,7 +97,8 @@
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -107,10 +117,13 @@
       </div>
     </div>
     
+      
+    
     
     
       <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -118,13 +131,16 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
@@ -135,7 +151,7 @@
           <div class="md-search-result__meta">
             Initializing search
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
@@ -144,10 +160,10 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/shenwei356/kmcp" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -177,6 +193,7 @@
                     
 
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching" class="md-nav__button md-logo" aria-label="KMCP - accurate metagenomic profiling and fast large-scale sequence/genome searching" data-md-component="logo">
@@ -188,10 +205,10 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/shenwei356/kmcp/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/shenwei356/kmcp" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -203,14 +220,18 @@
     
       
       
-      
-
   
   
   
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
-        Home
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
       </a>
     </li>
   
@@ -218,14 +239,18 @@
     
       
       
-      
-
   
   
   
     <li class="md-nav__item">
       <a href="../download/" class="md-nav__link">
-        Download
+        
+  
+  <span class="md-ellipsis">
+    Download
+  </span>
+  
+
       </a>
     </li>
   
@@ -233,14 +258,18 @@
     
       
       
-      
-
   
   
   
     <li class="md-nav__item">
       <a href="../database/" class="md-nav__link">
-        Databases
+        
+  
+  <span class="md-ellipsis">
+    Databases
+  </span>
+  
+
       </a>
     </li>
   
@@ -248,14 +277,18 @@
     
       
       
-      
-
   
   
   
     <li class="md-nav__item">
       <a href="../usage/" class="md-nav__link">
-        Usage
+        
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
       </a>
     </li>
   
@@ -263,160 +296,212 @@
     
       
       
-      
-
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5">
-          Tutorials
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
-          <span class="md-nav__icon md-icon"></span>
-          Tutorials
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
           
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../tutorial/profiling/" class="md-nav__link">
-        Taxonomic profiling
+        
+  
+  <span class="md-ellipsis">
+    Taxonomic profiling
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../tutorial/detecting-pathogens/" class="md-nav__link">
-        Detecting specific pathogens
+        
+  
+  <span class="md-ellipsis">
+    Detecting specific pathogens
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../tutorial/detecting-contaminated-seqs/" class="md-nav__link">
-        Detecting contaminated sequences
+        
+  
+  <span class="md-ellipsis">
+    Detecting contaminated sequences
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../tutorial/searching/" class="md-nav__link">
-        Sequence and genome searching
+        
+  
+  <span class="md-ellipsis">
+    Sequence and genome searching
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_6">
-          Benchmarks
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Benchmarks" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
-          <span class="md-nav__icon md-icon"></span>
-          Benchmarks
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
           
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Benchmarks
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Benchmarks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../benchmark/profiling/" class="md-nav__link">
-        Taxonomic profiling
+        
+  
+  <span class="md-ellipsis">
+    Taxonomic profiling
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
   
     <li class="md-nav__item">
       <a href="../benchmark/searching/" class="md-nav__link">
-        Sequence and genome searching
+        
+  
+  <span class="md-ellipsis">
+    Sequence and genome searching
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
   
   
     
@@ -424,19 +509,31 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
         
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          FAQs
+          
+  
+  <span class="md-ellipsis">
+    FAQs
+  </span>
+  
+
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        FAQs
+        
+  
+  <span class="md-ellipsis">
+    FAQs
+  </span>
+  
+
       </a>
       
         
@@ -607,14 +704,18 @@
     
       
       
-      
-
   
   
   
     <li class="md-nav__item">
       <a href="https://github.com/shenwei356" class="md-nav__link">
-        More tools
+        
+  
+  <span class="md-ellipsis">
+    More tools
+  </span>
+  
+
       </a>
     </li>
   
@@ -797,13 +898,14 @@
               </div>
             
           
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
                 
-<a href="https://github.com/shenwei356/kmcp/edit/master/docs/faq.md" title="Edit this page" class="md-content__button md-icon">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-</a>
+                  
+
+  
+  
 
 
 <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
@@ -913,94 +1015,94 @@ The height is the number of names (genome or genome chunks)</li>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">target</th>
-<th align="left">chunkIdx</th>
-<th align="left">chunks</th>
-<th align="left">kmers</th>
-<th align="left">fpr</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">target</th>
+<th style="text-align: left;">chunkIdx</th>
+<th style="text-align: left;">chunks</th>
+<th style="text-align: left;">kmers</th>
+<th style="text-align: left;">fpr</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_008766775.1</td>
-<td align="left">0</td>
-<td align="left">1</td>
-<td align="left">145</td>
-<td align="left">0.022419</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_008766775.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">145</td>
+<td style="text-align: left;">0.022419</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_003330005.1</td>
-<td align="left">8</td>
-<td align="left">10</td>
-<td align="left">150</td>
-<td align="left">0.023183</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_003330005.1</td>
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">150</td>
+<td style="text-align: left;">0.023183</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_002814895.1</td>
-<td align="left">0</td>
-<td align="left">1</td>
-<td align="left">154</td>
-<td align="left">0.023794</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_002814895.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">154</td>
+<td style="text-align: left;">0.023794</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_001967255.1</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">165</td>
-<td align="left">0.025471</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_001967255.1</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">165</td>
+<td style="text-align: left;">0.025471</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_002219745.1</td>
-<td align="left">4</td>
-<td align="left">10</td>
-<td align="left">197</td>
-<td align="left">0.030336</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_002219745.1</td>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">197</td>
+<td style="text-align: left;">0.030336</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_000839085.1</td>
-<td align="left">0</td>
-<td align="left">1</td>
-<td align="left">200</td>
-<td align="left">0.030790</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_000839085.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">200</td>
+<td style="text-align: left;">0.030790</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_000919055.1</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">207</td>
-<td align="left">0.031851</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_000919055.1</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">207</td>
+<td style="text-align: left;">0.031851</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_000848385.1</td>
-<td align="left">6</td>
-<td align="left">10</td>
-<td align="left">207</td>
-<td align="left">0.031851</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_000848385.1</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">207</td>
+<td style="text-align: left;">0.031851</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_002820565.1</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">208</td>
-<td align="left">0.032002</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_002820565.1</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">208</td>
+<td style="text-align: left;">0.032002</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCA_002820505.1</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">208</td>
-<td align="left">0.032002</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCA_002820505.1</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">208</td>
+<td style="text-align: left;">0.032002</td>
 </tr>
 </tbody>
 </table>
@@ -1010,22 +1112,22 @@ The height is the number of names (genome or genome chunks)</li>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">k</th>
-<th align="left">canonical</th>
-<th align="left">num-hashes</th>
-<th align="left">num-sigs</th>
-<th align="left">num-names</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">k</th>
+<th style="text-align: left;">canonical</th>
+<th style="text-align: left;">num-hashes</th>
+<th style="text-align: left;">num-sigs</th>
+<th style="text-align: left;">num-names</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">21</td>
-<td align="left">true</td>
-<td align="left">1</td>
-<td align="left">6395</td>
-<td align="left">10400</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">21</td>
+<td style="text-align: left;">true</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">6395</td>
+<td style="text-align: left;">10400</td>
 </tr>
 </tbody>
 </table>
@@ -1043,94 +1145,94 @@ The height is the number of names (genome or genome chunks)</li>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">target</th>
-<th align="left">chunkIdx</th>
-<th align="left">chunks</th>
-<th align="left">kmers</th>
-<th align="left">fpr</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">target</th>
+<th style="text-align: left;">chunkIdx</th>
+<th style="text-align: left;">chunks</th>
+<th style="text-align: left;">kmers</th>
+<th style="text-align: left;">fpr</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000277815.2</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">207084</td>
-<td align="left">0.094334</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000277815.2</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">207084</td>
+<td style="text-align: left;">0.094334</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000146465.1</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">209422</td>
-<td align="left">0.095346</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000146465.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">209422</td>
+<td style="text-align: left;">0.095346</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000091225.2</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">209787</td>
-<td align="left">0.095504</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000091225.2</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">209787</td>
+<td style="text-align: left;">0.095504</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">8</td>
-<td align="left">10</td>
-<td align="left">216972</td>
-<td align="left">0.098608</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">216972</td>
+<td style="text-align: left;">0.098608</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">217529</td>
-<td align="left">0.098849</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">217529</td>
+<td style="text-align: left;">0.098849</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">3</td>
-<td align="left">10</td>
-<td align="left">217631</td>
-<td align="left">0.098892</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">217631</td>
+<td style="text-align: left;">0.098892</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">6</td>
-<td align="left">10</td>
-<td align="left">218560</td>
-<td align="left">0.099293</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">218560</td>
+<td style="text-align: left;">0.099293</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">7</td>
-<td align="left">10</td>
-<td align="left">218763</td>
-<td align="left">0.099380</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">218763</td>
+<td style="text-align: left;">0.099380</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">4</td>
-<td align="left">10</td>
-<td align="left">218830</td>
-<td align="left">0.099409</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">218830</td>
+<td style="text-align: left;">0.099409</td>
 </tr>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">GCF_000280035.1</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">218860</td>
-<td align="left">0.099422</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">GCF_000280035.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">218860</td>
+<td style="text-align: left;">0.099422</td>
 </tr>
 </tbody>
 </table>
@@ -1140,22 +1242,22 @@ The height is the number of names (genome or genome chunks)</li>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">k</th>
-<th align="left">canonical</th>
-<th align="left">num-hashes</th>
-<th align="left">num-sigs</th>
-<th align="left">num-names</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">k</th>
+<th style="text-align: left;">canonical</th>
+<th style="text-align: left;">num-hashes</th>
+<th style="text-align: left;">num-sigs</th>
+<th style="text-align: left;">num-names</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block001.uniki</td>
-<td align="left">21</td>
-<td align="left">true</td>
-<td align="left">1</td>
-<td align="left">2089979</td>
-<td align="left">160</td>
+<td style="text-align: left;">_block001.uniki</td>
+<td style="text-align: left;">21</td>
+<td style="text-align: left;">true</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2089979</td>
+<td style="text-align: left;">160</td>
 </tr>
 </tbody>
 </table>
@@ -1166,116 +1268,116 @@ The height is the number of names (genome or genome chunks)</li>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">target</th>
-<th align="left">chunkIdx</th>
-<th align="left">chunks</th>
-<th align="left">kmers</th>
-<th align="left">fpr</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">target</th>
+<th style="text-align: left;">chunkIdx</th>
+<th style="text-align: left;">chunks</th>
+<th style="text-align: left;">kmers</th>
+<th style="text-align: left;">fpr</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_000349005.2</td>
-<td align="left">5</td>
-<td align="left">10</td>
-<td align="left">745638</td>
-<td align="left">0.249355</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_000349005.2</td>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">745638</td>
+<td style="text-align: left;">0.249355</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_000349005.2</td>
-<td align="left">2</td>
-<td align="left">10</td>
-<td align="left">746237</td>
-<td align="left">0.249528</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_000349005.2</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">746237</td>
+<td style="text-align: left;">0.249528</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_000349005.2</td>
-<td align="left">9</td>
-<td align="left">10</td>
-<td align="left">747586</td>
-<td align="left">0.249917</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_000349005.2</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">747586</td>
+<td style="text-align: left;">0.249917</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_000349005.2</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">748331</td>
-<td align="left">0.250132</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_000349005.2</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">748331</td>
+<td style="text-align: left;">0.250132</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_000349005.2</td>
-<td align="left">7</td>
-<td align="left">10</td>
-<td align="left">749497</td>
-<td align="left">0.250469</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_000349005.2</td>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">749497</td>
+<td style="text-align: left;">0.250469</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_001477545.1</td>
-<td align="left">5</td>
-<td align="left">10</td>
-<td align="left">751685</td>
-<td align="left">0.251099</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_001477545.1</td>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">751685</td>
+<td style="text-align: left;">0.251099</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_002251995.1</td>
-<td align="left">3</td>
-<td align="left">10</td>
-<td align="left">753439</td>
-<td align="left">0.251604</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_002251995.1</td>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">753439</td>
+<td style="text-align: left;">0.251604</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_001477545.1</td>
-<td align="left">4</td>
-<td align="left">10</td>
-<td align="left">755317</td>
-<td align="left">0.252145</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_001477545.1</td>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">755317</td>
+<td style="text-align: left;">0.252145</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_001477545.1</td>
-<td align="left">0</td>
-<td align="left">10</td>
-<td align="left">758418</td>
-<td align="left">0.253036</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_001477545.1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">758418</td>
+<td style="text-align: left;">0.253036</td>
 </tr>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">GCF_001477545.1</td>
-<td align="left">8</td>
-<td align="left">10</td>
-<td align="left">760460</td>
-<td align="left">0.253623</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">GCF_001477545.1</td>
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">760460</td>
+<td style="text-align: left;">0.253623</td>
 </tr>
 </tbody>
 </table>
 <table>
 <thead>
 <tr>
-<th align="left">file</th>
-<th align="left">k</th>
-<th align="left">canonical</th>
-<th align="left">num-hashes</th>
-<th align="left">num-sigs</th>
-<th align="left">num-names</th>
+<th style="text-align: left;">file</th>
+<th style="text-align: left;">k</th>
+<th style="text-align: left;">canonical</th>
+<th style="text-align: left;">num-hashes</th>
+<th style="text-align: left;">num-sigs</th>
+<th style="text-align: left;">num-names</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">_block002.uniki</td>
-<td align="left">21</td>
-<td align="left">true</td>
-<td align="left">1</td>
-<td align="left">2599648</td>
-<td align="left">160</td>
+<td style="text-align: left;">_block002.uniki</td>
+<td style="text-align: left;">21</td>
+<td style="text-align: left;">true</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2599648</td>
+<td style="text-align: left;">160</td>
 </tr>
 </tbody>
 </table>
@@ -1366,34 +1468,20 @@ profiling which needs the original reference IDs. We add a note now:</p>
 You need explicitly set all relevant options of the mode.</s></p>
 <p>It's available since v0.8.2.</p>
 
-              
-            </article>
-          </div>
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
         </div>
         
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../benchmark/searching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sequence and genome searching" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Sequence and genome searching
-            </div>
-          </div>
-        </a>
-      
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1415,10 +1503,12 @@ You need explicitly set all relevant options of the mode.</s></p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.b6ff8c07.min.js"}</script>
     
     
-      <script src="../assets/javascripts/bundle.5e13d264.min.js"></script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.81fa17fe.min.js"></script>
       
     
   </body>
